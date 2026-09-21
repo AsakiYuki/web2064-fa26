@@ -1,6 +1,51 @@
+/* ============================================
+   BETA CINEMAS - MAIN DESIGN TOKENS
+   ============================================ */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+
 :root {
 	--primary-color: #015198;
-	--primary-text-color: black;
-	--secondary-text-color: white;
-	--background-color: #f8f8f8;
+	--primary-dark: #013a6e;
+	--primary-light: #0066cc;
+	--accent-color: #f5a623;
+	--accent-red: #e63946;
+	--accent-green: #2a9d8f;
+	--primary-text-color: #1a1a2e;
+	--secondary-text-color: #ffffff;
+	--muted-text: #6b7280;
+	--background-color: #f3f4f6;
+	--card-bg: #ffffff;
+	--border-color: #e5e7eb;
+	--footer-bg: #1a3a6e;
+	--footer-dark: #0f2347;
+
+	/* Typography */
+	--font-size-xs: 11px;
+	--font-size-sm: 13px;
+	--font-size-base: 15px;
+	--font-size-md: 16px;
+	--font-size-lg: 18px;
+	--font-size-xl: 22px;
+	--font-size-2xl: 26px;
+
+	/* Spacing */
+	--gap-sm: 8px;
+	--gap-md: 16px;
+	--gap-lg: 24px;
+	--gap-xl: 40px;
+
+	/* Radius */
+	--radius-sm: 4px;
+	--radius-md: 8px;
+	--radius-lg: 12px;
+	--radius-xl: 16px;
+
+	/* Shadows */
+	--shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.08);
+	--shadow-md: 0 4px 12px rgba(0, 0, 0, 0.12);
+	--shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.16);
+	--shadow-hover: 0 12px 32px rgba(1, 81, 152, 0.2);
+
+	/* Transitions */
+	--transition: all 0.25s ease;
 }

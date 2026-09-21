@@ -1,33 +1,570 @@
-<html lang="en">
-	<head>
-		<meta charset="UTF-8" />
-		<meta name="viewport" content="width=1920, initial-scale=1.0" />
-		<title>Beta cinemas</title>
-		<link rel="stylesheet" href="/style/main.css" />
-		<link rel="stylesheet" href="/style/template.css" />
-	</head>
-	<body>
-		<header class="main-header">
-			<div class="header-account-manager">
-				<div
-					class="container"
-					style="
-						color: var(--secondary-text-color);
-						display: flex;
-						gap: 8px;
-						justify-content: flex-end;
-						align-items: center;
-						height: calc(100% - 10px);
-					"
-				>
-					<span>Đăng nhập</span>
-					<div style="width: 0.8px; height: 18px; background-color: white"></div>
-					<span>Đăng ký</span>
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+	<meta charset="UTF-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<meta name="description"
+		content="Beta Cinemas - Đặt vé xem phim online nhanh nhất. Xem lịch chiếu phim đang hot, phim sắp chiếu tại các cụm rạp Beta trên toàn quốc." />
+	<title>Beta Cinemas - Rạp Phim Cho Mọi Nhà</title>
+	<link rel="stylesheet" href="/style/main.css" />
+	<link rel="stylesheet" href="/style/template.css" />
+	<link rel="stylesheet" href="/style/home.css" />
+	<link rel="preconnect" href="https://fonts.googleapis.com" />
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+</head>
+
+<body>
+
+	<!-- ===================== HEADER ===================== -->
+	<header class="main-header">
+		<div class="header-account-manager">
+			<div class="container">
+				<a href="#" id="btn-login">Đăng nhập</a>
+				<div class="divider"></div>
+				<a href="#" id="btn-register">Đăng ký</a>
+				<span style="font-size:18px; margin-left:4px; cursor:pointer;" title="English">🇬🇧</span>
+			</div>
+		</div>
+		<div class="header-navigator">
+			<div class="container">
+				<a href="/" class="header-logo" id="logo-link">
+					<img src="/assets/logo.webp" alt="Beta Cinemas Logo" />
+				</a>
+				<div class="cinema-selector-wrap" id="cinema-selector-wrap">
+					<button class="cinema-selector" id="cinema-selector-btn" aria-haspopup="listbox"
+						aria-expanded="false">
+						<span class="cinema-selector-label" id="cinema-selector-label">Beta Thái Nguyên</span>
+						<svg class="cinema-selector-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+							stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+							<polyline points="6 9 12 15 18 9"></polyline>
+						</svg>
+					</button>
+					<div class="cinema-dropdown" id="cinema-dropdown" role="listbox">
+						<ul>
+							<li class="cinema-dropdown-item" data-city="Hà Nội" role="option" tabindex="0">Hà Nội <span
+									class="ci-arrow">›</span></li>
+							<li class="cinema-dropdown-item" data-city="TP. Hồ Chí Minh" role="option" tabindex="0">TP.
+								Hồ Chí Minh <span class="ci-arrow">›</span></li>
+							<li class="cinema-dropdown-item" data-city="An Giang" role="option" tabindex="0">An Giang
+								<span class="ci-arrow">›</span></li>
+							<li class="cinema-dropdown-item" data-city="Đồng Nai" role="option" tabindex="0">Đồng Nai
+								<span class="ci-arrow">›</span></li>
+							<li class="cinema-dropdown-item" data-city="Khánh Hòa" role="option" tabindex="0">Khánh Hòa
+								<span class="ci-arrow">›</span></li>
+							<li class="cinema-dropdown-item active" data-city="Thái Nguyên" role="option" tabindex="0">
+								Thái Nguyên <span class="ci-arrow">›</span></li>
+							<li class="cinema-dropdown-item" data-city="Thanh Hóa" role="option" tabindex="0">Thanh Hóa
+								<span class="ci-arrow">›</span></li>
+							<li class="cinema-dropdown-item" data-city="Bắc Ninh" role="option" tabindex="0">Bắc Ninh
+								<span class="ci-arrow">›</span></li>
+							<li class="cinema-dropdown-item" data-city="Lào Cai" role="option" tabindex="0">Lào Cai
+								<span class="ci-arrow">›</span></li>
+							<li class="cinema-dropdown-item" data-city="Phú Thọ" role="option" tabindex="0">Phú Thọ
+								<span class="ci-arrow">›</span></li>
+						</ul>
+					</div>
+				</div>
+				<nav class="nav-links">
+					<a href="#" id="nav-schedule">Lịch Chiếu Theo Rạp</a>
+					<a href="#" id="nav-movies">Phim</a>
+					<a href="#" id="nav-cinemas">Rạp</a>
+					<a href="#" id="nav-pricing">Giá Vé</a>
+					<a href="#" id="nav-news">Tin Mới Và Ưu Đãi</a>
+					<a href="#" id="nav-franchise">Nhượng Quyền</a>
+					<a href="#" id="nav-member">Thành Viên</a>
+				</nav>
+			</div>
+		</div>
+	</header>
+
+	<!-- ===================== HERO SLIDER ===================== -->
+	<section class="hero-slider" id="hero-slider" aria-label="Phim nổi bật">
+		<!-- Slides -->
+		<div class="hero-track" id="hero-track">
+
+			<div class="hero-slide active">
+				<img src="/assets/hero_bongma.jpg" alt="Bóng Ma Nhà Hát" class="hero-img" />
+				<div class="hero-gradient"></div>
+			</div>
+
+			<div class="hero-slide">
+				<img src="/assets/poster_utlan2.jpg" alt="Út Lan 2" class="hero-img"
+					style="object-position: center top;" />
+				<div class="hero-gradient"></div>
+			</div>
+
+			<div class="hero-slide">
+				<img src="/assets/poster_traibuonnguoi.jpg" alt="Trại Buôn Người" class="hero-img"
+					style="object-position: center top;" />
+				<div class="hero-gradient"></div>
+			</div>
+
+		</div>
+
+		<!-- Prev / Next arrows -->
+		<button class="hero-arrow hero-prev" id="hero-prev" aria-label="Slide trước">&#10094;</button>
+		<button class="hero-arrow hero-next" id="hero-next" aria-label="Slide sau">&#10095;</button>
+
+		<!-- Dots -->
+		<div class="hero-dots" id="hero-dots">
+			<button class="hero-dot active" data-idx="0" aria-label="Slide 1"></button>
+			<button class="hero-dot" data-idx="1" aria-label="Slide 2"></button>
+			<button class="hero-dot" data-idx="2" aria-label="Slide 3"></button>
+		</div>
+	</section>
+
+	<!-- ===================== MAIN CONTENT ===================== -->
+	<div class="home-content-wrap">
+
+		<!-- LEFT SIDE BANNER -->
+		<aside class="side-banner side-banner--left" aria-label="Quảng cáo trái">
+			<div class="side-banner-card">
+				<div class="sb-logo">
+					<img src="/assets/logo.webp" alt="Beta Cinemas" />
+				</div>
+				<div class="sb-badge">ĐẶC QUYỀN THÀNH VIÊN</div>
+				<div class="sb-discount">GIẢM 20K</div>
+				<div class="sb-sub">Khi mua<br>Combo Online</div>
+				<img src="/assets/promo_deal.jpg" alt="Combo ưu đãi" class="sb-img" />
+				<div class="sb-price-old">88.000đ</div>
+				<div class="sb-price-new">68.000đ</div>
+				<button class="sb-cta" id="side-left-cta">ĐẶT NGAY</button>
+			</div>
+		</aside>
+
+		<!-- CENTER: Movies section -->
+		<main class="home-main">
+
+			<!-- TABS -->
+			<div class="movie-tabs" id="movie-tabs" role="tablist">
+				<button class="movie-tab" id="tab-upcoming" role="tab" data-tab="upcoming">PHIM SẮP CHIẾU</button>
+				<button class="movie-tab active" id="tab-nowshowing" role="tab" data-tab="nowshowing">PHIM ĐANG
+					CHIẾU</button>
+				<button class="movie-tab" id="tab-special" role="tab" data-tab="special">SUẤT CHIẾU ĐẶC BIỆT</button>
+			</div>
+
+			<!-- MOVIE GRID - NOW SHOWING -->
+			<div class="movie-grid" id="tab-content-nowshowing">
+
+				<!-- Card 1 -->
+				<div class="mc" id="mc-utlan2">
+					<a href="#" class="mc-poster-wrap">
+						<img src="/assets/poster_utlan2.jpg" alt="Út Lan 2" class="mc-poster" />
+						<span class="mc-badge mc-badge--t18">T18</span>
+						<span class="mc-hot">HOT</span>
+					</a>
+					<div class="mc-body">
+						<h3 class="mc-title">Út Lan 2</h3>
+						<p class="mc-meta"><span class="mc-label">Thể loại:</span> Kinh dị</p>
+						<p class="mc-meta"><span class="mc-label">Thời lượng:</span> 107 phút</p>
+						<button class="mc-btn" id="buy-utlan2">
+							<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+								<path
+									d="M15 5v2M15 11v2M15 17v2M5 5h14a2 2 0 010 4H5a2 2 0 010-4zM5 13h14a2 2 0 010 4H5a2 2 0 010-4z" />
+							</svg>
+							MUA VÉ
+						</button>
+					</div>
+				</div>
+
+				<!-- Card 2 -->
+				<div class="mc" id="mc-bongma">
+					<a href="#" class="mc-poster-wrap">
+						<img src="/assets/poster_bongma.jpg" alt="Bóng Ma Nhà Hát" class="mc-poster" />
+						<span class="mc-badge mc-badge--t18">T18</span>
+						<span class="mc-hot">HOT</span>
+					</a>
+					<div class="mc-body">
+						<h3 class="mc-title">Bóng Ma Nhà Hát</h3>
+						<p class="mc-meta"><span class="mc-label">Thể loại:</span> Kinh dị, Hài hước</p>
+						<p class="mc-meta"><span class="mc-label">Thời lượng:</span> 97 phút</p>
+						<button class="mc-btn" id="buy-bongma">
+							<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+								<path
+									d="M15 5v2M15 11v2M15 17v2M5 5h14a2 2 0 010 4H5a2 2 0 010-4zM5 13h14a2 2 0 010 4H5a2 2 0 010-4z" />
+							</svg>
+							MUA VÉ
+						</button>
+					</div>
+				</div>
+
+				<!-- Card 3 -->
+				<div class="mc" id="mc-vungdat">
+					<a href="#" class="mc-poster-wrap">
+						<img src="/assets/poster_vungdat.jpg" alt="Vùng Đất Quỷ Dữ" class="mc-poster" />
+						<span class="mc-badge mc-badge--t18">T18</span>
+						<span class="mc-hot">HOT</span>
+					</a>
+					<div class="mc-body">
+						<h3 class="mc-title">Vùng Đất Quỷ Dữ</h3>
+						<p class="mc-meta"><span class="mc-label">Thể loại:</span> Kinh dị, Hành động</p>
+						<p class="mc-meta"><span class="mc-label">Thời lượng:</span> 94 phút</p>
+						<button class="mc-btn" id="buy-vungdat">
+							<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+								<path
+									d="M15 5v2M15 11v2M15 17v2M5 5h14a2 2 0 010 4H5a2 2 0 010-4zM5 13h14a2 2 0 010 4H5a2 2 0 010-4z" />
+							</svg>
+							MUA VÉ
+						</button>
+					</div>
+				</div>
+
+				<!-- Card 4 -->
+				<div class="mc" id="mc-lenhuong">
+					<a href="#" class="mc-poster-wrap">
+						<img src="/assets/poster_lonhuong.jpg" alt="Lên Hương" class="mc-poster" />
+						<span class="mc-badge mc-badge--k">K</span>
+						<span class="mc-hot">HOT</span>
+					</a>
+					<div class="mc-body">
+						<h3 class="mc-title">Lên Hương</h3>
+						<p class="mc-meta"><span class="mc-label">Thể loại:</span> Tâm lý, Gia đình</p>
+						<p class="mc-meta"><span class="mc-label">Thời lượng:</span> 121 phút</p>
+						<button class="mc-btn" id="buy-lenhuong">
+							<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+								<path
+									d="M15 5v2M15 11v2M15 17v2M5 5h14a2 2 0 010 4H5a2 2 0 010-4zM5 13h14a2 2 0 010 4H5a2 2 0 010-4z" />
+							</svg>
+							MUA VÉ
+						</button>
+					</div>
+				</div>
+
+				<!-- Card 5 -->
+				<div class="mc" id="mc-traibuon">
+					<a href="#" class="mc-poster-wrap">
+						<img src="/assets/poster_traibuonnguoi.jpg" alt="Trại Buôn Người" class="mc-poster" />
+						<span class="mc-badge mc-badge--t18">T18</span>
+						<span class="mc-hot">HOT</span>
+					</a>
+					<div class="mc-body">
+						<h3 class="mc-title">Trại Buôn Người</h3>
+						<p class="mc-meta"><span class="mc-label">Thể loại:</span> Ly kỳ, Hình sự</p>
+						<p class="mc-meta"><span class="mc-label">Thời lượng:</span> 118 phút</p>
+						<button class="mc-btn" id="buy-traibuon">
+							<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+								<path
+									d="M15 5v2M15 11v2M15 17v2M5 5h14a2 2 0 010 4H5a2 2 0 010-4zM5 13h14a2 2 0 010 4H5a2 2 0 010-4z" />
+							</svg>
+							MUA VÉ
+						</button>
+					</div>
+				</div>
+
+				<!-- Card 6: Avengers placeholder using movie_posters.jpg -->
+				<div class="mc" id="mc-avengers">
+					<a href="#" class="mc-poster-wrap">
+						<img src="/assets/movie_posters.jpg" alt="Avengers: Hồi Kết" class="mc-poster"
+							style="object-position: 75% 0%;" />
+						<span class="mc-badge mc-badge--t13">T13</span>
+						<span class="mc-hot">HOT</span>
+					</a>
+					<div class="mc-body">
+						<h3 class="mc-title">Avengers: Hồi Kết - Phiên Bản ĐB</h3>
+						<p class="mc-meta"><span class="mc-label">Thể loại:</span> Hành động, Phiêu lưu</p>
+						<p class="mc-meta"><span class="mc-label">Thời lượng:</span> 181 phút</p>
+						<button class="mc-btn" id="buy-avengers">
+							<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+								<path
+									d="M15 5v2M15 11v2M15 17v2M5 5h14a2 2 0 010 4H5a2 2 0 010-4zM5 13h14a2 2 0 010 4H5a2 2 0 010-4z" />
+							</svg>
+							MUA VÉ
+						</button>
+					</div>
+				</div>
+
+				<!-- Card 7 -->
+				<div class="mc" id="mc-nghiehu">
+					<a href="#" class="mc-poster-wrap">
+						<img src="/assets/promo_nowzone.jpg" alt="Nghỉ Hè Nghỉ Hưu" class="mc-poster"
+							style="object-position: center top;" />
+						<span class="mc-badge mc-badge--t13">T13</span>
+					</a>
+					<div class="mc-body">
+						<h3 class="mc-title">Nghỉ Hè Nghỉ Hưu</h3>
+						<p class="mc-meta"><span class="mc-label">Thể loại:</span> Hài, Gia đình</p>
+						<p class="mc-meta"><span class="mc-label">Thời lượng:</span> 98 phút</p>
+						<button class="mc-btn" id="buy-nghiehu">
+							<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+								<path
+									d="M15 5v2M15 11v2M15 17v2M5 5h14a2 2 0 010 4H5a2 2 0 010-4zM5 13h14a2 2 0 010 4H5a2 2 0 010-4z" />
+							</svg>
+							MUA VÉ
+						</button>
+					</div>
+				</div>
+
+				<!-- Card 8 -->
+				<div class="mc" id="mc-yeunhan">
+					<a href="#" class="mc-poster-wrap">
+						<img src="/assets/promo_student.jpg" alt="Yêu Nhân Thần Thám" class="mc-poster"
+							style="object-position: center top;" />
+						<span class="mc-badge mc-badge--k">K</span>
+					</a>
+					<div class="mc-body">
+						<h3 class="mc-title">Yêu Nhân Thần Thám</h3>
+						<p class="mc-meta"><span class="mc-label">Thể loại:</span> Hoạt hình, Phiêu lưu</p>
+						<p class="mc-meta"><span class="mc-label">Thời lượng:</span> 112 phút</p>
+						<button class="mc-btn" id="buy-yeunhan">
+							<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+								<path
+									d="M15 5v2M15 11v2M15 17v2M5 5h14a2 2 0 010 4H5a2 2 0 010-4zM5 13h14a2 2 0 010 4H5a2 2 0 010-4z" />
+							</svg>
+							MUA VÉ
+						</button>
+					</div>
+				</div>
+
+			</div>
+
+			<!-- MOVIE GRID - UPCOMING (hidden) -->
+			<div class="movie-grid hidden" id="tab-content-upcoming">
+				<div class="mc" id="mc-up1">
+					<a href="#" class="mc-poster-wrap">
+						<img src="/assets/hero_bongma.jpg" alt="Sắp chiếu" class="mc-poster" />
+						<span class="mc-badge mc-badge--t18">T18</span>
+					</a>
+					<div class="mc-body">
+						<h3 class="mc-title">Phim Sắp Chiếu 1</h3>
+						<p class="mc-meta"><span class="mc-label">Khởi chiếu:</span> 28.09.2026</p>
+						<button class="mc-btn mc-btn--outline" id="buy-up1">Nhắc Tôi</button>
+					</div>
+				</div>
+				<div class="mc" id="mc-up2">
+					<a href="#" class="mc-poster-wrap">
+						<img src="/assets/poster_vungdat.jpg" alt="Sắp chiếu" class="mc-poster" />
+						<span class="mc-badge mc-badge--t13">T13</span>
+					</a>
+					<div class="mc-body">
+						<h3 class="mc-title">Phim Sắp Chiếu 2</h3>
+						<p class="mc-meta"><span class="mc-label">Khởi chiếu:</span> 05.10.2026</p>
+						<button class="mc-btn mc-btn--outline" id="buy-up2">Nhắc Tôi</button>
+					</div>
 				</div>
 			</div>
-			<div class="header-navigator"></div>
-		</header>
-		<div class="website-content"></div>
-		<footer class="main-footer"></footer>
-	</body>
+
+			<!-- MOVIE GRID - SPECIAL (hidden) -->
+			<div class="movie-grid hidden" id="tab-content-special">
+				<div class="mc" id="mc-sp1">
+					<a href="#" class="mc-poster-wrap">
+						<img src="/assets/poster_avengers2.jpg" alt="IMAX" class="mc-poster"
+							onerror="this.src='/assets/movie_posters.jpg'" />
+						<span class="mc-badge mc-badge--t13">T13</span>
+						<span class="mc-special-tag">IMAX</span>
+					</a>
+					<div class="mc-body">
+						<h3 class="mc-title">Avengers: Hồi Kết IMAX</h3>
+						<p class="mc-meta"><span class="mc-label">Định dạng:</span> IMAX 3D</p>
+						<button class="mc-btn" id="buy-sp1">
+							<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+								<path
+									d="M15 5v2M15 11v2M15 17v2M5 5h14a2 2 0 010 4H5a2 2 0 010-4zM5 13h14a2 2 0 010 4H5a2 2 0 010-4z" />
+							</svg>
+							MUA VÉ
+						</button>
+					</div>
+				</div>
+			</div>
+
+			<!-- Back-to-top button -->
+			<button class="back-to-top" id="back-to-top" aria-label="Lên đầu trang">&#8679;</button>
+
+		</main>
+
+		<!-- RIGHT SIDE BANNER -->
+		<aside class="side-banner side-banner--right" aria-label="Quảng cáo phải">
+			<div class="side-banner-card">
+				<div class="sb-logo">
+					<img src="/assets/logo.webp" alt="Beta Cinemas" />
+				</div>
+				<div class="sb-badge">ĐẶC QUYỀN THÀNH VIÊN</div>
+				<div class="sb-discount">GIẢM 20K</div>
+				<div class="sb-sub">Khi mua<br>Combo Online</div>
+				<img src="/assets/promo_deal.jpg" alt="Combo ưu đãi" class="sb-img" />
+				<div class="sb-price-old">88.000đ</div>
+				<div class="sb-price-new">68.000đ</div>
+				<button class="sb-cta" id="side-right-cta">ĐẶT NGAY</button>
+			</div>
+		</aside>
+
+	</div>
+
+	<!-- ===================== FOOTER ===================== -->
+	<footer class="main-footer">
+		<div class="container">
+			<div class="footer-inner">
+				<div class="footer-brand">
+					<img src="/assets/logo.webp" alt="Beta Cinemas" />
+					<ul class="footer-links-list">
+						<li><a href="#" id="footer-recruit">Tuyển dụng</a></li>
+						<li><a href="#" id="footer-about">Giới thiệu</a></li>
+						<li><a href="#" id="footer-contact">Liên hệ</a></li>
+						<li><a href="#" id="footer-faq">F.A.Q</a></li>
+						<li><a href="#" id="footer-social">Hoạt động xã hội</a></li>
+						<li><a href="#" id="footer-tos">Điều khoản sử dụng</a></li>
+						<li><a href="#" id="footer-payment-policy">Chính sách thanh toán, đổi trả - hoàn vé</a></li>
+						<li><a href="#" id="footer-ads">Liên hệ quảng cáo</a></li>
+						<li><a href="#" id="footer-privacy">Điều khoản bảo mật</a></li>
+						<li><a href="guide.html" id="footer-guide">Hướng dẫn đặt vé online</a></li>
+					</ul>
+					<div class="footer-download-title">Tải Ứng Dụng</div>
+					<ul class="footer-links-list">
+						<li><a href="#" id="footer-ios">Beta Cinemas cho iOS</a></li>
+						<li><a href="#" id="footer-android">Beta Cinemas cho Android</a></li>
+					</ul>
+				</div>
+				<div class="footer-cinema-cluster">
+					<h3>Cụm Rạp Beta</h3>
+					<ul class="cinema-cluster-list">
+						<li><a href="#" id="fc-nowzone">Beta Cinemas Nowzone, TP Hồ Chí Minh - Hotline 1900 636807</a>
+						</li>
+						<li><a href="#" id="fc-xuanthuy">Beta Cinemas Xuân Thủy, Hà Nội - Hotline 0333 023 183</a></li>
+						<li><a href="#" id="fc-tayson">Beta Cinemas Tây Sơn, Hà Nội - Hotline 0976 894 773</a></li>
+						<li><a href="#" id="fc-vinhyen">Beta Cinemas Vĩnh Yên, Phú Thọ - Hotline 0977 632 215</a></li>
+						<li><a href="#" id="fc-ungvankhiem">Beta Cinemas Ung Văn Khiêm, TP Hồ Chí Minh - Hotline 0969
+								874 873</a></li>
+						<li><a href="#" id="fc-laocai">Beta Cinemas Lào Cai - Hotline 0358 968 970</a></li>
+						<li><a href="#" id="fc-tranquangkhai">Beta Cinemas Trần Quang Khải, TP Hồ Chí Minh - Hotline
+								1900 638 362</a></li>
+						<li><a href="#" id="fc-trmall">Beta Cinemas TRMall Phú Quốc, An Giang - Hotline 0983 474 440</a>
+						</li>
+						<li><a href="#" id="fc-empire">Beta Cinemas Empire Bình Dương, TP Hồ Chí Minh - Hotline 0784 531
+								525</a></li>
+						<li><a href="#" id="fc-quangtrung">Beta Cinemas Quang Trung, TP Hồ Chí Minh - Hotline 0706 075
+								509</a></li>
+						<li><a href="#" id="fc-giaiphong">Beta Cinemas Giải Phóng, Hà Nội - Hotline 0585 680 360</a>
+						</li>
+						<li><a href="#" id="fc-thanxuan">Beta Cinemas Thanh Xuân, Hà Nội - Hotline 082 4812878</a></li>
+						<li><a href="#" id="fc-mydinh">Beta Cinemas Mỹ Đình, Hà Nội - Hotline 082 4812878</a></li>
+						<li><a href="#" id="fc-danphuong">Beta Cinemas Đan Phượng, Hà Nội - Hotline 0983 901 714</a>
+						</li>
+						<li><a href="#" id="fc-thainguyen">Beta Cinemas Thái Nguyên - Hotline 0867 460 053</a></li>
+						<li><a href="#" id="fc-thanhhoa">Beta Cinemas Thanh Hóa - Hotline 0325 360 249</a></li>
+						<li><a href="#" id="fc-bacgiang">Beta Cinemas Bắc Giang, Bắc Ninh - Hotline 0866 493 413</a>
+						</li>
+						<li><a href="#" id="fc-nhatrang">Beta Cinemas Nha Trang, Khánh Hòa - Hotline 0399 475 165</a>
+						</li>
+						<li><a href="#" id="fc-bienhoa">Beta Cinemas Biên Hòa, Đồng Nai - Hotline 0979 460 002</a></li>
+						<li><a href="#" id="fc-longkhanh">Beta Cinemas Long Khánh, Đồng Nai - Hotline 0925 165 684</a>
+						</li>
+						<li><a href="#" id="fc-hotram">Beta Cinemas Hồ Tràm, TP Hồ Chí Minh - Hotline 0254 3788601</a>
+						</li>
+						<li><a href="#" id="fc-tanuyen">Beta Cinemas Tân Uyên, TP Hồ Chí Minh - Hotline 0937 905 925</a>
+						</li>
+					</ul>
+				</div>
+				<div class="footer-contact">
+					<h3>Liên Hệ</h3>
+					<p class="company-name">CÔNG TY CỔ PHẦN BETA MEDIA</p>
+					<p>Giấy chứng nhận ĐKKD số: 0106633482 - Đăng ký lần đầu ngày 08/09/2014 tại Sở Kế hoạch và Đầu tư
+						Thành phố Hà Nội</p>
+					<p>Địa chỉ: Tầng 3, số 595, đường Giải Phóng, Phường Tương Mai, Hà Nội</p>
+					<div class="contact-group">
+						<p class="contact-group-title">LIÊN HỆ CHĂM SÓC KHÁCH HÀNG:</p>
+						<p>Hotline: <strong>1900 636807</strong></p>
+						<p>Email: <a href="mailto:mkt@betacinemas.vn"
+								style="color:rgba(255,255,255,0.82);">mkt@betacinemas.vn</a></p>
+					</div>
+					<div class="contact-group">
+						<p class="contact-group-title">LIÊN HỆ QUẢNG CÁO:</p>
+						<p>Hotline: <strong>0934 632 682</strong></p>
+						<p>Email: <a href="mailto:ad@betagroup.vn"
+								style="color:rgba(255,255,255,0.82);">ad@betagroup.vn</a></p>
+					</div>
+					<p class="contact-group-title" style="margin-top:16px;">KẾT NỐI VỚI CHÚNG TÔI</p>
+					<div class="social-icons">
+						<a href="#" class="social-icon" id="social-fb" aria-label="Facebook">f</a>
+						<a href="#" class="social-icon" id="social-yt" aria-label="YouTube">▶</a>
+						<a href="#" class="social-icon" id="social-tt" aria-label="TikTok">♪</a>
+						<a href="#" class="social-icon" id="social-ig" aria-label="Instagram">📷</a>
+					</div>
+					<div class="bct-badge">
+						<span style="font-size:28px;">✅</span>
+						<div>
+							<p class="bct-badge-text">ĐÃ THÔNG BÁO</p>
+							<p class="bct-badge-sub">BỘ CÔNG THƯƠNG</p>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="footer-bottom">
+			<div class="container">
+				<p>© 2026 Beta Cinemas. All rights reserved. Thiết kế bởi Beta Media.</p>
+			</div>
+		</div>
+	</footer>
+
+	<script>
+		(function () {
+			/* ---- Dropdown ---- */
+			const wrap = document.getElementById('cinema-selector-wrap');
+			const btn = document.getElementById('cinema-selector-btn');
+			const dd = document.getElementById('cinema-dropdown');
+			const lbl = document.getElementById('cinema-selector-label');
+			const openDD = () => { dd.classList.add('open'); btn.setAttribute('aria-expanded', 'true'); };
+			const closeDD = () => { dd.classList.remove('open'); btn.setAttribute('aria-expanded', 'false'); };
+			btn.addEventListener('click', e => { e.stopPropagation(); dd.classList.contains('open') ? closeDD() : openDD(); });
+			dd.querySelectorAll('.cinema-dropdown-item').forEach(item => {
+				item.addEventListener('click', function () {
+					lbl.textContent = 'Beta ' + this.dataset.city;
+					dd.querySelectorAll('.cinema-dropdown-item').forEach(el => el.classList.remove('active'));
+					this.classList.add('active');
+					closeDD();
+				});
+				item.addEventListener('keydown', e => {
+					if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); item.click(); }
+					if (e.key === 'Escape') closeDD();
+					if (e.key === 'ArrowDown') { e.preventDefault(); (item.nextElementSibling || item).focus(); }
+					if (e.key === 'ArrowUp') { e.preventDefault(); (item.previousElementSibling || item).focus(); }
+				});
+			});
+			document.addEventListener('click', e => { if (!wrap.contains(e.target)) closeDD(); });
+			document.addEventListener('keydown', e => { if (e.key === 'Escape') closeDD(); });
+
+			/* ---- Hero Slider ---- */
+			const slides = document.querySelectorAll('.hero-slide');
+			const dots = document.querySelectorAll('.hero-dot');
+			let current = 0;
+			let autoTimer;
+
+			function goTo(idx) {
+				slides[current].classList.remove('active');
+				dots[current].classList.remove('active');
+				current = (idx + slides.length) % slides.length;
+				slides[current].classList.add('active');
+				dots[current].classList.add('active');
+			}
+			function startAuto() { autoTimer = setInterval(() => goTo(current + 1), 4500); }
+			function resetAuto() { clearInterval(autoTimer); startAuto(); }
+
+			document.getElementById('hero-prev').addEventListener('click', () => { goTo(current - 1); resetAuto(); });
+			document.getElementById('hero-next').addEventListener('click', () => { goTo(current + 1); resetAuto(); });
+			dots.forEach(dot => dot.addEventListener('click', () => { goTo(+dot.dataset.idx); resetAuto(); }));
+			startAuto();
+
+			/* ---- Movie Tabs ---- */
+			const tabBtns = document.querySelectorAll('.movie-tab');
+			tabBtns.forEach(btn => {
+				btn.addEventListener('click', function () {
+					tabBtns.forEach(b => b.classList.remove('active'));
+					this.classList.add('active');
+					document.querySelectorAll('[id^="tab-content-"]').forEach(c => c.classList.add('hidden'));
+					const target = document.getElementById('tab-content-' + this.dataset.tab);
+					if (target) target.classList.remove('hidden');
+				});
+			});
+
+			/* ---- Back to top ---- */
+			const btt = document.getElementById('back-to-top');
+			window.addEventListener('scroll', () => {
+				btt.classList.toggle('visible', window.scrollY > 400);
+			});
+			btt.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+		})();
+	</script>
+
+</body>
+
 </html>
