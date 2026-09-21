@@ -1,0 +1,39 @@
+body {
+	position: absolute;
+	width: 100%;
+	left: 0px;
+	top: 0px;
+	margin: 0px;
+	padding: 0px;
+	color: var(--primary-text-color);
+}
+
+.main-header {
+	position: relative;
+	display: flex;
+	flex-direction: column;
+	width: 100%;
+	left: 0px;
+	top: 0px;
+}
+
+.main-header .header-account-manager {
+	background-color: var(--primary-color);
+	height: 35px;
+}
+
+.main-footer {
+	width: 100%;
+	position: relative;
+}
+
+.website-content {
+	width: 100%;
+	min-height: calc(100vh - 70px);
+}
+
+.container {
+	margin: auto;
+	max-width: 100%;
+	width: 1250px;
+}
