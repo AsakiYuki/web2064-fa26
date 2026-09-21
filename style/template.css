@@ -5,6 +5,8 @@ body {
 	top: 0px;
 	margin: 0px;
 	padding: 0px;
+	font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+	font-weight: bold;
 	color: var(--primary-text-color);
 }
 
@@ -34,6 +36,11 @@ body {
 
 .container {
 	margin: auto;
-	max-width: 100%;
+	max-width: calc(100% - 10px);
+	padding: 5px;
 	width: 1250px;
+}
+
+.fill-height {
+	height: 100%;
 }
