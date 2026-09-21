@@ -299,6 +299,52 @@
 	transform: scale(1.04);
 }
 
+/* Play button overlay on hover */
+.mc-poster-wrap::after {
+	content: '';
+	position: absolute;
+	inset: 0;
+	background: rgba(0, 0, 0, 0.45);
+	opacity: 0;
+	transition: opacity 0.3s ease;
+	z-index: 3;
+}
+
+.mc:hover .mc-poster-wrap::after {
+	opacity: 1;
+}
+
+.mc-play-btn {
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%) scale(0.7);
+	width: 56px;
+	height: 56px;
+	background: rgba(255, 255, 255, 0.92);
+	border-radius: 50%;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	z-index: 4;
+	opacity: 0;
+	transition: opacity 0.3s ease, transform 0.3s ease;
+	pointer-events: none;
+	box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+}
+
+.mc-play-btn svg {
+	width: 22px;
+	height: 22px;
+	fill: var(--primary-color);
+	margin-left: 3px; /* optical centering for play icon */
+}
+
+.mc:hover .mc-play-btn {
+	opacity: 1;
+	transform: translate(-50%, -50%) scale(1);
+}
+
 /* Rating badge */
 .mc-badge {
 	position: absolute;
