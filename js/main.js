@@ -1,19 +1,23 @@
 /**
  * Beta Cinemas - Homepage Dynamic Rendering & Interactivity
+ * Modular data loading via domain-specific JSON files.
  */
 
 document.addEventListener("DOMContentLoaded", async () => {
 	try {
-		const res = await fetch("/data/home.json")
-		if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`)
-		const data = await res.json()
+		const [cinemas, moviesData, banners, footerCinemas] = await Promise.all([
+			fetch("/data/cinemas.json").then(r => r.json()),
+			fetch("/data/movies.json").then(r => r.json()),
+			fetch("/data/banners.json").then(r => r.json()),
+			fetch("/data/footer.json").then(r => r.json()),
+		])
 
-		renderCinemaSelector(data.cinemas)
-		renderHeroSlider(data.heroSlides)
-		renderSideBanners(data.sideBanners)
-		renderMovieTabs(data.movieTabs)
-		renderMovieGrids(data.movies)
-		renderFooterCinemas(data.footerCinemas)
+		renderCinemaSelector(cinemas)
+		renderHeroSlider(banners.heroSlides)
+		renderSideBanners(banners.sideBanners)
+		renderMovieTabs(moviesData.tabs)
+		renderMovieGrids(moviesData.items)
+		renderFooterCinemas(footerCinemas)
 
 		initCinemaDropdownEvents()
 		initHeroSliderEvents()

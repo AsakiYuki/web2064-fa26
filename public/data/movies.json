@@ -1,0 +1,160 @@
+{
+  "tabs": [
+    {
+      "id": "upcoming",
+      "label": "PHIM SẮP CHIẾU",
+      "active": false
+    },
+    {
+      "id": "nowshowing",
+      "label": "PHIM ĐANG CHIẾU",
+      "active": true
+    },
+    {
+      "id": "special",
+      "label": "SUẤT CHIẾU ĐẶC BIỆT",
+      "active": false
+    }
+  ],
+  "items": {
+    "nowshowing": [
+      {
+        "id": "utlan2",
+        "title": "Út Lan 2",
+        "genre": "Kinh dị",
+        "duration": "107 phút",
+        "poster": "/poster/poster_utlan2.jpg",
+        "badge": "T18",
+        "badgeClass": "mc-badge--t18",
+        "hot": true,
+        "buyId": "buy-utlan2",
+        "buyText": "MUA VÉ"
+      },
+      {
+        "id": "bongma",
+        "title": "Bóng Ma Nhà Hát",
+        "genre": "Kinh dị, Hài hước",
+        "duration": "97 phút",
+        "poster": "/poster/poster_bongma.jpg",
+        "badge": "T18",
+        "badgeClass": "mc-badge--t18",
+        "hot": true,
+        "buyId": "buy-bongma",
+        "buyText": "MUA VÉ"
+      },
+      {
+        "id": "vungdat",
+        "title": "Vùng Đất Quỷ Dữ",
+        "genre": "Kinh dị, Hành động",
+        "duration": "94 phút",
+        "poster": "/poster/poster_vungdat.jpg",
+        "badge": "T18",
+        "badgeClass": "mc-badge--t18",
+        "hot": true,
+        "buyId": "buy-vungdat",
+        "buyText": "MUA VÉ"
+      },
+      {
+        "id": "lenhuong",
+        "title": "Lên Hương",
+        "genre": "Tâm lý, Gia đình",
+        "duration": "121 phút",
+        "poster": "/poster/poster_lonhuong.jpg",
+        "badge": "K",
+        "badgeClass": "mc-badge--k",
+        "hot": true,
+        "buyId": "buy-lenhuong",
+        "buyText": "MUA VÉ"
+      },
+      {
+        "id": "traibuon",
+        "title": "Trại Buôn Người",
+        "genre": "Ly kỳ, Hình sự",
+        "duration": "118 phút",
+        "poster": "/poster/poster_traibuonnguoi.jpg",
+        "badge": "T18",
+        "badgeClass": "mc-badge--t18",
+        "hot": true,
+        "buyId": "buy-traibuon",
+        "buyText": "MUA VÉ"
+      },
+      {
+        "id": "avengers",
+        "title": "Avengers: Hồi Kết - Phiên Bản ĐB",
+        "genre": "Hành động, Phiêu lưu",
+        "duration": "181 phút",
+        "poster": "/movie_posters.jpg",
+        "posterStyle": "object-position: 75% 0%",
+        "badge": "T13",
+        "badgeClass": "mc-badge--t13",
+        "hot": true,
+        "buyId": "buy-avengers",
+        "buyText": "MUA VÉ"
+      },
+      {
+        "id": "nghiehu",
+        "title": "Nghỉ Hè Nghỉ Hưu",
+        "genre": "Hài, Gia đình",
+        "duration": "98 phút",
+        "poster": "/promo/promo_nowzone.jpg",
+        "posterStyle": "object-position: center top",
+        "badge": "T13",
+        "badgeClass": "mc-badge--t13",
+        "hot": false,
+        "buyId": "buy-nghiehu",
+        "buyText": "MUA VÉ"
+      },
+      {
+        "id": "yeunhan",
+        "title": "Yêu Nhân Thần Thám",
+        "genre": "Hoạt hình, Phiêu lưu",
+        "duration": "112 phút",
+        "poster": "/promo/promo_student.jpg",
+        "posterStyle": "object-position: center top",
+        "badge": "K",
+        "badgeClass": "mc-badge--k",
+        "hot": false,
+        "buyId": "buy-yeunhan",
+        "buyText": "MUA VÉ"
+      }
+    ],
+    "upcoming": [
+      {
+        "id": "up1",
+        "title": "Phim Sắp Chiếu 1",
+        "releaseDate": "28.09.2026",
+        "poster": "/hero_bongma.jpg",
+        "badge": "T18",
+        "badgeClass": "mc-badge--t18",
+        "buyId": "buy-up1",
+        "buyText": "Nhắc Tôi",
+        "outline": true
+      },
+      {
+        "id": "up2",
+        "title": "Phim Sắp Chiếu 2",
+        "releaseDate": "05.10.2026",
+        "poster": "/poster/poster_vungdat.jpg",
+        "badge": "T13",
+        "badgeClass": "mc-badge--t13",
+        "buyId": "buy-up2",
+        "buyText": "Nhắc Tôi",
+        "outline": true
+      }
+    ],
+    "special": [
+      {
+        "id": "sp1",
+        "title": "Avengers: Hồi Kết IMAX",
+        "format": "IMAX 3D",
+        "poster": "/poster/poster_avengers2.jpg",
+        "fallbackPoster": "/movie_posters.jpg",
+        "badge": "T13",
+        "badgeClass": "mc-badge--t13",
+        "specialTag": "IMAX",
+        "buyId": "buy-sp1",
+        "buyText": "MUA VÉ"
+      }
+    ]
+  }
+}

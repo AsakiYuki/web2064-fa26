@@ -1,0 +1,12 @@
+[
+  { "city": "Hà Nội", "active": false },
+  { "city": "TP. Hồ Chí Minh", "active": false },
+  { "city": "An Giang", "active": false },
+  { "city": "Đồng Nai", "active": false },
+  { "city": "Khánh Hòa", "active": false },
+  { "city": "Thái Nguyên", "active": true },
+  { "city": "Thanh Hóa", "active": false },
+  { "city": "Bắc Ninh", "active": false },
+  { "city": "Lào Cai", "active": false },
+  { "city": "Phú Thọ", "active": false }
+]

@@ -1,0 +1,46 @@
+{
+  "heroSlides": [
+    {
+      "id": "slide-1",
+      "title": "Bóng Ma Nhà Hát",
+      "image": "/hero_bongma.jpg",
+      "imageStyle": "object-position: center center"
+    },
+    {
+      "id": "slide-2",
+      "title": "Út Lan 2",
+      "image": "/poster/poster_utlan2.jpg",
+      "imageStyle": "object-position: center top"
+    },
+    {
+      "id": "slide-3",
+      "title": "Trại Buôn Người",
+      "image": "/poster/poster_traibuonnguoi.jpg",
+      "imageStyle": "object-position: center top"
+    }
+  ],
+  "sideBanners": {
+    "left": {
+      "logo": "/logo.webp",
+      "badge": "ĐẶC QUYỀN THÀNH VIÊN",
+      "discount": "GIẢM 20K",
+      "sub": "Khi mua<br />Combo Online",
+      "image": "/promo/promo_deal.jpg",
+      "priceOld": "88.000đ",
+      "priceNew": "68.000đ",
+      "ctaText": "ĐẶT NGAY",
+      "ctaId": "side-left-cta"
+    },
+    "right": {
+      "logo": "/logo.webp",
+      "badge": "ĐẶC QUYỀN THÀNH VIÊN",
+      "discount": "GIẢM 20K",
+      "sub": "Khi mua<br />Combo Online",
+      "image": "/promo/promo_deal.jpg",
+      "priceOld": "88.000đ",
+      "priceNew": "68.000đ",
+      "ctaText": "ĐẶT NGAY",
+      "ctaId": "side-right-cta"
+    }
+  }
+}
