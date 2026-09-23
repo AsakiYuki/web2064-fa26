@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="vi">
+
+<head>
+	<meta charset="UTF-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<meta name="description"
+		content="Beta Cinemas - Thông báo lỗi hệ thống (500 Internal Server Error). Vui lòng thử lại sau ít phút hoặc liên hệ bộ phận hỗ trợ." />
+	<title>Lỗi Hệ Thống (500) - Beta Cinemas</title>
+	<link rel="stylesheet" href="/style/main.scss" />
+	<link rel="preconnect" href="https://fonts.googleapis.com" />
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+</head>
+
+<body>
+	<!-- ===================== HEADER ===================== -->
+	<header class="main-header">
+		<div class="header-account-manager">
+			<div class="container">
+				<a href="#" id="btn-login">Đăng nhập</a>
+				<div class="divider"></div>
+				<a href="#" id="btn-register">Đăng ký</a>
+				<span style="font-size: 18px; margin-left: 4px; cursor: pointer" title="English">🇬🇧</span>
+			</div>
+		</div>
+		<div class="header-navigator">
+			<div class="container">
+				<a href="/" class="header-logo" id="logo-link">
+					<img src="/logo.webp" alt="Beta Cinemas Logo" />
+				</a>
+				<div class="cinema-selector-wrap" id="cinema-selector-wrap">
+					<button class="cinema-selector" id="cinema-selector-btn" aria-haspopup="listbox"
+						aria-expanded="false">
+						<span class="cinema-selector-label" id="cinema-selector-label">Beta Thái Nguyên</span>
+						<svg class="cinema-selector-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+							stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+							<polyline points="6 9 12 15 18 9"></polyline>
+						</svg>
+					</button>
+					<div class="cinema-dropdown" id="cinema-dropdown" role="listbox">
+						<ul id="cinema-dropdown-ul"></ul>
+					</div>
+				</div>
+				<nav class="nav-links">
+					<a href="/" id="nav-schedule">Lịch Chiếu Theo Rạp</a>
+					<a href="/" id="nav-movies">Phim</a>
+					<a href="/" id="nav-cinemas">Rạp</a>
+					<a href="/" id="nav-pricing">Giá Vé</a>
+					<a href="/" id="nav-news">Tin Mới Và Ưu Đãi</a>
+					<a href="/" id="nav-franchise">Nhượng Quyền</a>
+					<a href="/" id="nav-member">Thành Viên</a>
+				</nav>
+			</div>
+		</div>
+	</header>
+
+	<!-- ===================== SYSTEM ERROR CONTENT ===================== -->
+	<main class="error-page-wrap">
+		<div class="error-card">
+			<div class="error-badge">
+				<span>⚠️</span> LỖI MÁY CHỦ (500 SERVER ERROR)
+			</div>
+			<h1 class="error-code">500</h1>
+			<h2 class="error-title">Đã Xảy Ra Sự Cố Kỹ Thuật!</h2>
+			<p class="error-desc">
+				Hệ thống máy chủ Beta Cinemas đang gặp gián đoạn tạm thời hoặc đang trong quá trình nâng cấp dịch vụ. Vui lòng thử lại sau giây phút.
+			</p>
+			<div class="error-actions">
+				<button class="btn-home" onclick="window.location.reload();" style="border: none; cursor: pointer;">
+					<span>🔄</span> TẢI LẠI TRANG
+				</button>
+				<a href="/" class="btn-schedule">
+					TRỞ VỀ TRANG CHỦ
+				</a>
+			</div>
+			<div class="error-search-box">
+				<p>Nếu sự cố vẫn tiếp diễn, vui lòng liên hệ CSKH Hotline: <strong>1900 636807</strong></p>
+				<div class="quick-links">
+					<a href="mailto:mkt@betacinemas.vn">Gửi Email Hỗ Trợ</a>
+					<a href="/">Kiểm Tra Lịch Chiếu</a>
+					<a href="404.html">Trang 404 Sample</a>
+				</div>
+			</div>
+		</div>
+	</main>
+
+	<!-- ===================== FOOTER ===================== -->
+	<footer class="main-footer">
+		<div class="container">
+			<div class="footer-inner">
+				<div class="footer-brand">
+					<img src="/logo.webp" alt="Beta Cinemas" />
+					<ul class="footer-links-list">
+						<li><a href="#" id="footer-recruit">Tuyển dụng</a></li>
+						<li><a href="#" id="footer-about">Giới thiệu</a></li>
+						<li><a href="#" id="footer-contact">Liên hệ</a></li>
+						<li><a href="#" id="footer-faq">F.A.Q</a></li>
+						<li><a href="#" id="footer-social">Hoạt động xã hội</a></li>
+						<li><a href="#" id="footer-tos">Điều khoản sử dụng</a></li>
+						<li><a href="#" id="footer-payment-policy">Chính sách thanh toán, đổi trả - hoàn vé</a></li>
+						<li><a href="#" id="footer-ads">Liên hệ quảng cáo</a></li>
+						<li><a href="#" id="footer-privacy">Điều khoản bảo mật</a></li>
+						<li><a href="#" id="footer-guide">Hướng dẫn đặt vé online</a></li>
+					</ul>
+					<div class="footer-download-title">Tải Ứng Dụng</div>
+					<ul class="footer-links-list">
+						<li><a href="#" id="footer-ios">Beta Cinemas cho iOS</a></li>
+						<li><a href="#" id="footer-android">Beta Cinemas cho Android</a></li>
+					</ul>
+				</div>
+				<div class="footer-cinema-cluster">
+					<h3>Cụm Rạp Beta</h3>
+					<ul class="cinema-cluster-list" id="cinema-cluster-ul"></ul>
+				</div>
+				<div class="footer-contact">
+					<h3>Liên Hệ</h3>
+					<p class="company-name">CÔNG TY CỔ PHẦN BETA MEDIA</p>
+					<p>
+						Giấy chứng nhận ĐKKD số: 0106633482 - Đăng ký lần đầu ngày 08/09/2014 tại Sở Kế hoạch và Đầu tư Thành phố Hà Nội
+					</p>
+					<p>Địa chỉ: Tầng 3, số 595, đường Giải Phóng, Phường Tương Mai, Hà Nội</p>
+					<div class="contact-group">
+						<p class="contact-group-title">LIÊN HỆ CHĂM SÓC KHÁCH HÀNG:</p>
+						<p>Hotline: <strong>1900 636807</strong></p>
+						<p>Email: <a href="mailto:mkt@betacinemas.vn" style="color: rgba(255, 255, 255, 0.82)">mkt@betacinemas.vn</a></p>
+					</div>
+					<div class="contact-group">
+						<p class="contact-group-title">LIÊN HỆ QUẢNG CÁO:</p>
+						<p>Hotline: <strong>0934 632 682</strong></p>
+						<p>Email: <a href="mailto:ad@betagroup.vn" style="color: rgba(255, 255, 255, 0.82)">ad@betagroup.vn</a></p>
+					</div>
+					<p class="contact-group-title" style="margin-top: 16px">KẾT NỐI VỚI CHÚNG TÔI</p>
+					<div class="social-icons">
+						<a href="#" class="social-icon" aria-label="Facebook">f</a>
+						<a href="#" class="social-icon" aria-label="YouTube">▶</a>
+						<a href="#" class="social-icon" aria-label="TikTok">♪</a>
+						<a href="#" class="social-icon" aria-label="Instagram">📷</a>
+					</div>
+					<div class="bct-badge">
+						<span style="font-size: 28px">✅</span>
+						<div>
+							<p class="bct-badge-text">ĐÃ THÔNG BÁO</p>
+							<p class="bct-badge-sub">BỘ CÔNG THƯƠNG</p>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="footer-bottom">
+			<div class="container">
+				<p>© 2026 Beta Cinemas. All rights reserved. Thiết kế bởi Beta Media.</p>
+			</div>
+		</div>
+	</footer>
+
+	<script type="module" src="/js/main.js"></script>
+</body>
+
+</html>

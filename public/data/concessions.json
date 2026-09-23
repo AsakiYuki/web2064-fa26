@@ -1,0 +1,84 @@
+{
+  "categories": [
+    { "id": "combos", "name": "Combo Bắp Nước", "active": true },
+    { "id": "popcorn", "name": "Bắp Rang Bơ", "active": false },
+    { "id": "beverages", "name": "Nước Uống", "active": false }
+  ],
+  "items": [
+    {
+      "id": "cbo-solo",
+      "categoryId": "combos",
+      "name": "Beta Combo Solo",
+      "description": "1 Bắp Ngọt (60oz) + 1 Nước Có Ga (22oz)",
+      "price": 68000,
+      "originalPrice": 88000,
+      "image": "/promo/promo_deal.jpg",
+      "badge": "GIẢM 20K"
+    },
+    {
+      "id": "cbo-couple",
+      "categoryId": "combos",
+      "name": "Beta Combo Đôi",
+      "description": "1 Bắp Ngọt (60oz) + 2 Nước Có Ga (22oz)",
+      "price": 95000,
+      "originalPrice": 120000,
+      "image": "/promo/promo_deal.jpg",
+      "badge": "HOT"
+    },
+    {
+      "id": "cbo-family",
+      "categoryId": "combos",
+      "name": "Beta Combo Gia Đình",
+      "description": "2 Bắp Ngọt (60oz) + 3 Nước Có Ga (22oz) + 1 Snack",
+      "price": 149000,
+      "originalPrice": 185000,
+      "image": "/promo/promo_deal.jpg",
+      "badge": "TIẾT KIỆM"
+    },
+    {
+      "id": "pop-sweet",
+      "categoryId": "popcorn",
+      "name": "Bắp Rang Ngọt (60oz)",
+      "description": "Bắp rang bơ truyền thống thơm lừng vị ngọt nhẹ",
+      "price": 49000,
+      "originalPrice": null,
+      "image": "/promo/promo_deal.jpg"
+    },
+    {
+      "id": "pop-cheese",
+      "categoryId": "popcorn",
+      "name": "Bắp Rang Phô Mai (60oz)",
+      "description": "Bắp rang giòn rụm phủ lớp phô Mai béo ngậy",
+      "price": 59000,
+      "originalPrice": null,
+      "image": "/promo/promo_deal.jpg"
+    },
+    {
+      "id": "pop-caramel",
+      "categoryId": "popcorn",
+      "name": "Bắp Rang Caramel (60oz)",
+      "description": "Bắp rang phủ sốt Caramel thơm bơ hảo hạng",
+      "price": 59000,
+      "originalPrice": null,
+      "image": "/promo/promo_deal.jpg"
+    },
+    {
+      "id": "bev-pepsi",
+      "categoryId": "beverages",
+      "name": "Pepsi Tươi (22oz)",
+      "description": "Nước ngọt có ga mát lạnh",
+      "price": 32000,
+      "originalPrice": null,
+      "image": "/promo/promo_deal.jpg"
+    },
+    {
+      "id": "bev-7up",
+      "categoryId": "beverages",
+      "name": "7Up Chanh (22oz)",
+      "description": "Nước giải khát vị chanh sảng khoái",
+      "price": 32000,
+      "originalPrice": null,
+      "image": "/promo/promo_deal.jpg"
+    }
+  ]
+}

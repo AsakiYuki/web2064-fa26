@@ -1,0 +1,55 @@
+{
+  "dayTypes": [
+    { "id": "weekday", "label": "Thứ 2 - Thứ 5" },
+    { "id": "weekend", "label": "Thứ 6 - Chủ Nhật & Ngày Lễ" },
+    { "id": "happy_tuesday", "label": "Thứ Ba Hàng Tuần (Happy Tuesday)" }
+  ],
+  "seatTypes": [
+    { "id": "standard", "label": "Ghế Thường", "surcharge": 0 },
+    { "id": "vip", "label": "Ghế VIP", "surcharge": 5000 },
+    { "id": "sweetbox", "label": "Ghế Đôi (Sweetbox)", "surcharge": 25000 }
+  ],
+  "formats": [
+    {
+      "id": "2d",
+      "label": "Phòng Chiếu 2D Standard",
+      "rates": {
+        "weekday": { "standard": 65000, "vip": 70000, "sweetbox": 155000 },
+        "weekend": { "standard": 75000, "vip": 80000, "sweetbox": 175000 },
+        "happy_tuesday": { "standard": 50000, "vip": 55000, "sweetbox": 125000 }
+      }
+    },
+    {
+      "id": "3d",
+      "label": "Phòng Chiếu 3D",
+      "rates": {
+        "weekday": { "standard": 85000, "vip": 90000, "sweetbox": 195000 },
+        "weekend": { "standard": 95000, "vip": 100000, "sweetbox": 215000 },
+        "happy_tuesday": { "standard": 70000, "vip": 75000, "sweetbox": 165000 }
+      }
+    },
+    {
+      "id": "imax",
+      "label": "Phòng Chiếu IMAX 3D",
+      "rates": {
+        "weekday": { "standard": 120000, "vip": 130000, "sweetbox": 270000 },
+        "weekend": { "standard": 140000, "vip": 150000, "sweetbox": 310000 },
+        "happy_tuesday": { "standard": 100000, "vip": 110000, "sweetbox": 230000 }
+      }
+    }
+  ],
+  "discounts": [
+    {
+      "id": "student_u22",
+      "name": "Học Sinh / Sinh Viên & U22",
+      "description": "Áp dụng vé 2D từ Thứ 2 đến Thứ 6 trước 17h00 (Xuất trình thẻ HSSV/CCCD)",
+      "price": 50000
+    },
+    {
+      "id": "beta_member",
+      "name": "Đặc Quyền Thành Viên Beta",
+      "description": "Giảm 10% giá vé và tích điểm đổi quà trên toàn hệ thống",
+      "discountPercent": 10
+    }
+  ]
+}

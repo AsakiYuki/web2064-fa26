@@ -1,0 +1,50 @@
+[
+  {
+    "id": "kinh-di",
+    "name": "Kinh dị",
+    "slug": "kinh-di",
+    "description": "Các bộ phim giật gân, rùng rợn, khám phá các yếu tố tâm linh và siêu nhiên."
+  },
+  {
+    "id": "hanh-dong",
+    "name": "Hành động",
+    "slug": "hanh-dong",
+    "description": "Các trận đánh gay cấn, rượt đuổi nghẹt thở và kỹ xảo điện ảnh đỉnh cao."
+  },
+  {
+    "id": "hai-huoc",
+    "name": "Hài hước",
+    "slug": "hai-huoc",
+    "description": "Những câu chuyện giải trí sảng khoái, hóm hỉnh dành cho gia đình và bạn bè."
+  },
+  {
+    "id": "tam-ly",
+    "name": "Tâm lý",
+    "slug": "tam-ly",
+    "description": "Phản ánh sâu sắc cảm xúc, xung đột nội tâm và mối quan hệ con người."
+  },
+  {
+    "id": "gia-dinh",
+    "name": "Gia đình",
+    "slug": "gia-dinh",
+    "description": "Những bộ phim cảm động về tình thân, sự gắn kết và các giá trị nhân văn."
+  },
+  {
+    "id": "hoat-hinh",
+    "name": "Hoạt hình",
+    "slug": "hoat-hinh",
+    "description": "Thế giới hoạt họa 2D/3D sống động dành cho mọi lứa tuổi."
+  },
+  {
+    "id": "phieu-luu",
+    "name": "Phiêu lưu",
+    "slug": "phieu-luu",
+    "description": "Hành trình khám phá những vùng đất mới, vùng kỳ quan kỳ bí."
+  },
+  {
+    "id": "hinh-su",
+    "name": "Hình sự",
+    "slug": "hinh-su",
+    "description": "Những vụ án phức tạp, cuộc đấu trí giữa điều tra viên và tội phạm."
+  }
+]

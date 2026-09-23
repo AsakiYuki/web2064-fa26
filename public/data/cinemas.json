@@ -1,12 +1,138 @@
 [
-  { "city": "Hà Nội", "active": false },
-  { "city": "TP. Hồ Chí Minh", "active": false },
-  { "city": "An Giang", "active": false },
-  { "city": "Đồng Nai", "active": false },
-  { "city": "Khánh Hòa", "active": false },
-  { "city": "Thái Nguyên", "active": true },
-  { "city": "Thanh Hóa", "active": false },
-  { "city": "Bắc Ninh", "active": false },
-  { "city": "Lào Cai", "active": false },
-  { "city": "Phú Thọ", "active": false }
+  {
+    "id": "beta-thainguyen",
+    "city": "Thái Nguyên",
+    "name": "Beta Cinemas Thái Nguyên",
+    "active": true,
+    "address": "Tầng 4, TTTM Hoàng Gia, Số 259 Quang Trung, TP. Thái Nguyên",
+    "phone": "0867 460 053",
+    "email": "thainguyen@betacinemas.vn",
+    "facilities": ["Bãi đỗ xe", "Popcorn & Drinks Bar", "Phòng chiếu 2D/3D", "Lounge chờ VIP"],
+    "screens": [
+      { "screenId": "TN-P1", "name": "Phòng chiếu 1", "type": "2D", "totalSeats": 120 },
+      { "screenId": "TN-P2", "name": "Phòng chiếu 2", "type": "2D", "totalSeats": 140 },
+      { "screenId": "TN-P3", "name": "Phòng chiếu 3", "type": "3D", "totalSeats": 100 },
+      { "screenId": "TN-IMAX", "name": "Phòng IMAX", "type": "IMAX 3D", "totalSeats": 220 }
+    ]
+  },
+  {
+    "id": "beta-nowzone",
+    "city": "TP. Hồ Chí Minh",
+    "name": "Beta Cinemas Nowzone",
+    "active": false,
+    "address": "Tầng 5, TTTM Nowzone, 235 Nguyễn Văn Cừ, Quận 1, TP.HCM",
+    "phone": "1900 636807",
+    "email": "nowzone@betacinemas.vn",
+    "facilities": ["Bãi đỗ xe ô tô/xe máy", "Beta Food Court", "Phòng chiếu 2D/3D/IMAX"],
+    "screens": [
+      { "screenId": "NZ-P1", "name": "Phòng chiếu 1", "type": "2D", "totalSeats": 160 },
+      { "screenId": "NZ-P2", "name": "Phòng chiếu 2", "type": "2D", "totalSeats": 180 },
+      { "screenId": "NZ-IMAX", "name": "Phòng IMAX", "type": "IMAX 3D", "totalSeats": 280 }
+    ]
+  },
+  {
+    "id": "beta-xuanthuy",
+    "city": "Hà Nội",
+    "name": "Beta Cinemas Xuân Thủy",
+    "active": false,
+    "address": "Tầng 4, TTTM HITC, 239 Xuân Thủy, Cầu Giấy, Hà Nội",
+    "phone": "0333 023 183",
+    "email": "xuanthuy@betacinemas.vn",
+    "facilities": ["Bãi đỗ xe", "Coffee Corner", "Phòng chiếu 2D"],
+    "screens": [
+      { "screenId": "XT-P1", "name": "Phòng chiếu 1", "type": "2D", "totalSeats": 150 },
+      { "screenId": "XT-P2", "name": "Phòng chiếu 2", "type": "2D", "totalSeats": 130 }
+    ]
+  },
+  {
+    "id": "beta-tayson",
+    "city": "Hà Nội",
+    "name": "Beta Cinemas Tây Sơn",
+    "active": false,
+    "address": "Số 9 Tây Sơn, Đống Đa, Hà Nội",
+    "phone": "0976 894 773",
+    "email": "tayson@betacinemas.vn",
+    "facilities": ["Thanh toán QR", "Quầy bắp nước online"],
+    "screens": [
+      { "screenId": "TS-P1", "name": "Phòng chiếu 1", "type": "2D", "totalSeats": 110 }
+    ]
+  },
+  {
+    "id": "beta-vinhyen",
+    "city": "Phú Thọ",
+    "name": "Beta Cinemas Vĩnh Yên",
+    "active": false,
+    "address": "TTTM Vĩnh Yên, Phú Thọ",
+    "phone": "0977 632 215",
+    "email": "vinhyen@betacinemas.vn",
+    "facilities": ["Bãi đỗ xe", "Phòng chiếu 2D"],
+    "screens": [
+      { "screenId": "VY-P1", "name": "Phòng chiếu 1", "type": "2D", "totalSeats": 100 }
+    ]
+  },
+  {
+    "id": "beta-ungvankhiem",
+    "city": "TP. Hồ Chí Minh",
+    "name": "Beta Cinemas Ung Văn Khiêm",
+    "active": false,
+    "address": "Ung Văn Khiêm, Bình Thạnh, TP.HCM",
+    "phone": "0969 874 873",
+    "email": "ungvankhiem@betacinemas.vn",
+    "facilities": ["Lounge VIP"],
+    "screens": [
+      { "screenId": "UVK-P1", "name": "Phòng chiếu 1", "type": "2D", "totalSeats": 140 }
+    ]
+  },
+  {
+    "id": "beta-laocai",
+    "city": "Lào Cai",
+    "name": "Beta Cinemas Lào Cai",
+    "active": false,
+    "address": "Đại lộ Trần Hưng Đạo, TP. Lào Cai",
+    "phone": "0358 968 970",
+    "email": "laocai@betacinemas.vn",
+    "facilities": ["Bãi đỗ xe rộng rãi"],
+    "screens": [
+      { "screenId": "LC-P1", "name": "Phòng chiếu 1", "type": "2D", "totalSeats": 120 }
+    ]
+  },
+  {
+    "id": "beta-thanhhoa",
+    "city": "Thanh Hóa",
+    "name": "Beta Cinemas Thanh Hóa",
+    "active": false,
+    "address": "Phường Điện Biên, TP. Thanh Hóa",
+    "phone": "0325 360 249",
+    "email": "thanhhoa@betacinemas.vn",
+    "facilities": ["Quầy vé tự phục vụ Kiosk"],
+    "screens": [
+      { "screenId": "TH-P1", "name": "Phòng chiếu 1", "type": "2D", "totalSeats": 130 }
+    ]
+  },
+  {
+    "id": "beta-bacgiang",
+    "city": "Bắc Ninh",
+    "name": "Beta Cinemas Bắc Giang",
+    "active": false,
+    "address": "TP. Bắc Giang, Tỉnh Bắc Ninh",
+    "phone": "0866 493 413",
+    "email": "bacgiang@betacinemas.vn",
+    "facilities": ["Popcorn Bar"],
+    "screens": [
+      { "screenId": "BG-P1", "name": "Phòng chiếu 1", "type": "2D", "totalSeats": 115 }
+    ]
+  },
+  {
+    "id": "beta-trmall",
+    "city": "An Giang",
+    "name": "Beta Cinemas TRMall Phú Quốc",
+    "active": false,
+    "address": "TRMall Phú Quốc, An Giang",
+    "phone": "0983 474 440",
+    "email": "trmall@betacinemas.vn",
+    "facilities": ["Phòng chiếu 2D/3D"],
+    "screens": [
+      { "screenId": "PQ-P1", "name": "Phòng chiếu 1", "type": "2D", "totalSeats": 125 }
+    ]
+  }
 ]
