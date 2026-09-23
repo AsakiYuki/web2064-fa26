@@ -1,0 +1,228 @@
+/* ============================================
+   BETA CINEMAS - FOOTER SCSS
+   ============================================ */
+@use 'variables' as *;
+
+.main-footer {
+	background-color: $footer-bg;
+	color: $secondary-text-color;
+	width: 100%;
+	position: relative;
+
+	.footer-inner {
+		display: grid;
+		grid-template-columns: 200px 1fr 280px;
+		gap: $gap-xl;
+		padding: 44px 0 36px;
+	}
+
+	/* Footer Logo & Quick Links */
+	.footer-brand {
+		img {
+			height: 56px;
+			width: auto;
+			margin-bottom: 20px;
+			filter: brightness(0) invert(1);
+		}
+
+		.footer-links-list {
+			display: flex;
+			flex-direction: column;
+			gap: 8px;
+
+			li a {
+				color: rgba(255, 255, 255, 0.82);
+				font-size: $font-size-sm;
+				display: flex;
+				align-items: center;
+				gap: 6px;
+				transition: $transition-base;
+
+				&::before {
+					content: '›';
+					font-size: 16px;
+					color: $accent-color;
+					font-weight: bold;
+					line-height: 1;
+				}
+
+				&:hover {
+					color: #ffffff;
+					padding-left: 4px;
+				}
+			}
+		}
+
+		.footer-download-title {
+			font-size: $font-size-sm;
+			font-weight: 800;
+			color: $accent-color;
+			text-transform: uppercase;
+			letter-spacing: 0.5px;
+			margin: 20px 0 10px;
+			display: flex;
+			align-items: center;
+			gap: 6px;
+
+			&::before {
+				content: '';
+				display: inline-block;
+				width: 16px;
+				height: 2px;
+				background: $accent-color;
+			}
+		}
+	}
+
+	/* Cinema Cluster List */
+	.footer-cinema-cluster {
+		h3 {
+			font-size: $font-size-sm;
+			font-weight: 800;
+			color: $accent-color;
+			text-transform: uppercase;
+			letter-spacing: 0.5px;
+			margin: 0 0 14px;
+			padding-bottom: 10px;
+			border-bottom: 1.5px solid $accent-color;
+		}
+
+		.cinema-cluster-list {
+			display: flex;
+			flex-direction: column;
+			gap: 7px;
+			column-count: 2;
+			columns: 2;
+
+			li {
+				break-inside: avoid;
+
+				a {
+					color: rgba(255, 255, 255, 0.8);
+					font-size: 12px;
+					display: flex;
+					align-items: flex-start;
+					gap: 6px;
+					line-height: 1.5;
+					transition: $transition-base;
+
+					&::before {
+						content: '›';
+						font-size: 14px;
+						color: $accent-color;
+						font-weight: bold;
+						flex-shrink: 0;
+						margin-top: 1px;
+					}
+
+					&:hover {
+						color: #ffffff;
+					}
+				}
+			}
+		}
+	}
+
+	/* Contact Info & Badges */
+	.footer-contact {
+		h3 {
+			font-size: $font-size-sm;
+			font-weight: 800;
+			color: $accent-color;
+			text-transform: uppercase;
+			letter-spacing: 0.5px;
+			margin: 0 0 14px;
+			padding-bottom: 10px;
+			border-bottom: 1.5px solid $accent-color;
+		}
+
+		.company-name {
+			font-size: 13px;
+			font-weight: 700;
+			margin-bottom: 8px;
+		}
+
+		p {
+			font-size: 12px;
+			color: rgba(255, 255, 255, 0.78);
+			margin: 0 0 10px;
+			line-height: 1.6;
+		}
+
+		.contact-group {
+			margin-bottom: 14px;
+
+			.contact-group-title {
+				font-size: 12px;
+				font-weight: 700;
+				color: rgba(255, 255, 255, 0.9);
+				margin-bottom: 4px;
+			}
+
+			p {
+				margin: 0;
+			}
+		}
+
+		.social-icons {
+			display: flex;
+			gap: 10px;
+			margin: 14px 0;
+
+			.social-icon {
+				width: 36px;
+				height: 36px;
+				background: rgba(255, 255, 255, 0.15);
+				border-radius: $radius-sm;
+				@include flex-center;
+				font-size: 18px;
+				color: white;
+				cursor: pointer;
+				transition: $transition-base;
+
+				&:hover {
+					background: $primary-color;
+					transform: translateY(-2px);
+				}
+			}
+		}
+
+		.bct-badge {
+			display: flex;
+			align-items: center;
+			gap: 10px;
+			background: rgba(255, 255, 255, 0.1);
+			border-radius: $radius-md;
+			padding: 10px 14px;
+			margin-top: 10px;
+
+			.bct-badge-text {
+				font-size: 12px;
+				font-weight: 700;
+				color: white;
+			}
+
+			.bct-badge-sub {
+				font-size: 10px;
+				color: rgba(255, 255, 255, 0.7);
+				margin-top: 2px;
+			}
+		}
+	}
+
+	/* Footer Bottom Copyright */
+	.footer-bottom {
+		background-color: $footer-dark;
+		padding: 14px 0;
+
+		.container {
+			@include flex-center;
+		}
+
+		p {
+			font-size: 12px;
+			color: rgba(255, 255, 255, 0.6);
+			margin: 0;
+		}
+	}
+}
