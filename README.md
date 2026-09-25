@@ -7,7 +7,7 @@ Trước khi chạy được trang web, cần phải cài phần mềm sau:
 - NodeJS: [Tải ở đây](https://nodejs.org/en)
 - Bun: [Tải ở đây](https://bun.com/)
 
-Rồi mở dự án này và chạy lệnh sau
+Rồi mở terminal dự án này và chạy lệnh sau
 
 ```bash
 bun install
