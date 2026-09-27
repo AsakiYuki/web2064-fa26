@@ -1,0 +1,679 @@
+/* ============================================
+   BETA CINEMAS - SHOWTIMES SELECTOR SCSS
+   ============================================ */
+@use 'sass:color';
+@use 'variables' as *;
+
+.showtimes-section {
+	background: #ffffff;
+	border-radius: $radius-xl;
+	padding: 32px;
+	box-shadow: $shadow-md;
+	margin-top: 40px;
+	border: 1px solid $border-color;
+	color: $primary-text-color;
+
+	@media (max-width: 640px) {
+		padding: 20px 16px;
+	}
+
+	.showtimes-header {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		flex-wrap: wrap;
+		gap: 16px;
+		margin-bottom: 24px;
+		padding-bottom: 16px;
+		border-bottom: 2px solid $border-color;
+
+		.title-wrap {
+			h2 {
+				font-size: 22px;
+				font-weight: 800;
+				color: $primary-color;
+				margin: 0 0 4px;
+				text-transform: uppercase;
+				display: flex;
+				align-items: center;
+				gap: 10px;
+
+				svg {
+					width: 24px;
+					height: 24px;
+				}
+			}
+
+			p {
+				font-size: 13px;
+				color: $muted-text;
+				margin: 0;
+			}
+		}
+
+		.legend-quick {
+			display: flex;
+			align-items: center;
+			gap: 12px;
+			font-size: 12px;
+			color: #4b5563;
+
+			.legend-item {
+				display: flex;
+				align-items: center;
+				gap: 6px;
+
+				.dot {
+					width: 10px;
+					height: 10px;
+					border-radius: 50%;
+
+					&.dot-avail { background: #10b981; }
+					&.dot-almost { background: #f59e0b; }
+					&.dot-full { background: #ef4444; }
+				}
+			}
+		}
+	}
+}
+
+/* ---- DATE SELECTOR CAROUSEL ---- */
+.date-selector-wrap {
+	margin-bottom: 28px;
+
+	.date-selector-label {
+		font-size: 13px;
+		font-weight: 700;
+		color: #374151;
+		margin-bottom: 10px;
+		text-transform: uppercase;
+		letter-spacing: 0.5px;
+		display: flex;
+		align-items: center;
+		gap: 6px;
+
+		svg {
+			width: 16px;
+			height: 16px;
+			color: $primary-color;
+		}
+	}
+
+	.date-selector-scroll {
+		display: flex;
+		gap: 12px;
+		overflow-x: auto;
+		padding: 4px 2px 14px;
+		scrollbar-width: thin;
+		scrollbar-color: #cbd5e1 transparent;
+
+		&::-webkit-scrollbar {
+			height: 6px;
+		}
+		&::-webkit-scrollbar-track {
+			background: transparent;
+		}
+		&::-webkit-scrollbar-thumb {
+			background: #cbd5e1;
+			border-radius: 4px;
+		}
+	}
+
+	.date-card-btn {
+		flex: 0 0 100px;
+		background: #f8fafc;
+		border: 1.5px solid #e2e8f0;
+		border-radius: $radius-md;
+		padding: 12px 8px;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: 4px;
+		cursor: pointer;
+		transition: all 0.2s ease;
+		text-align: center;
+
+		.date-day-name {
+			font-size: 12px;
+			font-weight: 600;
+			color: #64748b;
+			text-transform: capitalize;
+		}
+
+		.date-day-num {
+			font-size: 18px;
+			font-weight: 800;
+			color: $primary-text-color;
+		}
+
+		.date-status-tag {
+			font-size: 10px;
+			font-weight: 700;
+			color: #059669;
+			background: #d1fae5;
+			padding: 1px 6px;
+			border-radius: 10px;
+		}
+
+		&:hover {
+			border-color: $primary-color;
+			background: #ffffff;
+			transform: translateY(-2px);
+			box-shadow: $shadow-sm;
+		}
+
+		&.active {
+			background: linear-gradient(135deg, $primary-color 0%, #0066cc 100%);
+			border-color: $primary-color;
+			box-shadow: 0 6px 16px rgba(1, 81, 152, 0.3);
+			transform: translateY(-2px);
+
+			.date-day-name {
+				color: rgba(255, 255, 255, 0.85);
+			}
+
+			.date-day-num {
+				color: #ffffff;
+			}
+
+			.date-status-tag {
+				background: rgba(255, 255, 255, 0.25);
+				color: #ffffff;
+			}
+		}
+	}
+}
+
+/* ---- CINEMA CLUSTER SELECTOR ---- */
+.cinema-filter-container {
+	margin-bottom: 28px;
+	background: #f8fafc;
+	border-radius: $radius-lg;
+	padding: 18px 20px;
+	border: 1px solid #e2e8f0;
+
+	.city-pills-row {
+		display: flex;
+		align-items: center;
+		gap: 8px;
+		flex-wrap: wrap;
+		margin-bottom: 16px;
+
+		.city-label {
+			font-size: 12px;
+			font-weight: 700;
+			color: #64748b;
+			text-transform: uppercase;
+			margin-right: 4px;
+		}
+
+		.city-pill-btn {
+			background: #ffffff;
+			border: 1px solid #cbd5e1;
+			color: #334155;
+			padding: 5px 14px;
+			border-radius: 20px;
+			font-size: 13px;
+			font-weight: 600;
+			cursor: pointer;
+			transition: all 0.2s;
+
+			&:hover {
+				border-color: $primary-color;
+				color: $primary-color;
+			}
+
+			&.active {
+				background: $primary-color;
+				color: #ffffff;
+				border-color: $primary-color;
+				box-shadow: 0 2px 8px rgba(1, 81, 152, 0.25);
+			}
+		}
+	}
+
+	.cinemas-list-grid {
+		display: grid;
+		grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+		gap: 12px;
+
+		.cinema-card-choice {
+			background: #ffffff;
+			border: 1.5px solid #e2e8f0;
+			border-radius: $radius-md;
+			padding: 12px 14px;
+			cursor: pointer;
+			transition: all 0.2s;
+			display: flex;
+			flex-direction: column;
+			gap: 4px;
+
+			.cinema-name {
+				font-size: 14px;
+				font-weight: 700;
+				color: $primary-text-color;
+				display: flex;
+				align-items: center;
+				justify-content: space-between;
+
+				.check-mark {
+					color: $primary-color;
+					font-size: 14px;
+					opacity: 0;
+					transition: opacity 0.2s;
+				}
+			}
+
+			.cinema-addr {
+				font-size: 12px;
+				color: #64748b;
+				line-height: 1.4;
+				white-space: nowrap;
+				overflow: hidden;
+				text-overflow: ellipsis;
+			}
+
+			.cinema-facs {
+				display: flex;
+				gap: 4px;
+				flex-wrap: wrap;
+				margin-top: 4px;
+
+				.fac-tag {
+					font-size: 10px;
+					background: #f1f5f9;
+					color: #475569;
+					padding: 2px 6px;
+					border-radius: 4px;
+					font-weight: 600;
+				}
+			}
+
+			&:hover {
+				border-color: $primary-color;
+				box-shadow: $shadow-sm;
+			}
+
+			&.active {
+				border-color: $primary-color;
+				background: rgba(1, 81, 152, 0.04);
+				box-shadow: 0 0 0 1px $primary-color;
+
+				.cinema-name {
+					color: $primary-color;
+					.check-mark {
+						opacity: 1;
+					}
+				}
+			}
+		}
+	}
+}
+
+/* ---- SHOWTIMES FORMAT GROUPS & SLOTS ---- */
+.showtime-group-card {
+	background: #ffffff;
+	border: 1px solid #e2e8f0;
+	border-radius: $radius-lg;
+	padding: 20px;
+	margin-bottom: 20px;
+	box-shadow: $shadow-sm;
+
+	.group-title-row {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		padding-bottom: 12px;
+		margin-bottom: 16px;
+		border-bottom: 1px solid #f1f5f9;
+		flex-wrap: wrap;
+		gap: 8px;
+
+		.format-title {
+			font-size: 15px;
+			font-weight: 800;
+			color: #1e293b;
+			display: flex;
+			align-items: center;
+			gap: 8px;
+
+			.format-badge {
+				background: #e0f2fe;
+				color: #0284c7;
+				padding: 3px 8px;
+				border-radius: 4px;
+				font-size: 12px;
+				font-weight: 700;
+			}
+		}
+
+		.screen-name {
+			font-size: 13px;
+			color: #64748b;
+			font-weight: 600;
+		}
+	}
+
+	.slots-grid {
+		display: grid;
+		grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+		gap: 12px;
+
+		.slot-btn {
+			background: #f8fafc;
+			border: 1.5px solid #cbd5e1;
+			border-radius: $radius-md;
+			padding: 10px 8px;
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+			gap: 3px;
+			cursor: pointer;
+			transition: all 0.2s ease;
+			text-align: center;
+			position: relative;
+
+			.slot-time {
+				font-size: 17px;
+				font-weight: 800;
+				color: $primary-text-color;
+				letter-spacing: -0.3px;
+			}
+
+			.slot-end {
+				font-size: 11px;
+				color: #94a3b8;
+			}
+
+			.slot-price {
+				font-size: 12px;
+				font-weight: 700;
+				color: $primary-color;
+				margin-top: 2px;
+			}
+
+			.slot-seats {
+				font-size: 10px;
+				font-weight: 600;
+				padding: 1px 6px;
+				border-radius: 10px;
+				margin-top: 2px;
+
+				&.seats-green {
+					background: #d1fae5;
+					color: #065f46;
+				}
+
+				&.seats-yellow {
+					background: #fef3c7;
+					color: #92400e;
+				}
+
+				&.seats-red {
+					background: #fee2e2;
+					color: #991b1b;
+				}
+			}
+
+			&:hover {
+				border-color: $primary-color;
+				background: #ffffff;
+				transform: translateY(-2px);
+				box-shadow: 0 4px 12px rgba(1, 81, 152, 0.15);
+			}
+
+			&.disabled {
+				opacity: 0.5;
+				cursor: not-allowed;
+				border-color: #e2e8f0;
+				background: #f1f5f9;
+				pointer-events: none;
+			}
+		}
+	}
+}
+
+.no-showtimes-notice {
+	text-align: center;
+	padding: 40px 20px;
+	color: #64748b;
+
+	.notice-icon {
+		font-size: 36px;
+		margin-bottom: 8px;
+	}
+
+	p {
+		margin: 0;
+		font-size: 14px;
+	}
+}
+
+/* ==========================================================================
+   SEAT SELECTION MODAL (Interactive Preview)
+   ========================================================================== */
+.seat-modal-content {
+	background: #0f172a;
+	color: #f8fafc;
+	padding: 24px;
+	max-width: 800px;
+	border-radius: $radius-lg;
+
+	.seat-modal-header {
+		padding-bottom: 16px;
+		border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+		margin-bottom: 20px;
+
+		h3 {
+			font-size: 20px;
+			font-weight: 800;
+			color: #fff;
+			margin: 0 0 6px;
+		}
+
+		.seat-modal-meta {
+			display: flex;
+			gap: 14px;
+			font-size: 13px;
+			color: #94a3b8;
+			flex-wrap: wrap;
+
+			span {
+				display: flex;
+				align-items: center;
+				gap: 4px;
+			}
+
+			strong {
+				color: #e2e8f0;
+			}
+		}
+	}
+
+	/* Screen graphic */
+	.screen-graphic-wrap {
+		text-align: center;
+		margin: 20px 0 28px;
+
+		.screen-curve {
+			height: 8px;
+			background: linear-gradient(90deg, transparent 0%, #38bdf8 30%, #38bdf8 70%, transparent 100%);
+			border-radius: 50% 50% 0 0;
+			box-shadow: 0 4px 20px rgba(56, 189, 248, 0.5);
+			margin-bottom: 6px;
+		}
+
+		.screen-label {
+			font-size: 11px;
+			font-weight: 700;
+			text-transform: uppercase;
+			letter-spacing: 2px;
+			color: #64748b;
+		}
+	}
+
+	/* Seat Map Grid */
+	.seat-map-grid {
+		display: flex;
+		flex-direction: column;
+		gap: 8px;
+		align-items: center;
+		margin-bottom: 24px;
+		overflow-x: auto;
+		padding-bottom: 8px;
+
+		.seat-row {
+			display: flex;
+			align-items: center;
+			gap: 6px;
+
+			.row-label {
+				width: 24px;
+				font-size: 12px;
+				font-weight: 700;
+				color: #94a3b8;
+				text-align: center;
+			}
+
+			.seat-item {
+				width: 28px;
+				height: 28px;
+				border-radius: 4px;
+				font-size: 10px;
+				font-weight: 700;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				cursor: pointer;
+				transition: all 0.15s;
+				user-select: none;
+
+				&.seat-standard {
+					background: #334155;
+					color: #e2e8f0;
+					&:hover {
+						background: #475569;
+					}
+				}
+
+				&.seat-vip {
+					background: #b45309;
+					color: #fff;
+					&:hover {
+						background: #d97706;
+					}
+				}
+
+				&.seat-sweetbox {
+					width: 60px;
+					background: #831843;
+					color: #fff;
+					&:hover {
+						background: #9d174d;
+					}
+				}
+
+				&.seat-sold {
+					background: #1e293b;
+					color: #475569;
+					cursor: not-allowed;
+					text-decoration: line-through;
+					opacity: 0.6;
+				}
+
+				&.seat-selected {
+					background: #10b981 !important;
+					color: #ffffff !important;
+					transform: scale(1.1);
+					box-shadow: 0 0 10px rgba(16, 185, 129, 0.8);
+				}
+			}
+		}
+	}
+
+	/* Seat legend */
+	.seat-legend {
+		display: flex;
+		justify-content: center;
+		gap: 18px;
+		flex-wrap: wrap;
+		padding: 12px;
+		background: rgba(255, 255, 255, 0.04);
+		border-radius: $radius-md;
+		margin-bottom: 24px;
+
+		.legend-col {
+			display: flex;
+			align-items: center;
+			gap: 6px;
+			font-size: 12px;
+			color: #cbd5e1;
+
+			.sample-seat {
+				width: 18px;
+				height: 18px;
+				border-radius: 3px;
+
+				&.sample-std { background: #334155; }
+				&.sample-vip { background: #b45309; }
+				&.sample-swb { background: #831843; }
+				&.sample-sold { background: #1e293b; opacity: 0.6; }
+				&.sample-sel { background: #10b981; }
+			}
+		}
+	}
+
+	/* Summary & Checkout */
+	.seat-modal-footer {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		padding-top: 16px;
+		border-top: 1px solid rgba(255, 255, 255, 0.1);
+		flex-wrap: wrap;
+		gap: 16px;
+
+		.selected-summary {
+			display: flex;
+			flex-direction: column;
+			gap: 2px;
+
+			.seats-chosen-text {
+				font-size: 13px;
+				color: #94a3b8;
+				strong {
+					color: #f1f5f9;
+				}
+			}
+
+			.total-price-text {
+				font-size: 20px;
+				font-weight: 800;
+				color: #fbbf24;
+			}
+		}
+
+		.btn-confirm-booking {
+			background: linear-gradient(135deg, #015198 0%, #0066cc 100%);
+			color: #fff;
+			border: none;
+			padding: 12px 28px;
+			border-radius: $radius-md;
+			font-size: 14px;
+			font-weight: 800;
+			cursor: pointer;
+			transition: all 0.2s;
+
+			&:hover {
+				background: linear-gradient(135deg, #0066cc 0%, #015198 100%);
+				transform: translateY(-1px);
+			}
+
+			&:disabled {
+				opacity: 0.5;
+				cursor: not-allowed;
+				transform: none;
+			}
+		}
+	}
+}

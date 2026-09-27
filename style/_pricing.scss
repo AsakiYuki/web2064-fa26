@@ -1,0 +1,387 @@
+/* ============================================
+   BETA CINEMAS - TICKET PRICING & PROMOTIONS SCSS
+   ============================================ */
+@use 'sass:color';
+@use 'variables' as *;
+
+.pricing-page {
+	background-color: $background-color;
+	padding-bottom: 80px;
+}
+
+/* ---- SECTION 1: TICKET PRICING SECTION ---- */
+.pricing-section-container {
+	margin-top: 36px;
+	background: #ffffff;
+	border-radius: $radius-xl;
+	padding: 36px 32px;
+	box-shadow: $shadow-sm;
+	border: 1px solid $border-color;
+
+	@media (max-width: 640px) {
+		padding: 20px 16px;
+	}
+
+	.pricing-header-wrap {
+		text-align: center;
+		max-width: 700px;
+		margin: 0 auto 32px;
+
+		h2 {
+			font-size: 26px;
+			font-weight: 900;
+			color: $primary-color;
+			margin: 0 0 8px;
+			text-transform: uppercase;
+			letter-spacing: -0.5px;
+		}
+
+		p {
+			font-size: 14px;
+			color: $muted-text;
+			margin: 0;
+			line-height: 1.6;
+		}
+	}
+
+	/* Format switcher tabs */
+	.format-switch-tabs {
+		display: flex;
+		justify-content: center;
+		gap: 12px;
+		margin-bottom: 28px;
+		flex-wrap: wrap;
+
+		.fmt-tab-btn {
+			padding: 10px 24px;
+			border-radius: 24px;
+			font-size: 14px;
+			font-weight: 700;
+			background: #f1f5f9;
+			border: 1.5px solid #cbd5e1;
+			color: #334155;
+			cursor: pointer;
+			transition: all 0.2s;
+
+			&:hover {
+				border-color: $primary-color;
+				color: $primary-color;
+			}
+
+			&.active {
+				background: $primary-color;
+				border-color: $primary-color;
+				color: #ffffff;
+				box-shadow: 0 4px 12px rgba(1, 81, 152, 0.25);
+			}
+		}
+	}
+
+	/* Pricing Table */
+	.pricing-table-wrap {
+		overflow-x: auto;
+		margin-bottom: 32px;
+
+		table.pricing-table {
+			width: 100%;
+			border-collapse: separate;
+			border-spacing: 0;
+			border-radius: $radius-md;
+			overflow: hidden;
+			border: 1px solid #e2e8f0;
+
+			th,
+			td {
+				padding: 14px 18px;
+				text-align: center;
+				font-size: 14px;
+			}
+
+			thead {
+				background: #f8fafc;
+				th {
+					font-weight: 800;
+					color: $primary-text-color;
+					border-bottom: 2px solid $primary-color;
+					text-transform: uppercase;
+					font-size: 13px;
+					letter-spacing: 0.5px;
+
+					&:first-child {
+						text-align: left;
+					}
+				}
+			}
+
+			tbody {
+				tr {
+					&:nth-child(even) {
+						background: #fcfdfe;
+					}
+
+					&:hover {
+						background: rgba(1, 81, 152, 0.03);
+					}
+
+					td {
+						border-bottom: 1px solid #f1f5f9;
+						color: #374151;
+
+						&:first-child {
+							text-align: left;
+							font-weight: 700;
+							color: $primary-text-color;
+						}
+
+						&.price-highlight {
+							font-weight: 800;
+							color: $primary-color;
+							font-size: 15px;
+						}
+
+						&.price-tuesday {
+							font-weight: 800;
+							color: #059669;
+							background: rgba(16, 185, 129, 0.06);
+						}
+					}
+				}
+			}
+		}
+	}
+
+	/* Special Discounts Cards Grid */
+	.special-discount-grid {
+		display: grid;
+		grid-template-columns: repeat(3, 1fr);
+		gap: 20px;
+		margin-top: 24px;
+
+		@media (max-width: 900px) {
+			grid-template-columns: 1fr;
+		}
+
+		.discount-card {
+			background: #f8fafc;
+			border: 1.5px solid #e2e8f0;
+			border-radius: $radius-lg;
+			padding: 20px;
+			display: flex;
+			flex-direction: column;
+			gap: 8px;
+			transition: all 0.2s;
+
+			&:hover {
+				border-color: $primary-color;
+				transform: translateY(-2px);
+				box-shadow: $shadow-sm;
+			}
+
+			.dc-icon {
+				font-size: 28px;
+				margin-bottom: 4px;
+			}
+
+			.dc-title {
+				font-size: 16px;
+				font-weight: 800;
+				color: $primary-text-color;
+				margin: 0;
+			}
+
+			.dc-desc {
+				font-size: 13px;
+				color: $muted-text;
+				margin: 0;
+				line-height: 1.5;
+			}
+
+			.dc-tag {
+				align-self: flex-start;
+				margin-top: auto;
+				padding-top: 10px;
+				font-size: 13px;
+				font-weight: 800;
+				color: $accent-color;
+			}
+		}
+	}
+}
+
+/* ---- SECTION 2: PROMOTIONS & NEWS SECTION ---- */
+.promotions-section-container {
+	margin-top: 40px;
+
+	.promotions-header-bar {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		margin-bottom: 24px;
+		flex-wrap: wrap;
+		gap: 16px;
+
+		h2 {
+			font-size: 24px;
+			font-weight: 900;
+			color: $primary-text-color;
+			margin: 0;
+			text-transform: uppercase;
+			letter-spacing: -0.3px;
+		}
+	}
+
+	/* Category Filter Pills */
+	.promo-filter-pills {
+		display: flex;
+		gap: 8px;
+		overflow-x: auto;
+		padding-bottom: 12px;
+		margin-bottom: 24px;
+		scrollbar-width: none;
+		&::-webkit-scrollbar { display: none; }
+
+		.promo-pill {
+			background: #ffffff;
+			border: 1px solid #d1d5db;
+			color: #4b5563;
+			padding: 7px 16px;
+			border-radius: 20px;
+			font-size: 13px;
+			font-weight: 600;
+			cursor: pointer;
+			white-space: nowrap;
+			transition: all 0.2s;
+
+			&:hover {
+				border-color: $primary-color;
+				color: $primary-color;
+			}
+
+			&.active {
+				background: $primary-color;
+				border-color: $primary-color;
+				color: #ffffff;
+				font-weight: 700;
+				box-shadow: 0 2px 8px rgba(1, 81, 152, 0.25);
+			}
+		}
+	}
+
+	/* Promotions Grid */
+	.promotions-grid {
+		display: grid;
+		grid-template-columns: repeat(3, 1fr);
+		gap: 24px;
+
+		@media (max-width: 992px) {
+			grid-template-columns: repeat(2, 1fr);
+		}
+		@media (max-width: 600px) {
+			grid-template-columns: 1fr;
+		}
+
+		.promo-card {
+			background: #ffffff;
+			border-radius: $radius-lg;
+			overflow: hidden;
+			box-shadow: $shadow-sm;
+			border: 1px solid $border-color;
+			display: flex;
+			flex-direction: column;
+			transition: transform 0.25s, box-shadow 0.25s;
+
+			&:hover {
+				transform: translateY(-4px);
+				box-shadow: $shadow-hover;
+
+				.promo-thumb img {
+					transform: scale(1.04);
+				}
+			}
+
+			.promo-thumb {
+				position: relative;
+				aspect-ratio: 16 / 9;
+				overflow: hidden;
+				background: #111;
+
+				img {
+					width: 100%;
+					height: 100%;
+					object-fit: cover;
+					transition: transform 0.4s ease;
+				}
+
+				.promo-badge {
+					position: absolute;
+					top: 10px;
+					left: 10px;
+					background: linear-gradient(135deg, #ef4444, #f97316);
+					color: #fff;
+					font-size: 11px;
+					font-weight: 800;
+					padding: 3px 8px;
+					border-radius: 4px;
+				}
+			}
+
+			.promo-body {
+				padding: 18px;
+				display: flex;
+				flex-direction: column;
+				gap: 8px;
+				flex: 1;
+
+				.promo-title {
+					font-size: 16px;
+					font-weight: 800;
+					color: $primary-text-color;
+					margin: 0;
+					line-height: 1.35;
+				}
+
+				.promo-desc {
+					font-size: 13px;
+					color: $muted-text;
+					margin: 0;
+					line-height: 1.5;
+					display: -webkit-box;
+					-webkit-line-clamp: 3;
+					line-clamp: 3;
+					-webkit-box-orient: vertical;
+					overflow: hidden;
+				}
+
+				.promo-validity {
+					font-size: 12px;
+					color: #9ca3af;
+					margin-top: auto;
+					padding-top: 10px;
+					display: flex;
+					align-items: center;
+					gap: 6px;
+				}
+
+				.btn-view-promo {
+					margin-top: 12px;
+					background: #f1f5f9;
+					border: 1px solid #e2e8f0;
+					color: $primary-color;
+					padding: 8px 14px;
+					border-radius: $radius-sm;
+					font-size: 13px;
+					font-weight: 700;
+					cursor: pointer;
+					text-align: center;
+					transition: all 0.2s;
+
+					&:hover {
+						background: $primary-color;
+						color: #fff;
+						border-color: $primary-color;
+					}
+				}
+			}
+		}
+	}
+}

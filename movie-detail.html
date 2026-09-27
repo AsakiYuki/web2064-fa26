@@ -1,0 +1,256 @@
+<!doctype html>
+<html lang="vi">
+
+<head>
+	<meta charset="UTF-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<meta name="description"
+		content="Thông tin chi tiết phim, xem trailer HD, đánh giá và lịch chiếu đặt vé tại rạp Beta Cinemas." />
+	<title>Chi Tiết Phim - Trailer & Lịch Chiếu | Beta Cinemas</title>
+	<link rel="stylesheet" href="/style/main.scss" />
+	<link rel="preconnect" href="https://fonts.googleapis.com" />
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+	<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+</head>
+
+<body class="movie-detail-body">
+	<!-- ===================== HEADER ===================== -->
+	<header class="main-header">
+		<div class="header-account-manager">
+			<div class="container">
+				<a href="#" id="btn-login">Đăng nhập</a>
+				<div class="divider"></div>
+				<a href="#" id="btn-register">Đăng ký</a>
+				<span style="font-size: 18px; margin-left: 4px; cursor: pointer" title="English">🇬🇧</span>
+			</div>
+		</div>
+		<div class="header-navigator">
+			<div class="container">
+				<a href="/" class="header-logo" id="logo-link">
+					<img src="/logo.webp" alt="Beta Cinemas Logo" />
+				</a>
+				<div class="cinema-selector-wrap" id="cinema-selector-wrap">
+					<button class="cinema-selector" id="cinema-selector-btn" aria-haspopup="listbox" aria-expanded="false">
+						<span class="cinema-selector-label" id="cinema-selector-label">Beta Thái Nguyên</span>
+						<svg class="cinema-selector-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+							stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+							<polyline points="6 9 12 15 18 9"></polyline>
+						</svg>
+					</button>
+					<div class="cinema-dropdown" id="cinema-dropdown" role="listbox">
+						<ul id="cinema-dropdown-ul"></ul>
+					</div>
+				</div>
+				<nav class="nav-links">
+					<a href="/schedule.html" id="nav-schedule">Lịch Chiếu Theo Rạp</a>
+					<a href="/movies.html" id="nav-movies" class="active">Phim</a>
+					<a href="#" id="nav-cinemas">Rạp</a>
+					<a href="#" id="nav-pricing">Giá Vé</a>
+					<a href="#" id="nav-news">Tin Mới Và Ưu Đãi</a>
+					<a href="#" id="nav-franchise">Nhượng Quyền</a>
+					<a href="#" id="nav-member">Thành Viên</a>
+				</nav>
+			</div>
+		</div>
+	</header>
+
+	<main class="movie-detail-page">
+		<!-- ===================== CINEMATIC HERO BACKDROP ===================== -->
+		<section class="detail-hero" aria-label="Thông tin tổng quan phim">
+			<div class="hero-backdrop-img" id="hero-backdrop-img"></div>
+			<div class="hero-gradient-overlay"></div>
+
+			<div class="container">
+				<!-- Breadcrumb -->
+				<nav class="breadcrumb" aria-label="Breadcrumb">
+					<a href="/">Trang chủ</a>
+					<span class="bc-separator">/</span>
+					<a href="/movies.html">Phim</a>
+					<span class="bc-separator">/</span>
+					<span class="bc-current" id="bc-movie-name">Đang tải...</span>
+				</nav>
+
+				<div class="detail-hero-grid">
+					<!-- Left: Poster -->
+					<div class="detail-poster-wrap">
+						<img src="/poster/poster_utlan2.jpg" alt="Poster phim" id="detail-poster-img" />
+						<span class="poster-badge badge-t18" id="detail-poster-badge">T18</span>
+						<button type="button" class="btn-play-trailer-overlay" id="btn-play-trailer-poster" aria-label="Xem trailer">
+							<div class="play-icon-circle">
+								<svg viewBox="0 0 24 24"><polygon points="5,3 19,12 5,21" /></svg>
+							</div>
+							<span>Xem Trailer</span>
+						</button>
+					</div>
+
+					<!-- Right: Info -->
+					<div class="detail-info">
+						<h1 class="movie-title-vn" id="movie-title-vn">Đang tải tên phim...</h1>
+						<div class="movie-title-en" id="movie-title-en"></div>
+
+						<div class="rating-bar">
+							<div class="rating-badge-lg">
+								<span class="star-icon">⭐</span>
+								<span class="rating-score" id="detail-rating-score">9.2</span>
+								<span class="rating-max">/ 10</span>
+							</div>
+							<span class="rating-votes">(Đánh giá tích cực từ hơn 2.400 khán giả)</span>
+						</div>
+
+						<div class="detail-pills-row" id="detail-pills-row">
+							<!-- Injected dynamically -->
+						</div>
+
+						<div class="detail-meta-table">
+							<div class="meta-row">
+								<span class="meta-title">Đạo diễn</span>
+								<span class="meta-val" id="meta-director">-</span>
+							</div>
+							<div class="meta-row">
+								<span class="meta-title">Khởi chiếu</span>
+								<span class="meta-val" id="meta-release">-</span>
+							</div>
+							<div class="meta-row" style="grid-column: 1 / -1;">
+								<span class="meta-title">Diễn viên chính</span>
+								<span class="meta-val" id="meta-cast">-</span>
+							</div>
+							<div class="meta-row">
+								<span class="meta-title">Quốc gia</span>
+								<span class="meta-val" id="meta-country">-</span>
+							</div>
+							<div class="meta-row">
+								<span class="meta-title">Hệ thống chiếu</span>
+								<span class="meta-val">Beta Cinemas toàn quốc</span>
+							</div>
+						</div>
+
+						<div class="detail-actions-bar">
+							<button type="button" class="btn-book-now" id="btn-book-now">
+								<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+									<path d="M15 5v2M15 11v2M15 17v2M5 5h14a2 2 0 010 4H5a2 2 0 010-4zM5 13h14a2 2 0 010 4H5a2 2 0 010-4z" />
+								</svg>
+								ĐẶT VÉ NGAY
+							</button>
+							<button type="button" class="btn-watch-trailer-hero" id="btn-watch-trailer-hero">
+								<svg viewBox="0 0 24 24"><polygon points="5,3 19,12 5,21" /></svg>
+								Xem Trailer
+							</button>
+						</div>
+					</div>
+				</div>
+			</div>
+		</section>
+
+		<!-- ===================== DETAIL MAIN CONTENT ===================== -->
+		<div class="detail-main-content">
+			<div class="container">
+				<!-- SECTION 1: TÓM TẮT NỘI DUNG -->
+				<section class="content-section" aria-label="Nội dung phim">
+					<div class="section-header">
+						<span class="section-icon">📖</span>
+						<h2>Tóm Tắt Nội Dung</h2>
+					</div>
+					<div class="synopsis-card">
+						<p id="detail-synopsis-text">Đang tải tóm tắt nội dung phim...</p>
+					</div>
+
+					<div class="age-advisory-box" id="age-advisory-box">
+						<div class="advisory-badge" id="advisory-badge">T18</div>
+						<p class="advisory-text" id="advisory-text">
+							Phim chỉ dành cho khán giả từ đủ 18 tuổi trở lên. Khán giả vui lòng xuất trình giấy tờ tùy thân có hình ảnh xác minh độ tuổi tại quầy soát vé rạp.
+						</p>
+					</div>
+				</section>
+
+				<!-- SECTION 2: TRAILER PLAYER -->
+				<section class="content-section" aria-label="Trailer chính thức">
+					<div class="section-header">
+						<span class="section-icon">🎬</span>
+						<h2>Trailer Chính Thức</h2>
+					</div>
+					<div class="trailer-player-wrap">
+						<div class="player-iframe-aspect">
+							<iframe id="detail-trailer-iframe" allowfullscreen allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"></iframe>
+						</div>
+					</div>
+				</section>
+
+				<!-- SECTION 3: DIỄN VIÊN & ĐOÀN LÀM PHIM -->
+				<section class="content-section" aria-label="Diễn viên và đoàn làm phim">
+					<div class="section-header">
+						<span class="section-icon">👥</span>
+						<h2>Diễn Viên & Đoàn Làm Phim</h2>
+					</div>
+					<div class="cast-grid" id="detail-cast-grid">
+						<!-- Injected dynamically -->
+					</div>
+				</section>
+
+				<!-- SECTION 4: LỊCH CHIẾU THEO CỤM RẠP VÀ NGÀY XEM (SHOWTIMES SELECTOR) -->
+				<section class="content-section" id="showtimes" aria-label="Lịch chiếu và đặt vé">
+					<div id="movie-showtimes-container">
+						<!-- Rendered dynamically by ShowtimePicker -->
+					</div>
+				</section>
+			</div>
+		</div>
+	</main>
+
+	<!-- ===================== FOOTER ===================== -->
+	<footer class="main-footer">
+		<div class="container">
+			<div class="footer-inner">
+				<div class="footer-brand">
+					<img src="/logo.webp" alt="Beta Cinemas" />
+					<ul class="footer-links-list">
+						<li><a href="#" id="footer-recruit">Tuyển dụng</a></li>
+						<li><a href="#" id="footer-about">Giới thiệu</a></li>
+						<li><a href="#" id="footer-contact">Liên hệ</a></li>
+						<li><a href="#" id="footer-faq">F.A.Q</a></li>
+						<li><a href="#" id="footer-social">Hoạt động xã hội</a></li>
+						<li><a href="#" id="footer-tos">Điều khoản sử dụng</a></li>
+						<li><a href="#" id="footer-payment-policy">Chính sách thanh toán, đổi trả - hoàn vé</a></li>
+						<li><a href="#" id="footer-ads">Liên hệ quảng cáo</a></li>
+						<li><a href="#" id="footer-privacy">Điều khoản bảo mật</a></li>
+						<li><a href="#" id="footer-guide">Hướng dẫn đặt vé online</a></li>
+					</ul>
+					<div class="footer-download-title">Tải Ứng Dụng</div>
+					<ul class="footer-links-list">
+						<li><a href="#" id="footer-ios">Beta Cinemas cho iOS</a></li>
+						<li><a href="#" id="footer-android">Beta Cinemas cho Android</a></li>
+					</ul>
+				</div>
+				<div class="footer-cinema-cluster">
+					<h3>Cụm Rạp Beta</h3>
+					<ul class="cinema-cluster-list" id="cinema-cluster-ul"></ul>
+				</div>
+				<div class="footer-contact">
+					<h3>Liên Hệ</h3>
+					<p class="company-name">CÔNG TY CỔ PHẦN BETA MEDIA</p>
+					<p>Giấy chứng nhận ĐKKD số: 0106633482 - Đăng ký lần đầu ngày 08/09/2014 tại Sở Kế hoạch và Đầu tư TP. Hà Nội</p>
+					<p>Địa chỉ: Tầng 3, số 595, đường Giải Phóng, Phường Tương Mai, Hà Nội</p>
+					<div class="contact-group">
+						<p class="contact-group-title">LIÊN HỆ CHĂM SÓC KHÁCH HÀNG:</p>
+						<p>Hotline: <strong>1900 636807</strong></p>
+						<p>Email: <a href="mailto:mkt@betacinemas.vn" style="color: rgba(255, 255, 255, 0.82)">mkt@betacinemas.vn</a></p>
+					</div>
+					<div class="social-icons">
+						<a href="#" class="social-icon" id="social-fb" aria-label="Facebook">f</a>
+						<a href="#" class="social-icon" id="social-yt" aria-label="YouTube">▶</a>
+						<a href="#" class="social-icon" id="social-tt" aria-label="TikTok">♪</a>
+						<a href="#" class="social-icon" id="social-ig" aria-label="Instagram">📷</a>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="footer-bottom">
+			<div class="container">
+				<p>© 2026 Beta Cinemas. All rights reserved. Thiết kế bởi Beta Media.</p>
+			</div>
+		</div>
+	</footer>
+
+	<script type="module" src="/js/movie-detail-page.js"></script>
+</body>
+
+</html>

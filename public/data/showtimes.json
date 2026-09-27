@@ -1,6 +1,6 @@
 [
   {
-    "date": "2026-09-23",
+    "date": "2026-09-26",
     "cinemaId": "beta-thainguyen",
     "schedules": [
       {
@@ -10,11 +10,12 @@
         "screenName": "Phòng 1",
         "format": "2D Phụ Đề",
         "slots": [
-          { "time": "10:15", "price": 65000, "availableSeats": 42 },
-          { "time": "13:30", "price": 70000, "availableSeats": 18 },
-          { "time": "16:45", "price": 75000, "availableSeats": 5 },
-          { "time": "19:30", "price": 85000, "availableSeats": 0 },
-          { "time": "21:45", "price": 80000, "availableSeats": 26 }
+          { "time": "09:15", "price": 65000, "availableSeats": 54 },
+          { "time": "11:45", "price": 70000, "availableSeats": 38 },
+          { "time": "14:30", "price": 75000, "availableSeats": 22 },
+          { "time": "17:15", "price": 85000, "availableSeats": 8 },
+          { "time": "20:00", "price": 85000, "availableSeats": 0 },
+          { "time": "22:30", "price": 80000, "availableSeats": 19 }
         ]
       },
       {
@@ -24,10 +25,11 @@
         "screenName": "Phòng 2",
         "format": "2D Phụ Đề",
         "slots": [
-          { "time": "11:00", "price": 65000, "availableSeats": 50 },
-          { "time": "14:15", "price": 70000, "availableSeats": 30 },
-          { "time": "17:30", "price": 75000, "availableSeats": 12 },
-          { "time": "20:00", "price": 85000, "availableSeats": 8 }
+          { "time": "10:00", "price": 65000, "availableSeats": 45 },
+          { "time": "13:00", "price": 70000, "availableSeats": 29 },
+          { "time": "16:00", "price": 75000, "availableSeats": 14 },
+          { "time": "19:15", "price": 85000, "availableSeats": 4 },
+          { "time": "21:45", "price": 80000, "availableSeats": 31 }
         ]
       },
       {
@@ -37,15 +39,28 @@
         "screenName": "Phòng IMAX",
         "format": "IMAX 3D",
         "slots": [
-          { "time": "14:00", "price": 120000, "availableSeats": 15 },
-          { "time": "18:00", "price": 140000, "availableSeats": 2 },
-          { "time": "21:30", "price": 130000, "availableSeats": 24 }
+          { "time": "13:30", "price": 120000, "availableSeats": 35 },
+          { "time": "17:30", "price": 140000, "availableSeats": 6 },
+          { "time": "21:00", "price": 135000, "availableSeats": 18 }
+        ]
+      },
+      {
+        "movieId": "lenhuong",
+        "movieTitle": "Lên Hương",
+        "screenId": "TN-P3",
+        "screenName": "Phòng 3",
+        "format": "2D Lồng Tiếng",
+        "slots": [
+          { "time": "09:45", "price": 65000, "availableSeats": 60 },
+          { "time": "12:30", "price": 70000, "availableSeats": 41 },
+          { "time": "15:15", "price": 75000, "availableSeats": 25 },
+          { "time": "18:45", "price": 80000, "availableSeats": 12 }
         ]
       }
     ]
   },
   {
-    "date": "2026-09-23",
+    "date": "2026-09-26",
     "cinemaId": "beta-nowzone",
     "schedules": [
       {
@@ -55,11 +70,11 @@
         "screenName": "Phòng 1",
         "format": "2D Phụ Đề",
         "slots": [
-          { "time": "09:30", "price": 70000, "availableSeats": 60 },
-          { "time": "12:15", "price": 75000, "availableSeats": 45 },
-          { "time": "15:00", "price": 80000, "availableSeats": 20 },
-          { "time": "18:30", "price": 95000, "availableSeats": 4 },
-          { "time": "21:15", "price": 90000, "availableSeats": 15 }
+          { "time": "10:15", "price": 75000, "availableSeats": 58 },
+          { "time": "13:15", "price": 80000, "availableSeats": 40 },
+          { "time": "16:15", "price": 85000, "availableSeats": 15 },
+          { "time": "19:00", "price": 95000, "availableSeats": 3 },
+          { "time": "21:45", "price": 90000, "availableSeats": 22 }
         ]
       },
       {
@@ -69,10 +84,245 @@
         "screenName": "Phòng 2",
         "format": "2D Phụ Đề",
         "slots": [
-          { "time": "10:45", "price": 70000, "availableSeats": 70 },
-          { "time": "13:45", "price": 75000, "availableSeats": 50 },
-          { "time": "17:00", "price": 85000, "availableSeats": 18 },
-          { "time": "20:15", "price": 95000, "availableSeats": 10 }
+          { "time": "11:00", "price": 75000, "availableSeats": 62 },
+          { "time": "14:00", "price": 80000, "availableSeats": 44 },
+          { "time": "17:30", "price": 90000, "availableSeats": 11 },
+          { "time": "20:30", "price": 95000, "availableSeats": 0 }
+        ]
+      },
+      {
+        "movieId": "sp1",
+        "movieTitle": "Avengers: Hồi Kết IMAX",
+        "screenId": "NZ-IMAX",
+        "screenName": "Phòng IMAX",
+        "format": "IMAX 3D",
+        "slots": [
+          { "time": "14:15", "price": 140000, "availableSeats": 45 },
+          { "time": "18:00", "price": 150000, "availableSeats": 12 },
+          { "time": "21:30", "price": 145000, "availableSeats": 28 }
+        ]
+      },
+      {
+        "movieId": "traibuon",
+        "movieTitle": "Trại Buôn Người",
+        "screenId": "NZ-P1",
+        "screenName": "Phòng 1",
+        "format": "2D Phụ Đề",
+        "slots": [
+          { "time": "12:00", "price": 75000, "availableSeats": 50 },
+          { "time": "15:30", "price": 80000, "availableSeats": 32 },
+          { "time": "22:15", "price": 85000, "availableSeats": 17 }
+        ]
+      }
+    ]
+  },
+  {
+    "date": "2026-09-26",
+    "cinemaId": "beta-xuanthuy",
+    "schedules": [
+      {
+        "movieId": "utlan2",
+        "movieTitle": "Út Lan 2",
+        "screenId": "XT-P1",
+        "screenName": "Phòng 1",
+        "format": "2D Phụ Đề",
+        "slots": [
+          { "time": "09:30", "price": 70000, "availableSeats": 40 },
+          { "time": "12:45", "price": 75000, "availableSeats": 28 },
+          { "time": "16:00", "price": 80000, "availableSeats": 10 },
+          { "time": "19:30", "price": 85000, "availableSeats": 2 },
+          { "time": "22:00", "price": 80000, "availableSeats": 25 }
+        ]
+      },
+      {
+        "movieId": "bongma",
+        "movieTitle": "Bóng Ma Nhà Hát",
+        "screenId": "XT-P2",
+        "screenName": "Phòng 2",
+        "format": "2D Phụ Đề",
+        "slots": [
+          { "time": "10:30", "price": 70000, "availableSeats": 55 },
+          { "time": "13:45", "price": 75000, "availableSeats": 34 },
+          { "time": "17:00", "price": 80000, "availableSeats": 16 },
+          { "time": "20:15", "price": 85000, "availableSeats": 7 }
+        ]
+      },
+      {
+        "movieId": "avengers",
+        "movieTitle": "Avengers: Hồi Kết - Phiên Bản ĐB",
+        "screenId": "XT-P1",
+        "screenName": "Phòng 1",
+        "format": "2D Phụ Đề",
+        "slots": [
+          { "time": "14:15", "price": 80000, "availableSeats": 30 },
+          { "time": "18:00", "price": 90000, "availableSeats": 8 }
+        ]
+      }
+    ]
+  },
+  {
+    "date": "2026-09-27",
+    "cinemaId": "beta-thainguyen",
+    "schedules": [
+      {
+        "movieId": "utlan2",
+        "movieTitle": "Út Lan 2",
+        "screenId": "TN-P1",
+        "screenName": "Phòng 1",
+        "format": "2D Phụ Đề",
+        "slots": [
+          { "time": "09:30", "price": 70000, "availableSeats": 60 },
+          { "time": "12:15", "price": 75000, "availableSeats": 45 },
+          { "time": "15:00", "price": 80000, "availableSeats": 30 },
+          { "time": "18:00", "price": 85000, "availableSeats": 14 },
+          { "time": "20:45", "price": 85000, "availableSeats": 5 }
+        ]
+      },
+      {
+        "movieId": "bongma",
+        "movieTitle": "Bóng Ma Nhà Hát",
+        "screenId": "TN-P2",
+        "screenName": "Phòng 2",
+        "format": "2D Phụ Đề",
+        "slots": [
+          { "time": "10:15", "price": 70000, "availableSeats": 50 },
+          { "time": "13:30", "price": 75000, "availableSeats": 35 },
+          { "time": "16:45", "price": 80000, "availableSeats": 20 },
+          { "time": "19:45", "price": 85000, "availableSeats": 9 }
+        ]
+      },
+      {
+        "movieId": "lenhuong",
+        "movieTitle": "Lên Hương",
+        "screenId": "TN-P3",
+        "screenName": "Phòng 3",
+        "format": "2D Lồng Tiếng",
+        "slots": [
+          { "time": "11:00", "price": 70000, "availableSeats": 55 },
+          { "time": "14:00", "price": 75000, "availableSeats": 42 },
+          { "time": "17:15", "price": 80000, "availableSeats": 22 },
+          { "time": "20:30", "price": 85000, "availableSeats": 11 }
+        ]
+      },
+      {
+        "movieId": "sp1",
+        "movieTitle": "Avengers: Hồi Kết IMAX",
+        "screenId": "TN-IMAX",
+        "screenName": "Phòng IMAX",
+        "format": "IMAX 3D",
+        "slots": [
+          { "time": "14:00", "price": 130000, "availableSeats": 40 },
+          { "time": "18:30", "price": 145000, "availableSeats": 15 },
+          { "time": "21:45", "price": 140000, "availableSeats": 22 }
+        ]
+      }
+    ]
+  },
+  {
+    "date": "2026-09-27",
+    "cinemaId": "beta-nowzone",
+    "schedules": [
+      {
+        "movieId": "utlan2",
+        "movieTitle": "Út Lan 2",
+        "screenId": "NZ-P1",
+        "screenName": "Phòng 1",
+        "format": "2D Phụ Đề",
+        "slots": [
+          { "time": "09:45", "price": 80000, "availableSeats": 70 },
+          { "time": "12:45", "price": 85000, "availableSeats": 48 },
+          { "time": "15:45", "price": 90000, "availableSeats": 25 },
+          { "time": "18:45", "price": 95000, "availableSeats": 8 },
+          { "time": "21:30", "price": 90000, "availableSeats": 19 }
+        ]
+      },
+      {
+        "movieId": "vungdat",
+        "movieTitle": "Vùng Đất Quỷ Dữ",
+        "screenId": "NZ-P2",
+        "screenName": "Phòng 2",
+        "format": "2D Phụ Đề",
+        "slots": [
+          { "time": "10:30", "price": 80000, "availableSeats": 65 },
+          { "time": "13:30", "price": 85000, "availableSeats": 40 },
+          { "time": "17:00", "price": 90000, "availableSeats": 16 },
+          { "time": "20:00", "price": 95000, "availableSeats": 4 }
+        ]
+      },
+      {
+        "movieId": "sp1",
+        "movieTitle": "Avengers: Hồi Kết IMAX",
+        "screenId": "NZ-IMAX",
+        "screenName": "Phòng IMAX",
+        "format": "IMAX 3D",
+        "slots": [
+          { "time": "13:45", "price": 145000, "availableSeats": 50 },
+          { "time": "17:45", "price": 155000, "availableSeats": 14 },
+          { "time": "21:15", "price": 150000, "availableSeats": 30 }
+        ]
+      }
+    ]
+  },
+  {
+    "date": "2026-09-28",
+    "cinemaId": "beta-thainguyen",
+    "schedules": [
+      {
+        "movieId": "utlan2",
+        "movieTitle": "Út Lan 2",
+        "screenId": "TN-P1",
+        "screenName": "Phòng 1",
+        "format": "2D Phụ Đề",
+        "slots": [
+          { "time": "10:15", "price": 65000, "availableSeats": 70 },
+          { "time": "13:30", "price": 70000, "availableSeats": 50 },
+          { "time": "16:45", "price": 70000, "availableSeats": 35 },
+          { "time": "19:30", "price": 75000, "availableSeats": 20 }
+        ]
+      },
+      {
+        "movieId": "bongma",
+        "movieTitle": "Bóng Ma Nhà Hát",
+        "screenId": "TN-P2",
+        "screenName": "Phòng 2",
+        "format": "2D Phụ Đề",
+        "slots": [
+          { "time": "11:00", "price": 65000, "availableSeats": 60 },
+          { "time": "14:15", "price": 70000, "availableSeats": 45 },
+          { "time": "17:30", "price": 70000, "availableSeats": 28 },
+          { "time": "20:00", "price": 75000, "availableSeats": 15 }
+        ]
+      }
+    ]
+  },
+  {
+    "date": "2026-09-28",
+    "cinemaId": "beta-nowzone",
+    "schedules": [
+      {
+        "movieId": "utlan2",
+        "movieTitle": "Út Lan 2",
+        "screenId": "NZ-P1",
+        "screenName": "Phòng 1",
+        "format": "2D Phụ Đề",
+        "slots": [
+          { "time": "10:00", "price": 70000, "availableSeats": 65 },
+          { "time": "13:00", "price": 75000, "availableSeats": 52 },
+          { "time": "16:00", "price": 80000, "availableSeats": 38 },
+          { "time": "19:00", "price": 85000, "availableSeats": 22 }
+        ]
+      },
+      {
+        "movieId": "vungdat",
+        "movieTitle": "Vùng Đất Quỷ Dữ",
+        "screenId": "NZ-P2",
+        "screenName": "Phòng 2",
+        "format": "2D Phụ Đề",
+        "slots": [
+          { "time": "11:15", "price": 70000, "availableSeats": 72 },
+          { "time": "14:30", "price": 75000, "availableSeats": 55 },
+          { "time": "17:45", "price": 80000, "availableSeats": 30 },
+          { "time": "20:45", "price": 85000, "availableSeats": 14 }
         ]
       }
     ]

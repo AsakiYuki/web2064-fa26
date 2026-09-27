@@ -1,0 +1,321 @@
+<!doctype html>
+<html lang="vi">
+
+<head>
+	<meta charset="UTF-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<meta name="description"
+		content="Chọn ghế ngồi rạp chiếu phim (Standard, VIP, Ghế đôi Sweetbox) và combo bắp nước trực tuyến nhanh chóng tại Beta Cinemas." />
+	<title>Sơ Đồ Chọn Ghế & Combo Bắp Nước | Beta Cinemas</title>
+	<link rel="stylesheet" href="/style/main.scss" />
+	<link rel="preconnect" href="https://fonts.googleapis.com" />
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+	<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+</head>
+
+<body class="booking-page-body">
+	<!-- ===================== HEADER ===================== -->
+	<header class="main-header">
+		<div class="header-account-manager">
+			<div class="container">
+				<a href="#" id="btn-login">Đăng nhập</a>
+				<div class="divider"></div>
+				<a href="#" id="btn-register">Đăng ký</a>
+				<span style="font-size: 18px; margin-left: 4px; cursor: pointer" title="English">🇬🇧</span>
+			</div>
+		</div>
+		<div class="header-navigator">
+			<div class="container">
+				<a href="/" class="header-logo" id="logo-link">
+					<img src="/logo.webp" alt="Beta Cinemas Logo" />
+				</a>
+				<div class="cinema-selector-wrap" id="cinema-selector-wrap">
+					<button class="cinema-selector" id="cinema-selector-btn" aria-haspopup="listbox" aria-expanded="false">
+						<span class="cinema-selector-label" id="cinema-selector-label">Beta Thái Nguyên</span>
+						<svg class="cinema-selector-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+							stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+							<polyline points="6 9 12 15 18 9"></polyline>
+						</svg>
+					</button>
+					<div class="cinema-dropdown" id="cinema-dropdown" role="listbox">
+						<ul id="cinema-dropdown-ul"></ul>
+					</div>
+				</div>
+				<nav class="nav-links">
+					<a href="/schedule.html" id="nav-schedule">Lịch Chiếu Theo Rạp</a>
+					<a href="/movies.html" id="nav-movies">Phim</a>
+					<a href="#" id="nav-cinemas">Rạp</a>
+					<a href="#" id="nav-pricing">Giá Vé</a>
+					<a href="#" id="nav-news">Tin Mới Và Ưu Đãi</a>
+					<a href="#" id="nav-franchise">Nhượng Quyền</a>
+					<a href="#" id="nav-member">Thành Viên</a>
+				</nav>
+			</div>
+		</div>
+	</header>
+
+	<!-- ===================== BOOKING STEPPER BAR ===================== -->
+	<div class="booking-header-bar">
+		<div class="container">
+			<nav class="booking-breadcrumb" aria-label="Breadcrumb">
+				<a href="/">Trang chủ</a>
+				<span class="bc-separator">/</span>
+				<a href="/movies.html">Phim</a>
+				<span class="bc-separator">/</span>
+				<span class="bc-current">Đặt Vé & Bắp Nước</span>
+			</nav>
+
+			<div class="booking-stepper">
+				<a href="/schedule.html" class="step-item completed" title="Quay lại chọn suất chiếu">
+					<span class="step-number">✓</span>
+					<span class="step-text">Suất Chiếu</span>
+				</a>
+				<div class="step-divider"></div>
+				<div class="step-item active" id="step-indicator-seats">
+					<span class="step-number">2</span>
+					<span class="step-text">Chọn Ghế</span>
+				</div>
+				<div class="step-divider"></div>
+				<div class="step-item" id="step-indicator-combos">
+					<span class="step-number">3</span>
+					<span class="step-text">Bắp Nước</span>
+				</div>
+				<div class="step-divider"></div>
+				<div class="step-item" id="step-indicator-checkout">
+					<span class="step-number">4</span>
+					<span class="step-text">Thanh Toán</span>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<!-- ===================== BOOKING MAIN CONTENT ===================== -->
+	<main class="booking-page">
+		<div class="container">
+			<div class="booking-layout-grid">
+				<!-- LEFT COLUMN: SEAT MAP & CONCESSIONS -->
+				<div class="booking-main-content">
+					<!-- Navigation Tabs between Seats & Combos -->
+					<div class="booking-view-tabs" role="tablist">
+						<button type="button" class="view-tab-btn active" id="tab-view-seats" role="tab" aria-selected="true">
+							<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+								<path d="M4 18v3M20 18v3M2 11h20M4 11V7a2 2 0 012-2h12a2 2 0 012 2v4M6 18h12"></path>
+							</svg>
+							<span>1. SƠ ĐỒ CHỌN GHẾ</span>
+							<span class="tab-badge" id="tab-badge-seats">0</span>
+						</button>
+						<button type="button" class="view-tab-btn" id="tab-view-combos" role="tab" aria-selected="false">
+							<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+								<path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4zM3 6h18M16 10a4 4 0 01-8 0"></path>
+							</svg>
+							<span>2. COMBO BẮP NƯỚC & ĐỒ ĂN</span>
+							<span class="tab-badge" id="tab-badge-combos">0</span>
+						</button>
+					</div>
+
+					<!-- SECTION 1: SEAT SELECTION -->
+					<section class="seat-selection-card" id="section-seat-selection" aria-label="Sơ đồ ghế ngồi xem phim">
+						<div class="hall-header-info">
+							<div class="hall-title-wrap">
+								<h2 id="hall-movie-title">Tên Phim</h2>
+								<p id="hall-sub-meta">Beta Thái Nguyên | Phòng chiếu 1 | Suất 14:30</p>
+							</div>
+							<div class="hall-tags-wrap">
+								<span class="ht-tag">Màn Hình Lớn</span>
+								<span class="ht-tag">Dolby 7.1</span>
+							</div>
+						</div>
+
+						<!-- Cinema Screen Graphic -->
+						<div class="cinema-screen-area">
+							<div class="screen-beam"></div>
+							<div class="screen-arc"></div>
+							<div class="screen-title">MÀN HÌNH CHIẾU / SCREEN</div>
+						</div>
+
+						<!-- Seat Map Viewport with Aisles -->
+						<div class="seat-map-viewport">
+							<div class="seat-rows-container" id="seat-rows-container">
+								<!-- Dynamically rendered rows A to J -->
+							</div>
+						</div>
+
+						<!-- Seat Legend Bar -->
+						<div class="booking-seat-legend" aria-label="Chú thích loại ghế">
+							<div class="legend-cell">
+								<div class="sample-box sample-std"></div>
+								<div class="legend-text">
+									<span class="legend-name">Ghế Thường (Standard)</span>
+									<span class="legend-price" id="legend-price-std">70.000 đ</span>
+								</div>
+							</div>
+							<div class="legend-cell">
+								<div class="sample-box sample-vip"></div>
+								<div class="legend-text">
+									<span class="legend-name">Ghế VIP (Góc nhìn vàng)</span>
+									<span class="legend-price" id="legend-price-vip">80.000 đ</span>
+								</div>
+							</div>
+							<div class="legend-cell">
+								<div class="sample-box sample-swb"></div>
+								<div class="legend-text">
+									<span class="legend-name">Ghế Đôi (Sweetbox)</span>
+									<span class="legend-price" id="legend-price-swb">155.000 đ</span>
+								</div>
+							</div>
+							<div class="legend-cell">
+								<div class="sample-box sample-sold"></div>
+								<div class="legend-text">
+									<span class="legend-name">Đã Bán</span>
+									<span class="legend-price">Không thể chọn</span>
+								</div>
+							</div>
+							<div class="legend-cell">
+								<div class="sample-box sample-selected"></div>
+								<div class="legend-text">
+									<span class="legend-name">Đang Chọn</span>
+									<span class="legend-price">Tối đa 8 ghế</span>
+								</div>
+							</div>
+						</div>
+
+						<!-- Step 1 Next Button -->
+						<div class="seat-action-next-wrap">
+							<button type="button" class="btn-goto-concessions" id="btn-goto-concessions" disabled>
+								<span>TIẾP TỤC CHỌN BẮP NƯỚC</span>
+								<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:18px;height:18px;">
+									<polyline points="9 18 15 12 9 6"></polyline>
+								</svg>
+							</button>
+						</div>
+					</section>
+
+					<!-- SECTION 2: CONCESSIONS & FOOD/DRINKS -->
+					<section class="concessions-selection-card" id="section-concessions-selection" style="display: none;" aria-label="Chọn bắp nước và đồ ăn kèm">
+						<div class="concessions-header-bar">
+							<h2>🍿 QUẦY BẮP NƯỚC & COMBO ƯU ĐÃI</h2>
+							<p>Thưởng thức bắp rang bơ nóng hổi thơm giòn cùng nước giải khát mát lạnh xem phim trọn vẹn hơn!</p>
+						</div>
+
+						<!-- Category Filter Tabs -->
+						<div class="concessions-category-tabs" id="concessions-category-tabs">
+							<!-- Injected dynamically -->
+						</div>
+
+						<!-- Concessions Items Grid -->
+						<div class="concessions-grid" id="concessions-grid">
+							<!-- Injected dynamically -->
+						</div>
+
+						<!-- Concessions Navigation -->
+						<div class="concession-nav-buttons">
+							<button type="button" class="btn-back-to-seats" id="btn-back-to-seats">
+								<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:16px;height:16px;">
+									<polyline points="15 18 9 12 15 6"></polyline>
+								</svg>
+								<span>Quay lại chọn Ghế</span>
+							</button>
+						</div>
+					</section>
+				</div>
+
+				<!-- RIGHT COLUMN: ORDER SUMMARY SIDEBAR -->
+				<aside class="order-summary-sidebar" aria-label="Tóm tắt đơn hàng">
+					<div class="summary-header">
+						<h3>
+							<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:20px;height:20px;color:#f5a623;">
+								<path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+							</svg>
+							TÓM TẮT ĐƠN HÀNG
+						</h3>
+					</div>
+
+					<!-- Compact Movie Card -->
+					<div class="summary-movie-card">
+						<div class="sm-poster">
+							<img src="/poster/poster_utlan2.jpg" alt="Poster" id="summary-poster-img" />
+						</div>
+						<div class="sm-meta">
+							<h4 class="sm-title" id="summary-movie-title">Tên Phim</h4>
+							<span class="sm-cinema" id="summary-cinema-name">Beta Thái Nguyên</span>
+							<span class="sm-time" id="summary-showtime-text">14:30 - Thứ Bảy, 26/09</span>
+							<span class="sm-format" id="summary-format-tag">Phòng 1 (2D Phụ Đề)</span>
+						</div>
+					</div>
+
+					<!-- Seats Breakdown -->
+					<div class="summary-breakdown-section">
+						<div class="breakdown-group-title">💺 Ghế đã chọn</div>
+						<div id="summary-seats-breakdown">
+							<span class="empty-placeholder">Chưa chọn ghế nào</span>
+						</div>
+					</div>
+
+					<!-- Concessions Breakdown -->
+					<div class="summary-breakdown-section">
+						<div class="breakdown-group-title">🍿 Bắp nước & đồ ăn</div>
+						<div id="summary-concessions-breakdown">
+							<span class="empty-placeholder">Chưa chọn bắp nước</span>
+						</div>
+					</div>
+
+					<!-- Voucher / Coupon Code -->
+					<div class="summary-coupon-box">
+						<div class="coupon-input-group">
+							<input type="text" id="coupon-input" placeholder="Mã giảm giá (Thử BETA10 hoặc BETA50)" aria-label="Mã giảm giá" />
+							<button type="button" id="btn-apply-coupon">Áp dụng</button>
+						</div>
+						<div class="coupon-applied-msg" id="coupon-msg"></div>
+					</div>
+
+					<!-- Grand Total -->
+					<div class="summary-total-bar">
+						<span class="total-title">Tổng Thanh Toán:</span>
+						<span class="total-amount" id="summary-grand-total">0 đ</span>
+					</div>
+
+					<!-- Main Checkout Action -->
+					<button type="button" class="btn-checkout-now" id="btn-checkout-now" disabled>
+						<span>TIẾP TỤC CHỌN BẮP NƯỚC</span>
+						<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+							<polyline points="9 18 15 12 9 6"></polyline>
+						</svg>
+					</button>
+				</aside>
+			</div>
+		</div>
+	</main>
+
+	<!-- ===================== FOOTER ===================== -->
+	<footer class="main-footer">
+		<div class="container">
+			<div class="footer-inner">
+				<div class="footer-brand">
+					<img src="/logo.webp" alt="Beta Cinemas" />
+					<ul class="footer-links-list">
+						<li><a href="#" id="footer-recruit">Tuyển dụng</a></li>
+						<li><a href="#" id="footer-about">Giới thiệu</a></li>
+						<li><a href="#" id="footer-contact">Liên hệ</a></li>
+						<li><a href="#" id="footer-faq">F.A.Q</a></li>
+						<li><a href="#" id="footer-tos">Điều khoản sử dụng</a></li>
+						<li><a href="#" id="footer-payment-policy">Chính sách thanh toán, đổi trả - hoàn vé</a></li>
+					</ul>
+				</div>
+				<div class="footer-cinema-cluster">
+					<h3>Cụm Rạp Beta</h3>
+					<ul class="cinema-cluster-list" id="cinema-cluster-ul"></ul>
+				</div>
+				<div class="footer-contact">
+					<h3>Liên Hệ</h3>
+					<p class="company-name">CÔNG TY CỔ PHẦN BETA MEDIA</p>
+					<p>Hotline: <strong>1900 636807</strong> | Email: <a href="mailto:mkt@betacinemas.vn" style="color: rgba(255, 255, 255, 0.82)">mkt@betacinemas.vn</a></p>
+					<p>© 2026 Beta Cinemas. All rights reserved.</p>
+				</div>
+			</div>
+		</div>
+	</footer>
+
+	<script type="module" src="/js/booking-page.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,1178 @@
+/* ============================================
+   BETA CINEMAS - BOOKING (SEATS & CONCESSIONS) SCSS
+   ============================================ */
+@use 'sass:color';
+@use 'variables' as *;
+
+.booking-page {
+	background-color: #0b1120;
+	color: #e2e8f0;
+	min-height: 100vh;
+	padding-bottom: 80px;
+}
+
+/* ---- BOOKING HEADER & STEPPER ---- */
+.booking-header-bar {
+	background: #0f172a;
+	border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+	padding: 20px 0;
+	position: sticky;
+	top: 72px;
+	z-index: 100;
+	box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+
+	.container {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 20px;
+		flex-wrap: wrap;
+	}
+
+	.booking-breadcrumb {
+		display: flex;
+		align-items: center;
+		gap: 8px;
+		font-size: 13px;
+		color: #94a3b8;
+
+		a {
+			color: #cbd5e1;
+			&:hover {
+				color: $accent-color;
+			}
+		}
+
+		.bc-separator {
+			opacity: 0.4;
+		}
+
+		.bc-current {
+			color: #ffffff;
+			font-weight: 700;
+		}
+	}
+
+	/* Stepper Progress Bar */
+	.booking-stepper {
+		display: flex;
+		align-items: center;
+		gap: 12px;
+
+		.step-item {
+			display: flex;
+			align-items: center;
+			gap: 8px;
+			font-size: 13px;
+			font-weight: 700;
+			color: #64748b;
+			transition: all 0.2s;
+			cursor: pointer;
+
+			.step-number {
+				width: 28px;
+				height: 28px;
+				border-radius: 50%;
+				background: rgba(255, 255, 255, 0.08);
+				border: 1.5px solid #475569;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				font-size: 12px;
+				color: #94a3b8;
+				transition: all 0.2s;
+			}
+
+			&.completed {
+				color: #10b981;
+				.step-number {
+					background: #10b981;
+					border-color: #10b981;
+					color: #ffffff;
+				}
+			}
+
+			&.active {
+				color: #ffffff;
+				.step-number {
+					background: $primary-color;
+					border-color: #38bdf8;
+					color: #ffffff;
+					box-shadow: 0 0 12px rgba(56, 189, 248, 0.6);
+				}
+			}
+		}
+
+		.step-divider {
+			width: 24px;
+			height: 2px;
+			background: #334155;
+		}
+	}
+}
+
+/* ---- BOOKING MAIN LAYOUT (2 Columns) ---- */
+.booking-layout-grid {
+	display: grid;
+	grid-template-columns: 1fr 380px;
+	gap: 32px;
+	margin-top: 32px;
+	align-items: flex-start;
+
+	@media (max-width: 1100px) {
+		grid-template-columns: 1fr;
+	}
+}
+
+/* ---- TAB SWITCHER CONTROLS ---- */
+.booking-view-tabs {
+	display: flex;
+	gap: 12px;
+	margin-bottom: 24px;
+	border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+	padding-bottom: 12px;
+
+	.view-tab-btn {
+		background: rgba(255, 255, 255, 0.05);
+		border: 1px solid rgba(255, 255, 255, 0.12);
+		color: #94a3b8;
+		padding: 12px 24px;
+		border-radius: $radius-md;
+		font-size: 15px;
+		font-weight: 700;
+		cursor: pointer;
+		display: flex;
+		align-items: center;
+		gap: 10px;
+		transition: all 0.2s ease;
+
+		svg {
+			width: 18px;
+			height: 18px;
+		}
+
+		.tab-badge {
+			background: #334155;
+			color: #cbd5e1;
+			font-size: 11px;
+			padding: 2px 8px;
+			border-radius: 10px;
+		}
+
+		&:hover {
+			background: rgba(255, 255, 255, 0.1);
+			color: #fff;
+		}
+
+		&.active {
+			background: linear-gradient(135deg, $primary-color 0%, #0284c7 100%);
+			border-color: #38bdf8;
+			color: #ffffff;
+			box-shadow: 0 4px 16px rgba(2, 132, 199, 0.35);
+
+			.tab-badge {
+				background: rgba(255, 255, 255, 0.25);
+				color: #fff;
+			}
+		}
+	}
+}
+
+/* ==========================================================================
+   1. SEAT MAP SECTION (STANDARD, VIP, DOUBLE/SWEETBOX)
+   ========================================================================== */
+.seat-selection-card {
+	background: #0f172a;
+	border-radius: $radius-xl;
+	padding: 32px 24px;
+	border: 1px solid rgba(255, 255, 255, 0.08);
+	box-shadow: 0 16px 40px rgba(0, 0, 0, 0.4);
+
+	@media (max-width: 640px) {
+		padding: 20px 12px;
+	}
+
+	.hall-header-info {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		flex-wrap: wrap;
+		gap: 12px;
+		padding-bottom: 20px;
+		border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+		margin-bottom: 28px;
+
+		.hall-title-wrap {
+			h2 {
+				font-size: 20px;
+				font-weight: 800;
+				color: #ffffff;
+				margin: 0 0 4px;
+				display: flex;
+				align-items: center;
+				gap: 8px;
+			}
+			p {
+				font-size: 13px;
+				color: #94a3b8;
+				margin: 0;
+			}
+		}
+
+		.hall-tags-wrap {
+			display: flex;
+			gap: 8px;
+
+			.ht-tag {
+				background: rgba(56, 189, 248, 0.15);
+				border: 1px solid rgba(56, 189, 248, 0.3);
+				color: #38bdf8;
+				padding: 4px 10px;
+				border-radius: 6px;
+				font-size: 12px;
+				font-weight: 700;
+			}
+		}
+	}
+
+	/* Screen graphic with projection beam */
+	.cinema-screen-area {
+		text-align: center;
+		margin: 20px 0 40px;
+		position: relative;
+
+		.screen-beam {
+			position: absolute;
+			top: -15px;
+			left: 10%;
+			right: 10%;
+			height: 50px;
+			background: linear-gradient(180deg, rgba(56, 189, 248, 0.12) 0%, transparent 100%);
+			clip-path: polygon(25% 0%, 75% 0%, 100% 100%, 0% 100%);
+			pointer-events: none;
+		}
+
+		.screen-arc {
+			height: 10px;
+			background: linear-gradient(90deg, transparent 0%, #38bdf8 25%, #bae6fd 50%, #38bdf8 75%, transparent 100%);
+			border-radius: 50% 50% 0 0;
+			box-shadow: 0 4px 30px rgba(56, 189, 248, 0.7);
+			margin-bottom: 10px;
+		}
+
+		.screen-title {
+			font-size: 12px;
+			font-weight: 800;
+			letter-spacing: 4px;
+			color: #94a3b8;
+			text-transform: uppercase;
+		}
+	}
+
+	/* Seat Map Outer with Aisles */
+	.seat-map-viewport {
+		overflow-x: auto;
+		padding: 10px 0 30px;
+		scrollbar-width: thin;
+		scrollbar-color: #334155 transparent;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		min-width: 100%;
+	}
+
+	.seat-rows-container {
+		display: flex;
+		flex-direction: column;
+		gap: 10px;
+		align-items: center;
+
+		.seat-row-block {
+			display: flex;
+			align-items: center;
+			gap: 8px;
+
+			.row-letter {
+				width: 24px;
+				font-size: 12px;
+				font-weight: 800;
+				color: #94a3b8;
+				text-align: center;
+				user-select: none;
+			}
+
+			.seat-aisle-divider {
+				width: 16px;
+			}
+
+			/* Seat Unit */
+			.seat-unit {
+				width: 32px;
+				height: 30px;
+				border-radius: 6px 6px 3px 3px;
+				font-size: 11px;
+				font-weight: 800;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				cursor: pointer;
+				position: relative;
+				transition: transform 0.15s ease, box-shadow 0.15s ease;
+				user-select: none;
+				border-bottom: 3px solid rgba(0, 0, 0, 0.3);
+
+				/* Standard Seat */
+				&.seat-standard {
+					background: #334155;
+					color: #e2e8f0;
+					border-color: #1e293b;
+
+					&:hover {
+						background: #475569;
+						transform: translateY(-2px);
+						box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
+					}
+				}
+
+				/* VIP Seat */
+				&.seat-vip {
+					background: linear-gradient(180deg, #d97706 0%, #b45309 100%);
+					color: #ffffff;
+					border-color: #78350f;
+
+					&:hover {
+						background: linear-gradient(180deg, #f59e0b 0%, #d97706 100%);
+						transform: translateY(-2px);
+						box-shadow: 0 4px 14px rgba(217, 119, 6, 0.45);
+					}
+				}
+
+				/* Double / Sweetbox Seat */
+				&.seat-sweetbox {
+					width: 74px;
+					background: linear-gradient(180deg, #be185d 0%, #9d174d 100%);
+					color: #ffffff;
+					border-color: #700d36;
+					border-radius: 8px 8px 3px 3px;
+					gap: 4px;
+
+					.swb-icon {
+						font-size: 13px;
+					}
+
+					&:hover {
+						background: linear-gradient(180deg, #db2777 0%, #be185d 100%);
+						transform: translateY(-2px);
+						box-shadow: 0 4px 16px rgba(190, 24, 93, 0.5);
+					}
+				}
+
+				/* Sold / Booked Seat */
+				&.seat-sold {
+					background: #1e293b !important;
+					color: #475569 !important;
+					cursor: not-allowed !important;
+					border-color: #0f172a !important;
+					transform: none !important;
+					box-shadow: none !important;
+					opacity: 0.5;
+
+					&::after {
+						content: '✕';
+						font-size: 12px;
+						color: #64748b;
+					}
+				}
+
+				/* Selected Seat */
+				&.seat-selected {
+					background: linear-gradient(180deg, #10b981 0%, #059669 100%) !important;
+					color: #ffffff !important;
+					border-color: #047857 !important;
+					transform: scale(1.12) translateY(-2px) !important;
+					box-shadow: 0 0 14px rgba(16, 185, 129, 0.8) !important;
+					z-index: 5;
+
+					&::before {
+						content: '✓';
+						font-size: 10px;
+						position: absolute;
+						top: -6px;
+						right: -4px;
+						background: #ffffff;
+						color: #059669;
+						border-radius: 50%;
+						width: 14px;
+						height: 14px;
+						display: flex;
+						align-items: center;
+						justify-content: center;
+						font-weight: 900;
+					}
+				}
+			}
+		}
+	}
+
+	/* Seat Legend Detailed */
+	.booking-seat-legend {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		gap: 24px;
+		flex-wrap: wrap;
+		padding: 16px 20px;
+		background: rgba(255, 255, 255, 0.03);
+		border-radius: $radius-lg;
+		border: 1px solid rgba(255, 255, 255, 0.06);
+		margin-top: 10px;
+
+		.legend-cell {
+			display: flex;
+			align-items: center;
+			gap: 10px;
+
+			.sample-box {
+				width: 24px;
+				height: 22px;
+				border-radius: 4px;
+
+				&.sample-std { background: #334155; }
+				&.sample-vip { background: #d97706; }
+				&.sample-swb { width: 44px; background: #be185d; }
+				&.sample-sold { background: #1e293b; opacity: 0.6; display: flex; align-items: center; justify-content: center; font-size: 10px; color: #64748b; }
+				&.sample-selected { background: #10b981; box-shadow: 0 0 8px rgba(16, 185, 129, 0.7); }
+			}
+
+			.legend-text {
+				display: flex;
+				flex-direction: column;
+
+				.legend-name {
+					font-size: 13px;
+					font-weight: 700;
+					color: #f1f5f9;
+				}
+
+				.legend-price {
+					font-size: 12px;
+					color: #94a3b8;
+					font-weight: 600;
+				}
+			}
+		}
+	}
+
+	.seat-action-next-wrap {
+		margin-top: 24px;
+		display: flex;
+		justify-content: flex-end;
+
+		.btn-goto-concessions {
+			background: linear-gradient(135deg, $primary-color 0%, #0066cc 100%);
+			color: #fff;
+			border: none;
+			padding: 14px 28px;
+			border-radius: $radius-md;
+			font-size: 15px;
+			font-weight: 800;
+			cursor: pointer;
+			display: flex;
+			align-items: center;
+			gap: 10px;
+			transition: all 0.2s;
+			box-shadow: 0 4px 16px rgba(1, 81, 152, 0.4);
+
+			&:hover {
+				background: linear-gradient(135deg, #0066cc 0%, #015198 100%);
+				transform: translateY(-2px);
+				box-shadow: 0 8px 24px rgba(1, 81, 152, 0.6);
+			}
+
+			&:disabled {
+				opacity: 0.5;
+				cursor: not-allowed;
+				transform: none;
+				box-shadow: none;
+			}
+		}
+	}
+}
+
+/* ==========================================================================
+   2. CONCESSIONS & FOOD/DRINKS SECTION
+   ========================================================================== */
+.concessions-selection-card {
+	background: #0f172a;
+	border-radius: $radius-xl;
+	padding: 32px 24px;
+	border: 1px solid rgba(255, 255, 255, 0.08);
+	box-shadow: 0 16px 40px rgba(0, 0, 0, 0.4);
+
+	.concessions-header-bar {
+		padding-bottom: 20px;
+		border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+		margin-bottom: 24px;
+
+		h2 {
+			font-size: 22px;
+			font-weight: 800;
+			color: #fff;
+			margin: 0 0 6px;
+			display: flex;
+			align-items: center;
+			gap: 10px;
+		}
+
+		p {
+			font-size: 13px;
+			color: #94a3b8;
+			margin: 0;
+		}
+	}
+
+	/* Category Filter Tabs */
+	.concessions-category-tabs {
+		display: flex;
+		gap: 8px;
+		overflow-x: auto;
+		padding-bottom: 12px;
+		margin-bottom: 24px;
+		scrollbar-width: none;
+		&::-webkit-scrollbar {
+			display: none;
+		}
+
+		.cat-btn {
+			background: rgba(255, 255, 255, 0.05);
+			border: 1px solid rgba(255, 255, 255, 0.1);
+			color: #94a3b8;
+			padding: 8px 16px;
+			border-radius: 20px;
+			font-size: 13px;
+			font-weight: 700;
+			cursor: pointer;
+			white-space: nowrap;
+			transition: all 0.2s;
+
+			&:hover {
+				background: rgba(255, 255, 255, 0.12);
+				color: #fff;
+			}
+
+			&.active {
+				background: $accent-color;
+				border-color: $accent-color;
+				color: #1a1a2e;
+				font-weight: 800;
+				box-shadow: 0 2px 10px rgba(245, 166, 35, 0.4);
+			}
+		}
+	}
+
+	/* Concessions Grid */
+	.concessions-grid {
+		display: grid;
+		grid-template-columns: repeat(2, 1fr);
+		gap: 20px;
+
+		@media (max-width: 768px) {
+			grid-template-columns: 1fr;
+		}
+
+		.concession-item-card {
+			background: #1e293b;
+			border-radius: $radius-lg;
+			overflow: hidden;
+			border: 1px solid rgba(255, 255, 255, 0.08);
+			display: grid;
+			grid-template-columns: 120px 1fr;
+			transition: transform 0.2s ease, border-color 0.2s;
+			position: relative;
+
+			&:hover {
+				border-color: rgba(245, 166, 35, 0.4);
+				transform: translateY(-2px);
+			}
+
+			&.has-qty {
+				border-color: #38bdf8;
+				background: rgba(30, 41, 59, 0.95);
+				box-shadow: 0 4px 16px rgba(56, 189, 248, 0.15);
+			}
+
+			.c-thumb-wrap {
+				position: relative;
+				height: 100%;
+				min-height: 120px;
+				background: #0f172a;
+
+				img {
+					width: 100%;
+					height: 100%;
+					object-fit: cover;
+					display: block;
+				}
+
+				.c-badge {
+					position: absolute;
+					top: 8px;
+					left: 8px;
+					background: linear-gradient(135deg, #ef4444, #f97316);
+					color: #fff;
+					font-size: 10px;
+					font-weight: 900;
+					padding: 2px 6px;
+					border-radius: 4px;
+					letter-spacing: 0.3px;
+				}
+			}
+
+			.c-details {
+				padding: 14px 16px;
+				display: flex;
+				flex-direction: column;
+				justify-content: space-between;
+				gap: 8px;
+
+				.c-name {
+					font-size: 15px;
+					font-weight: 800;
+					color: #f8fafc;
+					margin: 0;
+					line-height: 1.3;
+				}
+
+				.c-desc {
+					font-size: 12px;
+					color: #94a3b8;
+					margin: 0;
+					line-height: 1.4;
+					display: -webkit-box;
+					-webkit-line-clamp: 2;
+					line-clamp: 2;
+					-webkit-box-orient: vertical;
+					overflow: hidden;
+				}
+
+				.c-pricing-row {
+					display: flex;
+					align-items: center;
+					justify-content: space-between;
+					gap: 12px;
+					margin-top: auto;
+					padding-top: 6px;
+
+					.price-box {
+						display: flex;
+						flex-direction: column;
+
+						.price-current {
+							font-size: 16px;
+							font-weight: 800;
+							color: #fbbf24;
+						}
+
+						.price-old {
+							font-size: 11px;
+							color: #64748b;
+							text-decoration: line-through;
+						}
+					}
+
+					/* Quantity Counter */
+					.qty-control {
+						display: flex;
+						align-items: center;
+						gap: 6px;
+						background: rgba(15, 23, 42, 0.6);
+						border: 1px solid rgba(255, 255, 255, 0.1);
+						border-radius: 20px;
+						padding: 3px 6px;
+
+						.qty-btn {
+							width: 26px;
+							height: 26px;
+							border-radius: 50%;
+							border: none;
+							background: #334155;
+							color: #ffffff;
+							font-size: 16px;
+							line-height: 1;
+							cursor: pointer;
+							display: flex;
+							align-items: center;
+							justify-content: center;
+							transition: all 0.15s;
+
+							&:hover {
+								background: $primary-color;
+							}
+
+							&:disabled {
+								opacity: 0.3;
+								cursor: not-allowed;
+								&:hover {
+									background: #334155;
+								}
+							}
+						}
+
+						.qty-display {
+							font-size: 13px;
+							font-weight: 800;
+							color: #ffffff;
+							min-width: 18px;
+							text-align: center;
+						}
+					}
+				}
+			}
+		}
+	}
+
+	.concession-nav-buttons {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		margin-top: 28px;
+		padding-top: 20px;
+		border-top: 1px solid rgba(255, 255, 255, 0.08);
+
+		.btn-back-to-seats {
+			background: rgba(255, 255, 255, 0.08);
+			border: 1px solid rgba(255, 255, 255, 0.15);
+			color: #cbd5e1;
+			padding: 12px 20px;
+			border-radius: $radius-md;
+			font-size: 14px;
+			font-weight: 700;
+			cursor: pointer;
+			display: flex;
+			align-items: center;
+			gap: 8px;
+			transition: all 0.2s;
+
+			&:hover {
+				background: rgba(255, 255, 255, 0.15);
+				color: #fff;
+			}
+		}
+	}
+}
+
+/* ==========================================================================
+   3. ORDER SUMMARY SIDEBAR (STICKY TỔNG KẾT ĐƠN HÀNG)
+   ========================================================================== */
+.order-summary-sidebar {
+	background: #0f172a;
+	border-radius: $radius-xl;
+	padding: 24px;
+	border: 1px solid rgba(255, 255, 255, 0.1);
+	position: sticky;
+	top: 150px;
+	box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5);
+
+	.summary-header {
+		padding-bottom: 16px;
+		border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+		margin-bottom: 18px;
+
+		h3 {
+			font-size: 18px;
+			font-weight: 800;
+			color: #ffffff;
+			margin: 0;
+			text-transform: uppercase;
+			letter-spacing: 0.5px;
+			display: flex;
+			align-items: center;
+			gap: 8px;
+		}
+	}
+
+	/* Movie Compact Card */
+	.summary-movie-card {
+		display: grid;
+		grid-template-columns: 70px 1fr;
+		gap: 14px;
+		background: rgba(255, 255, 255, 0.03);
+		padding: 12px;
+		border-radius: $radius-md;
+		border: 1px solid rgba(255, 255, 255, 0.06);
+		margin-bottom: 18px;
+
+		.sm-poster {
+			aspect-ratio: 2 / 3;
+			border-radius: 6px;
+			overflow: hidden;
+			background: #1e293b;
+
+			img {
+				width: 100%;
+				height: 100%;
+				object-fit: cover;
+			}
+		}
+
+		.sm-meta {
+			display: flex;
+			flex-direction: column;
+			gap: 3px;
+
+			.sm-title {
+				font-size: 15px;
+				font-weight: 800;
+				color: #ffffff;
+				line-height: 1.3;
+				margin: 0;
+			}
+
+			.sm-cinema {
+				font-size: 12px;
+				color: #38bdf8;
+				font-weight: 600;
+			}
+
+			.sm-time {
+				font-size: 12px;
+				color: #94a3b8;
+			}
+
+			.sm-format {
+				display: inline-block;
+				font-size: 10px;
+				font-weight: 800;
+				background: rgba(255, 255, 255, 0.1);
+				padding: 2px 6px;
+				border-radius: 4px;
+				color: #e2e8f0;
+				align-self: flex-start;
+				margin-top: 4px;
+			}
+		}
+	}
+
+	/* Items breakdown list */
+	.summary-breakdown-section {
+		display: flex;
+		flex-direction: column;
+		gap: 12px;
+		margin-bottom: 20px;
+		padding-bottom: 16px;
+		border-bottom: 1px dashed rgba(255, 255, 255, 0.12);
+
+		.breakdown-group-title {
+			font-size: 12px;
+			font-weight: 800;
+			text-transform: uppercase;
+			color: #64748b;
+			letter-spacing: 0.5px;
+			margin-bottom: 4px;
+		}
+
+		.breakdown-row {
+			display: flex;
+			justify-content: space-between;
+			align-items: flex-start;
+			font-size: 13px;
+			color: #cbd5e1;
+
+			.row-desc {
+				display: flex;
+				flex-direction: column;
+				gap: 1px;
+
+				strong {
+					color: #ffffff;
+				}
+				small {
+					color: #94a3b8;
+					font-size: 11px;
+				}
+			}
+
+			.row-val {
+				font-weight: 700;
+				color: #f1f5f9;
+				white-space: nowrap;
+			}
+		}
+
+		.empty-placeholder {
+			font-size: 12px;
+			color: #64748b;
+			font-style: italic;
+		}
+	}
+
+	/* Voucher Coupon Code */
+	.summary-coupon-box {
+		margin-bottom: 20px;
+
+		.coupon-input-group {
+			display: flex;
+			gap: 8px;
+
+			input {
+				flex: 1;
+				background: rgba(255, 255, 255, 0.05);
+				border: 1px solid rgba(255, 255, 255, 0.15);
+				border-radius: $radius-md;
+				padding: 10px 12px;
+				color: #fff;
+				font-size: 13px;
+				outline: none;
+				text-transform: uppercase;
+
+				&:focus {
+					border-color: $accent-color;
+				}
+
+				&::placeholder {
+					color: #64748b;
+					text-transform: none;
+				}
+			}
+
+			button {
+				background: rgba(255, 255, 255, 0.1);
+				border: 1px solid rgba(255, 255, 255, 0.2);
+				color: #f8fafc;
+				padding: 0 16px;
+				border-radius: $radius-md;
+				font-size: 13px;
+				font-weight: 700;
+				cursor: pointer;
+				transition: all 0.2s;
+
+				&:hover {
+					background: $accent-color;
+					color: #1a1a2e;
+					border-color: $accent-color;
+				}
+			}
+		}
+
+		.coupon-applied-msg {
+			font-size: 12px;
+			color: #10b981;
+			margin-top: 6px;
+			display: none;
+		}
+	}
+
+	/* Grand Total Bar */
+	.summary-total-bar {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		margin-bottom: 20px;
+
+		.total-title {
+			font-size: 14px;
+			font-weight: 700;
+			color: #94a3b8;
+			text-transform: uppercase;
+		}
+
+		.total-amount {
+			font-size: 26px;
+			font-weight: 900;
+			color: #fbbf24;
+			letter-spacing: -0.5px;
+			text-shadow: 0 2px 10px rgba(251, 191, 36, 0.3);
+		}
+	}
+
+	/* Checkout CTA Button */
+	.btn-checkout-now {
+		width: 100%;
+		background: linear-gradient(135deg, #015198 0%, #0066cc 100%);
+		color: #ffffff;
+		border: none;
+		padding: 16px;
+		border-radius: $radius-md;
+		font-size: 16px;
+		font-weight: 900;
+		text-transform: uppercase;
+		letter-spacing: 0.5px;
+		cursor: pointer;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		gap: 8px;
+		box-shadow: 0 6px 20px rgba(1, 81, 152, 0.5);
+		transition: all 0.25s;
+
+		svg {
+			width: 20px;
+			height: 20px;
+		}
+
+		&:hover {
+			background: linear-gradient(135deg, #0066cc 0%, #015198 100%);
+			transform: translateY(-2px);
+			box-shadow: 0 10px 28px rgba(1, 81, 152, 0.7);
+		}
+
+		&:disabled {
+			opacity: 0.4;
+			cursor: not-allowed;
+			transform: none;
+			box-shadow: none;
+		}
+	}
+}
+
+/* ==========================================================================
+   4. E-TICKET CONFIRMATION MODAL
+   ========================================================================== */
+.eticket-modal-content {
+	background: #0f172a;
+	color: #fff;
+	max-width: 520px;
+	border-radius: $radius-xl;
+	padding: 0;
+	overflow: hidden;
+	box-shadow: 0 25px 60px rgba(0, 0, 0, 0.8);
+	border: 1px solid rgba(255, 255, 255, 0.15);
+
+	.ticket-head-banner {
+		background: linear-gradient(135deg, $primary-color 0%, #0066cc 100%);
+		padding: 24px 24px 20px;
+		text-align: center;
+		position: relative;
+
+		.success-icon-badge {
+			font-size: 38px;
+			margin-bottom: 6px;
+		}
+
+		h3 {
+			font-size: 20px;
+			font-weight: 900;
+			margin: 0 0 4px;
+			text-transform: uppercase;
+		}
+
+		p {
+			font-size: 13px;
+			color: rgba(255, 255, 255, 0.85);
+			margin: 0;
+		}
+	}
+
+	.ticket-body-details {
+		padding: 24px;
+		background: #1e293b;
+		display: flex;
+		flex-direction: column;
+		gap: 16px;
+
+		.ticket-code-row {
+			background: rgba(15, 23, 42, 0.8);
+			border: 1px dashed rgba(255, 255, 255, 0.2);
+			border-radius: $radius-md;
+			padding: 12px;
+			text-align: center;
+
+			.t-code-label {
+				font-size: 11px;
+				font-weight: 700;
+				color: #94a3b8;
+				text-transform: uppercase;
+				letter-spacing: 1px;
+			}
+
+			.t-code-val {
+				font-size: 22px;
+				font-weight: 900;
+				color: #fbbf24;
+				letter-spacing: 3px;
+				margin-top: 2px;
+			}
+		}
+
+		.ticket-info-grid {
+			display: grid;
+			grid-template-columns: repeat(2, 1fr);
+			gap: 12px;
+			font-size: 13px;
+
+			.ti-item {
+				display: flex;
+				flex-direction: column;
+				gap: 2px;
+
+				.ti-lbl {
+					font-size: 11px;
+					color: #94a3b8;
+					text-transform: uppercase;
+				}
+
+				.ti-val {
+					font-weight: 700;
+					color: #ffffff;
+				}
+			}
+		}
+
+		/* Mock Barcode */
+		.barcode-wrapper {
+			text-align: center;
+			padding: 12px 0 4px;
+			border-top: 1px solid rgba(255, 255, 255, 0.08);
+
+			.barcode-lines {
+				height: 48px;
+				background: repeating-linear-gradient(
+					90deg,
+					#ffffff 0px,
+					#ffffff 2px,
+					transparent 2px,
+					transparent 4px,
+					#ffffff 4px,
+					#ffffff 7px,
+					transparent 7px,
+					transparent 9px
+				);
+				width: 80%;
+				margin: 0 auto 6px;
+				border-radius: 2px;
+			}
+
+			span {
+				font-family: monospace;
+				font-size: 12px;
+				color: #94a3b8;
+				letter-spacing: 2px;
+			}
+		}
+	}
+
+	.ticket-footer-actions {
+		padding: 18px 24px;
+		background: #0f172a;
+		display: flex;
+		gap: 12px;
+
+		.btn-ticket-done {
+			flex: 1;
+			background: $primary-color;
+			color: #fff;
+			border: none;
+			padding: 12px;
+			border-radius: $radius-md;
+			font-size: 14px;
+			font-weight: 800;
+			cursor: pointer;
+			text-align: center;
+			text-decoration: none;
+
+			&:hover {
+				background: $primary-dark;
+			}
+		}
+	}
+}

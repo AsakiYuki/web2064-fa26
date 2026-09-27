@@ -4,6 +4,16 @@
 @use 'variables';
 @use 'base';
 @use 'header';
+@use 'megamenu';
 @use 'footer';
 @use 'home';
 @use 'error';
+@use 'modal';
+@use 'auth_modal';
+@use 'movies';
+@use 'movie_detail';
+@use 'showtimes';
+@use 'booking';
+@use 'checkout';
+@use 'profile';
+@use 'pricing';

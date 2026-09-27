@@ -2,7 +2,8 @@
   "categories": [
     { "id": "combos", "name": "Combo Bắp Nước", "active": true },
     { "id": "popcorn", "name": "Bắp Rang Bơ", "active": false },
-    { "id": "beverages", "name": "Nước Uống", "active": false }
+    { "id": "beverages", "name": "Nước Uống", "active": false },
+    { "id": "snacks", "name": "Đồ Ăn Kèm", "active": false }
   ],
   "items": [
     {
@@ -66,7 +67,7 @@
       "id": "bev-pepsi",
       "categoryId": "beverages",
       "name": "Pepsi Tươi (22oz)",
-      "description": "Nước ngọt có ga mát lạnh",
+      "description": "Nước ngọt có ga mát lạnh sảng khoái",
       "price": 32000,
       "originalPrice": null,
       "image": "/promo/promo_deal.jpg"
@@ -75,8 +76,37 @@
       "id": "bev-7up",
       "categoryId": "beverages",
       "name": "7Up Chanh (22oz)",
-      "description": "Nước giải khát vị chanh sảng khoái",
+      "description": "Nước giải khát vị chanh thơm mát sảng khoái",
       "price": 32000,
+      "originalPrice": null,
+      "image": "/promo/promo_deal.jpg"
+    },
+    {
+      "id": "snk-sausage",
+      "categoryId": "snacks",
+      "name": "Xúc Xích Phô Mai Nướng",
+      "description": "Xúc xích Đức nướng nóng giòn nhân phô mai tan chảy",
+      "price": 35000,
+      "originalPrice": null,
+      "image": "/promo/promo_deal.jpg",
+      "badge": "MÓN MỚI"
+    },
+    {
+      "id": "snk-nachos",
+      "categoryId": "snacks",
+      "name": "Bánh Bắp Nachos Sốt Phô Mai",
+      "description": "Bánh bắp giòn rụm kèm sốt phô mai cheddar béo ngậy và salsa",
+      "price": 45000,
+      "originalPrice": null,
+      "image": "/promo/promo_deal.jpg",
+      "badge": "YÊU THÍCH"
+    },
+    {
+      "id": "snk-fries",
+      "categoryId": "snacks",
+      "name": "Khoai Tây Lắc Phô Mai",
+      "description": "Khoai tây chiên vàng giòn rụm lắc bột phô mai thơm ngon",
+      "price": 39000,
       "originalPrice": null,
       "image": "/promo/promo_deal.jpg"
     }

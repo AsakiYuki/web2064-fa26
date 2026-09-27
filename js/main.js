@@ -2,24 +2,22 @@
  * Beta Cinemas - Homepage Dynamic Rendering & Interactivity
  * Modular data loading via domain-specific JSON files.
  */
+import { openTrailerModal, setupHeaderAndFooter } from "./common.js"
 
 document.addEventListener("DOMContentLoaded", async () => {
+	await setupHeaderAndFooter()
+
 	try {
-		const [cinemas, moviesData, banners, footerCinemas] = await Promise.all([
-			fetch("/data/cinemas.json").then(r => r.json()),
+		const [moviesData, banners] = await Promise.all([
 			fetch("/data/movies.json").then(r => r.json()),
 			fetch("/data/banners.json").then(r => r.json()),
-			fetch("/data/footer.json").then(r => r.json()),
 		])
 
-		renderCinemaSelector(cinemas)
 		renderHeroSlider(banners.heroSlides)
 		renderSideBanners(banners.sideBanners)
 		renderMovieTabs(moviesData.tabs)
 		renderMovieGrids(moviesData.items)
-		renderFooterCinemas(footerCinemas)
 
-		initCinemaDropdownEvents()
 		initHeroSliderEvents()
 		initMovieTabEvents()
 		initBackToTopEvent()
@@ -127,24 +125,24 @@ function renderMovieGrids(movies) {
 			.map(
 				m => `
 			<div class="mc" id="mc-${m.id}">
-				<a href="#" class="mc-poster-wrap">
+				<a href="/movie-detail.html?id=${m.id}" class="mc-poster-wrap">
 					<img src="${m.poster}" alt="${m.title}" class="mc-poster" style="${m.posterStyle || ""}" />
 					${m.badge ? `<span class="mc-badge ${m.badgeClass || ""}">${m.badge}</span>` : ""}
 					${m.hot ? `<span class="mc-hot">HOT</span>` : ""}
-					<div class="mc-play-btn">
+					<button type="button" class="mc-play-btn home-play-trailer" data-trailer="${m.trailerUrl || ""}" data-title="${m.title}" aria-label="Xem Trailer">
 						<svg viewBox="0 0 24 24"><polygon points="5,3 19,12 5,21" /></svg>
-					</div>
+					</button>
 				</a>
 				<div class="mc-body">
-					<h3 class="mc-title">${m.title}</h3>
+					<h3 class="mc-title"><a href="/movie-detail.html?id=${m.id}">${m.title}</a></h3>
 					<p class="mc-meta"><span class="mc-label">Thể loại:</span> ${m.genre}</p>
 					<p class="mc-meta"><span class="mc-label">Thời lượng:</span> ${m.duration}</p>
-					<button class="mc-btn" id="${m.buyId}">
+					<a href="/movie-detail.html?id=${m.id}#showtimes" class="mc-btn" id="${m.buyId}">
 						<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
 							<path d="M15 5v2M15 11v2M15 17v2M5 5h14a2 2 0 010 4H5a2 2 0 010-4zM5 13h14a2 2 0 010 4H5a2 2 0 010-4z" />
 						</svg>
 						${m.buyText || "MUA VÉ"}
-					</button>
+					</a>
 				</div>
 			</div>
 		`,
@@ -159,19 +157,19 @@ function renderMovieGrids(movies) {
 			.map(
 				m => `
 			<div class="mc" id="mc-${m.id}">
-				<a href="#" class="mc-poster-wrap">
+				<a href="/movie-detail.html?id=${m.id}" class="mc-poster-wrap">
 					<img src="${m.poster}" alt="${m.title}" class="mc-poster" style="${m.posterStyle || ""}" />
 					${m.badge ? `<span class="mc-badge ${m.badgeClass || ""}">${m.badge}</span>` : ""}
-					<div class="mc-play-btn">
+					<button type="button" class="mc-play-btn home-play-trailer" data-trailer="${m.trailerUrl || ""}" data-title="${m.title}" aria-label="Xem Trailer">
 						<svg viewBox="0 0 24 24"><polygon points="5,3 19,12 5,21" /></svg>
-					</div>
+					</button>
 				</a>
 				<div class="mc-body">
-					<h3 class="mc-title">${m.title}</h3>
+					<h3 class="mc-title"><a href="/movie-detail.html?id=${m.id}">${m.title}</a></h3>
 					<p class="mc-meta"><span class="mc-label">Khởi chiếu:</span> ${m.releaseDate}</p>
-					<button class="mc-btn ${m.outline ? "mc-btn--outline" : ""}" id="${m.buyId}">
-						${m.buyText || "Nhắc Tôi"}
-					</button>
+					<a href="/movie-detail.html?id=${m.id}" class="mc-btn ${m.outline ? "mc-btn--outline" : ""}" id="${m.buyId}">
+						${m.buyText || "Xem Chi Tiết"}
+					</a>
 				</div>
 			</div>
 		`,
@@ -186,31 +184,42 @@ function renderMovieGrids(movies) {
 			.map(
 				m => `
 			<div class="mc" id="mc-${m.id}">
-				<a href="#" class="mc-poster-wrap">
+				<a href="/movie-detail.html?id=${m.id}" class="mc-poster-wrap">
 					<img src="${m.poster}" alt="${m.title}" class="mc-poster" style="${m.posterStyle || ""}" ${
 					m.fallbackPoster ? `onerror="this.src='${m.fallbackPoster}'"` : ""
 				} />
 					${m.badge ? `<span class="mc-badge ${m.badgeClass || ""}">${m.badge}</span>` : ""}
 					${m.specialTag ? `<span class="mc-special-tag">${m.specialTag}</span>` : ""}
-					<div class="mc-play-btn">
+					<button type="button" class="mc-play-btn home-play-trailer" data-trailer="${m.trailerUrl || ""}" data-title="${m.title}" aria-label="Xem Trailer">
 						<svg viewBox="0 0 24 24"><polygon points="5,3 19,12 5,21" /></svg>
-					</div>
+					</button>
 				</a>
 				<div class="mc-body">
-					<h3 class="mc-title">${m.title}</h3>
+					<h3 class="mc-title"><a href="/movie-detail.html?id=${m.id}">${m.title}</a></h3>
 					<p class="mc-meta"><span class="mc-label">Định dạng:</span> ${m.format}</p>
-					<button class="mc-btn" id="${m.buyId}">
+					<a href="/movie-detail.html?id=${m.id}#showtimes" class="mc-btn" id="${m.buyId}">
 						<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
 							<path d="M15 5v2M15 11v2M15 17v2M5 5h14a2 2 0 010 4H5a2 2 0 010-4zM5 13h14a2 2 0 010 4H5a2 2 0 010-4z" />
 						</svg>
 						${m.buyText || "MUA VÉ"}
-					</button>
+					</a>
 				</div>
 			</div>
 		`,
 			)
 			.join("")
 	}
+
+	// Attach play trailer events
+	document.querySelectorAll(".home-play-trailer").forEach(btn => {
+		btn.addEventListener("click", e => {
+			e.preventDefault()
+			e.stopPropagation()
+			const trailer = btn.dataset.trailer
+			const title = btn.dataset.title
+			openTrailerModal(trailer, title)
+		})
+	})
 }
 
 /** Render Footer Cinema Cluster List */

@@ -1,0 +1,80 @@
+[
+  {
+    "id": "promo-happy-tuesday",
+    "title": "Thứ Ba Vui Vẻ - Đồng Giá Vé 50K Toàn Hệ Thống",
+    "category": "promotion",
+    "categoryLabel": "Khuyến Mãi Vé",
+    "image": "/promo/promo_deal.jpg",
+    "discount": "ĐỒNG GIÁ 50K",
+    "date": "Áp dụng: Thứ 3 hàng tuần",
+    "badge": "HOT DEAL",
+    "summary": "Mỗi thứ 3 hàng tuần, Beta Cinemas áp dụng mức giá siêu ưu đãi chỉ 50.000đ/vé 2D cho toàn bộ các suất chiếu trong ngày.",
+    "content": "Chương trình Thứ Ba Vui Vẻ áp dụng cho tất cả khách hàng đến xem phim tại hệ thống rạp Beta Cinemas trên toàn quốc. Không giới hạn số lượng vé mua, áp dụng cho cả hình thức mua vé online và tại quầy kiosk rạp. Phụ thu ghế VIP: +5.000đ, ghế đôi Sweetbox: +25.000đ. Không áp dụng vào các ngày lễ Tết.",
+    "code": "HAPPYTUE"
+  },
+  {
+    "id": "promo-u22-student",
+    "title": "Ưu Đãi Học Sinh - Sinh Viên & U22 Chỉ 50K",
+    "category": "promotion",
+    "categoryLabel": "HSSV - U22",
+    "image": "/promo/promo_student.jpg",
+    "discount": "VÉ 50K",
+    "date": "Hạn dùng: Đến 31/12/2026",
+    "badge": "U22 SPECIAL",
+    "summary": "Xem phim thả ga, giá chỉ 50.000đ dành riêng cho học sinh, sinh viên và khách hàng dưới 22 tuổi từ Thứ 2 đến Thứ 6.",
+    "content": "Chương trình dành riêng cho các bạn học sinh, sinh viên và khán giả dưới 22 tuổi. Vui lòng xuất trình thẻ HSSV hoặc giấy tờ tùy thân (CCCD) có ảnh và năm sinh khi vào rạp soát vé. Mỗi thẻ HSSV được mua 01 vé ưu đãi/suất chiếu.",
+    "code": "BETA-U22"
+  },
+  {
+    "id": "promo-member-day",
+    "title": "Beta Member Day - Tích Điểm Gấp Đôi & Đổi Bắp Miễn Phí",
+    "category": "member",
+    "categoryLabel": "Thành Viên",
+    "image": "/promo/promo_member.jpg",
+    "discount": "X2 ĐIỂM THƯỞNG",
+    "date": "Áp dụng: Ngày 15 hàng tháng",
+    "badge": "MEMBER EXCLUSIVE",
+    "summary": "Ngày hội thành viên Beta: Nhân đôi điểm tích lũy cho mọi giao dịch vé và bắp nước. Đổi ngay combo bắp rang bơ miễn phí.",
+    "content": "Vào ngày 15 hàng tháng, thành viên Beta Cinemas khi thực hiện giao dịch mua vé hoặc combo đồ ăn thức uống sẽ nhận ngay x2 điểm thưởng tích lũy. Điểm có thể dùng để đổi vé xem phim 2D/3D miễn phí, voucher giảm giá hoặc combo bắp nước thượng hạng tại quầy.",
+    "code": "MEMBERX2"
+  },
+  {
+    "id": "news-opening-nowzone",
+    "title": "Khai Trương Cụm Rạp Beta Cinemas Nowzone TP.HCM",
+    "category": "news",
+    "categoryLabel": "Tin Tức",
+    "image": "/promo/promo_nowzone.jpg",
+    "discount": "TẶNG BẮP NƯỚC",
+    "date": "Ngày đăng: 20/09/2026",
+    "badge": "SỰ KIỆN MỚI",
+    "summary": "Chào đón cụm rạp thứ 21 của Beta Cinemas tại TTTM Nowzone Quận 5 với không gian điện ảnh trẻ trung và hệ thống âm thanh Dolby 7.1 đỉnh cao.",
+    "content": "Nhân dịp khai trương rạp mới, từ nay đến hết tháng, mỗi khách hàng mua từ 02 vé xem phim bất kỳ tại Beta Nowzone sẽ được tặng ngay 01 gói bắp ngọt thơm lừng cùng cơ hội bốc thăm trúng thưởng vé xem phim miễn phí 1 năm.",
+    "code": "NOWZONE2026"
+  },
+  {
+    "id": "promo-combo-online",
+    "title": "Đặt Combo Bắp Nước Online Tiết Kiệm Đến 20%",
+    "category": "promotion",
+    "categoryLabel": "Combo Tiết Kiệm",
+    "image": "/promo/promo_deal.jpg",
+    "discount": "GIẢM 20%",
+    "date": "Áp dụng xuyên suốt",
+    "badge": "COMBO DEAL",
+    "summary": "Tiết kiệm hơn khi đặt trước bắp rang và nước ngọt online trên website hoặc app Beta Cinemas trước khi đến rạp.",
+    "content": "Khi đặt vé cùng các combo bắp nước (Beta Combo Solo, Beta Combo Đôi, Family Combo), bạn sẽ được giảm giá trực tiếp đến 20% so với mua trực tiếp tại quầy concession. Nhận đồ ăn nhanh chóng tại quầy VIP Pick-up không cần xếp hàng.",
+    "code": "BETA50"
+  },
+  {
+    "id": "news-technology-upgrade",
+    "title": "Nâng Cấp Màn Chiếu Laser Siêu Nét Trên Toàn Quốc",
+    "category": "news",
+    "categoryLabel": "Công Nghệ",
+    "image": "/hero_bongma.jpg",
+    "discount": "CÔNG NGHỆ MỚI",
+    "date": "Ngày đăng: 15/09/2026",
+    "badge": "TIN MỚI",
+    "summary": "Beta Cinemas tiên phong nâng cấp hệ thống máy chiếu Laser RGB thế hệ mới, mang lại độ tương phản sắc nét và màu sắc sống động vượt bậc.",
+    "content": "Trải nghiệm rạp chiếu phim chất lượng chuẩn quốc tế với mức giá phù hợp cho mọi khán giả. Hệ thống máy chiếu Laser RGB mới giúp tăng độ sáng màn chiếu lên 40%, hình ảnh chân thực, góc nhìn rộng và đặc biệt thân thiện với thị giác người xem trong các thước phim hành động mãn nhãn.",
+    "code": "LASER2026"
+  }
+]

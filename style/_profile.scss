@@ -1,0 +1,546 @@
+/* ============================================
+   BETA CINEMAS - USER PROFILE & BOOKING HISTORY SCSS
+   ============================================ */
+@use 'sass:color';
+@use 'variables' as *;
+
+.profile-page {
+	background-color: #0b1120;
+	color: #e2e8f0;
+	min-height: 100vh;
+	padding-bottom: 80px;
+}
+
+/* ---- PROFILE HERO HEADER ---- */
+.profile-hero-banner {
+	background: linear-gradient(135deg, #091a38 0%, #013a6e 50%, #015198 100%);
+	padding: 40px 0 32px;
+	position: relative;
+	overflow: hidden;
+
+	.container {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 24px;
+		flex-wrap: wrap;
+	}
+
+	.user-hero-info {
+		display: flex;
+		align-items: center;
+		gap: 20px;
+
+		.user-avatar-lg {
+			width: 80px;
+			height: 80px;
+			border-radius: 50%;
+			background: linear-gradient(135deg, #f5a623 0%, #d97706 100%);
+			color: #1a1a2e;
+			font-size: 32px;
+			font-weight: 900;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+			border: 3px solid rgba(255, 255, 255, 0.2);
+			flex-shrink: 0;
+		}
+
+		.user-texts {
+			display: flex;
+			flex-direction: column;
+			gap: 4px;
+
+			h1 {
+				font-size: 24px;
+				font-weight: 800;
+				color: #fff;
+				margin: 0;
+			}
+
+			.user-meta-sub {
+				font-size: 13px;
+				color: rgba(255, 255, 255, 0.8);
+				display: flex;
+				gap: 12px;
+				flex-wrap: wrap;
+			}
+
+			.member-rank-badge {
+				display: inline-flex;
+				align-items: center;
+				gap: 6px;
+				background: rgba(251, 191, 36, 0.2);
+				border: 1px solid rgba(251, 191, 36, 0.4);
+				color: #fbbf24;
+				font-size: 11px;
+				font-weight: 800;
+				padding: 3px 8px;
+				border-radius: 12px;
+				align-self: flex-start;
+				margin-top: 4px;
+				letter-spacing: 0.5px;
+			}
+		}
+	}
+
+	.user-points-card {
+		background: rgba(255, 255, 255, 0.1);
+		border: 1px solid rgba(255, 255, 255, 0.2);
+		backdrop-filter: blur(8px);
+		border-radius: $radius-lg;
+		padding: 16px 24px;
+		display: flex;
+		flex-direction: column;
+		gap: 6px;
+		min-width: 220px;
+
+		.points-lbl {
+			font-size: 12px;
+			font-weight: 700;
+			color: rgba(255, 255, 255, 0.7);
+			text-transform: uppercase;
+		}
+
+		.points-val {
+			font-size: 26px;
+			font-weight: 900;
+			color: #fbbf24;
+			line-height: 1;
+		}
+
+		.points-sub {
+			font-size: 11px;
+			color: rgba(255, 255, 255, 0.6);
+		}
+	}
+}
+
+/* ---- PROFILE TABS NAVIGATION ---- */
+.profile-nav-tabs {
+	background: #0f172a;
+	border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+	position: sticky;
+	top: 72px;
+	z-index: 90;
+
+	.container {
+		display: flex;
+		gap: 8px;
+		overflow-x: auto;
+		scrollbar-width: none;
+		&::-webkit-scrollbar { display: none; }
+	}
+
+	.p-tab-btn {
+		background: none;
+		border: none;
+		padding: 16px 20px;
+		font-size: 14px;
+		font-weight: 700;
+		color: #94a3b8;
+		cursor: pointer;
+		white-space: nowrap;
+		transition: all 0.2s;
+		border-bottom: 3px solid transparent;
+		display: flex;
+		align-items: center;
+		gap: 8px;
+
+		svg {
+			width: 16px;
+			height: 16px;
+		}
+
+		.p-badge {
+			background: #334155;
+			color: #e2e8f0;
+			font-size: 11px;
+			padding: 2px 7px;
+			border-radius: 10px;
+		}
+
+		&:hover {
+			color: #fff;
+		}
+
+		&.active {
+			color: #38bdf8;
+			border-bottom-color: #38bdf8;
+			background: rgba(56, 189, 248, 0.05);
+
+			.p-badge {
+				background: #0284c7;
+				color: #fff;
+			}
+		}
+	}
+}
+
+/* ---- TAB CONTENT AREAS ---- */
+.profile-content-container {
+	margin-top: 32px;
+
+	.profile-section-card {
+		background: #0f172a;
+		border-radius: $radius-xl;
+		padding: 28px;
+		border: 1px solid rgba(255, 255, 255, 0.08);
+		box-shadow: 0 16px 40px rgba(0, 0, 0, 0.4);
+
+		.section-head {
+			padding-bottom: 16px;
+			border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+			margin-bottom: 24px;
+			display: flex;
+			align-items: center;
+			justify-content: space-between;
+
+			h2 {
+				font-size: 20px;
+				font-weight: 800;
+				color: #fff;
+				margin: 0;
+			}
+		}
+	}
+}
+
+/* BOOKING HISTORY CARDS */
+.history-cards-list {
+	display: flex;
+	flex-direction: column;
+	gap: 18px;
+
+	.history-ticket-card {
+		background: #1e293b;
+		border-radius: $radius-lg;
+		border: 1px solid rgba(255, 255, 255, 0.08);
+		padding: 20px;
+		display: grid;
+		grid-template-columns: 100px 1fr auto;
+		gap: 20px;
+		align-items: center;
+		transition: transform 0.2s, border-color 0.2s;
+
+		@media (max-width: 768px) {
+			grid-template-columns: 80px 1fr;
+			.ht-actions {
+				grid-column: 1 / -1;
+				display: flex;
+				justify-content: flex-end;
+			}
+		}
+
+		&:hover {
+			border-color: rgba(56, 189, 248, 0.4);
+			transform: translateY(-2px);
+		}
+
+		.ht-poster {
+			aspect-ratio: 2 / 3;
+			border-radius: 6px;
+			overflow: hidden;
+			background: #0f172a;
+
+			img {
+				width: 100%;
+				height: 100%;
+				object-fit: cover;
+			}
+		}
+
+		.ht-details {
+			display: flex;
+			flex-direction: column;
+			gap: 4px;
+
+			.ht-status-badge {
+				align-self: flex-start;
+				font-size: 11px;
+				font-weight: 800;
+				padding: 2px 8px;
+				border-radius: 4px;
+
+				&.status-paid {
+					background: rgba(16, 185, 129, 0.15);
+					color: #10b981;
+					border: 1px solid rgba(16, 185, 129, 0.3);
+				}
+				&.status-done {
+					background: rgba(148, 163, 184, 0.15);
+					color: #94a3b8;
+					border: 1px solid rgba(148, 163, 184, 0.3);
+				}
+			}
+
+			.ht-title {
+				font-size: 16px;
+				font-weight: 800;
+				color: #fff;
+				margin: 4px 0 2px;
+			}
+
+			.ht-meta-row {
+				font-size: 13px;
+				color: #94a3b8;
+				display: flex;
+				gap: 14px;
+				flex-wrap: wrap;
+
+				span {
+					display: flex;
+					align-items: center;
+					gap: 4px;
+				}
+				strong {
+					color: #f1f5f9;
+				}
+			}
+
+			.ht-code {
+				font-size: 12px;
+				color: #fbbf24;
+				font-weight: 700;
+				margin-top: 4px;
+			}
+		}
+
+		.ht-actions {
+			display: flex;
+			flex-direction: column;
+			gap: 8px;
+			min-width: 160px;
+
+			.btn-view-eticket {
+				background: linear-gradient(135deg, $primary-color 0%, #0066cc 100%);
+				color: #fff;
+				border: none;
+				padding: 9px 14px;
+				border-radius: $radius-sm;
+				font-size: 13px;
+				font-weight: 700;
+				cursor: pointer;
+				text-align: center;
+				transition: all 0.2s;
+
+				&:hover {
+					background: linear-gradient(135deg, #0066cc 0%, #015198 100%);
+				}
+			}
+
+			.btn-rebook {
+				background: rgba(255, 255, 255, 0.08);
+				border: 1px solid rgba(255, 255, 255, 0.15);
+				color: #cbd5e1;
+				padding: 9px 14px;
+				border-radius: $radius-sm;
+				font-size: 13px;
+				font-weight: 600;
+				cursor: pointer;
+				text-align: center;
+				text-decoration: none;
+
+				&:hover {
+					background: rgba(255, 255, 255, 0.12);
+					color: #fff;
+				}
+			}
+		}
+	}
+}
+
+/* VOUCHERS GRID */
+.vouchers-grid {
+	display: grid;
+	grid-template-columns: repeat(2, 1fr);
+	gap: 20px;
+
+	@media (max-width: 768px) {
+		grid-template-columns: 1fr;
+	}
+
+	.voucher-card {
+		background: #1e293b;
+		border-radius: $radius-lg;
+		border: 1px dashed rgba(245, 166, 35, 0.4);
+		padding: 20px;
+		display: flex;
+		gap: 16px;
+		align-items: center;
+
+		.v-icon {
+			width: 52px;
+			height: 52px;
+			border-radius: 12px;
+			background: rgba(245, 166, 35, 0.15);
+			color: #f5a623;
+			font-size: 26px;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			flex-shrink: 0;
+		}
+
+		.v-info {
+			display: flex;
+			flex-direction: column;
+			gap: 3px;
+			flex: 1;
+
+			.v-code {
+				font-size: 15px;
+				font-weight: 900;
+				color: #fbbf24;
+				letter-spacing: 1px;
+			}
+
+			.v-desc {
+				font-size: 13px;
+				color: #e2e8f0;
+				margin: 0;
+			}
+
+			.v-exp {
+				font-size: 11px;
+				color: #94a3b8;
+			}
+		}
+
+		.btn-use-voucher {
+			background: $primary-color;
+			color: #fff;
+			border: none;
+			padding: 8px 14px;
+			border-radius: $radius-sm;
+			font-size: 12px;
+			font-weight: 700;
+			cursor: pointer;
+			text-decoration: none;
+			white-space: nowrap;
+
+			&:hover {
+				background: $primary-dark;
+			}
+		}
+	}
+}
+
+/* PERSONAL INFO FORM */
+.profile-form-grid {
+	display: grid;
+	grid-template-columns: repeat(2, 1fr);
+	gap: 20px;
+
+	@media (max-width: 640px) {
+		grid-template-columns: 1fr;
+	}
+
+	.pf-field {
+		display: flex;
+		flex-direction: column;
+		gap: 6px;
+
+		&.pf-full {
+			grid-column: 1 / -1;
+		}
+
+		label {
+			font-size: 13px;
+			font-weight: 700;
+			color: #cbd5e1;
+		}
+
+		input, select {
+			background: #1e293b;
+			border: 1.5px solid rgba(255, 255, 255, 0.12);
+			border-radius: $radius-md;
+			padding: 11px 14px;
+			color: #ffffff;
+			font-size: 14px;
+			font-family: inherit;
+			outline: none;
+			transition: all 0.2s;
+
+			&:focus {
+				border-color: #38bdf8;
+				box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.15);
+			}
+
+			&:disabled {
+				opacity: 0.6;
+				cursor: not-allowed;
+				background: #0f172a;
+			}
+		}
+	}
+
+	.pf-actions {
+		grid-column: 1 / -1;
+		display: flex;
+		gap: 12px;
+		margin-top: 10px;
+
+		.btn-save-profile {
+			background: linear-gradient(135deg, $primary-color 0%, #0066cc 100%);
+			color: #fff;
+			border: none;
+			padding: 12px 28px;
+			border-radius: $radius-md;
+			font-size: 14px;
+			font-weight: 800;
+			cursor: pointer;
+			transition: all 0.2s;
+
+			&:hover {
+				background: linear-gradient(135deg, #0066cc 0%, #015198 100%);
+				transform: translateY(-1px);
+			}
+		}
+	}
+}
+
+/* EMPTY STATE */
+.empty-history-box {
+	text-align: center;
+	padding: 48px 24px;
+	background: #1e293b;
+	border-radius: $radius-lg;
+	border: 1px dashed rgba(255, 255, 255, 0.15);
+
+	.empty-icon {
+		font-size: 48px;
+		margin-bottom: 12px;
+	}
+
+	h3 {
+		font-size: 18px;
+		font-weight: 800;
+		color: #ffffff;
+		margin: 0 0 6px;
+	}
+
+	p {
+		font-size: 14px;
+		color: #94a3b8;
+		margin: 0 0 20px;
+	}
+
+	.btn-book-now {
+		display: inline-block;
+		background: $primary-color;
+		color: #ffffff;
+		padding: 10px 24px;
+		border-radius: $radius-md;
+		font-size: 14px;
+		font-weight: 700;
+		text-decoration: none;
+		transition: background 0.2s;
+
+		&:hover {
+			background: $primary-dark;
+		}
+	}
+}
+

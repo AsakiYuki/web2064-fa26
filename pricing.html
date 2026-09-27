@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="vi">
+
+<head>
+	<meta charset="UTF-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<meta name="description"
+		content="Bảng giá vé rạp chiếu phim Beta Cinemas (2D, 3D, IMAX) cùng các chương trình khuyến mãi, ưu đãi học sinh sinh viên U22 và thành viên mới nhất." />
+	<title>Bảng Giá Vé & Khuyến Mãi | Beta Cinemas</title>
+	<link rel="stylesheet" href="/style/main.scss" />
+	<link rel="preconnect" href="https://fonts.googleapis.com" />
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+	<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+</head>
+
+<body class="pricing-page">
+	<!-- ===================== HEADER ===================== -->
+	<header class="main-header">
+		<div class="header-account-manager">
+			<div class="container">
+				<a href="#" id="btn-login">Đăng nhập</a>
+				<div class="divider"></div>
+				<a href="#" id="btn-register">Đăng ký</a>
+				<span style="font-size: 18px; margin-left: 4px; cursor: pointer" title="English">🇬🇧</span>
+			</div>
+		</div>
+		<div class="header-navigator">
+			<div class="container">
+				<a href="/" class="header-logo" id="logo-link">
+					<img src="/logo.webp" alt="Beta Cinemas Logo" />
+				</a>
+				<div class="cinema-selector-wrap" id="cinema-selector-wrap">
+					<button class="cinema-selector" id="cinema-selector-btn" aria-haspopup="listbox" aria-expanded="false">
+						<span class="cinema-selector-label" id="cinema-selector-label">Beta Thái Nguyên</span>
+						<svg class="cinema-selector-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+							stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+							<polyline points="6 9 12 15 18 9"></polyline>
+						</svg>
+					</button>
+					<div class="cinema-dropdown" id="cinema-dropdown" role="listbox">
+						<ul id="cinema-dropdown-ul"></ul>
+					</div>
+				</div>
+				<nav class="nav-links">
+					<a href="/schedule.html" id="nav-schedule">Lịch Chiếu Theo Rạp</a>
+					<a href="/movies.html" id="nav-movies">Phim</a>
+					<a href="#" id="nav-cinemas">Rạp</a>
+					<a href="/pricing.html" id="nav-pricing" class="active">Giá Vé</a>
+					<a href="/pricing.html#promotions" id="nav-news">Tin Mới Và Ưu Đãi</a>
+					<a href="#" id="nav-franchise">Nhượng Quyền</a>
+					<a href="/profile.html" id="nav-member">Thành Viên</a>
+				</nav>
+			</div>
+		</div>
+	</header>
+
+	<!-- ===================== BREADCRUMB BAR ===================== -->
+	<div class="booking-header-bar" style="background:#0f172a; padding: 14px 0;">
+		<div class="container">
+			<nav class="booking-breadcrumb" aria-label="Breadcrumb">
+				<a href="/">Trang chủ</a>
+				<span class="bc-separator">/</span>
+				<span class="bc-current">Bảng Giá Vé & Khuyến Mãi</span>
+			</nav>
+		</div>
+	</div>
+
+	<!-- ===================== MAIN CONTENT ===================== -->
+	<main class="container">
+		<!-- SECTION 1: TICKET PRICING MATRIX -->
+		<section class="pricing-section-container" id="ticket-pricing">
+			<div class="pricing-header-wrap">
+				<h2>Bảng Giá Vé Xem Phim Hệ Thống Beta Cinemas</h2>
+				<p>Giá vé tiêu chuẩn áp dụng tại các cụm rạp Beta Cinemas trên toàn quốc. Đã bao gồm thuế GTGT. Áp dụng cho các định dạng chiếu 2D, 3D và IMAX Laser hiện đại.</p>
+			</div>
+
+			<!-- Format Switch Tabs -->
+			<div class="format-switch-tabs" role="tablist">
+				<button class="fmt-tab-btn active" data-format="2d" role="tab" aria-selected="true">
+					Phòng Chiếu 2D Standard
+				</button>
+				<button class="fmt-tab-btn" data-format="3d" role="tab" aria-selected="false">
+					Phòng Chiếu 3D Digital
+				</button>
+				<button class="fmt-tab-btn" data-format="imax" role="tab" aria-selected="false">
+					Phòng Chiếu IMAX 3D Laser
+				</button>
+			</div>
+
+			<!-- Pricing Table Wrap -->
+			<div class="pricing-table-wrap">
+				<table class="pricing-table" aria-label="Bảng giá vé xem phim">
+					<thead>
+						<tr>
+							<th style="width: 25%;">Loại Ghế</th>
+							<th style="width: 25%;">Thứ 2 - Thứ 5</th>
+							<th style="width: 25%;">Thứ 6 - CN & Ngày Lễ</th>
+							<th style="width: 25%;">Thứ Ba Vui Vẻ (Happy Tuesday)</th>
+						</tr>
+					</thead>
+					<tbody id="pricing-table-tbody">
+						<!-- Injected dynamically via pricing-page.js -->
+					</tbody>
+				</table>
+			</div>
+
+			<!-- Special Discounts Cards Grid -->
+			<div class="special-discount-grid">
+				<div class="discount-card">
+					<div class="dc-icon">🎓</div>
+					<h3 class="dc-title">Học Sinh - Sinh Viên & U22</h3>
+					<p class="dc-desc">Đồng giá vé 2D chỉ <strong>50.000đ</strong> áp dụng từ Thứ 2 đến Thứ 6 trước 17h00. Vui lòng xuất trình thẻ HSSV hoặc CCCD dưới 22 tuổi khi soát vé.</p>
+					<span class="dc-tag">ĐỒNG GIÁ 50.000 ₫</span>
+				</div>
+
+				<div class="discount-card">
+					<div class="dc-icon">👑</div>
+					<h3 class="dc-title">Đặc Quyền Thành Viên Beta</h3>
+					<p class="dc-desc">Tích lũy từ 5% đến 10% điểm thưởng cho mọi giao dịch mua vé và bắp nước. Đổi vé xem phim miễn phí vào ngày hội thành viên hàng tháng.</p>
+					<span class="dc-tag">TÍCH ĐIỂM ĐẾN 10%</span>
+				</div>
+
+				<div class="discount-card">
+					<div class="dc-icon">🎉</div>
+					<h3 class="dc-title">Thứ Ba Vui Vẻ (Happy Tuesday)</h3>
+					<p class="dc-desc">Mọi suất chiếu vào Thứ 3 hàng tuần chỉ từ <strong>50.000đ</strong> cho tất cả khách hàng. Không giới hạn số lượng vé mua online hoặc tại rạp.</p>
+					<span class="dc-tag">ĐỒNG GIÁ THỨ 3</span>
+				</div>
+			</div>
+		</section>
+
+		<!-- SECTION 2: PROMOTIONS & NEWS -->
+		<section class="promotions-section-container" id="promotions">
+			<div class="promotions-header-bar">
+				<h2>Tin Tức & Chương Trình Khuyến Mãi Mới Nhất</h2>
+			</div>
+
+			<!-- Category Filter Pills -->
+			<div class="promo-filter-pills" role="tablist">
+				<button class="promo-pill active" data-category="all">Tất Cả Ưu Đãi</button>
+				<button class="promo-pill" data-category="promotion">Khuyến Mãi Vé</button>
+				<button class="promo-pill" data-category="member">Ưu Đãi Thành Viên</button>
+				<button class="promo-pill" data-category="news">Tin Tức Rạp</button>
+			</div>
+
+			<!-- Promotions Grid -->
+			<div class="promotions-grid" id="promotions-grid-container">
+				<!-- Dynamically injected via pricing-page.js -->
+			</div>
+		</section>
+	</main>
+
+	<!-- ===================== PROMO DETAIL MODAL ===================== -->
+	<div class="modal-backdrop" id="promo-detail-modal">
+		<div class="modal-content" style="max-width: 680px; padding: 0; overflow: hidden;">
+			<button class="modal-close-btn" id="promo-modal-close" aria-label="Đóng">&#x2715;</button>
+			<div id="promo-modal-body">
+				<!-- Rendered dynamically -->
+			</div>
+		</div>
+	</div>
+
+	<!-- ===================== FOOTER ===================== -->
+	<footer class="main-footer" id="footer-container"></footer>
+
+	<!-- Scripts -->
+	<script type="module" src="/js/pricing-page.js"></script>
+</body>
+
+</html>
