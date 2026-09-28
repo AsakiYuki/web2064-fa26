@@ -76,6 +76,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 	initTabSwitcher()
 	initCouponCode()
 	initCheckoutModal()
+	initHoldTimer()
 
 	/* ==========================================================================
 	   1. INITIALIZE MOVIE & CINEMA DETAILS IN HEADER / SUMMARY
@@ -706,5 +707,90 @@ document.addEventListener("DOMContentLoaded", async () => {
 			modal.classList.remove("active")
 			document.body.style.overflow = ""
 		}
+	}
+
+	/* ==========================================================================
+	   8. HOLD COUNTDOWN TIMER (5 PHÚT VÀ TỰ ĐỘNG HỦY KHI HẾT GIỜ)
+	   ========================================================================== */
+	let holdTimerInterval = null
+	let holdSecondsRemaining = 300 // 5 phút = 300 giây
+	let hasNotifiedOneMinute = false
+
+	function formatTimeDigits(totalSecs) {
+		const m = Math.floor(Math.max(0, totalSecs) / 60)
+		const s = Math.max(0, totalSecs) % 60
+		return `${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`
+	}
+
+	function updateHoldTimerUI(secs) {
+		const formatted = formatTimeDigits(secs)
+		const sidebarTimerEl = document.getElementById("booking-timer-countdown")
+		const hallTimerEl = document.getElementById("hall-timer-digits")
+		const sidebarBadge = document.getElementById("booking-timer-badge")
+		const hallTag = document.getElementById("hall-countdown-tag")
+
+		if (sidebarTimerEl) sidebarTimerEl.textContent = formatted
+		if (hallTimerEl) hallTimerEl.textContent = formatted
+
+		// Cảnh báo đỏ nhấp nháy khi còn dưới 60 giây
+		const isDanger = secs <= 60
+		if (sidebarBadge) sidebarBadge.classList.toggle("timer-danger", isDanger)
+		if (hallTag) hallTag.classList.toggle("timer-danger", isDanger)
+
+		if (secs === 60 && !hasNotifiedOneMinute) {
+			hasNotifiedOneMinute = true
+			showToast("⚠️ Thời gian giữ ghế chỉ còn 1 phút! Vui lòng sớm xác nhận đặt vé.", "warning", 6000)
+		}
+
+		// Tự động hủy khi hết giờ (00:00)
+		if (secs <= 0) {
+			clearInterval(holdTimerInterval)
+			holdTimerInterval = null
+
+			if (bookingState.selectedSeats.length > 0) {
+				const cancelCount = bookingState.selectedSeats.length
+				bookingState.selectedSeats = []
+
+				// Bỏ chọn tất cả ghế trên sơ đồ giao diện
+				const container = document.getElementById("seat-rows-container")
+				if (container) {
+					container.querySelectorAll(".seat-unit.seat-selected").forEach(seat => {
+						seat.classList.remove("seat-selected")
+						seat.setAttribute("aria-checked", "false")
+					})
+				}
+
+				updateSummarySidebar()
+
+				showToast(
+					`⏰ Đã hết thời gian giữ ghế 5 phút! Hệ thống đã tự động hủy ${cancelCount} ghế bạn chọn để nhường cho khách hàng khác. Vui lòng chọn lại ghế.`,
+					"warning",
+					8000,
+				)
+			} else {
+				showToast("⏰ Đã hết thời gian giữ ghế 5 phút! Vui lòng chọn lại ghế ngồi.", "info", 5000)
+			}
+
+			// Khởi động lại đợt giữ ghế mới sau 1 giây
+			setTimeout(() => {
+				startHoldCountdown()
+			}, 1000)
+		}
+	}
+
+	function startHoldCountdown() {
+		if (holdTimerInterval) clearInterval(holdTimerInterval)
+		holdSecondsRemaining = 300
+		hasNotifiedOneMinute = false
+		updateHoldTimerUI(holdSecondsRemaining)
+
+		holdTimerInterval = setInterval(() => {
+			holdSecondsRemaining--
+			updateHoldTimerUI(holdSecondsRemaining)
+		}, 1000)
+	}
+
+	function initHoldTimer() {
+		startHoldCountdown()
 	}
 })

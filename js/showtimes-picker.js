@@ -622,6 +622,9 @@ export class ShowtimePicker {
 					<span>📅 <strong>${formatDateVN(slotData.date)}</strong></span>
 					<span>⏰ <strong>${slotData.time}</strong></span>
 				</div>
+				<div class="seat-modal-timer-badge" id="modal-seat-timer-badge" aria-label="Thời gian giữ ghế">
+					<span>⏱️ Thời gian giữ ghế: <strong id="modal-timer-digits">05:00</strong></span>
+				</div>
 			</div>
 
 			<!-- Screen visual -->
@@ -729,6 +732,53 @@ export class ShowtimePicker {
 		const modal = document.getElementById("seat-booking-modal")
 		modal.classList.add("active")
 		document.body.style.overflow = "hidden"
+		this.startModalCountdown()
+	}
+
+	startModalCountdown() {
+		if (this.modalTimerInterval) clearInterval(this.modalTimerInterval)
+		let seconds = 300
+		let warned = false
+
+		const digitsEl = document.getElementById("modal-timer-digits")
+		const badgeEl = document.getElementById("modal-seat-timer-badge")
+
+		const updateDigits = () => {
+			const m = Math.floor(Math.max(0, seconds) / 60)
+			const s = Math.max(0, seconds) % 60
+			if (digitsEl) digitsEl.textContent = `${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`
+			if (badgeEl) badgeEl.classList.toggle("timer-danger", seconds <= 60)
+
+			if (seconds === 60 && !warned) {
+				warned = true
+				showToast("⚠️ Thời gian giữ ghế chỉ còn 1 phút! Vui lòng sớm xác nhận.", "warning", 4000)
+			}
+
+			if (seconds <= 0) {
+				clearInterval(this.modalTimerInterval)
+				this.modalTimerInterval = null
+
+				if (this.currentBooking && this.currentBooking.selectedSeats.length > 0) {
+					this.currentBooking.selectedSeats = []
+					const body = document.getElementById("seat-modal-body")
+					if (body) {
+						body.querySelectorAll(".seat-item.seat-selected").forEach(s => {
+							s.classList.remove("seat-selected")
+							s.setAttribute("aria-checked", "false")
+						})
+					}
+					this.updateBookingSummary()
+					showToast("⏰ Đã hết thời gian giữ ghế 5 phút! Vui lòng chọn lại ghế.", "warning", 6000)
+				}
+				setTimeout(() => this.startModalCountdown(), 1000)
+			}
+		}
+
+		updateDigits()
+		this.modalTimerInterval = setInterval(() => {
+			seconds--
+			updateDigits()
+		}, 1000)
 	}
 
 	updateBookingSummary() {
@@ -752,6 +802,10 @@ export class ShowtimePicker {
 	}
 
 	closeSeatModal() {
+		if (this.modalTimerInterval) {
+			clearInterval(this.modalTimerInterval)
+			this.modalTimerInterval = null
+		}
 		const modal = document.getElementById("seat-booking-modal")
 		if (modal) {
 			modal.classList.remove("active")
