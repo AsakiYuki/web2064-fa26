@@ -188,7 +188,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 	function renderFilteredMovies() {
 		if (!gridContainer || !moviesData) return
 
-		// Sử dụng filterMovies từ storage module
 		const list = filterMovies({
 			tab: currentTab,
 			genre: selectedGenre,
