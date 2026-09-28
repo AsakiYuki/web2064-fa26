@@ -3,15 +3,24 @@
  * Modular data loading via domain-specific JSON files.
  */
 import { openTrailerModal, setupHeaderAndFooter } from "./common.js"
+import { initializeStorage, getMoviesData, getBanners } from "./storage.js"
 
 document.addEventListener("DOMContentLoaded", async () => {
 	await setupHeaderAndFooter()
+	await initializeStorage()
 
 	try {
-		const [moviesData, banners] = await Promise.all([
-			fetch("/data/movies.json").then(r => r.json()),
-			fetch("/data/banners.json").then(r => r.json()),
-		])
+		let moviesData = getMoviesData()
+		let banners = getBanners()
+
+		if (!moviesData || !banners) {
+			const [m, b] = await Promise.all([
+				fetch("/data/movies.json").then(r => r.json()),
+				fetch("/data/banners.json").then(r => r.json()),
+			])
+			moviesData = m
+			banners = b
+		}
 
 		renderHeroSlider(banners.heroSlides)
 		renderSideBanners(banners.sideBanners)

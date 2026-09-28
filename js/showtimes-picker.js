@@ -1,7 +1,10 @@
 /**
  * Beta Cinemas - Showtimes Selector & Interactive Seat Booking Component
+ * Chức năng chọn rạp, chọn ngày và lọc suất chiếu tương ứng
+ * Render sơ đồ ghế động, đếm ngược giữ ghế, tính tổng tiền tự động
  */
 import { formatCurrency, showToast, formatDateVN } from "./common.js"
+import { getCinemas, getMoviesData, getShowtimes, getTicketPricing, getShowtimeSeats, updateShowtimeSeats, storageGet, storageSet, STORAGE_KEYS } from "./storage.js"
 
 export class ShowtimePicker {
 	constructor(options = {}) {
@@ -31,18 +34,30 @@ export class ShowtimePicker {
 
 	async init() {
 		try {
-			const [cinemas, moviesData, showtimesData, pricing] = await Promise.all([
-				fetch("/data/cinemas.json").then(r => r.json()),
-				fetch("/data/movies.json").then(r => r.json()),
-				fetch("/data/showtimes.json").then(r => r.json()),
-				fetch("/data/ticket_pricing.json").then(r => r.json()).catch(() => null),
-			])
+			let cinemas = getCinemas()
+			let moviesData = getMoviesData()
+			let showtimesData = getShowtimes()
+			let pricing = getTicketPricing()
+
+			// Fallback nếu LocalStorage chưa có
+			if (!cinemas.length || !moviesData) {
+				const [c, m, s, p] = await Promise.all([
+					fetch("/data/cinemas.json").then(r => r.json()),
+					fetch("/data/movies.json").then(r => r.json()),
+					fetch("/data/showtimes.json").then(r => r.json()),
+					fetch("/data/ticket_pricing.json").then(r => r.json()).catch(() => null),
+				])
+				cinemas = c
+				moviesData = m
+				showtimesData = s
+				pricing = p
+			}
 
 			this.cinemas = cinemas || []
 			this.movies = [
-				...(moviesData.items.nowshowing || []),
-				...(moviesData.items.special || []),
-				...(moviesData.items.upcoming || []),
+				...(moviesData?.items?.nowshowing || []),
+				...(moviesData?.items?.special || []),
+				...(moviesData?.items?.upcoming || []),
 			]
 			this.showtimes = showtimesData || []
 			this.ticketPricing = pricing
@@ -428,15 +443,47 @@ export class ShowtimePicker {
 		return `~${String(endH).padStart(2, "0")}:${String(endM).padStart(2, "0")}`
 	}
 
+	/**
+	 * Lấy suất chiếu đã lọc theo ngày + rạp hiện tại từ LocalStorage
+	 * @returns {Object|null} scheduleEntry { date, cinemaId, schedules: [...] }
+	 */
+	getFilteredShowtimes() {
+		const currentCinema = this.cinemas.find(c => c.id === this.selectedCinemaId)
+		if (!currentCinema) return null
+
+		// Tìm trong dữ liệu showtimes chính xác theo date + cinemaId
+		let scheduleEntry = this.showtimes.find(
+			s => s.date === this.selectedDate && s.cinemaId === this.selectedCinemaId,
+		)
+
+		// Fallback: sinh lịch mẫu nếu không tìm thấy
+		if (!scheduleEntry) {
+			scheduleEntry = this.generateFallbackSchedule(this.selectedDate, currentCinema)
+		}
+
+		// Nếu đang ở mode single-movie, lọc chỉ hiện phim đó
+		if (this.movieId) {
+			const filtered = (scheduleEntry.schedules || []).filter(s => s.movieId === this.movieId)
+			return { ...scheduleEntry, schedules: filtered }
+		}
+
+		return scheduleEntry
+	}
+
 	attachEvents() {
 		const container = document.getElementById(this.containerId)
 		if (!container) return
 
-		// Date buttons
+		// Date buttons - smooth scroll active card vào view
 		container.querySelectorAll(".date-card-btn").forEach(btn => {
 			btn.addEventListener("click", () => {
 				this.selectedDate = btn.dataset.date
-				this.render()
+				this.renderShowtimeResultsOnly()
+				// Update active class without full re-render
+				container.querySelectorAll(".date-card-btn").forEach(b => b.classList.remove("active"))
+				btn.classList.add("active")
+				// Smooth scroll date card into view
+				btn.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" })
 			})
 		})
 
@@ -448,16 +495,28 @@ export class ShowtimePicker {
 			})
 		})
 
-		// Cinema choice
+		// Cinema choice cards
 		container.querySelectorAll(".cinema-card-choice").forEach(card => {
 			card.addEventListener("click", () => {
 				this.selectedCinemaId = card.dataset.cinemaId
-				this.render()
+				// Animate active state
+				container.querySelectorAll(".cinema-card-choice").forEach(c => c.classList.remove("active"))
+				card.classList.add("active")
+				// Only re-render results section (không flash toàn trang)
+				this.renderShowtimeResultsOnly()
 			})
 		})
 
 		// Showtime slot click -> Open seat selection
-		container.querySelectorAll(".slot-btn:not(.disabled)").forEach(btn => {
+		this.attachSlotEvents(container)
+	}
+
+	/** Attach click events cho các slot-btn (gọi riêng khi partial re-render) */
+	attachSlotEvents(container) {
+		const wrap = container || document.getElementById(this.containerId)
+		if (!wrap) return
+
+		wrap.querySelectorAll(".slot-btn:not(.disabled)").forEach(btn => {
 			btn.addEventListener("click", () => {
 				const slotData = {
 					movieId: btn.dataset.movieId,
@@ -473,6 +532,19 @@ export class ShowtimePicker {
 				this.openSeatModal(slotData)
 			})
 		})
+	}
+
+	/** Re-render chỉ phần kết quả suất chiếu (không flash toàn bộ picker) */
+	renderShowtimeResultsOnly() {
+		const resultsWrap = document.getElementById("showtimes-results-wrap")
+		if (!resultsWrap) return
+		resultsWrap.style.opacity = "0.4"
+		resultsWrap.style.transition = "opacity 0.2s ease"
+		setTimeout(() => {
+			resultsWrap.innerHTML = this.renderShowtimeResults()
+			resultsWrap.style.opacity = "1"
+			this.attachSlotEvents(resultsWrap)
+		}, 150)
 	}
 
 	/* ==========================================================================
@@ -508,43 +580,35 @@ export class ShowtimePicker {
 		const body = document.getElementById("seat-modal-body")
 		if (!body) return
 
-		const rows = ["A", "B", "C", "D", "E", "F", "G"]
-		const isWeekend = new Date(slotData.date).getDay() === 0 || new Date(slotData.date).getDay() === 6
 		const basePrice = slotData.price || 75000
-
-		// Deterministic sold seats based on slot time
-		const soldHash = (slotData.time + slotData.date).split("").reduce((acc, c) => acc + c.charCodeAt(0), 0)
+		const seatLayout = getShowtimeSeats(slotData.cinemaId, slotData.movieId, slotData.date, slotData.time, {
+			basePrice,
+			isIMAX: (slotData.format || "").toLowerCase().includes("imax"),
+		})
 
 		let seatRowsHTML = ""
-		rows.forEach((r, rIdx) => {
+		seatLayout.forEach(rowBlock => {
 			let seatsInRow = ""
-			const isSweetbox = r === "G"
-			const isVip = r === "D" || r === "E" || r === "F"
-			const seatType = isSweetbox ? "sweetbox" : isVip ? "vip" : "standard"
+			const isSweetbox = rowBlock.type === "sweetbox"
 
-			const seatPrice = isSweetbox ? basePrice * 2 + 10000 : isVip ? basePrice + 10000 : basePrice
-			const colCount = isSweetbox ? 5 : 10
-
-			for (let c = 1; c <= colCount; c++) {
-				const seatNum = isSweetbox ? `${r}0${c * 2 - 1}-${r}0${c * 2}` : `${r}${String(c).padStart(2, "0")}`
-				const isSold = (soldHash * rIdx + c * 7) % 7 === 0 || (rIdx === 3 && c === 5)
-
+			rowBlock.seats.forEach(seat => {
+				const isSold = seat.status === "sold"
 				seatsInRow += `
-					<div class="seat-item seat-${seatType} ${isSold ? "seat-sold" : ""}"
-						data-seat-id="${seatNum}"
-						data-seat-type="${seatType}"
-						data-price="${seatPrice}"
-						title="${seatNum} (${formatCurrency(seatPrice)})">
-						${isSweetbox ? "👫" : seatNum.slice(1)}
+					<div class="seat-item seat-${seat.type} ${isSold ? "seat-sold" : ""}"
+						data-seat-id="${seat.id}"
+						data-seat-type="${seat.type}"
+						data-price="${seat.price}"
+						title="${seat.id} (${formatCurrency(seat.price)})">
+						${isSweetbox ? "👫" : seat.id.slice(1)}
 					</div>
 				`
-			}
+			})
 
 			seatRowsHTML += `
 				<div class="seat-row">
-					<span class="row-label">${r}</span>
+					<span class="row-label">${rowBlock.row}</span>
 					${seatsInRow}
-					<span class="row-label">${r}</span>
+					<span class="row-label">${rowBlock.row}</span>
 				</div>
 			`
 		})
@@ -557,6 +621,9 @@ export class ShowtimePicker {
 					<span>🚪 <strong>${slotData.screenName} (${slotData.format})</strong></span>
 					<span>📅 <strong>${formatDateVN(slotData.date)}</strong></span>
 					<span>⏰ <strong>${slotData.time}</strong></span>
+				</div>
+				<div class="seat-modal-timer-badge" id="modal-seat-timer-badge" aria-label="Thời gian giữ ghế">
+					<span>⏱️ Thời gian giữ ghế: <strong id="modal-timer-digits">05:00</strong></span>
 				</div>
 			</div>
 
@@ -599,28 +666,50 @@ export class ShowtimePicker {
 			</div>
 		`
 
-		// Add click listener on seats
+		// Gán sự kiện click và phím điều khiển cho ghế
 		const seatItems = body.querySelectorAll(".seat-item:not(.seat-sold)")
 		seatItems.forEach(seat => {
-			seat.addEventListener("click", () => {
+			const toggleSeat = () => {
 				const id = seat.dataset.seatId
 				const price = +seat.dataset.price
 				const type = seat.dataset.seatType
 
 				const existingIdx = this.currentBooking.selectedSeats.findIndex(s => s.id === id)
 				if (existingIdx > -1) {
+					// Bỏ chọn ghế
 					this.currentBooking.selectedSeats.splice(existingIdx, 1)
 					seat.classList.remove("seat-selected")
+					seat.setAttribute("aria-checked", "false")
 				} else {
-					if (this.currentBooking.selectedSeats.length >= 8) {
-						showToast("Bạn chỉ có thể chọn tối đa 8 ghế trong 1 lần đặt.", "warning")
+					// Giới hạn 8 ghế tối đa
+					const MAX_SEATS = 8
+					if (this.currentBooking.selectedSeats.length >= MAX_SEATS) {
+						seat.classList.add("seat-shake")
+						setTimeout(() => seat.classList.remove("seat-shake"), 400)
+						showToast(`⚠️ Bạn chỉ có thể chọn tối đa ${MAX_SEATS} ghế trong 1 lần đặt.`, "warning")
 						return
 					}
+					// Chọn ghế mới
 					this.currentBooking.selectedSeats.push({ id, price, type })
 					seat.classList.add("seat-selected")
+					seat.setAttribute("aria-checked", "true")
 				}
 
+				if (typeof navigator !== "undefined" && navigator.vibrate) {
+					navigator.vibrate(25)
+				}
 				this.updateBookingSummary()
+			}
+
+			seat.setAttribute("role", "checkbox")
+			seat.setAttribute("aria-checked", "false")
+			seat.setAttribute("tabindex", "0")
+			seat.addEventListener("click", toggleSeat)
+			seat.addEventListener("keydown", e => {
+				if (e.key === "Enter" || e.key === " ") {
+					e.preventDefault()
+					toggleSeat()
+				}
 			})
 		})
 
@@ -643,6 +732,53 @@ export class ShowtimePicker {
 		const modal = document.getElementById("seat-booking-modal")
 		modal.classList.add("active")
 		document.body.style.overflow = "hidden"
+		this.startModalCountdown()
+	}
+
+	startModalCountdown() {
+		if (this.modalTimerInterval) clearInterval(this.modalTimerInterval)
+		let seconds = 300
+		let warned = false
+
+		const digitsEl = document.getElementById("modal-timer-digits")
+		const badgeEl = document.getElementById("modal-seat-timer-badge")
+
+		const updateDigits = () => {
+			const m = Math.floor(Math.max(0, seconds) / 60)
+			const s = Math.max(0, seconds) % 60
+			if (digitsEl) digitsEl.textContent = `${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`
+			if (badgeEl) badgeEl.classList.toggle("timer-danger", seconds <= 60)
+
+			if (seconds === 60 && !warned) {
+				warned = true
+				showToast("⚠️ Thời gian giữ ghế chỉ còn 1 phút! Vui lòng sớm xác nhận.", "warning", 4000)
+			}
+
+			if (seconds <= 0) {
+				clearInterval(this.modalTimerInterval)
+				this.modalTimerInterval = null
+
+				if (this.currentBooking && this.currentBooking.selectedSeats.length > 0) {
+					this.currentBooking.selectedSeats = []
+					const body = document.getElementById("seat-modal-body")
+					if (body) {
+						body.querySelectorAll(".seat-item.seat-selected").forEach(s => {
+							s.classList.remove("seat-selected")
+							s.setAttribute("aria-checked", "false")
+						})
+					}
+					this.updateBookingSummary()
+					showToast("⏰ Đã hết thời gian giữ ghế 5 phút! Vui lòng chọn lại ghế.", "warning", 6000)
+				}
+				setTimeout(() => this.startModalCountdown(), 1000)
+			}
+		}
+
+		updateDigits()
+		this.modalTimerInterval = setInterval(() => {
+			seconds--
+			updateDigits()
+		}, 1000)
 	}
 
 	updateBookingSummary() {
@@ -658,14 +794,40 @@ export class ShowtimePicker {
 			totalLabel.textContent = "0 đ"
 			confirmBtn.disabled = true
 		} else {
-			chosenLabel.textContent = seats.map(s => s.id).join(", ")
-			const total = seats.reduce((sum, s) => sum + s.price, 0)
-			totalLabel.textContent = formatCurrency(total)
+			// Phân loại ghế và tính tổng tiền theo từng loại
+			const standardSeats = seats.filter(s => s.type === "standard")
+			const vipSeats = seats.filter(s => s.type === "vip")
+			const sweetboxSeats = seats.filter(s => s.type === "sweetbox")
+
+			const standardTotal = standardSeats.reduce((sum, s) => sum + s.price, 0)
+			const vipTotal = vipSeats.reduce((sum, s) => sum + s.price, 0)
+			const sweetboxTotal = sweetboxSeats.reduce((sum, s) => sum + s.price, 0)
+			const grandTotal = standardTotal + vipTotal + sweetboxTotal
+
+			// Chuỗi tóm tắt theo từng loại ghế
+			const typeDetails = []
+			if (standardSeats.length > 0) {
+				typeDetails.push(`${standardSeats.length} Thường (${formatCurrency(standardTotal)})`)
+			}
+			if (vipSeats.length > 0) {
+				typeDetails.push(`${vipSeats.length} VIP (${formatCurrency(vipTotal)})`)
+			}
+			if (sweetboxSeats.length > 0) {
+				typeDetails.push(`${sweetboxSeats.length} Đôi (${formatCurrency(sweetboxTotal)})`)
+			}
+
+			const seatNames = seats.map(s => s.id).join(", ")
+			chosenLabel.innerHTML = `<strong>${seatNames}</strong> <span style="display:block; font-size:12px; color:#94a3b8; font-weight:500; margin-top:2px;">Phân loại: ${typeDetails.join(" • ")}</span>`
+			totalLabel.textContent = formatCurrency(grandTotal)
 			confirmBtn.disabled = false
 		}
 	}
 
 	closeSeatModal() {
+		if (this.modalTimerInterval) {
+			clearInterval(this.modalTimerInterval)
+			this.modalTimerInterval = null
+		}
 		const modal = document.getElementById("seat-booking-modal")
 		if (modal) {
 			modal.classList.remove("active")

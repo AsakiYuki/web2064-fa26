@@ -1,8 +1,20 @@
 {
   "tabs": [
-    { "id": "upcoming", "label": "PHIM SẮP CHIẾU", "active": false },
-    { "id": "nowshowing", "label": "PHIM ĐANG CHIẾU", "active": true },
-    { "id": "special", "label": "SUẤT CHIẾU ĐẶC BIỆT", "active": false }
+    {
+      "id": "upcoming",
+      "label": "PHIM SẮP CHIẾU",
+      "active": false
+    },
+    {
+      "id": "nowshowing",
+      "label": "PHIM ĐANG CHIẾU",
+      "active": true
+    },
+    {
+      "id": "special",
+      "label": "SUẤT CHIẾU ĐẶC BIỆT",
+      "active": false
+    }
   ],
   "items": {
     "nowshowing": [
@@ -12,9 +24,15 @@
         "title": "Út Lan 2",
         "originalTitle": "Ut Lan Chapter 2",
         "genre": "Kinh dị",
-        "genreIds": ["kinh-di"],
+        "genreIds": [
+          "kinh-di"
+        ],
         "director": "Trần Thanh Huy",
-        "cast": ["Việt Hương", "Lâm Thanh Mỹ", "Mạc Văn Khoa"],
+        "cast": [
+          "Việt Hương",
+          "Lâm Thanh Mỹ",
+          "Mạc Văn Khoa"
+        ],
         "duration": "107 phút",
         "releaseDate": "20.09.2026",
         "country": "Việt Nam",
@@ -29,7 +47,8 @@
         "buyText": "MUA VÉ",
         "ratingScore": 9.2,
         "synopsis": "Phần 2 tiếp nối câu chuyện tâm linh bí ẩn xoay quanh truyền thuyết bóng ma Út Lan tại ngôi làng cổ phía Nam.",
-        "trailerUrl": "https://www.youtube.com/embed/dQw4w9WgXcQ"
+        "trailerUrl": "https://www.youtube.com/watch?v=0k5G83aK_sI",
+        "format": "2D Digital"
       },
       {
         "id": "bongma",
@@ -37,9 +56,15 @@
         "title": "Bóng Ma Nhà Hát",
         "originalTitle": "Phantom of the Opera Night",
         "genre": "Kinh dị, Hài hước",
-        "genreIds": ["kinh-di", "hai-huoc"],
+        "genreIds": [
+          "kinh-di",
+          "hai-huoc"
+        ],
         "director": "Nguyễn Quang Dũng",
-        "cast": ["Ninh Dương Lan Ngọc", "Kiều Minh Tuấn"],
+        "cast": [
+          "Ninh Dương Lan Ngọc",
+          "Kiều Minh Tuấn"
+        ],
         "duration": "97 phút",
         "releaseDate": "15.09.2026",
         "country": "Việt Nam",
@@ -54,7 +79,8 @@
         "buyText": "MUA VÉ",
         "ratingScore": 8.8,
         "synopsis": "Một đoàn kịch bí ẩn phát hiện những hiện tượng kỳ lạ xảy ra đằng sau hậu trường rạp hát trung tâm.",
-        "trailerUrl": "https://www.youtube.com/embed/dQw4w9WgXcQ"
+        "trailerUrl": "https://www.youtube.com/watch?v=9_b3vK25c50",
+        "format": "2D Digital"
       },
       {
         "id": "vungdat",
@@ -62,9 +88,15 @@
         "title": "Vùng Đất Quỷ Dữ",
         "originalTitle": "Resident Evil: Requiem",
         "genre": "Kinh dị, Hành động",
-        "genreIds": ["kinh-di", "hanh-dong"],
+        "genreIds": [
+          "kinh-di",
+          "hanh-dong"
+        ],
         "director": "Paul W. S. Anderson",
-        "cast": ["Milla Jovovich", "Ali Larter"],
+        "cast": [
+          "Milla Jovovich",
+          "Ali Larter"
+        ],
         "duration": "94 phút",
         "releaseDate": "18.09.2026",
         "country": "Mỹ",
@@ -78,7 +110,8 @@
         "buyText": "MUA VÉ",
         "ratingScore": 8.5,
         "synopsis": "Hành trình sống còn giữa vùng đất tràn ngập các sinh vật biến dị hiểm hóc.",
-        "trailerUrl": "https://www.youtube.com/embed/dQw4w9WgXcQ"
+        "trailerUrl": "https://www.youtube.com/watch?v=4dO3UjJk_qM",
+        "format": "3D Digital"
       },
       {
         "id": "lenhuong",
@@ -86,9 +119,16 @@
         "title": "Lên Hương",
         "originalTitle": "Rising Fortune",
         "genre": "Tâm lý, Gia đình",
-        "genreIds": ["tam-ly", "gia-dinh"],
+        "genreIds": [
+          "tam-ly",
+          "gia-dinh"
+        ],
         "director": "Vũ Ngọc Đãng",
-        "cast": ["Thái Hòa", "Thu Trang", "Phát La"],
+        "cast": [
+          "Thái Hòa",
+          "Thu Trang",
+          "Phát La"
+        ],
         "duration": "121 phút",
         "releaseDate": "10.09.2026",
         "country": "Việt Nam",
@@ -100,9 +140,10 @@
         "hot": true,
         "buyId": "buy-lenhuong",
         "buyText": "MUA VÉ",
-        "ratingScore": 9.0,
+        "ratingScore": 9,
         "synopsis": "Câu chuyện hài hước nhưng sâu sắc về ước mơ đổi đời của một gia đình giàu tình cảm tại xóm nghèo.",
-        "trailerUrl": "https://www.youtube.com/embed/dQw4w9WgXcQ"
+        "trailerUrl": "https://www.youtube.com/watch?v=6ZfuNTqbHE8",
+        "format": "2D Digital"
       },
       {
         "id": "traibuon",
@@ -110,9 +151,14 @@
         "title": "Trại Buôn Người",
         "originalTitle": "Human Syndicate",
         "genre": "Ly kỳ, Hình sự",
-        "genreIds": ["hinh-su"],
+        "genreIds": [
+          "hinh-su"
+        ],
         "director": "Lê Bình Giang",
-        "cast": ["Quang Tuấn", "Hoàng Yến Chibi"],
+        "cast": [
+          "Quang Tuấn",
+          "Hoàng Yến Chibi"
+        ],
         "duration": "118 phút",
         "releaseDate": "12.09.2026",
         "country": "Việt Nam",
@@ -126,7 +172,8 @@
         "buyText": "MUA VÉ",
         "ratingScore": 8.7,
         "synopsis": "Cuộc thâm nhập nguy hiểm của trinh sát hình sự vào đường dây tội phạm xuyên quốc gia.",
-        "trailerUrl": "https://www.youtube.com/embed/dQw4w9WgXcQ"
+        "trailerUrl": "https://www.youtube.com/watch?v=8Qn_spdM5Zg",
+        "format": "2D Digital"
       },
       {
         "id": "avengers",
@@ -134,9 +181,16 @@
         "title": "Avengers: Hồi Kết - Phiên Bản ĐB",
         "originalTitle": "Avengers: Endgame Special Edition",
         "genre": "Hành động, Phiêu lưu",
-        "genreIds": ["hanh-dong", "phieu-luu"],
+        "genreIds": [
+          "hanh-dong",
+          "phieu-luu"
+        ],
         "director": "Anthony Russo, Joe Russo",
-        "cast": ["Robert Downey Jr.", "Chris Evans", "Scarlett Johansson"],
+        "cast": [
+          "Robert Downey Jr.",
+          "Chris Evans",
+          "Scarlett Johansson"
+        ],
         "duration": "181 phút",
         "releaseDate": "01.09.2026",
         "country": "Mỹ",
@@ -151,7 +205,8 @@
         "buyText": "MUA VÉ",
         "ratingScore": 9.6,
         "synopsis": "Trận chiến cuối cùng quyết định vận mệnh toàn vũ trụ của biệt đội siêu anh hùng Avengers.",
-        "trailerUrl": "https://www.youtube.com/embed/dQw4w9WgXcQ"
+        "trailerUrl": "https://www.youtube.com/watch?v=TcMBFSGVi1c",
+        "format": "3D Digital"
       },
       {
         "id": "nghiehu",
@@ -159,9 +214,15 @@
         "title": "Nghỉ Hè Nghỉ Hưu",
         "originalTitle": "Summer Retirement",
         "genre": "Hài, Gia đình",
-        "genreIds": ["hai-huoc", "gia-dinh"],
+        "genreIds": [
+          "hai-huoc",
+          "gia-dinh"
+        ],
         "director": "Đinh Tuấn Vũ",
-        "cast": ["NSND Hồng Vân", "NSƯT Thành Lộc"],
+        "cast": [
+          "NSND Hồng Vân",
+          "NSƯT Thành Lộc"
+        ],
         "duration": "98 phút",
         "releaseDate": "05.09.2026",
         "country": "Việt Nam",
@@ -176,7 +237,8 @@
         "buyText": "MUA VÉ",
         "ratingScore": 8.2,
         "synopsis": "Chuyến du lịch hè nhiều bất ngờ và tiếng cười của những người bạn già về hưu.",
-        "trailerUrl": "https://www.youtube.com/embed/dQw4w9WgXcQ"
+        "trailerUrl": "https://www.youtube.com/watch?v=XW2E2Fnh52w",
+        "format": "2D Digital"
       },
       {
         "id": "yeunhan",
@@ -184,9 +246,14 @@
         "title": "Yêu Nhân Thần Thám",
         "originalTitle": "Monster Detective",
         "genre": "Hoạt hình, Phiêu lưu",
-        "genreIds": ["hoat-hinh", "phieu-luu"],
+        "genreIds": [
+          "hoat-hinh",
+          "phieu-luu"
+        ],
         "director": "Hiroyuki Seshita",
-        "cast": ["Lồng tiếng Việt"],
+        "cast": [
+          "Lồng tiếng Việt"
+        ],
         "duration": "112 phút",
         "releaseDate": "08.09.2026",
         "country": "Nhật Bản",
@@ -201,7 +268,8 @@
         "buyText": "MUA VÉ",
         "ratingScore": 8.6,
         "synopsis": "Thám tử yêu tinh cùng các đồng đội phá giải những ẩn số thần bí trong thế giới ma quái.",
-        "trailerUrl": "https://www.youtube.com/embed/dQw4w9WgXcQ"
+        "trailerUrl": "https://www.youtube.com/watch?v=QfpxqI8cWcE",
+        "format": "2D Lồng Tiếng"
       }
     ],
     "upcoming": [
@@ -211,9 +279,16 @@
         "title": "Thám Tử Conan: Ngôi Sao 5 Cánh 1 Triệu Đô",
         "originalTitle": "Detective Conan: The Million-dollar Pentagram",
         "genre": "Hoạt hình, Hành động, Bí ẩn",
-        "genreIds": ["hoat-hinh", "hanh-dong"],
+        "genreIds": [
+          "hoat-hinh",
+          "hanh-dong"
+        ],
         "director": "Chika Nagaoka",
-        "cast": ["Minami Takayama", "Wakana Yamazaki", "Kappei Yamaguchi"],
+        "cast": [
+          "Minami Takayama",
+          "Wakana Yamazaki",
+          "Kappei Yamaguchi"
+        ],
         "duration": "110 phút",
         "releaseDate": "28.09.2026",
         "country": "Nhật Bản",
@@ -229,7 +304,8 @@
         "outline": true,
         "ratingScore": 9.4,
         "synopsis": "Tại Hakodate, Hokkaido, bức thư thách thức từ siêu trộm Kaito Kid xuất hiện nhắm vào thanh kiếm Nhật lịch sử thời Mạc Phủ. Conan và Heiji Hattori cùng nhau tham gia phá giải bí ẩn ly kỳ.",
-        "trailerUrl": "https://www.youtube.com/embed/dQw4w9WgXcQ"
+        "trailerUrl": "https://www.youtube.com/watch?v=kxy-mG7V7xI",
+        "format": "2D Phụ đề / Lồng tiếng"
       },
       {
         "id": "up2",
@@ -237,9 +313,16 @@
         "title": "Venom: Kèo Cuối",
         "originalTitle": "Venom: The Last Dance",
         "genre": "Hành động, Khoa học viễn tưởng",
-        "genreIds": ["hanh-dong", "phieu-luu"],
+        "genreIds": [
+          "hanh-dong",
+          "phieu-luu"
+        ],
         "director": "Kelly Marcel",
-        "cast": ["Tom Hardy", "Chiwetel Ejiofor", "Juno Temple"],
+        "cast": [
+          "Tom Hardy",
+          "Chiwetel Ejiofor",
+          "Juno Temple"
+        ],
         "duration": "115 phút",
         "releaseDate": "05.10.2026",
         "country": "Mỹ",
@@ -255,7 +338,8 @@
         "outline": true,
         "ratingScore": 8.9,
         "synopsis": "Eddie và Venom đang trên đường chạy trốn. Bị truy đuổi bởi cả hai thế giới, vòng vây ngày càng khép lại buộc bộ đôi phải đưa ra một quyết định tàn khốc.",
-        "trailerUrl": "https://www.youtube.com/embed/dQw4w9WgXcQ"
+        "trailerUrl": "https://www.youtube.com/watch?v=__2bjWbetsA",
+        "format": "3D Digital"
       }
     ],
     "special": [
@@ -265,9 +349,17 @@
         "title": "Avengers: Hồi Kết IMAX Experience",
         "originalTitle": "Avengers: Endgame IMAX 3D",
         "genre": "Hành động, Phiêu lưu, Viễn tưởng",
-        "genreIds": ["hanh-dong", "phieu-luu"],
+        "genreIds": [
+          "hanh-dong",
+          "phieu-luu"
+        ],
         "director": "Anthony Russo, Joe Russo",
-        "cast": ["Robert Downey Jr.", "Chris Evans", "Mark Ruffalo", "Chris Hemsworth"],
+        "cast": [
+          "Robert Downey Jr.",
+          "Chris Evans",
+          "Mark Ruffalo",
+          "Chris Hemsworth"
+        ],
         "duration": "181 phút",
         "releaseDate": "26.09.2026",
         "country": "Mỹ",
@@ -286,7 +378,7 @@
         "buyText": "MUA VÉ",
         "ratingScore": 9.8,
         "synopsis": "Trải nghiệm siêu phẩm điện ảnh vĩ đại nhất của Vũ trụ Điện ảnh Marvel trên màn hình khổng lồ IMAX với chất lượng âm thanh 12 kênh sống động chưa từng có.",
-        "trailerUrl": "https://www.youtube.com/embed/dQw4w9WgXcQ"
+        "trailerUrl": "https://www.youtube.com/watch?v=TcMBFSGVi1c"
       }
     ]
   }

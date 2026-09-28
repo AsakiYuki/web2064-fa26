@@ -1,62 +1,99 @@
 /**
  * Beta Cinemas - Movie Detail Page Logic
+ * Render trang chi tiết phim động dựa trên tham số ID / Slug trên URL từ LocalStorage
+ * Tích hợp xem trailer video YouTube qua modal & inline player
  */
-import { setupHeaderAndFooter, openTrailerModal } from "./common.js"
+import { setupHeaderAndFooter, openTrailerModal, getYouTubeEmbedUrl, showToast } from "./common.js"
 import { ShowtimePicker } from "./showtimes-picker.js"
+import { initializeStorage, getMovieById, getMovieBySlug, getMoviesData } from "./storage.js"
 
 document.addEventListener("DOMContentLoaded", async () => {
+	// Khởi tạo Header, Footer và nạp dữ liệu LocalStorage nếu chạy lần đầu
 	await setupHeaderAndFooter()
+	await initializeStorage()
 
-	let moviesData = null
-	try {
-		moviesData = await fetch("/data/movies.json").then(r => r.json())
-	} catch (err) {
-		console.error("Failed to load movies data:", err)
-		return
-	}
-
-	// Find movie by URL query param (?id=... or ?slug=...)
+	// Đọc query param ?id=... hoặc ?slug=...
 	const urlParams = new URLSearchParams(window.location.search)
 	const queryId = urlParams.get("id")
 	const querySlug = urlParams.get("slug")
 
-	const allMovies = [
-		...(moviesData.items.nowshowing || []),
-		...(moviesData.items.special || []),
-		...(moviesData.items.upcoming || []),
-	]
-
 	let currentMovie = null
+
 	if (queryId) {
-		currentMovie = allMovies.find(m => m.id === queryId)
+		currentMovie = getMovieById(queryId)
 	} else if (querySlug) {
-		currentMovie = allMovies.find(m => m.slug === querySlug)
+		currentMovie = getMovieBySlug(querySlug)
 	}
 
-	// Default to first now showing movie if not found
+	// Nếu không tìm thấy theo query param
 	if (!currentMovie) {
-		currentMovie = allMovies[0]
+		const moviesData = getMoviesData()
+		const allMovies = [
+			...(moviesData?.items?.nowshowing || []),
+			...(moviesData?.items?.special || []),
+			...(moviesData?.items?.upcoming || []),
+		]
+
+		if (queryId || querySlug) {
+			showToast(`Không tìm thấy phim với mã "${queryId || querySlug}". Đang hiển thị phim nổi bật.`, "info", 4000)
+		}
+
+		currentMovie = allMovies[0] || null
 	}
 
+	// Trường hợp không có dữ liệu phim nào trong hệ thống
+	if (!currentMovie) {
+		renderNotFoundState(queryId || querySlug)
+		return
+	}
+
+	// Render toàn bộ thông tin chi tiết phim
 	renderMovieDetails(currentMovie)
 
-	// Initialize the ShowtimePicker specifically for this movie!
+	// Khởi tạo ShowtimePicker cho phim này
 	const showtimePicker = new ShowtimePicker({
 		containerId: "movie-showtimes-container",
 		movieId: currentMovie.id,
 	})
 	await showtimePicker.init()
 
-	// If page was loaded with #showtimes anchor, smooth scroll down
+	// Nếu URL có hash #showtimes, cuộn mượt xuống phần lịch chiếu
 	if (window.location.hash === "#showtimes") {
 		setTimeout(() => {
 			document.getElementById("movie-showtimes-container")?.scrollIntoView({ behavior: "smooth" })
-		}, 300)
+		}, 350)
 	}
 })
 
+/**
+ * Hiển thị giao diện khi không tìm thấy phim
+ * @param {string} idOrSlug
+ */
+function renderNotFoundState(idOrSlug) {
+	document.title = "Không tìm thấy phim | Beta Cinemas"
+	const mainEl = document.querySelector(".movie-detail-page")
+	if (mainEl) {
+		mainEl.innerHTML = `
+			<div class="container" style="padding: 100px 20px; text-align: center;">
+				<div style="font-size: 64px; margin-bottom: 20px;">🎬</div>
+				<h1 style="color: #fff; font-size: 28px; margin-bottom: 12px;">Không tìm thấy thông tin phim</h1>
+				<p style="color: #8b92a5; max-width: 500px; margin: 0 auto 30px;">
+					Rất tiếc, mã phim <strong>"${idOrSlug || "yêu cầu"}"</strong> không tồn tại hoặc đã ngừng chiếu tại hệ thống rạp.
+				</p>
+				<a href="/movies.html" style="display: inline-block; background: #e50914; color: #fff; padding: 14px 28px; border-radius: 8px; text-decoration: none; font-weight: 600;">
+					Khám phá danh sách phim đang chiếu
+				</a>
+			</div>
+		`
+	}
+}
+
+/**
+ * Render đầy đủ thông tin chi tiết phim động vào DOM
+ * @param {Object} movie - Đối tượng phim
+ */
 function renderMovieDetails(movie) {
-	// Set document title
+	// Cập nhật tiêu đề trang
 	document.title = `${movie.title} - Lịch Chiếu & Đặt Vé | Beta Cinemas`
 
 	// 1. Breadcrumb
@@ -82,12 +119,13 @@ function renderMovieDetails(movie) {
 		if (movie.badge) {
 			posterBadge.textContent = movie.badge
 			posterBadge.className = `poster-badge badge-${(movie.badge || "").toLowerCase()}`
+			posterBadge.style.display = ""
 		} else {
 			posterBadge.style.display = "none"
 		}
 	}
 
-	// Play trailer on poster
+	// Nút phát trailer trên poster
 	const playPosterBtn = document.getElementById("btn-play-trailer-poster")
 	if (playPosterBtn) {
 		playPosterBtn.addEventListener("click", () => {
@@ -102,7 +140,7 @@ function renderMovieDetails(movie) {
 	const titleEn = document.getElementById("movie-title-en")
 	if (titleEn) {
 		titleEn.textContent = movie.originalTitle || ""
-		if (!movie.originalTitle) titleEn.style.display = "none"
+		titleEn.style.display = movie.originalTitle ? "" : "none"
 	}
 
 	// Rating Score
@@ -111,7 +149,7 @@ function renderMovieDetails(movie) {
 		ratingScoreEl.textContent = movie.ratingScore ? movie.ratingScore.toFixed(1) : "9.0"
 	}
 
-	// Pills
+	// Pills (Thời lượng, thể loại, định dạng, ngôn ngữ, phụ đề)
 	const pillsWrap = document.getElementById("detail-pills-row")
 	if (pillsWrap) {
 		pillsWrap.innerHTML = `
@@ -164,21 +202,19 @@ function renderMovieDetails(movie) {
 	// 7. Inline Trailer Embed
 	const trailerIframe = document.getElementById("detail-trailer-iframe")
 	if (trailerIframe) {
-		let embedUrl = movie.trailerUrl || "https://www.youtube.com/embed/dQw4w9WgXcQ"
-		if (embedUrl.includes("watch?v=")) {
-			embedUrl = embedUrl.replace("watch?v=", "embed/")
-		}
-		trailerIframe.src = embedUrl
+		trailerIframe.src = getYouTubeEmbedUrl(movie.trailerUrl, false)
 		trailerIframe.title = `Trailer: ${movie.title}`
 	}
 
 	// 8. Cast List
 	const castGrid = document.getElementById("detail-cast-grid")
 	if (castGrid && Array.isArray(movie.cast)) {
-		castGrid.innerHTML = [
+		const castMembers = [
 			{ name: movie.director || "Đạo diễn", role: "Đạo diễn", isDirector: true },
 			...movie.cast.map(c => ({ name: c, role: "Diễn viên chính" })),
 		]
+
+		castGrid.innerHTML = castMembers
 			.map(
 				person => `
 			<div class="cast-card">
@@ -199,17 +235,23 @@ function renderMovieDetails(movie) {
 	if (advisoryText && advisoryBadge) {
 		const badge = movie.badge || "P"
 		advisoryBadge.textContent = badge
+		advisoryBadge.className = `advisory-badge badge-${badge.toLowerCase()}`
+
 		if (badge === "T18") {
 			advisoryText.textContent =
 				"Phim được phổ biến đến người xem từ đủ 18 tuổi trở lên (18+). Khán giả vui lòng xuất trình CCCD hoặc giấy tờ tùy thân có hình ảnh xác minh độ tuổi tại quầy soát vé."
 		} else if (badge === "T16") {
-			advisoryText.textContent = "Phim được phổ biến đến người xem từ đủ 16 tuổi trở lên (16+)."
+			advisoryText.textContent =
+				"Phim được phổ biến đến người xem từ đủ 16 tuổi trở lên (16+). Khán giả dưới 16 tuổi không được phép vào rạp theo quy định của Cục Điện ảnh."
 		} else if (badge === "T13") {
-			advisoryText.textContent = "Phim được phổ biến đến người xem từ đủ 13 tuổi trở lên (13+)."
+			advisoryText.textContent =
+				"Phim được phổ biến đến người xem từ đủ 13 tuổi trở lên (13+). Vui lòng mang giấy tờ tùy thân khi xem phim."
 		} else if (badge === "K") {
-			advisoryText.textContent = "Phim được phổ biến đến người xem dưới 13 tuổi có người bảo hộ đi kèm."
+			advisoryText.textContent =
+				"Phim được phổ biến đến người xem dưới 13 tuổi với điều kiện có cha mẹ hoặc người bảo hộ đi cùng."
 		} else {
-			advisoryText.textContent = "Phim được phép phổ biến rộng rãi đến người xem ở mọi lứa tuổi (P)."
+			advisoryText.textContent =
+				"Phim được phép phổ biến rộng rãi đến người xem ở mọi lứa tuổi (P). Thích hợp cho cả gia đình cùng thưởng thức."
 		}
 	}
 }

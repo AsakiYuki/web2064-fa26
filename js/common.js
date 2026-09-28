@@ -2,6 +2,7 @@
  * Beta Cinemas - Common Utilities & Shared Components
  * Authentication, Mega Menu, Mobile Drawer, Modals & Toast notifications
  */
+import { initializeStorage, storageGet, STORAGE_KEYS, getCinemas, getFooterData } from "./storage.js"
 
 /** Format currency VND */
 export function formatCurrency(amount) {
@@ -371,8 +372,52 @@ function initAuthModalEvents(modal) {
 }
 
 /* ==========================================================================
-   UNIVERSAL TRAILER MODAL
+   UNIVERSAL YOUTUBE EMBED & TRAILER MODAL
    ========================================================================== */
+
+/**
+ * Chuyển đổi mọi định dạng link YouTube thành URL nhúng (embed) chuẩn
+ * Hỗ trợ: youtube.com/watch?v=..., youtu.be/..., youtube.com/embed/..., youtube.com/shorts/...
+ * @param {string} url - Link YouTube bất kỳ
+ * @param {boolean} autoplay - Bật tự động phát (mặc định true)
+ * @returns {string} URL iframe embed hợp lệ
+ */
+export function getYouTubeEmbedUrl(url, autoplay = true) {
+	if (!url) return `https://www.youtube.com/embed/dQw4w9WgXcQ?autoplay=${autoplay ? 1 : 0}`
+	let videoId = ""
+
+	try {
+		if (url.includes("youtu.be/")) {
+			videoId = url.split("youtu.be/")[1]?.split("?")[0]?.split("&")[0] || ""
+		} else if (url.includes("youtube.com/embed/")) {
+			videoId = url.split("youtube.com/embed/")[1]?.split("?")[0]?.split("&")[0] || ""
+		} else if (url.includes("youtube.com/shorts/")) {
+			videoId = url.split("youtube.com/shorts/")[1]?.split("?")[0]?.split("&")[0] || ""
+		} else if (url.includes("youtube.com/v/")) {
+			videoId = url.split("youtube.com/v/")[1]?.split("?")[0]?.split("&")[0] || ""
+		} else if (url.includes("watch")) {
+			const parsed = new URL(url)
+			videoId = parsed.searchParams.get("v") || ""
+		}
+	} catch (e) {
+		console.warn("[YouTube Embed] Không thể parse URL:", url, e)
+	}
+
+	if (videoId) {
+		return `https://www.youtube.com/embed/${videoId}?autoplay=${autoplay ? 1 : 0}&enablejsapi=1&rel=0`
+	}
+
+	// Fallback nếu url dạng khác
+	let fallback = url
+	if (fallback.includes("watch?v=")) {
+		fallback = fallback.replace("watch?v=", "embed/")
+	}
+	if (autoplay && !fallback.includes("autoplay=1")) {
+		fallback += (fallback.includes("?") ? "&" : "?") + "autoplay=1"
+	}
+	return fallback
+}
+
 export function openTrailerModal(trailerUrl, movieTitle = "Trailer") {
 	let modalBackdrop = document.getElementById("trailer-modal-backdrop")
 	if (!modalBackdrop) {
@@ -382,6 +427,10 @@ export function openTrailerModal(trailerUrl, movieTitle = "Trailer") {
 		modalBackdrop.innerHTML = `
 			<div class="modal-content trailer-modal-content" role="dialog" aria-modal="true" aria-label="Xem Trailer">
 				<button class="modal-close-btn" id="trailer-modal-close" aria-label="Đóng">&#x2715;</button>
+				<div class="trailer-modal-header" style="padding: 14px 20px; background: #12151e; color: #fff; border-bottom: 1px solid rgba(255,255,255,0.08); display: flex; align-items: center; gap: 8px;">
+					<span style="color: #e50914; font-size: 18px;">🎬</span>
+					<h3 class="trailer-modal-title" id="trailer-modal-title" style="margin: 0; font-size: 16px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: calc(100% - 50px);">Trailer</h3>
+				</div>
 				<div class="trailer-video-wrapper">
 					<iframe id="trailer-modal-iframe" allowfullscreen allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"></iframe>
 				</div>
@@ -400,14 +449,11 @@ export function openTrailerModal(trailerUrl, movieTitle = "Trailer") {
 		})
 	}
 
+	const titleEl = document.getElementById("trailer-modal-title")
+	if (titleEl) titleEl.textContent = `Trailer: ${movieTitle}`
+
 	const iframe = document.getElementById("trailer-modal-iframe")
-	let embedUrl = trailerUrl || "https://www.youtube.com/embed/dQw4w9WgXcQ"
-	if (embedUrl.includes("watch?v=")) {
-		embedUrl = embedUrl.replace("watch?v=", "embed/")
-	}
-	if (!embedUrl.includes("autoplay=1")) {
-		embedUrl += (embedUrl.includes("?") ? "&" : "?") + "autoplay=1"
-	}
+	const embedUrl = getYouTubeEmbedUrl(trailerUrl, true)
 
 	iframe.src = embedUrl
 	iframe.title = `Trailer: ${movieTitle}`
@@ -613,10 +659,12 @@ function updateDrawerAccountUI() {
    ========================================================================== */
 export async function setupHeaderAndFooter() {
 	try {
-		const [cinemas, footerCinemas] = await Promise.all([
-			fetch("/data/cinemas.json").then(r => r.json()),
-			fetch("/data/footer.json").then(r => r.json()),
-		])
+		// Khởi tạo dữ liệu mẫu vào LocalStorage khi chạy lần đầu
+		await initializeStorage()
+
+		// Đọc dữ liệu từ LocalStorage thay vì fetch trực tiếp
+		const cinemas = getCinemas()
+		const footerCinemas = getFooterData()
 
 		// Cinema Dropdown
 		const ul = document.getElementById("cinema-dropdown-ul")

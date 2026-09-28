@@ -488,6 +488,28 @@
 				color: #e2e8f0;
 			}
 		}
+
+		.seat-modal-timer-badge {
+			display: inline-flex;
+			align-items: center;
+			gap: 6px;
+			background: rgba(245, 158, 11, 0.15);
+			border: 1px solid rgba(245, 158, 11, 0.4);
+			color: #fbbf24;
+			padding: 4px 10px;
+			border-radius: 6px;
+			font-size: 12px;
+			font-weight: 700;
+			margin-top: 8px;
+			transition: all 0.3s ease;
+
+			&.timer-danger {
+				background: rgba(239, 68, 68, 0.2);
+				border-color: #ef4444;
+				color: #f87171;
+				animation: dangerPulse 1.2s infinite;
+			}
+		}
 	}
 
 	/* Screen graphic */
@@ -586,6 +608,10 @@
 					color: #ffffff !important;
 					transform: scale(1.1);
 					box-shadow: 0 0 10px rgba(16, 185, 129, 0.8);
+				}
+
+				&.seat-shake {
+					animation: seatShake 0.4s ease;
 				}
 			}
 		}
