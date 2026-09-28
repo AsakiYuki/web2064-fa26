@@ -151,7 +151,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 		let list = [...(moviesData.items[currentTab] || [])]
 
-		// Filter by search query
+		// Đây là phần tìm kiếm đã được chỉnh sửa
 		if (searchQuery) {
 			list = list.filter(
 				m =>
