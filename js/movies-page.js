@@ -1,49 +1,63 @@
 /**
  * Beta Cinemas - Movies List Page Logic
+ * Render danh sách phim từ LocalStorage, tìm kiếm & bộ lọc nâng cao
  */
 import { setupHeaderAndFooter, openTrailerModal, showToast } from "./common.js"
+import { getMoviesData, getGenres, filterMovies } from "./storage.js"
 
 document.addEventListener("DOMContentLoaded", async () => {
 	await setupHeaderAndFooter()
 
-	let moviesData = null
-	let genresList = []
+	// Đọc dữ liệu phim & thể loại từ LocalStorage
+	const moviesData = getMoviesData()
+	const genresList = getGenres()
 
-	try {
-		const [moviesRes, genresRes] = await Promise.all([
-			fetch("/data/movies.json").then(r => r.json()),
-			fetch("/data/genres.json").then(r => r.json()),
-		])
-		moviesData = moviesRes
-		genresList = genresRes
-	} catch (err) {
-		console.error("Failed to fetch movies or genres:", err)
+	if (!moviesData || !moviesData.items) {
+		console.error("Không thể tải dữ liệu phim từ LocalStorage")
 		return
 	}
 
+	// ===== STATE =====
 	let currentTab = "nowshowing"
 	let searchQuery = ""
 	let selectedGenre = "all"
 	let selectedAge = "all"
+	let selectedFormat = "all"
 	let selectedSort = "default"
 
-	// Check if URL has tab param: e.g. ?tab=upcoming
+	// Check URL params: ?tab=upcoming, ?search=keyword
 	const urlParams = new URLSearchParams(window.location.search)
 	if (urlParams.get("tab") && ["nowshowing", "upcoming", "special"].includes(urlParams.get("tab"))) {
 		currentTab = urlParams.get("tab")
 	}
+	if (urlParams.get("search")) {
+		searchQuery = urlParams.get("search").trim().toLowerCase()
+	}
+	if (urlParams.get("genre")) {
+		selectedGenre = urlParams.get("genre")
+	}
 
+	// ===== DOM ELEMENTS =====
 	const searchInput = document.getElementById("movies-search-input")
 	const clearSearchBtn = document.getElementById("clear-search-btn")
 	const ageSelect = document.getElementById("age-filter-select")
+	const formatSelect = document.getElementById("format-filter-select")
 	const sortSelect = document.getElementById("sort-select")
 	const resetBtn = document.getElementById("reset-filters-btn")
 	const genrePillsWrap = document.getElementById("genre-pills-bar")
 	const gridContainer = document.getElementById("movies-grid-container")
 	const tabButtons = document.querySelectorAll(".movies-nav-tabs .tab-btn")
 
-	// Render Genre Pills
-	if (genrePillsWrap && Array.isArray(genresList)) {
+	// ===== PRE-FILL SEARCH từ URL =====
+	if (searchQuery && searchInput) {
+		searchInput.value = searchQuery
+		if (clearSearchBtn) clearSearchBtn.classList.add("visible")
+	}
+
+	// ===== RENDER GENRE PILLS =====
+	function renderGenrePills() {
+		if (!genrePillsWrap || !Array.isArray(genresList)) return
+
 		genrePillsWrap.innerHTML = `
 			<span class="genre-pills-label">Thể loại:</span>
 			<button type="button" class="genre-pill ${selectedGenre === "all" ? "active" : ""}" data-genre="all">Tất cả</button>
@@ -55,6 +69,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 				)
 				.join("")}
 		`
+
 		genrePillsWrap.querySelectorAll(".genre-pill").forEach(pill => {
 			pill.addEventListener("click", () => {
 				genrePillsWrap.querySelectorAll(".genre-pill").forEach(p => p.classList.remove("active"))
@@ -65,19 +80,25 @@ document.addEventListener("DOMContentLoaded", async () => {
 		})
 	}
 
-	// Update Tab Counts
-	const countNow = moviesData.items.nowshowing?.length || 0
-	const countUp = moviesData.items.upcoming?.length || 0
-	const countSp = moviesData.items.special?.length || 0
+	renderGenrePills()
 
-	const cNowEl = document.getElementById("count-nowshowing")
-	const cUpEl = document.getElementById("count-upcoming")
-	const cSpEl = document.getElementById("count-special")
-	if (cNowEl) cNowEl.textContent = countNow
-	if (cUpEl) cUpEl.textContent = countUp
-	if (cSpEl) cSpEl.textContent = countSp
+	// ===== UPDATE TAB COUNTS =====
+	function updateTabCounts() {
+		const countNow = moviesData.items.nowshowing?.length || 0
+		const countUp = moviesData.items.upcoming?.length || 0
+		const countSp = moviesData.items.special?.length || 0
 
-	// Tab switcher
+		const cNowEl = document.getElementById("count-nowshowing")
+		const cUpEl = document.getElementById("count-upcoming")
+		const cSpEl = document.getElementById("count-special")
+		if (cNowEl) cNowEl.textContent = countNow
+		if (cUpEl) cUpEl.textContent = countUp
+		if (cSpEl) cSpEl.textContent = countSp
+	}
+
+	updateTabCounts()
+
+	// ===== TAB SWITCHER =====
 	tabButtons.forEach(btn => {
 		if (btn.dataset.tab === currentTab) btn.classList.add("active")
 		else btn.classList.remove("active")
@@ -90,14 +111,18 @@ document.addEventListener("DOMContentLoaded", async () => {
 		})
 	})
 
-	// Search input event
+	// ===== SEARCH INPUT =====
 	if (searchInput) {
+		let searchDebounceTimer = null
 		searchInput.addEventListener("input", e => {
-			searchQuery = e.target.value.trim().toLowerCase()
-			if (clearSearchBtn) {
-				clearSearchBtn.classList.toggle("visible", searchQuery.length > 0)
-			}
-			renderFilteredMovies()
+			clearTimeout(searchDebounceTimer)
+			searchDebounceTimer = setTimeout(() => {
+				searchQuery = e.target.value.trim().toLowerCase()
+				if (clearSearchBtn) {
+					clearSearchBtn.classList.toggle("visible", searchQuery.length > 0)
+				}
+				renderFilteredMovies()
+			}, 250) // Debounce 250ms để tối ưu
 		})
 	}
 
@@ -111,7 +136,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 		})
 	}
 
-	// Age filter
+	// ===== AGE FILTER =====
 	if (ageSelect) {
 		ageSelect.addEventListener("change", e => {
 			selectedAge = e.target.value
@@ -119,7 +144,15 @@ document.addEventListener("DOMContentLoaded", async () => {
 		})
 	}
 
-	// Sort select
+	// ===== FORMAT FILTER (2D / 3D / IMAX) =====
+	if (formatSelect) {
+		formatSelect.addEventListener("change", e => {
+			selectedFormat = e.target.value
+			renderFilteredMovies()
+		})
+	}
+
+	// ===== SORT SELECT =====
 	if (sortSelect) {
 		sortSelect.addEventListener("change", e => {
 			selectedSort = e.target.value
@@ -127,70 +160,57 @@ document.addEventListener("DOMContentLoaded", async () => {
 		})
 	}
 
-	// Reset filters
+	// ===== RESET ALL FILTERS =====
 	if (resetBtn) {
 		resetBtn.addEventListener("click", () => {
 			if (searchInput) searchInput.value = ""
 			searchQuery = ""
 			if (clearSearchBtn) clearSearchBtn.classList.remove("visible")
+
 			selectedGenre = "all"
-			if (genrePillsWrap) {
-				genrePillsWrap.querySelectorAll(".genre-pill").forEach(p => p.classList.remove("active"))
-				genrePillsWrap.querySelector('[data-genre="all"]')?.classList.add("active")
-			}
+			renderGenrePills() // Re-render pills to reset active state
+
 			selectedAge = "all"
 			if (ageSelect) ageSelect.value = "all"
+
+			selectedFormat = "all"
+			if (formatSelect) formatSelect.value = "all"
+
 			selectedSort = "default"
 			if (sortSelect) sortSelect.value = "default"
+
 			renderFilteredMovies()
+			showToast("Đã đặt lại tất cả bộ lọc.", "info", 2000)
 		})
 	}
 
+	// ===== MAIN RENDER FUNCTION =====
 	function renderFilteredMovies() {
 		if (!gridContainer || !moviesData) return
 
-		let list = [...(moviesData.items[currentTab] || [])]
+		// Sử dụng filterMovies từ storage module
+		const list = filterMovies({
+			tab: currentTab,
+			genre: selectedGenre,
+			age: selectedAge,
+			format: selectedFormat,
+			query: searchQuery,
+			sort: selectedSort !== "default" ? selectedSort : undefined,
+		})
 
-		// Filter by search query
-		if (searchQuery) {
-			list = list.filter(
-				m =>
-					(m.title && m.title.toLowerCase().includes(searchQuery)) ||
-					(m.originalTitle && m.originalTitle.toLowerCase().includes(searchQuery)) ||
-					(m.director && m.director.toLowerCase().includes(searchQuery)) ||
-					(m.cast && m.cast.some(c => c.toLowerCase().includes(searchQuery))),
-			)
-		}
+		// Hiển thị kết quả tìm kiếm count
+		updateResultsCount(list.length)
 
-		// Filter by genre
-		if (selectedGenre !== "all") {
-			list = list.filter(
-				m =>
-					(m.genreIds && m.genreIds.includes(selectedGenre)) ||
-					(m.genre && m.genre.toLowerCase().includes(selectedGenre.replace("-", " "))),
-			)
-		}
-
-		// Filter by age
-		if (selectedAge !== "all") {
-			list = list.filter(m => m.badge && m.badge.toLowerCase() === selectedAge.toLowerCase())
-		}
-
-		// Sort
-		if (selectedSort === "rating-desc") {
-			list.sort((a, b) => (b.ratingScore || 0) - (a.ratingScore || 0))
-		} else if (selectedSort === "date-desc") {
-			list.sort((a, b) => (b.releaseDate || "").localeCompare(a.releaseDate || ""))
-		} else if (selectedSort === "title-asc") {
-			list.sort((a, b) => (a.title || "").localeCompare(b.title || ""))
-		}
-
+		// Empty state
 		if (!list.length) {
 			gridContainer.innerHTML = `
 				<div class="movies-empty-state" style="grid-column: 1 / -1;">
 					<div class="empty-icon">🔍</div>
 					<h3>Không tìm thấy phim phù hợp</h3>
-					<p>Thử tìm kiếm với từ khóa khác hoặc điều chỉnh lại bộ lọc thể loại / độ tuổi bạn nhé.</p>
+					<p>${searchQuery
+						? `Không có kết quả cho "<strong>${escapeHtml(searchQuery)}</strong>". `
+						: ""
+					}Thử tìm kiếm với từ khóa khác hoặc điều chỉnh lại bộ lọc thể loại / độ tuổi bạn nhé.</p>
 					<button type="button" id="btn-empty-reset">Đặt lại bộ lọc</button>
 				</div>
 			`
@@ -200,6 +220,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 			return
 		}
 
+		// Render movie cards
 		gridContainer.innerHTML = list
 			.map(m => {
 				const isUpcoming = currentTab === "upcoming"
@@ -303,5 +324,34 @@ document.addEventListener("DOMContentLoaded", async () => {
 		})
 	}
 
+	// ===== HELPER: Update result count =====
+	function updateResultsCount(count) {
+		let countEl = document.getElementById("movies-results-count")
+		if (!countEl) {
+			countEl = document.createElement("div")
+			countEl.id = "movies-results-count"
+			countEl.className = "movies-results-count"
+			const filterBar = document.querySelector(".movies-filter-bar")
+			if (filterBar) filterBar.appendChild(countEl)
+		}
+
+		// Chỉ hiển thị khi có filter active
+		const hasFilters = searchQuery || selectedGenre !== "all" || selectedAge !== "all" || selectedFormat !== "all"
+		if (hasFilters) {
+			countEl.textContent = `Tìm thấy ${count} phim phù hợp`
+			countEl.style.display = "block"
+		} else {
+			countEl.style.display = "none"
+		}
+	}
+
+	// ===== HELPER: Escape HTML =====
+	function escapeHtml(text) {
+		const div = document.createElement("div")
+		div.textContent = text
+		return div.innerHTML
+	}
+
+	// ===== INITIAL RENDER =====
 	renderFilteredMovies()
 })

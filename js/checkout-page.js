@@ -2,20 +2,23 @@
  * Beta Cinemas - Checkout & E-Ticket QR Code Logic
  */
 import { setupHeaderAndFooter, formatCurrency, formatDateVN, showToast, getCurrentUser } from "./common.js"
+import { getMoviesData, getCinemas } from "./storage.js"
 
 document.addEventListener("DOMContentLoaded", async () => {
 	await setupHeaderAndFooter()
 
-	let moviesData = null
-	let cinemasData = []
+	let moviesData = getMoviesData()
+	let cinemasData = getCinemas()
 
 	try {
-		const [mRes, cRes] = await Promise.all([
-			fetch("/data/movies.json").then(r => r.json()),
-			fetch("/data/cinemas.json").then(r => r.json()),
-		])
-		moviesData = mRes
-		cinemasData = cRes
+		if (!moviesData || !cinemasData.length) {
+			const [mRes, cRes] = await Promise.all([
+				fetch("/data/movies.json").then(r => r.json()),
+				fetch("/data/cinemas.json").then(r => r.json()),
+			])
+			moviesData = mRes
+			cinemasData = cRes
+		}
 	} catch (err) {
 		console.error("Failed to load checkout dependencies:", err)
 		return

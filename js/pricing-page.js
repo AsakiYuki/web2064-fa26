@@ -2,20 +2,23 @@
  * Beta Cinemas - Ticket Pricing & Promotions Logic
  */
 import { setupHeaderAndFooter, formatCurrency, showToast } from "./common.js"
+import { getTicketPricing, getPromotions } from "./storage.js"
 
 document.addEventListener("DOMContentLoaded", async () => {
 	await setupHeaderAndFooter()
 
-	let pricingData = null
-	let promotionsData = []
+	let pricingData = getTicketPricing()
+	let promotionsData = getPromotions()
 
 	try {
-		const [prRes, promoRes] = await Promise.all([
-			fetch("/data/ticket_pricing.json").then(r => r.json()),
-			fetch("/data/promotions.json").then(r => r.json()),
-		])
-		pricingData = prRes
-		promotionsData = promoRes
+		if (!pricingData?.formats || !promotionsData.length) {
+			const [prRes, promoRes] = await Promise.all([
+				fetch("/data/ticket_pricing.json").then(r => r.json()),
+				fetch("/data/promotions.json").then(r => r.json()),
+			])
+			pricingData = prRes
+			promotionsData = promoRes
+		}
 	} catch (err) {
 		console.error("Failed to load pricing or promotions data:", err)
 		return
