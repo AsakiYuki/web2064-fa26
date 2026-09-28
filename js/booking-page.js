@@ -375,27 +375,72 @@ document.addEventListener("DOMContentLoaded", async () => {
 		const seatBadge = document.getElementById("tab-badge-seats")
 		const comboBadge = document.getElementById("tab-badge-combos")
 
-		// 1. Calculate seats total
-		const seatsTotal = bookingState.selectedSeats.reduce((sum, s) => sum + s.price, 0)
+		// 1. Tính toán tổng tiền ghế tự động theo từng loại ghế (Thường, VIP, Ghế đôi)
+		const standardSeats = bookingState.selectedSeats.filter(s => s.type === "standard")
+		const vipSeats = bookingState.selectedSeats.filter(s => s.type === "vip")
+		const sweetboxSeats = bookingState.selectedSeats.filter(s => s.type === "sweetbox")
+
+		const standardTotal = standardSeats.reduce((sum, s) => sum + s.price, 0)
+		const vipTotal = vipSeats.reduce((sum, s) => sum + s.price, 0)
+		const sweetboxTotal = sweetboxSeats.reduce((sum, s) => sum + s.price, 0)
+		const seatsTotal = standardTotal + vipTotal + sweetboxTotal
+
 		if (seatBadge) seatBadge.textContent = bookingState.selectedSeats.length
 
 		if (seatsListWrap) {
 			if (bookingState.selectedSeats.length === 0) {
 				seatsListWrap.innerHTML = `<span class="empty-placeholder">Chưa chọn ghế nào</span>`
 			} else {
-				seatsListWrap.innerHTML = bookingState.selectedSeats
-					.map(
-						s => `
-					<div class="breakdown-row">
-						<div class="row-desc">
-							<strong>Ghế ${s.id}</strong>
-							<small>${s.type === "sweetbox" ? "Ghế đôi Sweetbox" : s.type === "vip" ? "Ghế VIP" : "Ghế Thường"}</small>
+				let seatRowsHTML = ""
+
+				// Ghế Thường
+				if (standardSeats.length > 0) {
+					seatRowsHTML += `
+						<div class="breakdown-row">
+							<div class="row-desc">
+								<strong>Ghế Thường (${standardSeats.length}x)</strong>
+								<small>${standardSeats.map(s => s.id).join(", ")} • ${formatCurrency(standardSeats[0].price)}/ghế</small>
+							</div>
+							<div class="row-val">${formatCurrency(standardTotal)}</div>
 						</div>
-						<div class="row-val">${formatCurrency(s.price)}</div>
+					`
+				}
+
+				// Ghế VIP
+				if (vipSeats.length > 0) {
+					seatRowsHTML += `
+						<div class="breakdown-row">
+							<div class="row-desc">
+								<strong style="color: #fbbf24;">Ghế VIP (${vipSeats.length}x)</strong>
+								<small>${vipSeats.map(s => s.id).join(", ")} • ${formatCurrency(vipSeats[0].price)}/ghế</small>
+							</div>
+							<div class="row-val" style="color: #fbbf24;">${formatCurrency(vipTotal)}</div>
+						</div>
+					`
+				}
+
+				// Ghế Đôi Sweetbox
+				if (sweetboxSeats.length > 0) {
+					seatRowsHTML += `
+						<div class="breakdown-row">
+							<div class="row-desc">
+								<strong style="color: #f472b6;">Ghế Đôi Sweetbox (${sweetboxSeats.length}x)</strong>
+								<small>${sweetboxSeats.map(s => s.id).join(", ")} • ${formatCurrency(sweetboxSeats[0].price)}/cặp</small>
+							</div>
+							<div class="row-val" style="color: #f472b6;">${formatCurrency(sweetboxTotal)}</div>
+						</div>
+					`
+				}
+
+				// Dòng tổng cộng tiền ghế
+				seatRowsHTML += `
+					<div class="breakdown-subtotal-row">
+						<span>Tổng tiền ghế (${bookingState.selectedSeats.length} ghế):</span>
+						<strong>${formatCurrency(seatsTotal)}</strong>
 					</div>
-				`,
-					)
-					.join("")
+				`
+
+				seatsListWrap.innerHTML = seatRowsHTML
 			}
 		}
 

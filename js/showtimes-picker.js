@@ -794,9 +794,31 @@ export class ShowtimePicker {
 			totalLabel.textContent = "0 đ"
 			confirmBtn.disabled = true
 		} else {
-			chosenLabel.textContent = seats.map(s => s.id).join(", ")
-			const total = seats.reduce((sum, s) => sum + s.price, 0)
-			totalLabel.textContent = formatCurrency(total)
+			// Phân loại ghế và tính tổng tiền theo từng loại
+			const standardSeats = seats.filter(s => s.type === "standard")
+			const vipSeats = seats.filter(s => s.type === "vip")
+			const sweetboxSeats = seats.filter(s => s.type === "sweetbox")
+
+			const standardTotal = standardSeats.reduce((sum, s) => sum + s.price, 0)
+			const vipTotal = vipSeats.reduce((sum, s) => sum + s.price, 0)
+			const sweetboxTotal = sweetboxSeats.reduce((sum, s) => sum + s.price, 0)
+			const grandTotal = standardTotal + vipTotal + sweetboxTotal
+
+			// Chuỗi tóm tắt theo từng loại ghế
+			const typeDetails = []
+			if (standardSeats.length > 0) {
+				typeDetails.push(`${standardSeats.length} Thường (${formatCurrency(standardTotal)})`)
+			}
+			if (vipSeats.length > 0) {
+				typeDetails.push(`${vipSeats.length} VIP (${formatCurrency(vipTotal)})`)
+			}
+			if (sweetboxSeats.length > 0) {
+				typeDetails.push(`${sweetboxSeats.length} Đôi (${formatCurrency(sweetboxTotal)})`)
+			}
+
+			const seatNames = seats.map(s => s.id).join(", ")
+			chosenLabel.innerHTML = `<strong>${seatNames}</strong> <span style="display:block; font-size:12px; color:#94a3b8; font-weight:500; margin-top:2px;">Phân loại: ${typeDetails.join(" • ")}</span>`
+			totalLabel.textContent = formatCurrency(grandTotal)
 			confirmBtn.disabled = false
 		}
 	}

@@ -991,6 +991,28 @@
 			}
 		}
 
+		.breakdown-subtotal-row {
+			display: flex;
+			justify-content: space-between;
+			align-items: center;
+			font-size: 12px;
+			color: #94a3b8;
+			padding-top: 8px;
+			margin-top: 6px;
+			border-top: 1px dashed rgba(255, 255, 255, 0.12);
+
+			span {
+				color: #cbd5e1;
+				font-weight: 500;
+			}
+
+			strong {
+				color: #38bdf8;
+				font-size: 14px;
+				font-weight: 800;
+			}
+		}
+
 		.empty-placeholder {
 			font-size: 12px;
 			color: #64748b;
