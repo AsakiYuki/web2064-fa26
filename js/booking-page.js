@@ -195,6 +195,8 @@ document.addEventListener("DOMContentLoaded", async () => {
 	}
 
 	function handleSeatToggle(seatEl) {
+		if (seatEl.classList.contains("seat-sold")) return
+
 		const id = seatEl.dataset.seatId
 		const row = seatEl.dataset.row
 		const col = +seatEl.dataset.col
@@ -204,19 +206,33 @@ document.addEventListener("DOMContentLoaded", async () => {
 		const existingIdx = bookingState.selectedSeats.findIndex(s => s.id === id)
 
 		if (existingIdx > -1) {
-			// Deselect
+			// Bỏ chọn ghế: Xóa khỏi danh sách, phục hồi màu ban đầu theo loại ghế
 			bookingState.selectedSeats.splice(existingIdx, 1)
 			seatEl.classList.remove("seat-selected")
 			seatEl.setAttribute("aria-checked", "false")
+			showToast(`Đã bỏ chọn ghế ${id}`, "info", 1500)
 		} else {
-			// Limit to 8 seats
-			if (bookingState.selectedSeats.length >= 8) {
-				showToast("Bạn chỉ có thể chọn tối đa 8 ghế trong một giao dịch.", "warning")
+			// Giới hạn số lượng ghế tối đa là 8 ghế
+			const MAX_SEATS = 8
+			if (bookingState.selectedSeats.length >= MAX_SEATS) {
+				seatEl.classList.add("seat-shake")
+				setTimeout(() => seatEl.classList.remove("seat-shake"), 400)
+				showToast(`⚠️ Bạn chỉ có thể chọn tối đa ${MAX_SEATS} ghế trong 1 lần đặt.`, "warning")
 				return
 			}
+			// Chọn ghế mới: Thêm vào danh sách và đổi sang màu xanh ngọc nổi bật
 			bookingState.selectedSeats.push({ id, row, col, type, price })
 			seatEl.classList.add("seat-selected")
 			seatEl.setAttribute("aria-checked", "true")
+
+			if (bookingState.selectedSeats.length === MAX_SEATS) {
+				showToast(`Bạn đã chọn đủ tối đa ${MAX_SEATS} ghế.`, "info", 2000)
+			}
+		}
+
+		// Rung nhẹ haptic feedback trên thiết bị di động nếu hỗ trợ
+		if (typeof navigator !== "undefined" && navigator.vibrate) {
+			navigator.vibrate(25)
 		}
 
 		updateSummarySidebar()

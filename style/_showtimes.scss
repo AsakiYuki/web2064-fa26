@@ -587,6 +587,10 @@
 					transform: scale(1.1);
 					box-shadow: 0 0 10px rgba(16, 185, 129, 0.8);
 				}
+
+				&.seat-shake {
+					animation: seatShake 0.4s ease;
+				}
 			}
 		}
 	}

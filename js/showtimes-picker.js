@@ -663,28 +663,50 @@ export class ShowtimePicker {
 			</div>
 		`
 
-		// Add click listener on seats
+		// Gán sự kiện click và phím điều khiển cho ghế
 		const seatItems = body.querySelectorAll(".seat-item:not(.seat-sold)")
 		seatItems.forEach(seat => {
-			seat.addEventListener("click", () => {
+			const toggleSeat = () => {
 				const id = seat.dataset.seatId
 				const price = +seat.dataset.price
 				const type = seat.dataset.seatType
 
 				const existingIdx = this.currentBooking.selectedSeats.findIndex(s => s.id === id)
 				if (existingIdx > -1) {
+					// Bỏ chọn ghế
 					this.currentBooking.selectedSeats.splice(existingIdx, 1)
 					seat.classList.remove("seat-selected")
+					seat.setAttribute("aria-checked", "false")
 				} else {
-					if (this.currentBooking.selectedSeats.length >= 8) {
-						showToast("Bạn chỉ có thể chọn tối đa 8 ghế trong 1 lần đặt.", "warning")
+					// Giới hạn 8 ghế tối đa
+					const MAX_SEATS = 8
+					if (this.currentBooking.selectedSeats.length >= MAX_SEATS) {
+						seat.classList.add("seat-shake")
+						setTimeout(() => seat.classList.remove("seat-shake"), 400)
+						showToast(`⚠️ Bạn chỉ có thể chọn tối đa ${MAX_SEATS} ghế trong 1 lần đặt.`, "warning")
 						return
 					}
+					// Chọn ghế mới
 					this.currentBooking.selectedSeats.push({ id, price, type })
 					seat.classList.add("seat-selected")
+					seat.setAttribute("aria-checked", "true")
 				}
 
+				if (typeof navigator !== "undefined" && navigator.vibrate) {
+					navigator.vibrate(25)
+				}
 				this.updateBookingSummary()
+			}
+
+			seat.setAttribute("role", "checkbox")
+			seat.setAttribute("aria-checked", "false")
+			seat.setAttribute("tabindex", "0")
+			seat.addEventListener("click", toggleSeat)
+			seat.addEventListener("keydown", e => {
+				if (e.key === "Enter" || e.key === " ") {
+					e.preventDefault()
+					toggleSeat()
+				}
 			})
 		})
 
