@@ -2,26 +2,29 @@
  * Beta Cinemas - Seat Selection & Concessions Booking Logic
  */
 import { setupHeaderAndFooter, formatCurrency, formatDateVN, showToast } from "./common.js"
+import { getMoviesData, getCinemas, getConcessions, getTicketPricing, getShowtimeSeats, updateShowtimeSeats } from "./storage.js"
 
 document.addEventListener("DOMContentLoaded", async () => {
 	await setupHeaderAndFooter()
 
-	let moviesData = null
-	let cinemasData = []
-	let concessionsData = null
-	let pricingData = null
+	let moviesData = getMoviesData()
+	let cinemasData = getCinemas()
+	let concessionsData = getConcessions()
+	let pricingData = getTicketPricing()
 
 	try {
-		const [mRes, cRes, fRes, pRes] = await Promise.all([
-			fetch("/data/movies.json").then(r => r.json()),
-			fetch("/data/cinemas.json").then(r => r.json()),
-			fetch("/data/concessions.json").then(r => r.json()),
-			fetch("/data/ticket_pricing.json").then(r => r.json()).catch(() => null),
-		])
-		moviesData = mRes
-		cinemasData = cRes
-		concessionsData = fRes
-		pricingData = pRes
+		if (!moviesData || !cinemasData.length || !concessionsData.length) {
+			const [mRes, cRes, fRes, pRes] = await Promise.all([
+				fetch("/data/movies.json").then(r => r.json()),
+				fetch("/data/cinemas.json").then(r => r.json()),
+				fetch("/data/concessions.json").then(r => r.json()),
+				fetch("/data/ticket_pricing.json").then(r => r.json()).catch(() => null),
+			])
+			moviesData = mRes
+			cinemasData = cRes
+			concessionsData = fRes
+			pricingData = pRes
+		}
 	} catch (err) {
 		console.error("Failed to load booking data:", err)
 		return
@@ -115,94 +118,71 @@ document.addEventListener("DOMContentLoaded", async () => {
 		const container = document.getElementById("seat-rows-container")
 		if (!container) return
 
-		// Rows A to J:
-		// A, B, C: Standard
-		// D, E, F, G, H: VIP
-		// J: Sweetbox (Couple)
-		const rowConfigs = [
-			{ row: "A", type: "standard", price: baseStandardPrice },
-			{ row: "B", type: "standard", price: baseStandardPrice },
-			{ row: "C", type: "standard", price: baseStandardPrice },
-			{ row: "D", type: "vip", price: baseVipPrice },
-			{ row: "E", type: "vip", price: baseVipPrice },
-			{ row: "F", type: "vip", price: baseVipPrice },
-			{ row: "G", type: "vip", price: baseVipPrice },
-			{ row: "H", type: "vip", price: baseVipPrice },
-			{ row: "J", type: "sweetbox", price: baseSweetboxPrice },
-		]
-
-		// Deterministic sold seats seed
-		const seed = (dateStr + timeSlot + cinemaId).split("").reduce((acc, c) => acc + c.charCodeAt(0), 0)
+		// Nạp sơ đồ ghế động của suất chiếu trực tiếp từ LocalStorage
+		const seatLayout = getShowtimeSeats(currentCinema.id, currentMovie.id, dateStr, timeSlot, {
+			isIMAX,
+			basePrice: baseStandardPrice,
+		})
 
 		let rowsHTML = ""
-		rowConfigs.forEach((rc, rIdx) => {
-			const isSweetbox = rc.type === "sweetbox"
-
+		seatLayout.forEach(rowBlock => {
+			const isSweetbox = rowBlock.type === "sweetbox"
 			let rowSeatsHTML = ""
-			if (isSweetbox) {
-				// 5 couple seats
-				for (let c = 1; c <= 5; c++) {
-					const seatId = `J0${c * 2 - 1}-J0${c * 2}`
-					const isSold = (seed + rIdx * 7 + c * 11) % 5 === 0
 
+			rowBlock.seats.forEach(seat => {
+				const isSold = seat.status === "sold"
+				const isSelected = bookingState.selectedSeats.some(s => s.id === seat.id)
+
+				if (isSweetbox) {
 					rowSeatsHTML += `
-						<div class="seat-unit seat-sweetbox ${isSold ? "seat-sold" : ""}"
-							data-seat-id="${seatId}"
-							data-row="${rc.row}"
-							data-col="${c}"
-							data-type="${rc.type}"
-							data-price="${rc.price}"
-							title="${seatId} (Ghế đôi Sweetbox: ${formatCurrency(rc.price)})"
+						<div class="seat-unit seat-sweetbox ${isSold ? "seat-sold" : ""} ${isSelected ? "seat-selected" : ""}"
+							data-seat-id="${seat.id}"
+							data-row="${seat.row}"
+							data-col="${seat.col}"
+							data-type="${seat.type}"
+							data-price="${seat.price}"
+							title="${seat.id} (Ghế đôi Sweetbox: ${formatCurrency(seat.price)})"
 							role="checkbox"
-							aria-checked="false"
+							aria-checked="${isSelected ? "true" : "false"}"
 							tabindex="${isSold ? "-1" : "0"}">
-							<span class="swb-icon">👫</span> ${seatId}
+							<span class="swb-icon">👫</span> ${seat.id}
 						</div>
 					`
-				}
-			} else {
-				// Regular rows: 12 seats with aisles (3 left - aisle - 6 center - aisle - 3 right)
-				for (let c = 1; c <= 12; c++) {
-					const seatNum = `${rc.row}${String(c).padStart(2, "0")}`
-					const isSold =
-						(seed * (rIdx + 1) + c * 13) % 7 === 0 ||
-						(rc.row === "F" && (c === 6 || c === 7)) ||
-						(rc.row === "E" && c === 5)
-
-					// Add aisle spacing after col 3 and col 9
-					if (c === 4 || c === 10) {
+				} else {
+					// Lối đi sau ghế 3 và ghế 9
+					if (seat.col === 4 || seat.col === 10) {
 						rowSeatsHTML += `<div class="seat-aisle-divider"></div>`
 					}
 
 					rowSeatsHTML += `
-						<div class="seat-unit seat-${rc.type} ${isSold ? "seat-sold" : ""}"
-							data-seat-id="${seatNum}"
-							data-row="${rc.row}"
-							data-col="${c}"
-							data-type="${rc.type}"
-							data-price="${rc.price}"
-							title="${seatNum} (${rc.type === "vip" ? "VIP" : "Thường"}: ${formatCurrency(rc.price)})"
+						<div class="seat-unit seat-${seat.type} ${isSold ? "seat-sold" : ""} ${isSelected ? "seat-selected" : ""}"
+							data-seat-id="${seat.id}"
+							data-row="${seat.row}"
+							data-col="${seat.col}"
+							data-type="${seat.type}"
+							data-price="${seat.price}"
+							title="${seat.id} (${seat.type === "vip" ? "VIP" : "Thường"}: ${formatCurrency(seat.price)})"
 							role="checkbox"
-							aria-checked="false"
+							aria-checked="${isSelected ? "true" : "false"}"
 							tabindex="${isSold ? "-1" : "0"}">
-							${c}
+							${seat.col}
 						</div>
 					`
 				}
-			}
+			})
 
 			rowsHTML += `
 				<div class="seat-row-block">
-					<span class="row-letter">${rc.row}</span>
+					<span class="row-letter">${rowBlock.row}</span>
 					${rowSeatsHTML}
-					<span class="row-letter">${rc.row}</span>
+					<span class="row-letter">${rowBlock.row}</span>
 				</div>
 			`
 		})
 
 		container.innerHTML = rowsHTML
 
-		// Attach seat click events
+		// Gán sự kiện click và bàn phím cho các ghế còn trống
 		container.querySelectorAll(".seat-unit:not(.seat-sold)").forEach(seat => {
 			seat.addEventListener("click", () => handleSeatToggle(seat))
 			seat.addEventListener("keydown", e => {

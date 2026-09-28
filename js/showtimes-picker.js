@@ -4,7 +4,7 @@
  * Render sơ đồ ghế động, đếm ngược giữ ghế, tính tổng tiền tự động
  */
 import { formatCurrency, showToast, formatDateVN } from "./common.js"
-import { getCinemas, getMoviesData, getShowtimes, getTicketPricing, storageGet, storageSet, STORAGE_KEYS } from "./storage.js"
+import { getCinemas, getMoviesData, getShowtimes, getTicketPricing, getShowtimeSeats, updateShowtimeSeats, storageGet, storageSet, STORAGE_KEYS } from "./storage.js"
 
 export class ShowtimePicker {
 	constructor(options = {}) {
@@ -580,43 +580,35 @@ export class ShowtimePicker {
 		const body = document.getElementById("seat-modal-body")
 		if (!body) return
 
-		const rows = ["A", "B", "C", "D", "E", "F", "G"]
-		const isWeekend = new Date(slotData.date).getDay() === 0 || new Date(slotData.date).getDay() === 6
 		const basePrice = slotData.price || 75000
-
-		// Deterministic sold seats based on slot time
-		const soldHash = (slotData.time + slotData.date).split("").reduce((acc, c) => acc + c.charCodeAt(0), 0)
+		const seatLayout = getShowtimeSeats(slotData.cinemaId, slotData.movieId, slotData.date, slotData.time, {
+			basePrice,
+			isIMAX: (slotData.format || "").toLowerCase().includes("imax"),
+		})
 
 		let seatRowsHTML = ""
-		rows.forEach((r, rIdx) => {
+		seatLayout.forEach(rowBlock => {
 			let seatsInRow = ""
-			const isSweetbox = r === "G"
-			const isVip = r === "D" || r === "E" || r === "F"
-			const seatType = isSweetbox ? "sweetbox" : isVip ? "vip" : "standard"
+			const isSweetbox = rowBlock.type === "sweetbox"
 
-			const seatPrice = isSweetbox ? basePrice * 2 + 10000 : isVip ? basePrice + 10000 : basePrice
-			const colCount = isSweetbox ? 5 : 10
-
-			for (let c = 1; c <= colCount; c++) {
-				const seatNum = isSweetbox ? `${r}0${c * 2 - 1}-${r}0${c * 2}` : `${r}${String(c).padStart(2, "0")}`
-				const isSold = (soldHash * rIdx + c * 7) % 7 === 0 || (rIdx === 3 && c === 5)
-
+			rowBlock.seats.forEach(seat => {
+				const isSold = seat.status === "sold"
 				seatsInRow += `
-					<div class="seat-item seat-${seatType} ${isSold ? "seat-sold" : ""}"
-						data-seat-id="${seatNum}"
-						data-seat-type="${seatType}"
-						data-price="${seatPrice}"
-						title="${seatNum} (${formatCurrency(seatPrice)})">
-						${isSweetbox ? "👫" : seatNum.slice(1)}
+					<div class="seat-item seat-${seat.type} ${isSold ? "seat-sold" : ""}"
+						data-seat-id="${seat.id}"
+						data-seat-type="${seat.type}"
+						data-price="${seat.price}"
+						title="${seat.id} (${formatCurrency(seat.price)})">
+						${isSweetbox ? "👫" : seat.id.slice(1)}
 					</div>
 				`
-			}
+			})
 
 			seatRowsHTML += `
 				<div class="seat-row">
-					<span class="row-label">${r}</span>
+					<span class="row-label">${rowBlock.row}</span>
 					${seatsInRow}
-					<span class="row-label">${r}</span>
+					<span class="row-label">${rowBlock.row}</span>
 				</div>
 			`
 		})

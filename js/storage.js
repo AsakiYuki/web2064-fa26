@@ -512,3 +512,134 @@ export function getBanners() {
 export function getFooterData() {
 	return storageGet(STORAGE_KEYS.FOOTER, [])
 }
+
+/* ==========================================================================
+   SHOWTIME SEATS MANAGEMENT (LocalStorage)
+   ========================================================================== */
+
+/**
+ * Tạo key lưu trữ sơ đồ ghế cho một suất chiếu cụ thể trong LocalStorage
+ */
+export function getShowtimeStorageKey(cinemaId, movieId, date, time) {
+	const safeCinema = (cinemaId || "default").replace(/[^a-zA-Z0-9_-]/g, "")
+	const safeMovie = (movieId || "default").replace(/[^a-zA-Z0-9_-]/g, "")
+	const safeDate = (date || "today").replace(/[^a-zA-Z0-9_-]/g, "")
+	const safeTime = (time || "0000").replace(/[^a-zA-Z0-9_-]/g, "")
+	return `${STORAGE_PREFIX}seats_${safeCinema}_${safeMovie}_${safeDate}_${safeTime}`
+}
+
+/**
+ * Lấy hoặc khởi tạo sơ đồ ghế ngồi của một suất chiếu từ LocalStorage
+ * @param {string} cinemaId
+ * @param {string} movieId
+ * @param {string} date
+ * @param {string} time
+ * @param {Object} options - { basePrice, isIMAX }
+ * @returns {Array} Danh sách các hàng ghế và từng ghế cùng trạng thái (available / sold)
+ */
+export function getShowtimeSeats(cinemaId, movieId, date, time, options = {}) {
+	const key = getShowtimeStorageKey(cinemaId, movieId, date, time)
+	const cached = storageGet(key)
+	if (cached && Array.isArray(cached) && cached.length > 0) {
+		return cached
+	}
+
+	// Nếu chưa có trong LocalStorage, khởi tạo sơ đồ ghế mẫu và lưu vào LS
+	const isIMAX = options.isIMAX || false
+	const basePrice = options.basePrice || (isIMAX ? 120000 : 70000)
+	const vipPrice = basePrice + 10000
+	const sweetboxPrice = basePrice * 2 + 15000
+
+	const rowDefs = [
+		{ row: "A", type: "standard", price: basePrice, count: 12 },
+		{ row: "B", type: "standard", price: basePrice, count: 12 },
+		{ row: "C", type: "standard", price: basePrice, count: 12 },
+		{ row: "D", type: "vip", price: vipPrice, count: 12 },
+		{ row: "E", type: "vip", price: vipPrice, count: 12 },
+		{ row: "F", type: "vip", price: vipPrice, count: 12 },
+		{ row: "G", type: "vip", price: vipPrice, count: 12 },
+		{ row: "H", type: "vip", price: vipPrice, count: 12 },
+		{ row: "J", type: "sweetbox", price: sweetboxPrice, count: 5 },
+	]
+
+	// Hash để tạo ngẫu nhiên nhưng cố định các ghế đã bán (15-20% ghế)
+	const seedStr = `${cinemaId}_${movieId}_${date}_${time}`
+	let hash = 0
+	for (let i = 0; i < seedStr.length; i++) {
+		hash = (hash << 5) - hash + seedStr.charCodeAt(i)
+		hash |= 0
+	}
+	const absHash = Math.abs(hash)
+
+	const seatLayout = rowDefs.map((rd, rIdx) => {
+		const isSweetbox = rd.type === "sweetbox"
+		const seats = []
+
+		if (isSweetbox) {
+			for (let c = 1; c <= rd.count; c++) {
+				const seatId = `J0${c * 2 - 1}-J0${c * 2}`
+				const isSold = (absHash + rIdx * 7 + c * 11) % 5 === 0
+				seats.push({
+					id: seatId,
+					row: rd.row,
+					col: c,
+					type: rd.type,
+					price: rd.price,
+					status: isSold ? "sold" : "available",
+				})
+			}
+		} else {
+			for (let c = 1; c <= rd.count; c++) {
+				const seatId = `${rd.row}${String(c).padStart(2, "0")}`
+				const isSold =
+					(absHash * (rIdx + 1) + c * 13) % 7 === 0 ||
+					(rd.row === "F" && (c === 6 || c === 7)) ||
+					(rd.row === "E" && c === 5)
+				seats.push({
+					id: seatId,
+					row: rd.row,
+					col: c,
+					type: rd.type,
+					price: rd.price,
+					status: isSold ? "sold" : "available",
+				})
+			}
+		}
+
+		return {
+			row: rd.row,
+			type: rd.type,
+			price: rd.price,
+			seats,
+		}
+	})
+
+	// Lưu vào LocalStorage
+	storageSet(key, seatLayout)
+	return seatLayout
+}
+
+/**
+ * Cập nhật trạng thái ghế (ví dụ 'sold' khi đặt thành công hoặc 'held' khi đang giữ)
+ */
+export function updateShowtimeSeats(cinemaId, movieId, date, time, seatIds, status = "sold") {
+	const key = getShowtimeStorageKey(cinemaId, movieId, date, time)
+	const layout = getShowtimeSeats(cinemaId, movieId, date, time)
+	if (!layout) return false
+
+	let changed = false
+	layout.forEach(rowBlock => {
+		rowBlock.seats.forEach(s => {
+			if (seatIds.includes(s.id)) {
+				s.status = status
+				changed = true
+			}
+		})
+	})
+
+	if (changed) {
+		storageSet(key, layout)
+	}
+	return changed
+}
+
