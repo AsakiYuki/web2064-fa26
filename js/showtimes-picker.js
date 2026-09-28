@@ -1,7 +1,10 @@
 /**
  * Beta Cinemas - Showtimes Selector & Interactive Seat Booking Component
+ * Chức năng chọn rạp, chọn ngày và lọc suất chiếu tương ứng
+ * Render sơ đồ ghế động, đếm ngược giữ ghế, tính tổng tiền tự động
  */
 import { formatCurrency, showToast, formatDateVN } from "./common.js"
+import { getCinemas, getMoviesData, getShowtimes, getTicketPricing, storageGet, storageSet, STORAGE_KEYS } from "./storage.js"
 
 export class ShowtimePicker {
 	constructor(options = {}) {
@@ -31,18 +34,30 @@ export class ShowtimePicker {
 
 	async init() {
 		try {
-			const [cinemas, moviesData, showtimesData, pricing] = await Promise.all([
-				fetch("/data/cinemas.json").then(r => r.json()),
-				fetch("/data/movies.json").then(r => r.json()),
-				fetch("/data/showtimes.json").then(r => r.json()),
-				fetch("/data/ticket_pricing.json").then(r => r.json()).catch(() => null),
-			])
+			let cinemas = getCinemas()
+			let moviesData = getMoviesData()
+			let showtimesData = getShowtimes()
+			let pricing = getTicketPricing()
+
+			// Fallback nếu LocalStorage chưa có
+			if (!cinemas.length || !moviesData) {
+				const [c, m, s, p] = await Promise.all([
+					fetch("/data/cinemas.json").then(r => r.json()),
+					fetch("/data/movies.json").then(r => r.json()),
+					fetch("/data/showtimes.json").then(r => r.json()),
+					fetch("/data/ticket_pricing.json").then(r => r.json()).catch(() => null),
+				])
+				cinemas = c
+				moviesData = m
+				showtimesData = s
+				pricing = p
+			}
 
 			this.cinemas = cinemas || []
 			this.movies = [
-				...(moviesData.items.nowshowing || []),
-				...(moviesData.items.special || []),
-				...(moviesData.items.upcoming || []),
+				...(moviesData?.items?.nowshowing || []),
+				...(moviesData?.items?.special || []),
+				...(moviesData?.items?.upcoming || []),
 			]
 			this.showtimes = showtimesData || []
 			this.ticketPricing = pricing
@@ -428,15 +443,47 @@ export class ShowtimePicker {
 		return `~${String(endH).padStart(2, "0")}:${String(endM).padStart(2, "0")}`
 	}
 
+	/**
+	 * Lấy suất chiếu đã lọc theo ngày + rạp hiện tại từ LocalStorage
+	 * @returns {Object|null} scheduleEntry { date, cinemaId, schedules: [...] }
+	 */
+	getFilteredShowtimes() {
+		const currentCinema = this.cinemas.find(c => c.id === this.selectedCinemaId)
+		if (!currentCinema) return null
+
+		// Tìm trong dữ liệu showtimes chính xác theo date + cinemaId
+		let scheduleEntry = this.showtimes.find(
+			s => s.date === this.selectedDate && s.cinemaId === this.selectedCinemaId,
+		)
+
+		// Fallback: sinh lịch mẫu nếu không tìm thấy
+		if (!scheduleEntry) {
+			scheduleEntry = this.generateFallbackSchedule(this.selectedDate, currentCinema)
+		}
+
+		// Nếu đang ở mode single-movie, lọc chỉ hiện phim đó
+		if (this.movieId) {
+			const filtered = (scheduleEntry.schedules || []).filter(s => s.movieId === this.movieId)
+			return { ...scheduleEntry, schedules: filtered }
+		}
+
+		return scheduleEntry
+	}
+
 	attachEvents() {
 		const container = document.getElementById(this.containerId)
 		if (!container) return
 
-		// Date buttons
+		// Date buttons - smooth scroll active card vào view
 		container.querySelectorAll(".date-card-btn").forEach(btn => {
 			btn.addEventListener("click", () => {
 				this.selectedDate = btn.dataset.date
-				this.render()
+				this.renderShowtimeResultsOnly()
+				// Update active class without full re-render
+				container.querySelectorAll(".date-card-btn").forEach(b => b.classList.remove("active"))
+				btn.classList.add("active")
+				// Smooth scroll date card into view
+				btn.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" })
 			})
 		})
 
@@ -448,16 +495,28 @@ export class ShowtimePicker {
 			})
 		})
 
-		// Cinema choice
+		// Cinema choice cards
 		container.querySelectorAll(".cinema-card-choice").forEach(card => {
 			card.addEventListener("click", () => {
 				this.selectedCinemaId = card.dataset.cinemaId
-				this.render()
+				// Animate active state
+				container.querySelectorAll(".cinema-card-choice").forEach(c => c.classList.remove("active"))
+				card.classList.add("active")
+				// Only re-render results section (không flash toàn trang)
+				this.renderShowtimeResultsOnly()
 			})
 		})
 
 		// Showtime slot click -> Open seat selection
-		container.querySelectorAll(".slot-btn:not(.disabled)").forEach(btn => {
+		this.attachSlotEvents(container)
+	}
+
+	/** Attach click events cho các slot-btn (gọi riêng khi partial re-render) */
+	attachSlotEvents(container) {
+		const wrap = container || document.getElementById(this.containerId)
+		if (!wrap) return
+
+		wrap.querySelectorAll(".slot-btn:not(.disabled)").forEach(btn => {
 			btn.addEventListener("click", () => {
 				const slotData = {
 					movieId: btn.dataset.movieId,
@@ -473,6 +532,19 @@ export class ShowtimePicker {
 				this.openSeatModal(slotData)
 			})
 		})
+	}
+
+	/** Re-render chỉ phần kết quả suất chiếu (không flash toàn bộ picker) */
+	renderShowtimeResultsOnly() {
+		const resultsWrap = document.getElementById("showtimes-results-wrap")
+		if (!resultsWrap) return
+		resultsWrap.style.opacity = "0.4"
+		resultsWrap.style.transition = "opacity 0.2s ease"
+		setTimeout(() => {
+			resultsWrap.innerHTML = this.renderShowtimeResults()
+			resultsWrap.style.opacity = "1"
+			this.attachSlotEvents(resultsWrap)
+		}, 150)
 	}
 
 	/* ==========================================================================
