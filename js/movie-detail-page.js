@@ -25,7 +25,13 @@ document.addEventListener("DOMContentLoaded", async () => {
 		currentMovie = getMovieBySlug(querySlug)
 	}
 
-	// Nếu không tìm thấy theo query param
+	// Nếu có truyền id hoặc slug nhưng không tìm thấy phim trong database -> Tự động chuyển đến trang 404
+	if (!currentMovie && (queryId || querySlug)) {
+		window.location.href = `/404.html?from=${encodeURIComponent(window.location.pathname + window.location.search)}`
+		return
+	}
+
+	// Nếu không truyền query param nào, mặc định lấy phim đầu tiên
 	if (!currentMovie) {
 		const moviesData = getMoviesData()
 		const allMovies = [
@@ -33,11 +39,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 			...(moviesData?.items?.special || []),
 			...(moviesData?.items?.upcoming || []),
 		]
-
-		if (queryId || querySlug) {
-			showToast(`Không tìm thấy phim với mã "${queryId || querySlug}". Đang hiển thị phim nổi bật.`, "info", 4000)
-		}
-
 		currentMovie = allMovies[0] || null
 	}
 

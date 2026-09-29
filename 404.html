@@ -63,23 +63,23 @@
 			<h1 class="error-code">404</h1>
 			<h2 class="error-title">Rất Tiếc! Trang Bạn Tìm Không Tồn Tại</h2>
 			<p class="error-desc">
-				Đường dẫn bạn truy cập có thể đã bị thay đổi, xóa bỏ hoặc không tồn tại trong hệ thống của Beta Cinemas.
+				Đường dẫn <code id="missing-url-code" style="display:none; color:#f87171; background:rgba(239,68,68,0.15); padding:2px 8px; border-radius:4px; margin: 0 4px; font-weight: 600;"></code> bạn truy cập có thể đã bị thay đổi, xóa bỏ hoặc không tồn tại trong hệ thống của Beta Cinemas.
 			</p>
 			<div class="error-actions">
 				<a href="/" class="btn-home">
 					<span>🏠</span> TRỞ VỀ TRANG CHỦ
 				</a>
-				<a href="/" class="btn-schedule">
+				<a href="/schedule.html" class="btn-schedule">
 					LỊCH CHIẾU PHIM
 				</a>
 			</div>
 			<div class="error-search-box">
 				<p>Bạn có thể quan tâm đến các nội dung hot:</p>
 				<div class="quick-links">
-					<a href="/">Phim Đang Chiếu</a>
-					<a href="/">Phim Sắp Chiếu</a>
-					<a href="/">Ưu Đãi Thành Viên</a>
-					<a href="/">Giá Vé Rạp Beta</a>
+					<a href="/movies.html?tab=nowshowing">Phim Đang Chiếu</a>
+					<a href="/movies.html?tab=upcoming">Phim Sắp Chiếu</a>
+					<a href="/pricing.html#promotions">Ưu Đãi Thành Viên</a>
+					<a href="/pricing.html">Giá Vé Rạp Beta</a>
 				</div>
 			</div>
 		</div>
@@ -154,7 +154,7 @@
 		</div>
 	</footer>
 
-	<script type="module" src="/js/main.js"></script>
+	<script type="module" src="/js/error-page.js"></script>
 </body>
 
 </html>

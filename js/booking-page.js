@@ -45,6 +45,13 @@ document.addEventListener("DOMContentLoaded", async () => {
 		...(moviesData.items.special || []),
 		...(moviesData.items.upcoming || []),
 	]
+	// Check if movieId exists in database
+	const reqMovieId = urlParams.get("movieId")
+	if (reqMovieId && !allMovies.some(m => m.id === reqMovieId)) {
+		window.location.href = `/404.html?from=${encodeURIComponent(window.location.pathname + window.location.search)}`
+		return
+	}
+
 	const currentMovie = allMovies.find(m => m.id === movieId) || allMovies[0]
 	const currentCinema = cinemasData.find(c => c.id === cinemaId) || cinemasData[0]
 

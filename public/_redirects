@@ -1,0 +1,10 @@
+/movies /movies.html 200
+/schedule /schedule.html 200
+/booking /booking.html 200
+/checkout /checkout.html 200
+/profile /profile.html 200
+/pricing /pricing.html 200
+/movie-detail /movie-detail.html 200
+/404 /404.html 200
+/error /error.html 200
+/* /404.html 404
