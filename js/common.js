@@ -497,26 +497,26 @@ function initMegaMenuAndMobileDrawer() {
 				</a>
 			</div>
 			<div class="mega-movies-grid">
-				<a href="/movie-detail.html?id=utlan2" class="mm-card">
+				<a href="/movie-detail.html?id=utlan2" class="mm-card" title="Út Lan 2">
 					<div class="mm-thumb">
 						<img src="/poster/poster_utlan2.jpg" alt="Út Lan 2" />
 						<span class="mm-badge">T18</span>
 					</div>
 					<span class="mm-title">Út Lan 2</span>
 				</a>
-				<a href="/movie-detail.html?id=bongma" class="mm-card">
+				<a href="/movie-detail.html?id=bongma" class="mm-card" title="Bóng Ma Nhà Hát">
 					<div class="mm-thumb">
 						<img src="/poster/poster_bongma.jpg" alt="Bóng Ma Nhà Hát" />
 						<span class="mm-badge">T18</span>
 					</div>
 					<span class="mm-title">Bóng Ma Nhà Hát</span>
 				</a>
-				<a href="/movie-detail.html?id=sp1" class="mm-card">
+				<a href="/movie-detail.html?id=sp1" class="mm-card" title="Avengers: Hồi Kết IMAX">
 					<div class="mm-thumb">
-						<img src="/movie_posters.jpg" alt="Avengers IMAX" style="object-position:75% 0%;" />
+						<img src="/poster/poster_avengers.jpg" alt="Avengers: Hồi Kết IMAX" />
 						<span class="mm-badge" style="background:#0284c7;">IMAX</span>
 					</div>
-					<span class="mm-title">Avengers: Hồi Kết IMAX</span>
+					<span class="mm-title">Avengers: Hồi Kết</span>
 				</a>
 			</div>
 		`
