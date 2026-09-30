@@ -52,8 +52,16 @@ document.addEventListener("DOMContentLoaded", async () => {
 		return
 	}
 
-	const currentMovie = allMovies.find(m => m.id === movieId) || allMovies[0]
-	const currentCinema = cinemasData.find(c => c.id === cinemaId) || cinemasData[0]
+	// Base seat prices
+	const isIMAX = formatName.toLowerCase().includes("imax")
+	const baseStandardPrice = isIMAX ? 120000 : 70000
+	const baseVipPrice = baseStandardPrice + 10000
+	const baseSweetboxPrice = baseStandardPrice * 2 + 15000
+
+	// Hold timer variables (defined early to prevent TDZ access)
+	let holdTimerInterval = null
+	let holdSecondsRemaining = 300 // 5 phút = 300 giây
+	let hasNotifiedOneMinute = false
 
 	// Booking State
 	const bookingState = {
@@ -70,11 +78,30 @@ document.addEventListener("DOMContentLoaded", async () => {
 		currentStep: 1, // 1: Seats, 2: Concessions
 	}
 
-	// Base seat prices
-	const isIMAX = formatName.toLowerCase().includes("imax")
-	const baseStandardPrice = isIMAX ? 120000 : 70000
-	const baseVipPrice = baseStandardPrice + 10000
-	const baseSweetboxPrice = baseStandardPrice * 2 + 15000
+	// Pre-populate selected seats from URL if provided (e.g. from modal or direct link)
+	const seatsParam = urlParams.get("seats")
+	if (seatsParam) {
+		const seatIds = seatsParam.split(",").map(s => s.trim()).filter(Boolean)
+		const seatLayout = getShowtimeSeats(currentCinema.id, currentMovie.id, dateStr, timeSlot, {
+			isIMAX,
+			basePrice: baseStandardPrice,
+		})
+		seatIds.forEach(id => {
+			for (const row of seatLayout) {
+				const foundSeat = row.seats.find(s => s.id === id)
+				if (foundSeat && foundSeat.status !== "sold") {
+					bookingState.selectedSeats.push({
+						id: foundSeat.id,
+						row: foundSeat.row,
+						col: foundSeat.col,
+						type: foundSeat.type,
+						price: foundSeat.price,
+					})
+					break
+				}
+			}
+		})
+	}
 
 	initBookingInfoDisplay()
 	renderSeatMap()
@@ -864,10 +891,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 	/* ==========================================================================
 	   8. HOLD COUNTDOWN TIMER (5 PHÚT VÀ TỰ ĐỘNG HỦY KHI HẾT GIỜ)
 	   ========================================================================== */
-	let holdTimerInterval = null
-	let holdSecondsRemaining = 300 // 5 phút = 300 giây
-	let hasNotifiedOneMinute = false
-
 	function formatTimeDigits(totalSecs) {
 		const m = Math.floor(Math.max(0, totalSecs) / 60)
 		const s = Math.max(0, totalSecs) % 60

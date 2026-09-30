@@ -562,7 +562,13 @@ export class ShowtimePicker {
 					price: +btn.dataset.price,
 					date: this.selectedDate,
 				}
-				this.openSeatModal(slotData)
+
+				if (typeof this.onSlotSelect === "function") {
+					this.onSlotSelect(slotData)
+				} else {
+					const bookingUrl = `/booking.html?movieId=${encodeURIComponent(slotData.movieId)}&cinemaId=${encodeURIComponent(slotData.cinemaId)}&date=${encodeURIComponent(slotData.date)}&time=${encodeURIComponent(slotData.time)}&screen=${encodeURIComponent(slotData.screenName)}&format=${encodeURIComponent(slotData.format)}`
+					window.location.href = bookingUrl
+				}
 			})
 		})
 	}
