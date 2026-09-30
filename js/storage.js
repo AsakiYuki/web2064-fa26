@@ -31,7 +31,7 @@ export const STORAGE_KEYS = {
 }
 
 /** Phiên bản dữ liệu mẫu - tăng lên khi JSON cập nhật để tự động sync lại LS */
-export const CURRENT_DATA_VERSION = "2.2"
+export const CURRENT_DATA_VERSION = "2.5"
 
 /** Mapping từ STORAGE_KEYS sang đường dẫn file JSON tương ứng */
 const DATA_SOURCE_MAP = {
@@ -791,7 +791,7 @@ export function getShowtimeStorageKey(cinemaId, movieId, date, time) {
 export function getShowtimeSeats(cinemaId, movieId, date, time, options = {}) {
 	const key = getShowtimeStorageKey(cinemaId, movieId, date, time)
 	const cached = storageGet(key)
-	if (cached && Array.isArray(cached) && cached.length > 0) {
+	if (cached && Array.isArray(cached) && cached.length >= 12) {
 		return cached
 	}
 
@@ -801,15 +801,18 @@ export function getShowtimeSeats(cinemaId, movieId, date, time, options = {}) {
 	const sweetboxPrice = basePrice * 2 + 15000
 
 	const rowDefs = [
-		{ row: "A", type: "standard", price: basePrice, count: 12 },
-		{ row: "B", type: "standard", price: basePrice, count: 12 },
-		{ row: "C", type: "standard", price: basePrice, count: 12 },
-		{ row: "D", type: "vip", price: vipPrice, count: 12 },
-		{ row: "E", type: "vip", price: vipPrice, count: 12 },
-		{ row: "F", type: "vip", price: vipPrice, count: 12 },
-		{ row: "G", type: "vip", price: vipPrice, count: 12 },
-		{ row: "H", type: "vip", price: vipPrice, count: 12 },
-		{ row: "J", type: "sweetbox", price: sweetboxPrice, count: 5 },
+		{ row: "A", type: "standard", price: basePrice, count: 14 },
+		{ row: "B", type: "standard", price: basePrice, count: 14 },
+		{ row: "C", type: "standard", price: basePrice, count: 14 },
+		{ row: "D", type: "standard", price: basePrice, count: 14 },
+		{ row: "E", type: "vip", price: vipPrice, count: 14 },
+		{ row: "F", type: "vip", price: vipPrice, count: 14 },
+		{ row: "G", type: "vip", price: vipPrice, count: 14 },
+		{ row: "H", type: "vip", price: vipPrice, count: 14 },
+		{ row: "J", type: "vip", price: vipPrice, count: 14 },
+		{ row: "K", type: "vip", price: vipPrice, count: 14 },
+		{ row: "L", type: "sweetbox", price: sweetboxPrice, count: 6 },
+		{ row: "M", type: "sweetbox", price: sweetboxPrice, count: 6 },
 	]
 
 	const seedStr = `${cinemaId}_${movieId}_${date}_${time}`
@@ -826,8 +829,11 @@ export function getShowtimeSeats(cinemaId, movieId, date, time, options = {}) {
 
 		if (isSweetbox) {
 			for (let c = 1; c <= rd.count; c++) {
-				const seatId = `J0${c * 2 - 1}-J0${c * 2}`
-				const isSold = (absHash + rIdx * 7 + c * 11) % 5 === 0
+				const c1 = String(c * 2 - 1).padStart(2, "0")
+				const c2 = String(c * 2).padStart(2, "0")
+				const seatId = `${rd.row}${c1}-${rd.row}${c2}`
+				// Chỉ chiếm ~10% ghế đôi đã bán ngẫu nhiên
+				const isSold = (absHash + rIdx * 11 + c * 17) % 7 === 0
 				seats.push({
 					id: seatId,
 					row: rd.row,
@@ -840,10 +846,8 @@ export function getShowtimeSeats(cinemaId, movieId, date, time, options = {}) {
 		} else {
 			for (let c = 1; c <= rd.count; c++) {
 				const seatId = `${rd.row}${String(c).padStart(2, "0")}`
-				const isSold =
-					(absHash * (rIdx + 1) + c * 13) % 7 === 0 ||
-					(rd.row === "F" && (c === 6 || c === 7)) ||
-					(rd.row === "E" && c === 5)
+				// Chỉ chiếm ~12% ghế đơn đã bán ngẫu nhiên
+				const isSold = (absHash * (rIdx + 3) + c * 19) % 9 === 0
 				seats.push({
 					id: seatId,
 					row: rd.row,
