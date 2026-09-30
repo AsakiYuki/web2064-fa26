@@ -255,6 +255,19 @@
 						<span class="sd-label">Bắp nước</span>
 						<span class="sd-value" id="co-concessions-text">1x Beta Combo Đôi</span>
 					</div>
+					<div class="sd-item" id="co-discount-row" style="display: none;">
+						<span class="sd-label" style="color: #10b981;">Giảm giá voucher</span>
+						<span class="sd-value" id="co-discount-val" style="color: #10b981; font-weight: 800;">-0 ₫</span>
+					</div>
+				</div>
+
+				<!-- Voucher Coupon Box -->
+				<div class="summary-coupon-box" style="margin-top: 14px; padding-top: 14px; border-top: 1px solid rgba(255,255,255,0.08);">
+					<div class="coupon-input-group" style="display: flex; gap: 8px;">
+						<input type="text" id="co-coupon-input" placeholder="Mã giảm giá (VD: BETA10)" aria-label="Mã giảm giá" style="flex: 1; background: #1e293b; border: 1.5px solid rgba(255,255,255,0.12); border-radius: 6px; padding: 8px 12px; color: #fff; font-size: 13px; text-transform: uppercase;" />
+						<button type="button" id="btn-co-apply-coupon" style="background: #015198; color: #fff; border: none; padding: 8px 14px; border-radius: 6px; font-weight: 700; font-size: 12px; cursor: pointer; white-space: nowrap;">Áp dụng</button>
+					</div>
+					<div class="coupon-applied-msg" id="co-coupon-msg" style="display: none; font-size: 12px; margin-top: 6px;"></div>
 				</div>
 
 				<!-- Total Price Summary -->
@@ -273,6 +286,15 @@
 					XÁC NHẬN THANH TOÁN
 				</button>
 			</aside>
+		</div>
+
+		<!-- Simulated Payment Processing Modal -->
+		<div class="modal-backdrop" id="payment-processing-modal">
+			<div class="modal-content auth-modal-content" style="max-width: 420px; text-align: center; padding: 36px 28px;">
+				<div class="processing-spinner" style="width: 54px; height: 54px; border: 4px solid rgba(56,189,248,0.2); border-top-color: #38bdf8; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 20px;"></div>
+				<h3 style="font-size: 20px; font-weight: 800; color: #fff; margin: 0 0 8px;" id="proc-title">Đang Xử Lý Giao Dịch</h3>
+				<p style="font-size: 13px; color: #94a3b8; margin: 0;" id="proc-desc">Vui lòng không đóng trình duyệt trong khi hệ thống kết nối với cổng thanh toán bảo mật...</p>
+			</div>
 		</div>
 
 		<!-- ===================== SUCCESS E-TICKET VIEW ===================== -->
