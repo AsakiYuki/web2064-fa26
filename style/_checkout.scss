@@ -649,3 +649,60 @@
 		}
 	}
 }
+
+@keyframes spin {
+	0% {
+		transform: rotate(0deg);
+	}
+	100% {
+		transform: rotate(360deg);
+	}
+}
+
+@media print {
+	.main-header,
+	.main-footer,
+	.booking-header-bar,
+	.eticket-bottom-actions,
+	.modal-close-btn,
+	.toast-container {
+		display: none !important;
+	}
+
+	body,
+	.checkout-page,
+	.profile-page {
+		background: #ffffff !important;
+		color: #000000 !important;
+		padding: 0 !important;
+	}
+
+	.eticket-success-page-wrap {
+		margin: 0 !important;
+		box-shadow: none !important;
+		border: 1px solid #ccc !important;
+		background: #ffffff !important;
+		color: #000000 !important;
+		page-break-inside: avoid;
+	}
+
+	.eticket-top-banner {
+		background: #015198 !important;
+		-webkit-print-color-adjust: exact;
+		print-color-adjust: exact;
+	}
+
+	.eticket-ticket-pass {
+		background: #f8fafc !important;
+		color: #000000 !important;
+	}
+
+	.et-info-grid .et-info-item .et-val {
+		color: #000000 !important;
+	}
+
+	.et-code-banner .code-value {
+		color: #015198 !important;
+	}
+}
+
