@@ -184,8 +184,8 @@ document.addEventListener("DOMContentLoaded", async () => {
 						</div>
 					`
 				} else {
-					// Lối đi sau ghế 3 và ghế 9
-					if (seat.col === 4 || seat.col === 10) {
+					// Lối đi sau ghế 3 và ghế 11 (bố cục chuẩn 3 - 8 - 3 ghế)
+					if (seat.col === 4 || seat.col === 12) {
 						rowSeatsHTML += `<div class="seat-aisle-divider"></div>`
 					}
 
