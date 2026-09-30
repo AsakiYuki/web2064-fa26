@@ -31,7 +31,7 @@ export const STORAGE_KEYS = {
 }
 
 /** Phiên bản dữ liệu mẫu - tăng lên khi JSON cập nhật để tự động sync lại LS */
-export const CURRENT_DATA_VERSION = "2.2"
+export const CURRENT_DATA_VERSION = "2.4"
 
 /** Mapping từ STORAGE_KEYS sang đường dẫn file JSON tương ứng */
 const DATA_SOURCE_MAP = {
