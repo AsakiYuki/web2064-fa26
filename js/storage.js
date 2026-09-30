@@ -791,7 +791,7 @@ export function getShowtimeStorageKey(cinemaId, movieId, date, time) {
 export function getShowtimeSeats(cinemaId, movieId, date, time, options = {}) {
 	const key = getShowtimeStorageKey(cinemaId, movieId, date, time)
 	const cached = storageGet(key)
-	if (cached && Array.isArray(cached) && cached.length > 0) {
+	if (cached && Array.isArray(cached) && cached.length >= 12) {
 		return cached
 	}
 

@@ -52,6 +52,9 @@ document.addEventListener("DOMContentLoaded", async () => {
 		return
 	}
 
+	const currentMovie = allMovies.find(m => m.id === movieId) || allMovies[0]
+	const currentCinema = cinemasData.find(c => c.id === cinemaId) || cinemasData[0]
+
 	// Base seat prices
 	const isIMAX = formatName.toLowerCase().includes("imax")
 	const baseStandardPrice = isIMAX ? 120000 : 70000
