@@ -2,6 +2,8 @@
  * Beta Cinemas - User Profile & Booking History Logic
  */
 import { setupHeaderAndFooter, formatCurrency, formatDateVN, showToast, getCurrentUser, saveUserSession } from "./common.js"
+import { getBookingHistory, updateUserInDatabase, VOUCHER_LIST } from "./storage.js"
+import { generateQRCodeSVG } from "./qrcode.js"
 
 document.addEventListener("DOMContentLoaded", async () => {
 	await setupHeaderAndFooter()
@@ -10,12 +12,12 @@ document.addEventListener("DOMContentLoaded", async () => {
 	let user = getCurrentUser()
 	if (!user) {
 		user = {
-			name: "Nguyễn Văn An",
-			email: "nguyen.an@gmail.com",
-			phone: "0912 345 678",
+			name: "Nguyễn Hoàng Nam",
+			email: "nam.nguyen@example.com",
+			phone: "0987 654 321",
 			points: 850,
-			rank: "BETA VIP MEMBER",
-			avatar: "N",
+			rank: "Thành viên Beta VIP",
+			avatarText: "N",
 		}
 		saveUserSession(user)
 	}
@@ -23,6 +25,9 @@ document.addEventListener("DOMContentLoaded", async () => {
 	renderUserInfo(user)
 
 	// 2. Setup Profile Navigation Tabs
+	const urlParams = new URLSearchParams(window.location.search)
+	const initialTab = urlParams.get("tab") || "history"
+
 	const tabBtns = document.querySelectorAll(".p-tab-btn")
 	const panels = {
 		history: document.getElementById("panel-history"),
@@ -31,24 +36,25 @@ document.addEventListener("DOMContentLoaded", async () => {
 		security: document.getElementById("panel-security"),
 	}
 
-	tabBtns.forEach(btn => {
-		btn.addEventListener("click", () => {
-			tabBtns.forEach(b => b.classList.remove("active"))
-			btn.classList.add("active")
-
-			const target = btn.dataset.tab
-			Object.entries(panels).forEach(([key, panel]) => {
-				if (!panel) return
-				if (key === target) {
-					panel.style.display = "block"
-					panel.classList.add("active")
-				} else {
-					panel.style.display = "none"
-					panel.classList.remove("active")
-				}
-			})
+	function activateTab(target) {
+		tabBtns.forEach(b => b.classList.toggle("active", b.dataset.tab === target))
+		Object.entries(panels).forEach(([key, panel]) => {
+			if (!panel) return
+			if (key === target) {
+				panel.style.display = "block"
+				panel.classList.add("active")
+			} else {
+				panel.style.display = "none"
+				panel.classList.remove("active")
+			}
 		})
+	}
+
+	tabBtns.forEach(btn => {
+		btn.addEventListener("click", () => activateTab(btn.dataset.tab))
 	})
+
+	activateTab(initialTab)
 
 	// 3. Render Booking History
 	renderBookingHistory()
@@ -60,6 +66,9 @@ document.addEventListener("DOMContentLoaded", async () => {
 		const name = document.getElementById("pf-name")?.value.trim()
 		const email = document.getElementById("pf-email")?.value.trim()
 		const phone = document.getElementById("pf-phone")?.value.trim()
+		const birthday = document.getElementById("pf-birthday")?.value
+		const gender = document.getElementById("pf-gender")?.value
+		const favCinema = document.getElementById("pf-fav-cinema")?.value
 
 		if (!name || !email || !phone) {
 			showToast("Vui lòng điền đầy đủ họ tên, email và số điện thoại.", "warning")
@@ -69,8 +78,14 @@ document.addEventListener("DOMContentLoaded", async () => {
 		user.name = name
 		user.email = email
 		user.phone = phone
-		user.avatar = name.charAt(0).toUpperCase()
+		user.birthday = birthday
+		user.gender = gender
+		user.cinemaFavorite = favCinema
+		user.avatarText = name.charAt(0).toUpperCase()
+		user.avatar = user.avatarText
+
 		saveUserSession(user)
+		updateUserInDatabase(user)
 		renderUserInfo(user)
 
 		showToast("Cập nhật thông tin tài khoản thành công!", "success")
@@ -105,6 +120,10 @@ document.addEventListener("DOMContentLoaded", async () => {
 			return
 		}
 
+		user.password = newPass
+		saveUserSession(user)
+		updateUserInDatabase(user)
+
 		passForm.reset()
 		showToast("Đổi mật khẩu thành công! Hãy ghi nhớ mật khẩu mới của bạn.", "success")
 	})
@@ -134,20 +153,27 @@ document.addEventListener("DOMContentLoaded", async () => {
 		const pointsEl = document.getElementById("user-points-val")
 		const rankEl = document.getElementById("user-display-rank")
 
-		if (avatarEl) avatarEl.textContent = u.avatar || u.name?.charAt(0).toUpperCase() || "B"
+		if (avatarEl) avatarEl.textContent = u.avatarText || u.avatar || u.name?.charAt(0).toUpperCase() || "B"
 		if (nameEl) nameEl.textContent = u.name
 		if (emailEl) emailEl.textContent = u.email
 		if (phoneEl) phoneEl.textContent = u.phone
 		if (pointsEl) pointsEl.textContent = `${u.points || 850} Điểm`
-		if (rankEl) rankEl.textContent = u.rank || "BETA VIP MEMBER"
+		if (rankEl) rankEl.textContent = u.rank || "Thành viên Beta VIP"
 
 		// Pre-fill form fields
 		const pfName = document.getElementById("pf-name")
 		const pfEmail = document.getElementById("pf-email")
 		const pfPhone = document.getElementById("pf-phone")
-		if (pfName && !pfName.value) pfName.value = u.name || ""
-		if (pfEmail && !pfEmail.value) pfEmail.value = u.email || ""
-		if (pfPhone && !pfPhone.value) pfPhone.value = u.phone || ""
+		const pfBirthday = document.getElementById("pf-birthday")
+		const pfGender = document.getElementById("pf-gender")
+		const pfFav = document.getElementById("pf-fav-cinema")
+
+		if (pfName) pfName.value = u.name || ""
+		if (pfEmail) pfEmail.value = u.email || ""
+		if (pfPhone) pfPhone.value = u.phone || ""
+		if (pfBirthday && u.birthday) pfBirthday.value = u.birthday
+		if (pfGender && u.gender) pfGender.value = u.gender
+		if (pfFav && u.cinemaFavorite) pfFav.value = u.cinemaFavorite
 	}
 
 	function renderBookingHistory() {
@@ -155,53 +181,21 @@ document.addEventListener("DOMContentLoaded", async () => {
 		const badge = document.getElementById("history-count-badge")
 		if (!container) return
 
-		let history = []
-		try {
-			history = JSON.parse(localStorage.getItem("beta_booking_history") || "[]")
-		} catch (e) {
-			history = []
-		}
-
-		// Fallback sample tickets if clean state
-		if (history.length === 0) {
-			history = [
-				{
-					id: "BT842915",
-					movieId: "utlan2",
-					movieTitle: "Út Lan 2: Vùng Đất Mất Tích",
-					moviePoster: "/poster/poster_utlan2.jpg",
-					cinemaName: "Beta Thái Nguyên",
-					screenName: "Phòng chiếu 1",
-					formatName: "2D Phụ Đề",
-					date: "2026-09-26",
-					time: "14:30",
-					seats: "D05, D06",
-					concessions: "1x Beta Combo Đôi",
-					total: 255000,
-					paymentMethod: "momo",
-					status: "paid",
-				},
-				{
-					id: "BT718320",
-					movieId: "bongma",
-					movieTitle: "Bóng Ma Nhà Hát",
-					moviePoster: "/poster/poster_bongma.jpg",
-					cinemaName: "Beta Thanh Xuân (Hà Nội)",
-					screenName: "Phòng chiếu VIP 2",
-					formatName: "2D Lồng Tiếng",
-					date: "2026-09-20",
-					time: "20:00",
-					seats: "F07, F08",
-					concessions: "Không kèm bắp nước",
-					total: 160000,
-					paymentMethod: "vnpay",
-					status: "done",
-				},
-			]
-			localStorage.setItem("beta_booking_history", JSON.stringify(history))
-		}
+		const history = getBookingHistory()
 
 		if (badge) badge.textContent = history.length
+
+		if (history.length === 0) {
+			container.innerHTML = `
+				<div style="text-align: center; padding: 48px 20px; color: #94a3b8;">
+					<span style="font-size: 48px; display: block; margin-bottom: 12px;">🎟️</span>
+					<h3 style="color: #fff; font-size: 18px; margin: 0 0 8px;">Bạn Chưa Có Lịch Sử Đặt Vé</h3>
+					<p style="font-size: 14px; margin: 0 0 20px;">Hãy chọn phim yêu thích và trải nghiệm rạp Beta Cinemas ngay hôm nay!</p>
+					<a href="/movies.html" style="background: #015198; color: #fff; padding: 10px 24px; border-radius: 6px; text-decoration: none; font-weight: 700; font-size: 14px; display: inline-block;">Xem Danh Sách Phim</a>
+				</div>
+			`
+			return
+		}
 
 		container.innerHTML = history
 			.map((t, idx) => {
@@ -257,6 +251,23 @@ document.addEventListener("DOMContentLoaded", async () => {
 		const body = document.getElementById("profile-ticket-modal-body")
 		if (!modal || !body) return
 
+		const qrSvg = generateQRCodeSVG(
+			JSON.stringify({
+				ticket: t.id,
+				movie: t.movieTitle,
+				cinema: t.cinemaName,
+				time: `${t.time} ${t.date}`,
+				seats: t.seats,
+				status: "VALID_PAID",
+			}),
+			{
+				size: 160,
+				darkColor: "#015198",
+				lightColor: "#ffffff",
+				includeLogo: true,
+			}
+		)
+
 		body.innerHTML = `
 			<div class="eticket-success-page-wrap" style="margin: 0; box-shadow: none;">
 				<div class="eticket-top-banner">
@@ -271,37 +282,9 @@ document.addEventListener("DOMContentLoaded", async () => {
 					</div>
 					<div class="et-qr-container">
 						<div class="qr-code-box">
-							<svg viewBox="0 0 200 200" width="160" height="160" xmlns="http://www.w3.org/2000/svg">
-								<rect width="200" height="200" fill="#ffffff" rx="10" />
-								<rect x="15" y="15" width="45" height="45" fill="#015198" rx="6" />
-								<rect x="23" y="23" width="29" height="29" fill="#ffffff" rx="3" />
-								<rect x="29" y="29" width="17" height="17" fill="#015198" rx="2" />
-								<rect x="140" y="15" width="45" height="45" fill="#015198" rx="6" />
-								<rect x="148" y="23" width="29" height="29" fill="#ffffff" rx="3" />
-								<rect x="154" y="29" width="17" height="17" fill="#015198" rx="2" />
-								<rect x="15" y="140" width="45" height="45" fill="#015198" rx="6" />
-								<rect x="23" y="148" width="29" height="29" fill="#ffffff" rx="3" />
-								<rect x="29" y="154" width="17" height="17" fill="#015198" rx="2" />
-								<rect x="70" y="20" width="12" height="12" fill="#1e293b" />
-								<rect x="90" y="20" width="12" height="24" fill="#1e293b" />
-								<rect x="110" y="20" width="18" height="12" fill="#1e293b" />
-								<rect x="70" y="44" width="24" height="12" fill="#1e293b" />
-								<rect x="20" y="70" width="12" height="24" fill="#1e293b" />
-								<rect x="40" y="80" width="20" height="12" fill="#1e293b" />
-								<rect x="70" y="70" width="14" height="14" fill="#1e293b" />
-								<rect x="140" y="70" width="20" height="12" fill="#1e293b" />
-								<circle cx="100" cy="100" r="22" fill="#015198" />
-								<circle cx="100" cy="100" r="18" fill="#ffffff" />
-								<text x="100" y="105" font-family="'Inter', sans-serif" font-size="13" font-weight="900" fill="#015198" text-anchor="middle">β</text>
-								<rect x="70" y="130" width="18" height="14" fill="#1e293b" />
-								<rect x="100" y="135" width="24" height="12" fill="#1e293b" />
-								<rect x="135" y="130" width="14" height="24" fill="#1e293b" />
-								<rect x="70" y="160" width="24" height="24" fill="#1e293b" />
-								<rect x="110" y="165" width="18" height="18" fill="#1e293b" />
-								<rect x="145" y="165" width="40" height="18" fill="#1e293b" />
-							</svg>
+							${qrSvg}
 						</div>
-						<div class="qr-hint">Xuất trình mã này cho nhân viên soát vé</div>
+						<div class="qr-hint">Xuất trình mã QR này tại quầy hoặc máy in vé tự động</div>
 					</div>
 					<div class="et-info-grid">
 						<div class="et-info-item" style="grid-column: 1 / -1;">
@@ -329,7 +312,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 							<span class="et-val">${t.concessions || "Không kèm bắp"}</span>
 						</div>
 						<div class="et-info-item" style="grid-column: 1 / -1; border-top: 1px dashed rgba(255,255,255,0.15); padding-top: 8px;">
-							<span class="et-lbl">Tổng Tiền</span>
+							<span class="et-lbl">Tổng Tiền Đã Thanh Toán</span>
 							<span class="et-val val-gold">${formatCurrency(t.total)}</span>
 						</div>
 					</div>
@@ -338,10 +321,24 @@ document.addEventListener("DOMContentLoaded", async () => {
 						<div class="barcode-number">${t.id} - KIOSK READY</div>
 					</div>
 				</div>
+				<div class="eticket-bottom-actions">
+					<button type="button" class="btn-et-action btn-save-ticket" id="btn-print-profile-ticket">
+						<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+							<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+							<polyline points="7 10 12 15 17 10"></polyline>
+							<line x1="12" y1="15" x2="12" y2="3"></line>
+						</svg>
+						In Vé / Lưu Vé
+					</button>
+				</div>
 			</div>
 		`
 
 		modal.classList.add("active")
 		document.body.style.overflow = "hidden"
+
+		document.getElementById("btn-print-profile-ticket")?.addEventListener("click", () => {
+			window.print()
+		})
 	}
 })
