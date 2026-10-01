@@ -757,7 +757,7 @@ export function getShowtimes() {
 }
 
 export function getConcessions() {
-	return storageGet(STORAGE_KEYS.CONCESSIONS, [])
+	return storageGet(STORAGE_KEYS.CONCESSIONS, { categories: [], items: [] })
 }
 
 export function getTicketPricing() {
