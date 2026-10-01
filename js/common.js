@@ -64,56 +64,47 @@ export function showToast(message, type = "info", duration = 3500) {
 /* ==========================================================================
    USER AUTHENTICATION STATE & LOGIC
    ========================================================================== */
-const DEFAULT_USER = {
-	name: "Nguyễn Hoàng Nam",
-	email: "nam.nguyen@example.com",
-	phone: "0987 654 321",
-	avatarText: "N",
-	rank: "Thành viên Beta VIP",
-	points: 850,
-	gender: "Nam",
-	birthday: "1998-05-15",
-	city: "Hà Nội",
-	cinemaFavorite: "Beta Thái Nguyên",
-}
-// đây là đọc và lấy dữ liệu người dùng 
-export function getCurrentUser() {
-	try {
-		const raw = localStorage.getItem("beta_user_session")
-		return raw ? JSON.parse(raw) : null
-	} catch {
-		return null
-	}
-}
-//
-// Lưu thông tin người dùng vào LocalStorage và cập nhật UI Header
-export function saveUserSession(userData) {
-	localStorage.setItem("beta_user_session", JSON.stringify(userData))
+export { getCurrentUser, saveUserSession, logoutUser } from "./storage.js"
+import {
+	getCurrentUser as storageGetCurrentUser,
+	saveUserSession as storageSaveUserSession,
+	logoutUser as storageLogoutUser,
+	registerNewUser,
+	authenticateUser,
+	isAccountRegistered,
+	DEFAULT_USERS,
+} from "./storage.js"
+
+export function logoutUserAndNotify() {
+	storageLogoutUser()
 	updateHeaderAccountUI()
-}
-//
-export function logoutUser() {
-	localStorage.removeItem("beta_user_session")
-	updateHeaderAccountUI()
+	updateDrawerAccountUI()
 	showToast("Bạn đã đăng xuất tài khoản thành công.", "info")
+
+	// If on profile page, refresh or notify
+	if (window.location.pathname.includes("profile.html")) {
+		setTimeout(() => {
+			window.location.href = "/"
+		}, 800)
+	}
 }
 
 /** Update Account Bar in Header (Logged in vs Logged out) */
 export function updateHeaderAccountUI() {
-	const user = getCurrentUser()
+	const user = storageGetCurrentUser()
 	const accountContainer = document.querySelector(".header-account-manager .container")
 	if (!accountContainer) return
 
 	if (user) {
 		accountContainer.innerHTML = `
 			<div class="user-account-badge" id="header-user-menu-btn" tabindex="0">
-				<div class="user-avatar-circle">${user.avatarText || user.name.charAt(0)}</div>
+				<div class="user-avatar-circle">${user.avatarText || user.avatar || user.name.charAt(0)}</div>
 				<span class="user-name-text">${user.name}</span>
 				<svg class="user-dropdown-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"></polyline></svg>
 				<div class="user-profile-dropdown" id="user-profile-dropdown">
 					<div class="up-header">
 						<span class="up-rank">⭐ ${user.rank || "Thành viên VIP"}</span>
-						<span class="up-points">${user.points || 0} điểm thưởng (85k)</span>
+						<span class="up-points">${user.points || 0} điểm thưởng</span>
 					</div>
 					<a href="/profile.html?tab=info" class="up-item">
 						<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
@@ -151,7 +142,7 @@ export function updateHeaderAccountUI() {
 
 		document.getElementById("btn-header-logout")?.addEventListener("click", e => {
 			e.preventDefault()
-			logoutUser()
+			logoutUserAndNotify()
 		})
 	} else {
 		accountContainer.innerHTML = `
@@ -174,7 +165,7 @@ export function updateHeaderAccountUI() {
 }
 
 /* ==========================================================================
-   UNIVERSAL AUTH MODAL (LOGIN / REGISTER)
+   UNIVERSAL AUTH MODAL (LOGIN / REGISTER WITH FORM VALIDATION)
    ========================================================================== */
 export function openAuthModal(defaultTab = "login") {
 	let modal = document.getElementById("universal-auth-modal")
@@ -203,19 +194,21 @@ export function openAuthModal(defaultTab = "login") {
 					<div class="auth-divider-line"><span>Hoặc</span></div>
 
 					<!-- LOGIN FORM -->
-					<form id="form-auth-login" class="auth-form">
+					<form id="form-auth-login" class="auth-form" novalidate>
 						<div class="form-group">
 							<label for="login-account">Email hoặc Số điện thoại <span class="req">*</span></label>
 							<div class="input-icon-wrap">
-								<input type="text" id="login-account" placeholder="nam.nguyen@example.com" value="nam.nguyen@example.com" required />
+								<input type="text" id="login-account" placeholder="nam.nguyen@example.com hoặc 0987654321" value="nam.nguyen@example.com" />
 							</div>
+							<span class="field-error-msg" id="err-login-account"></span>
 						</div>
 						<div class="form-group">
 							<label for="login-password">Mật khẩu <span class="req">*</span></label>
 							<div class="input-icon-wrap">
-								<input type="password" id="login-password" placeholder="••••••••" value="BetaCinemas2026!" required />
+								<input type="password" id="login-password" placeholder="••••••••" value="BetaCinemas2026!" />
 								<button type="button" class="toggle-pwd-btn" data-target="login-password" aria-label="Hiện mật khẩu">👁</button>
 							</div>
+							<span class="field-error-msg" id="err-login-password"></span>
 						</div>
 						<div class="form-options-row">
 							<label>
@@ -231,38 +224,43 @@ export function openAuthModal(defaultTab = "login") {
 					</form>
 
 					<!-- REGISTER FORM -->
-					<form id="form-auth-register" class="auth-form" style="display: none;">
+					<form id="form-auth-register" class="auth-form" style="display: none;" novalidate>
 						<div class="form-group">
 							<label for="reg-fullname">Họ và tên <span class="req">*</span></label>
 							<div class="input-icon-wrap">
-								<input type="text" id="reg-fullname" placeholder="Nguyễn Hoàng Nam" required />
+								<input type="text" id="reg-fullname" placeholder="Nguyễn Hoàng Nam" />
 							</div>
+							<span class="field-error-msg" id="err-reg-fullname"></span>
 						</div>
 						<div class="form-group">
 							<label for="reg-phone">Số điện thoại <span class="req">*</span></label>
 							<div class="input-icon-wrap">
-								<input type="tel" id="reg-phone" placeholder="0987 654 321" required />
+								<input type="tel" id="reg-phone" placeholder="0987 654 321" />
 							</div>
+							<span class="field-error-msg" id="err-reg-phone"></span>
 						</div>
 						<div class="form-group">
 							<label for="reg-email">Email <span class="req">*</span></label>
 							<div class="input-icon-wrap">
-								<input type="email" id="reg-email" placeholder="nam.nguyen@example.com" required />
+								<input type="email" id="reg-email" placeholder="nam.nguyen@example.com" />
 							</div>
+							<span class="field-error-msg" id="err-reg-email"></span>
 						</div>
 						<div class="form-group">
 							<label for="reg-password">Mật khẩu <span class="req">*</span></label>
 							<div class="input-icon-wrap">
-								<input type="password" id="reg-password" placeholder="Tối thiểu 6 ký tự" required />
+								<input type="password" id="reg-password" placeholder="Tối thiểu 6 ký tự" />
 								<button type="button" class="toggle-pwd-btn" data-target="reg-password" aria-label="Hiện mật khẩu">👁</button>
 							</div>
+							<span class="field-error-msg" id="err-reg-password"></span>
 						</div>
 						<div class="form-options-row">
 							<label>
-								<input type="checkbox" id="reg-terms" checked required />
+								<input type="checkbox" id="reg-terms" checked />
 								<span>Tôi đồng ý với điều khoản Beta Cinemas</span>
 							</label>
 						</div>
+						<span class="field-error-msg" id="err-reg-terms" style="margin-top:-8px;"></span>
 						<button type="submit" class="btn-submit-auth">TẠO TÀI KHOẢN MỚI</button>
 						<div class="auth-footer-prompt">
 							Đã có tài khoản? <a id="switch-to-login">Đăng nhập</a>
@@ -294,6 +292,15 @@ function setAuthTab(tab) {
 	const loginForm = document.getElementById("form-auth-login")
 	const regForm = document.getElementById("form-auth-register")
 
+	// Clear errors
+	document.querySelectorAll(".field-error-msg").forEach(el => {
+		el.style.display = "none"
+		el.textContent = ""
+	})
+	document.querySelectorAll(".auth-form input").forEach(input => {
+		input.style.borderColor = ""
+	})
+
 	if (tab === "login") {
 		loginTabBtn?.classList.add("active")
 		regTabBtn?.classList.remove("active")
@@ -304,6 +311,22 @@ function setAuthTab(tab) {
 		regTabBtn?.classList.add("active")
 		if (loginForm) loginForm.style.display = "none"
 		if (regForm) regForm.style.display = "flex"
+	}
+}
+
+function setFieldError(fieldId, errorMsg) {
+	const errorEl = document.getElementById(`err-${fieldId}`)
+	const inputEl = document.getElementById(fieldId)
+	if (errorEl) {
+		if (errorMsg) {
+			errorEl.textContent = errorMsg
+			errorEl.style.display = "block"
+			if (inputEl) inputEl.style.borderColor = "#ef4444"
+		} else {
+			errorEl.textContent = ""
+			errorEl.style.display = "none"
+			if (inputEl) inputEl.style.borderColor = ""
+		}
 	}
 }
 
@@ -334,44 +357,185 @@ function initAuthModalEvents(modal) {
 		})
 	})
 
+	// Real-time blur validation on register fields
+	const regFullNameInput = document.getElementById("reg-fullname")
+	const regPhoneInput = document.getElementById("reg-phone")
+	const regEmailInput = document.getElementById("reg-email")
+	const regPassInput = document.getElementById("reg-password")
+
+	regFullNameInput?.addEventListener("input", () => {
+		if (regFullNameInput.value.trim().length >= 2) setFieldError("reg-fullname", "")
+	})
+	regPhoneInput?.addEventListener("input", () => {
+		const clean = regPhoneInput.value.replace(/\s+/g, "")
+		if (/^(0|84)(3|5|7|8|9)[0-9]{8}$/.test(clean)) setFieldError("reg-phone", "")
+	})
+	regEmailInput?.addEventListener("input", () => {
+		if (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(regEmailInput.value.trim())) setFieldError("reg-email", "")
+	})
+	regPassInput?.addEventListener("input", () => {
+		if (regPassInput.value.length >= 6) setFieldError("reg-password", "")
+	})
+
 	// Social Logins (Google / Facebook mock)
 	const loginSocial = provider => {
-		saveUserSession(DEFAULT_USER)
+		storageSaveUserSession(DEFAULT_USERS[0])
+		updateHeaderAccountUI()
+		updateDrawerAccountUI()
 		closeAuthModal()
 		showToast(`Đăng nhập thành công với tài khoản ${provider}! Chào mừng bạn.`, "success")
 	}
 	document.getElementById("btn-social-google")?.addEventListener("click", () => loginSocial("Google"))
 	document.getElementById("btn-social-facebook")?.addEventListener("click", () => loginSocial("Facebook"))
 
-	// Login form submit
+	// Login form submit with validation
 	document.getElementById("form-auth-login")?.addEventListener("submit", e => {
 		e.preventDefault()
-		const acc = document.getElementById("login-account")?.value.trim()
-		const name = acc.includes("@") ? acc.split("@")[0] : "Nguyễn Hoàng Nam"
-		saveUserSession({
-			...DEFAULT_USER,
-			name: name.charAt(0).toUpperCase() + name.slice(1),
-			avatarText: name.charAt(0).toUpperCase(),
-		})
+		const accInput = document.getElementById("login-account")
+		const pwdInput = document.getElementById("login-password")
+		const acc = accInput?.value.trim() || ""
+		const pwd = pwdInput?.value || ""
+
+		let hasError = false
+		if (!acc) {
+			setFieldError("login-account", "Vui lòng nhập Email hoặc Số điện thoại.")
+			hasError = true
+		} else {
+			setFieldError("login-account", "")
+		}
+
+		if (!pwd) {
+			setFieldError("login-password", "Vui lòng nhập mật khẩu.")
+			hasError = true
+		} else if (pwd.length < 6) {
+			setFieldError("login-password", "Mật khẩu phải có ít nhất 6 ký tự.")
+			hasError = true
+		} else {
+			setFieldError("login-password", "")
+		}
+
+		if (hasError) return
+
+		// Authenticate with storage
+		const authResult = authenticateUser(acc, pwd)
+		if (!authResult.success) {
+			// Fallback: If not in list, check if matches default demo pattern or create quick session
+			if (acc.includes("@") && pwd.length >= 6) {
+				const fallbackName = acc.split("@")[0]
+				const userObj = {
+					...DEFAULT_USERS[0],
+					name: fallbackName.charAt(0).toUpperCase() + fallbackName.slice(1),
+					email: acc,
+					avatarText: fallbackName.charAt(0).toUpperCase(),
+				}
+				storageSaveUserSession(userObj)
+				updateHeaderAccountUI()
+				updateDrawerAccountUI()
+				closeAuthModal()
+				showToast(`Đăng nhập thành công! Chào mừng ${userObj.name} đã quay lại.`, "success")
+				return
+			}
+			setFieldError("login-account", authResult.message)
+			showToast(authResult.message, "warning")
+			return
+		}
+
+		updateHeaderAccountUI()
+		updateDrawerAccountUI()
 		closeAuthModal()
-		showToast(`Đăng nhập thành công! Chào mừng bạn đã quay lại.`, "success")
+		showToast(`Đăng nhập thành công! Chào mừng ${authResult.user.name} đã quay lại.`, "success")
 	})
 
-	// Register form submit
+	// Register form submit with full validation
 	document.getElementById("form-auth-register")?.addEventListener("submit", e => {
 		e.preventDefault()
-		const name = document.getElementById("reg-fullname")?.value.trim() || "Thành viên Beta"
-		const phone = document.getElementById("reg-phone")?.value.trim() || "0987 654 321"
-		const email = document.getElementById("reg-email")?.value.trim() || "member@example.com"
-		saveUserSession({
-			...DEFAULT_USER,
+		const name = document.getElementById("reg-fullname")?.value.trim() || ""
+		const rawPhone = document.getElementById("reg-phone")?.value.trim() || ""
+		const cleanPhone = rawPhone.replace(/[\s.-]/g, "")
+		const email = document.getElementById("reg-email")?.value.trim() || ""
+		const password = document.getElementById("reg-password")?.value || ""
+		const termsChecked = document.getElementById("reg-terms")?.checked
+
+		let isValid = true
+
+		// 1. Validate Họ và tên
+		if (!name) {
+			setFieldError("reg-fullname", "Vui lòng nhập họ và tên của bạn.")
+			isValid = false
+		} else if (name.length < 2) {
+			setFieldError("reg-fullname", "Họ và tên phải có tối thiểu 2 ký tự.")
+			isValid = false
+		} else {
+			setFieldError("reg-fullname", "")
+		}
+
+		// 2. Validate Số điện thoại VN
+		const phoneRegex = /^(0|84)(3|5|7|8|9)[0-9]{8}$/
+		if (!cleanPhone) {
+			setFieldError("reg-phone", "Vui lòng nhập số điện thoại.")
+			isValid = false
+		} else if (!phoneRegex.test(cleanPhone)) {
+			setFieldError("reg-phone", "Số điện thoại không hợp lệ (VD: 0987654321).")
+			isValid = false
+		} else {
+			setFieldError("reg-phone", "")
+		}
+
+		// 3. Validate Email
+		const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+		if (!email) {
+			setFieldError("reg-email", "Vui lòng nhập địa chỉ Email.")
+			isValid = false
+		} else if (!emailRegex.test(email)) {
+			setFieldError("reg-email", "Địa chỉ Email không đúng định dạng.")
+			isValid = false
+		} else {
+			setFieldError("reg-email", "")
+		}
+
+		// 4. Validate Mật khẩu
+		if (!password) {
+			setFieldError("reg-password", "Vui lòng nhập mật khẩu.")
+			isValid = false
+		} else if (password.length < 6) {
+			setFieldError("reg-password", "Mật khẩu phải có tối thiểu 6 ký tự.")
+			isValid = false
+		} else {
+			setFieldError("reg-password", "")
+		}
+
+		// 5. Validate Điều khoản
+		if (!termsChecked) {
+			setFieldError("reg-terms", "Bạn cần đồng ý với điều khoản Beta Cinemas.")
+			isValid = false
+		} else {
+			setFieldError("reg-terms", "")
+		}
+
+		if (!isValid) return
+
+		// Register to storage
+		const regResult = registerNewUser({
 			name,
-			phone,
+			phone: cleanPhone,
 			email,
-			avatarText: name.charAt(0).toUpperCase(),
+			password,
 		})
+
+		if (!regResult.success) {
+			setFieldError("reg-email", regResult.message)
+			showToast(regResult.message, "warning")
+			return
+		}
+
+		updateHeaderAccountUI()
+		updateDrawerAccountUI()
 		closeAuthModal()
-		showToast(`Chúc mừng ${name} đã đăng ký tài khoản thành công và nhận ngay 50 điểm khởi đầu!`, "success", 5000)
+		showToast(
+			`🎉 Chúc mừng ${name} đã đăng ký tài khoản thành công và nhận ngay 50 điểm thưởng thành viên!`,
+			"success",
+			6000
+		)
 	})
 
 	document.getElementById("link-forgot-pwd")?.addEventListener("click", e => {

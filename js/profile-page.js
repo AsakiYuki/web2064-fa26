@@ -2,21 +2,8 @@
  * Beta Cinemas - User Profile & Booking History Logic
  */
 import { setupHeaderAndFooter, formatCurrency, formatDateVN, showToast, getCurrentUser, saveUserSession } from "./common.js"
-import { getBookingHistory, saveBookingTicket, cancelBookingTicket, STORAGE_KEYS, storageSet } from "./storage.js"
-
-const DEFAULT_PROFILE = {
-	name: "Nguyễn Văn An",
-	email: "nguyen.an@gmail.com",
-	phone: "0912 345 678",
-	birthday: "1998-05-15",
-	gender: "Nam",
-	city: "Thái Nguyên",
-	cinemaFavorite: "Beta Thái Nguyên",
-	points: 850,
-	rank: "BETA VIP MEMBER",
-	avatar: "N",
-	avatarColor: "gold",
-}
+import { getBookingHistory, updateUserInDatabase, VOUCHER_LIST } from "./storage.js"
+import { generateQRCodeSVG } from "./qrcode.js"
 
 document.addEventListener("DOMContentLoaded", async () => {
 	await setupHeaderAndFooter()
@@ -24,7 +11,14 @@ document.addEventListener("DOMContentLoaded", async () => {
 	// 1. Load User Session from LocalStorage
 	let user = getCurrentUser()
 	if (!user) {
-		user = { ...DEFAULT_PROFILE }
+		user = {
+			name: "Nguyễn Hoàng Nam",
+			email: "nam.nguyen@example.com",
+			phone: "0987 654 321",
+			points: 850,
+			rank: "Thành viên Beta VIP",
+			avatarText: "N",
+		}
 		saveUserSession(user)
 	} else {
 		// Merge any missing fields with defaults
@@ -34,6 +28,9 @@ document.addEventListener("DOMContentLoaded", async () => {
 	renderUserInfo(user)
 
 	// 2. Setup Profile Navigation Tabs
+	const urlParams = new URLSearchParams(window.location.search)
+	const initialTab = urlParams.get("tab") || "history"
+
 	const tabBtns = document.querySelectorAll(".p-tab-btn")
 	const panels = {
 		history: document.getElementById("panel-history"),
@@ -42,27 +39,8 @@ document.addEventListener("DOMContentLoaded", async () => {
 		security: document.getElementById("panel-security"),
 	}
 
-	// Check URL param ?tab=info or ?tab=history
-	const urlParams = new URLSearchParams(window.location.search)
-	const initialTab = urlParams.get("tab") || "history"
-	switchTab(initialTab)
-
-	tabBtns.forEach(btn => {
-		btn.addEventListener("click", () => {
-			const target = btn.dataset.tab
-			switchTab(target)
-		})
-	})
-
-	function switchTab(target) {
-		tabBtns.forEach(b => {
-			if (b.dataset.tab === target) {
-				b.classList.add("active")
-			} else {
-				b.classList.remove("active")
-			}
-		})
-
+	function activateTab(target) {
+		tabBtns.forEach(b => b.classList.toggle("active", b.dataset.tab === target))
 		Object.entries(panels).forEach(([key, panel]) => {
 			if (!panel) return
 			if (key === target) {
@@ -75,10 +53,13 @@ document.addEventListener("DOMContentLoaded", async () => {
 		})
 	}
 
-	// 3. Setup Booking History Management
-	let currentHistoryFilter = "all"
-	let currentSearchKeyword = ""
+	tabBtns.forEach(btn => {
+		btn.addEventListener("click", () => activateTab(btn.dataset.tab))
+	})
 
+	activateTab(initialTab)
+
+	// 3. Render Booking History
 	renderBookingHistory()
 
 	// Booking History Status Filter Buttons
@@ -149,14 +130,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 		const phone = document.getElementById("pf-phone")?.value.trim()
 		const birthday = document.getElementById("pf-birthday")?.value
 		const gender = document.getElementById("pf-gender")?.value
-		const city = document.getElementById("pf-city")?.value.trim()
-		const cinemaFavorite = document.getElementById("pf-fav-cinema")?.value
-		const avatar = document.getElementById("pf-avatar-input")?.value.trim().toUpperCase() || name.charAt(0).toUpperCase()
-		// điều kiện kiểm tra lệnh
-		if (!name || name.length < 2) {
-			showToast("Vui lòng nhập họ và tên hợp lệ (tối thiểu 2 ký tự).", "warning")
-			return
-		}
+		const favCinema = document.getElementById("pf-fav-cinema")?.value
 
 		if (!email || !email.includes("@")) {
 			showToast("Vui lòng nhập địa chỉ email hợp lệ.", "warning")
@@ -174,13 +148,12 @@ document.addEventListener("DOMContentLoaded", async () => {
 		user.phone = phone
 		user.birthday = birthday
 		user.gender = gender
-		user.city = city
-		user.cinemaFavorite = cinemaFavorite
-		user.avatar = avatar
-		user.avatarText = avatar
+		user.cinemaFavorite = favCinema
+		user.avatarText = name.charAt(0).toUpperCase()
+		user.avatar = user.avatarText
 
-		// Save to LocalStorage
 		saveUserSession(user)
+		updateUserInDatabase(user)
 		renderUserInfo(user)
 		// Báo thành công
 		showToast("✅ Đã cập nhật và lưu thông tin cá nhân vào LocalStorage thành công!", "success")
@@ -225,6 +198,10 @@ document.addEventListener("DOMContentLoaded", async () => {
 			return
 		}
 
+		user.password = newPass
+		saveUserSession(user)
+		updateUserInDatabase(user)
+
 		passForm.reset()
 		showToast("Đổi mật khẩu thành công! Hãy ghi nhớ mật khẩu mới của bạn.", "success")
 	})
@@ -254,24 +231,12 @@ document.addEventListener("DOMContentLoaded", async () => {
 		const pointsEl = document.getElementById("user-points-val")
 		const rankEl = document.getElementById("user-display-rank")
 
-		const colorGradients = {
-			gold: "linear-gradient(135deg, #f5a623 0%, #d97706 100%)",
-			blue: "linear-gradient(135deg, #0284c7 0%, #0369a1 100%)",
-			purple: "linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%)",
-			emerald: "linear-gradient(135deg, #10b981 0%, #047857 100%)",
-		}
-		const activeGradient = colorGradients[u.avatarColor] || colorGradients.gold
-
-		const avatarText = u.avatar || u.avatarText || u.name?.charAt(0).toUpperCase() || "N"
-		if (avatarEl) {
-			avatarEl.textContent = avatarText
-			avatarEl.style.background = activeGradient
-		}
+		if (avatarEl) avatarEl.textContent = u.avatarText || u.avatar || u.name?.charAt(0).toUpperCase() || "B"
 		if (nameEl) nameEl.textContent = u.name
 		if (emailEl) emailEl.textContent = u.email
 		if (phoneEl) phoneEl.textContent = u.phone
 		if (pointsEl) pointsEl.textContent = `${u.points || 850} Điểm`
-		if (rankEl) rankEl.textContent = u.rank || "BETA VIP MEMBER"
+		if (rankEl) rankEl.textContent = u.rank || "Thành viên Beta VIP"
 
 		// Pre-fill form fields
 		const pfAvatarPreview = document.getElementById("pf-avatar-preview")
@@ -281,30 +246,14 @@ document.addEventListener("DOMContentLoaded", async () => {
 		const pfPhone = document.getElementById("pf-phone")
 		const pfBirthday = document.getElementById("pf-birthday")
 		const pfGender = document.getElementById("pf-gender")
-		const pfCity = document.getElementById("pf-city")
-		const pfFavCinema = document.getElementById("pf-fav-cinema")
+		const pfFav = document.getElementById("pf-fav-cinema")
 
-		if (pfAvatarPreview) {
-			pfAvatarPreview.textContent = avatarText
-			pfAvatarPreview.style.background = activeGradient
-		}
-		if (pfAvatarInput) pfAvatarInput.value = avatarText
 		if (pfName) pfName.value = u.name || ""
 		if (pfEmail) pfEmail.value = u.email || ""
 		if (pfPhone) pfPhone.value = u.phone || ""
-		if (pfBirthday) pfBirthday.value = u.birthday || "1998-05-15"
-		if (pfGender) pfGender.value = u.gender || "Nam"
-		if (pfCity) pfCity.value = u.city || ""
-		if (pfFavCinema && u.cinemaFavorite) pfFavCinema.value = u.cinemaFavorite
-
-		// Preset color indicator
-		document.querySelectorAll(".color-preset-btn").forEach(b => {
-			if (b.dataset.color === u.avatarColor) {
-				b.style.borderColor = "#fff"
-			} else {
-				b.style.borderColor = "transparent"
-			}
-		})
+		if (pfBirthday && u.birthday) pfBirthday.value = u.birthday
+		if (pfGender && u.gender) pfGender.value = u.gender
+		if (pfFav && u.cinemaFavorite) pfFav.value = u.cinemaFavorite
 	}
 
 	function renderBookingHistory() {
@@ -312,90 +261,24 @@ document.addEventListener("DOMContentLoaded", async () => {
 		const badge = document.getElementById("history-count-badge")
 		if (!container) return
 
-		let history = getBookingHistory()
+		const history = getBookingHistory()
 
-		// Fallback sample tickets if clean state
+		if (badge) badge.textContent = history.length
+
 		if (history.length === 0) {
-			history = [
-				{
-					id: "BT842915",
-					movieId: "utlan2",
-					movieTitle: "Út Lan 2: Vùng Đất Mất Tích",
-					moviePoster: "/poster/poster_utlan2.jpg",
-					cinemaName: "Beta Thái Nguyên",
-					screenName: "Phòng chiếu 1",
-					formatName: "2D Phụ Đề",
-					date: "2026-09-26",
-					time: "14:30",
-					seats: "D05, D06",
-					concessions: "1x Beta Combo Đôi",
-					total: 255000,
-					paymentMethod: "momo",
-					status: "paid",
-					userEmail: user.email,
-					userName: user.name,
-				},
-				{
-					id: "BT718320",
-					movieId: "bongma",
-					movieTitle: "Bóng Ma Nhà Hát",
-					moviePoster: "/poster/poster_bongma.jpg",
-					cinemaName: "Beta Thanh Xuân (Hà Nội)",
-					screenName: "Phòng chiếu VIP 2",
-					formatName: "2D Lồng Tiếng",
-					date: "2026-09-20",
-					time: "20:00",
-					seats: "F07, F08",
-					concessions: "Không kèm bắp nước",
-					total: 160000,
-					paymentMethod: "vnpay",
-					status: "done",
-					userEmail: user.email,
-					userName: user.name,
-				},
-			]
-			storageSet(STORAGE_KEYS.BOOKING_HISTORY, history)
-		}
-
-		// Filter for current user tickets (or tickets without specific user tag)
-		const userTickets = history.filter(t => !t.userEmail || t.userEmail === user.email)
-
-		if (badge) badge.textContent = userTickets.length
-
-		// Apply status filter
-		let filtered = userTickets
-		if (currentHistoryFilter !== "all") {
-			filtered = filtered.filter(t => t.status === currentHistoryFilter)
-		}
-
-		// Apply search filter
-		if (currentSearchKeyword) {
-			filtered = filtered.filter(
-				t =>
-					(t.movieTitle && t.movieTitle.toLowerCase().includes(currentSearchKeyword)) ||
-					(t.id && t.id.toLowerCase().includes(currentSearchKeyword)) ||
-					(t.cinemaName && t.cinemaName.toLowerCase().includes(currentSearchKeyword))
-			)
-		}
-
-		if (filtered.length === 0) {
 			container.innerHTML = `
-				<div class="empty-history-state" style="text-align: center; padding: 48px 20px; background: #1e293b; border-radius: 12px; border: 1px dashed rgba(255,255,255,0.15);">
-					<div style="font-size: 48px; margin-bottom: 12px;">🎟️</div>
-					<h3 style="color: #fff; font-size: 18px; margin-bottom: 8px;">Không tìm thấy vé xem phim nào</h3>
-					<p style="color: #94a3b8; font-size: 14px; max-width: 400px; margin: 0 auto 20px;">
-						${currentSearchKeyword ? `Không có kết quả nào khớp với "${currentSearchKeyword}".` : "Bạn chưa có vé nào trong mục này. Hãy chọn phim và đặt vé ngay hôm nay!"}
-					</p>
-					<a href="/movies.html" style="display: inline-block; background: #015198; color: #fff; padding: 10px 24px; border-radius: 8px; font-weight: 700; text-decoration: none; transition: background 0.2s;">
-						🎬 Khám Phá Phim Đang Chiếu
-					</a>
+				<div style="text-align: center; padding: 48px 20px; color: #94a3b8;">
+					<span style="font-size: 48px; display: block; margin-bottom: 12px;">🎟️</span>
+					<h3 style="color: #fff; font-size: 18px; margin: 0 0 8px;">Bạn Chưa Có Lịch Sử Đặt Vé</h3>
+					<p style="font-size: 14px; margin: 0 0 20px;">Hãy chọn phim yêu thích và trải nghiệm rạp Beta Cinemas ngay hôm nay!</p>
+					<a href="/movies.html" style="background: #015198; color: #fff; padding: 10px 24px; border-radius: 6px; text-decoration: none; font-weight: 700; font-size: 14px; display: inline-block;">Xem Danh Sách Phim</a>
 				</div>
 			`
 			return
 		}
 
-		container.innerHTML = filtered
-			.map(t => {
+		container.innerHTML = history
+			.map((t, idx) => {
 				const isPaid = t.status === "paid"
 				const isCancelled = t.status === "cancelled"
 				let statusText = "Đã Thanh Toán"
@@ -484,6 +367,23 @@ document.addEventListener("DOMContentLoaded", async () => {
 		const body = document.getElementById("profile-ticket-modal-body")
 		if (!modal || !body) return
 
+		const qrSvg = generateQRCodeSVG(
+			JSON.stringify({
+				ticket: t.id,
+				movie: t.movieTitle,
+				cinema: t.cinemaName,
+				time: `${t.time} ${t.date}`,
+				seats: t.seats,
+				status: "VALID_PAID",
+			}),
+			{
+				size: 160,
+				darkColor: "#015198",
+				lightColor: "#ffffff",
+				includeLogo: true,
+			}
+		)
+
 		body.innerHTML = `
 			<div class="eticket-success-page-wrap" style="margin: 0; box-shadow: none; max-width: 100%;">
 				<div class="eticket-top-banner">
@@ -498,37 +398,9 @@ document.addEventListener("DOMContentLoaded", async () => {
 					</div>
 					<div class="et-qr-container">
 						<div class="qr-code-box">
-							<svg viewBox="0 0 200 200" width="160" height="160" xmlns="http://www.w3.org/2000/svg">
-								<rect width="200" height="200" fill="#ffffff" rx="10" />
-								<rect x="15" y="15" width="45" height="45" fill="#015198" rx="6" />
-								<rect x="23" y="23" width="29" height="29" fill="#ffffff" rx="3" />
-								<rect x="29" y="29" width="17" height="17" fill="#015198" rx="2" />
-								<rect x="140" y="15" width="45" height="45" fill="#015198" rx="6" />
-								<rect x="148" y="23" width="29" height="29" fill="#ffffff" rx="3" />
-								<rect x="154" y="29" width="17" height="17" fill="#015198" rx="2" />
-								<rect x="15" y="140" width="45" height="45" fill="#015198" rx="6" />
-								<rect x="23" y="148" width="29" height="29" fill="#ffffff" rx="3" />
-								<rect x="29" y="154" width="17" height="17" fill="#015198" rx="2" />
-								<rect x="70" y="20" width="12" height="12" fill="#1e293b" />
-								<rect x="90" y="20" width="12" height="24" fill="#1e293b" />
-								<rect x="110" y="20" width="18" height="12" fill="#1e293b" />
-								<rect x="70" y="44" width="24" height="12" fill="#1e293b" />
-								<rect x="20" y="70" width="12" height="24" fill="#1e293b" />
-								<rect x="40" y="80" width="20" height="12" fill="#1e293b" />
-								<rect x="70" y="70" width="14" height="14" fill="#1e293b" />
-								<rect x="140" y="70" width="20" height="12" fill="#1e293b" />
-								<circle cx="100" cy="100" r="22" fill="#015198" />
-								<circle cx="100" cy="100" r="18" fill="#ffffff" />
-								<text x="100" y="105" font-family="'Inter', sans-serif" font-size="13" font-weight="900" fill="#015198" text-anchor="middle">β</text>
-								<rect x="70" y="130" width="18" height="14" fill="#1e293b" />
-								<rect x="100" y="135" width="24" height="12" fill="#1e293b" />
-								<rect x="135" y="130" width="14" height="24" fill="#1e293b" />
-								<rect x="70" y="160" width="24" height="24" fill="#1e293b" />
-								<rect x="110" y="165" width="18" height="18" fill="#1e293b" />
-								<rect x="145" y="165" width="40" height="18" fill="#1e293b" />
-							</svg>
+							${qrSvg}
 						</div>
-						<div class="qr-hint">Xuất trình mã này cho nhân viên soát vé</div>
+						<div class="qr-hint">Xuất trình mã QR này tại quầy hoặc máy in vé tự động</div>
 					</div>
 					<div class="et-info-grid">
 						<div class="et-info-item" style="grid-column: 1 / -1;">
@@ -556,7 +428,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 							<span class="et-val">${t.concessions || "Không kèm bắp"}</span>
 						</div>
 						<div class="et-info-item" style="grid-column: 1 / -1; border-top: 1px dashed rgba(255,255,255,0.15); padding-top: 8px;">
-							<span class="et-lbl">Tổng Tiền</span>
+							<span class="et-lbl">Tổng Tiền Đã Thanh Toán</span>
 							<span class="et-val val-gold">${formatCurrency(t.total)}</span>
 						</div>
 					</div>
@@ -565,10 +437,24 @@ document.addEventListener("DOMContentLoaded", async () => {
 						<div class="barcode-number">${t.id} - KIOSK READY</div>
 					</div>
 				</div>
+				<div class="eticket-bottom-actions">
+					<button type="button" class="btn-et-action btn-save-ticket" id="btn-print-profile-ticket">
+						<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+							<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+							<polyline points="7 10 12 15 17 10"></polyline>
+							<line x1="12" y1="15" x2="12" y2="3"></line>
+						</svg>
+						In Vé / Lưu Vé
+					</button>
+				</div>
 			</div>
 		`
 
 		modal.classList.add("active")
 		document.body.style.overflow = "hidden"
+
+		document.getElementById("btn-print-profile-ticket")?.addEventListener("click", () => {
+			window.print()
+		})
 	}
 })

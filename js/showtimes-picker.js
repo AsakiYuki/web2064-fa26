@@ -1,10 +1,17 @@
 /**
  * Beta Cinemas - Showtimes Selector & Interactive Seat Booking Component
  * Chức năng chọn rạp, chọn ngày và lọc suất chiếu tương ứng
- * Render sơ đồ ghế động, đếm ngược giữ ghế, tính tổng tiền tự động
+ * CHỈ hiển thị các khu vực/rạp phim thực sự CÓ suất chiếu, ẩn các khu vực/rạp không có suất chiếu
  */
 import { formatCurrency, showToast, formatDateVN } from "./common.js"
-import { getCinemas, getMoviesData, getShowtimes, getTicketPricing, getShowtimeSeats, updateShowtimeSeats, storageGet, storageSet, STORAGE_KEYS } from "./storage.js"
+import {
+	getCinemas,
+	getMoviesData,
+	getShowtimes,
+	getTicketPricing,
+	getShowtimeSeats,
+	updateShowtimeSeats,
+} from "./storage.js"
 
 export class ShowtimePicker {
 	constructor(options = {}) {
@@ -19,7 +26,7 @@ export class ShowtimePicker {
 
 		this.selectedDate = null
 		this.selectedCity = "all"
-		this.selectedCinemaId = "beta-thainguyen"
+		this.selectedCinemaId = null
 
 		// Seat booking modal state
 		this.currentBooking = {
@@ -28,7 +35,7 @@ export class ShowtimePicker {
 			slot: null,
 			format: "",
 			date: "",
-			selectedSeats: [], // Array of { id: "D05", type: "vip", price: 75000 }
+			selectedSeats: [],
 		}
 	}
 
@@ -73,6 +80,9 @@ export class ShowtimePicker {
 				if (found) this.selectedCinemaId = found.id
 			}
 
+			// Validate and auto-pick the first available cinema for this date/movie
+			this.validateActiveSelection()
+
 			this.render()
 			this.initSeatModal()
 		} catch (err) {
@@ -80,7 +90,7 @@ export class ShowtimePicker {
 		}
 	}
 
-	/** Generate 7 days starting from 2026-09-26 */
+	/** Generate 8 days starting from 2026-09-26 */
 	getDatesList() {
 		const baseDate = new Date("2026-09-26T00:00:00")
 		const dates = []
@@ -114,25 +124,83 @@ export class ShowtimePicker {
 		return dates
 	}
 
-	/** Get list of unique cities */
-	getCities() {
+	/**
+	 * Kiểm tra xem một rạp có suất chiếu vào ngày dateStr (cho movieId nếu có) không
+	 * @param {string} cinemaId
+	 * @param {string} dateStr
+	 * @returns {boolean}
+	 */
+	hasShowtimes(cinemaId, dateStr) {
+		const entry = this.showtimes.find(s => s.date === dateStr && s.cinemaId === cinemaId)
+		if (!entry || !Array.isArray(entry.schedules) || entry.schedules.length === 0) {
+			return false
+		}
+
+		if (this.movieId) {
+			return entry.schedules.some(
+				sch => sch.movieId === this.movieId && Array.isArray(sch.slots) && sch.slots.length > 0
+			)
+		}
+
+		return entry.schedules.some(sch => Array.isArray(sch.slots) && sch.slots.length > 0)
+	}
+
+	/**
+	 * Lấy danh sách rạp THỰC SỰ CÓ SUẤT CHIẾU cho ngày và khu vực hiện tại
+	 * @param {string} dateStr
+	 * @param {string} city - "all" hoặc tên thành phố
+	 * @returns {Array}
+	 */
+	getAvailableCinemas(dateStr, city = "all") {
+		return this.cinemas.filter(c => {
+			const matchesCity = city === "all" || c.city === city
+			return matchesCity && this.hasShowtimes(c.id, dateStr)
+		})
+	}
+
+	/**
+	 * Lấy danh sách các khu vực/thành phố THỰC SỰ CÓ RẠP CÓ SUẤT CHIẾU
+	 * @param {string} dateStr
+	 * @returns {Array}
+	 */
+	getAvailableCities(dateStr) {
 		const cities = new Set()
 		this.cinemas.forEach(c => {
-			if (c.city) cities.add(c.city)
+			if (c.city && this.hasShowtimes(c.id, dateStr)) {
+				cities.add(c.city)
+			}
 		})
 		return Array.from(cities)
+	}
+
+	/**
+	 * Tự động đồng bộ và điều chỉnh rạp/khu vực được chọn nếu rạp hiện tại không có suất chiếu
+	 */
+	validateActiveSelection() {
+		const availableCities = this.getAvailableCities(this.selectedDate)
+
+		// Nếu thành phố đang chọn không còn rạp nào có suất chiếu -> reset về 'all'
+		if (this.selectedCity !== "all" && !availableCities.includes(this.selectedCity)) {
+			this.selectedCity = "all"
+		}
+
+		const availableCinemas = this.getAvailableCinemas(this.selectedDate, this.selectedCity)
+
+		// Nếu rạp đang chọn không có trong danh sách rạp có suất chiếu -> chọn rạp đầu tiên có suất chiếu
+		if (!availableCinemas.some(c => c.id === this.selectedCinemaId)) {
+			this.selectedCinemaId = availableCinemas.length > 0 ? availableCinemas[0].id : null
+		}
 	}
 
 	render() {
 		const container = document.getElementById(this.containerId)
 		if (!container) return
 
+		this.validateActiveSelection()
+
 		const dates = this.getDatesList()
-		const cities = this.getCities()
-		const filteredCinemas =
-			this.selectedCity === "all"
-				? this.cinemas
-				: this.cinemas.filter(c => c.city === this.selectedCity)
+		const availableCities = this.getAvailableCities(this.selectedDate)
+		const availableCinemas = this.getAvailableCinemas(this.selectedDate, this.selectedCity)
 
 		container.innerHTML = `
 			<div class="showtimes-section" id="showtimes-picker-box">
@@ -147,7 +215,7 @@ export class ShowtimePicker {
 							</svg>
 							LỊCH CHIẾU & SUẤT VÉ
 						</h2>
-						<p>Chọn ngày xem và cụm rạp để hiển thị danh sách các suất chiếu chính xác nhất</p>
+						<p>Chỉ hiển thị các khu vực và rạp phim đang có suất chiếu khả dụng</p>
 					</div>
 					<div class="legend-quick">
 						<div class="legend-item"><span class="dot dot-avail"></span> Còn vé</div>
@@ -180,43 +248,9 @@ export class ShowtimePicker {
 					</div>
 				</div>
 
-				<!-- 2. CINEMA SELECTOR -->
-				<div class="cinema-filter-container">
-					<div class="city-pills-row">
-						<span class="city-label">2. CHỌN KHU VỰC:</span>
-						<button type="button" class="city-pill-btn ${this.selectedCity === "all" ? "active" : ""}" data-city="all">Tất cả</button>
-						${cities
-							.map(
-								city => `
-							<button type="button" class="city-pill-btn ${this.selectedCity === city ? "active" : ""}" data-city="${city}">${city}</button>
-						`,
-							)
-							.join("")}
-					</div>
-
-					<div class="cinemas-list-grid" id="cinemas-list-grid">
-						${filteredCinemas
-							.map(
-								c => `
-							<div class="cinema-card-choice ${this.selectedCinemaId === c.id ? "active" : ""}" data-cinema-id="${c.id}">
-								<div class="cinema-name">
-									${c.name}
-									<span class="check-mark">✓</span>
-								</div>
-								<div class="cinema-addr">${c.address || ""}</div>
-								<div class="cinema-facs">
-									${(c.facilities || []).slice(0, 2).map(f => `<span class="fac-tag">${f}</span>`).join("")}
-								</div>
-							</div>
-						`,
-							)
-							.join("")}
-					</div>
-				</div>
-
-				<!-- 3. SLOTS SCHEDULE DISPLAY -->
-				<div class="showtimes-results-wrap" id="showtimes-results-wrap">
-					${this.renderShowtimeResults()}
+				<!-- 2. CINEMA & REGION SELECTOR (CHỈ HIỂN THỊ KHU VỰC VÀ RẠP CÓ SUẤT CHIẾU) -->
+				<div id="cinema-and-results-section">
+					${this.renderCinemaAndResults(availableCities, availableCinemas)}
 				</div>
 			</div>
 		`
@@ -224,21 +258,93 @@ export class ShowtimePicker {
 		this.attachEvents()
 	}
 
-	/** Render results based on single movie mode or schedule mode */
+	renderCinemaAndResults(availableCities, availableCinemas) {
+		if (availableCities.length === 0 || availableCinemas.length === 0) {
+			const targetMovie = this.movieId ? this.movies.find(m => m.id === this.movieId) : null
+			const movieNameText = targetMovie ? ` của phim <strong>${targetMovie.title}</strong>` : ""
+			return `
+				<div class="no-showtimes-notice" style="background: rgba(15, 23, 42, 0.6); border: 1px dashed rgba(255,255,255,0.15); border-radius: 12px; padding: 48px 24px; text-align: center; margin-top: 24px;">
+					<div class="notice-icon" style="font-size: 48px; margin-bottom: 12px;">🎬</div>
+					<h3 style="color: #fff; font-size: 18px; margin: 0 0 8px;">Không Có Suất Chiếu Vào Ngày Này</h3>
+					<p style="color: #94a3b8; font-size: 14px; margin: 0 0 16px; max-width: 520px; margin-left: auto; margin-right: auto;">
+						Hiện tại không có rạp nào có lịch chiếu${movieNameText} vào ngày <strong>${formatDateVN(this.selectedDate)}</strong>.
+					</p>
+					<p style="color: #38bdf8; font-size: 13px; font-weight: 600; margin: 0;">
+						💡 Quý khách vui lòng chọn các ngày khác có suất chiếu ở mục <strong>1. CHỌN NGÀY XEM</strong> phía trên.
+					</p>
+				</div>
+			`
+		}
+
+		return `
+			<div class="cinema-filter-container">
+				<div class="city-pills-row">
+					<span class="city-label">2. KHU VỰC CÓ SUẤT CHIẾU:</span>
+					<button type="button" class="city-pill-btn ${this.selectedCity === "all" ? "active" : ""}" data-city="all">
+						Tất cả (${availableCinemas.length} rạp)
+					</button>
+					${availableCities
+						.map(city => {
+							const countInCity = this.getAvailableCinemas(this.selectedDate, city).length
+							return `
+								<button type="button" class="city-pill-btn ${this.selectedCity === city ? "active" : ""}" data-city="${city}">
+									${city} (${countInCity})
+								</button>
+							`
+						})
+						.join("")}
+				</div>
+
+				<div class="cinemas-list-grid" id="cinemas-list-grid">
+					${availableCinemas
+						.map(
+							c => `
+						<div class="cinema-card-choice ${this.selectedCinemaId === c.id ? "active" : ""}" data-cinema-id="${c.id}">
+							<div class="cinema-name">
+								${c.name}
+								<span class="check-mark">✓</span>
+							</div>
+							<div class="cinema-addr">${c.address || ""}</div>
+							<div class="cinema-facs">
+								${(c.facilities || []).slice(0, 2).map(f => `<span class="fac-tag">${f}</span>`).join("")}
+							</div>
+						</div>
+					`,
+						)
+						.join("")}
+				</div>
+			</div>
+
+			<!-- 3. SLOTS SCHEDULE DISPLAY -->
+			<div class="showtimes-results-wrap" id="showtimes-results-wrap">
+				${this.renderShowtimeResults()}
+			</div>
+		`
+	}
+
+	/** Render kết quả suất chiếu của rạp đang chọn */
 	renderShowtimeResults() {
 		const currentCinema = this.cinemas.find(c => c.id === this.selectedCinemaId)
 		if (!currentCinema) {
-			return `<div class="no-showtimes-notice"><div class="notice-icon">🏢</div><p>Vui lòng chọn cụm rạp để xem lịch chiếu.</p></div>`
+			return `
+				<div class="no-showtimes-notice">
+					<div class="notice-icon">🏢</div>
+					<p>Vui lòng chọn rạp chiếu phim để xem danh sách suất chiếu.</p>
+				</div>
+			`
 		}
 
-		// Find in showtimes.json for (selectedDate, selectedCinemaId)
-		let scheduleEntry = this.showtimes.find(
-			s => s.date === this.selectedDate && s.cinemaId === this.selectedCinemaId,
+		const scheduleEntry = this.showtimes.find(
+			s => s.date === this.selectedDate && s.cinemaId === this.selectedCinemaId
 		)
 
-		// Fallback: If not in json, generate dynamic realistic schedule so user can explore any date/cinema seamlessly
-		if (!scheduleEntry) {
-			scheduleEntry = this.generateFallbackSchedule(this.selectedDate, currentCinema)
+		if (!scheduleEntry || !Array.isArray(scheduleEntry.schedules) || scheduleEntry.schedules.length === 0) {
+			return `
+				<div class="no-showtimes-notice">
+					<div class="notice-icon">🎬</div>
+					<p>Không có suất chiếu tại <strong>${currentCinema.name}</strong> vào ngày <strong>${formatDateVN(this.selectedDate)}</strong>.</p>
+				</div>
+			`
 		}
 
 		// Mode A: Single Movie Mode (movie-detail.html)
@@ -249,8 +355,8 @@ export class ShowtimePicker {
 				return `
 					<div class="no-showtimes-notice">
 						<div class="notice-icon">🎬</div>
-						<p>Hiện tại chưa có suất chiếu của phim này tại <strong>${currentCinema.name}</strong> vào ngày <strong>${this.selectedDate}</strong>.</p>
-						<p style="margin-top: 8px; font-size: 13px; color: #94a3b8;">Bạn có thể chọn rạp khác hoặc ngày khác ở phía trên nhé!</p>
+						<p>Hiện tại rạp <strong>${currentCinema.name}</strong> chưa có suất chiếu của phim này vào ngày <strong>${formatDateVN(this.selectedDate)}</strong>.</p>
+						<p style="margin-top: 8px; font-size: 13px; color: #94a3b8;">Quý khách vui lòng chọn cụm rạp khác ở phía trên nhé!</p>
 					</div>
 				`
 			}
@@ -309,7 +415,7 @@ export class ShowtimePicker {
 			return `
 				<div class="no-showtimes-notice">
 					<div class="notice-icon">🍿</div>
-					<p>Không tìm thấy suất chiếu nào tại <strong>${currentCinema.name}</strong> vào ngày <strong>${this.selectedDate}</strong>.</p>
+					<p>Không tìm thấy suất chiếu nào tại <strong>${currentCinema.name}</strong> vào ngày <strong>${formatDateVN(this.selectedDate)}</strong>.</p>
 				</div>
 			`
 		}
@@ -397,44 +503,6 @@ export class ShowtimePicker {
 		return html
 	}
 
-	/** Generate dynamic realistic schedule for dates / cinemas not explicitly stored */
-	generateFallbackSchedule(dateStr, cinema) {
-		const sampleMovies = this.movies.slice(0, 4)
-		const formats = ["2D Phụ Đề", "2D Lồng Tiếng", "IMAX 3D"]
-		const times = [
-			["09:30", "12:15", "15:00", "18:00", "20:45"],
-			["10:00", "13:15", "16:30", "19:45", "22:15"],
-			["11:00", "14:15", "17:30", "20:30"],
-			["13:45", "17:45", "21:15"],
-		]
-
-		const schedules = sampleMovies.map((m, idx) => {
-			const isImax = idx === 2 && cinema.facilities?.some(f => f.includes("IMAX"))
-			const fmt = isImax ? "IMAX 3D" : formats[idx % 2]
-			const basePrice = isImax ? 130000 : 70000
-			const slotTimes = times[idx % times.length]
-
-			return {
-				movieId: m.id,
-				movieTitle: m.title,
-				screenId: `${cinema.id}-P${idx + 1}`,
-				screenName: isImax ? "Phòng IMAX" : `Phòng chiếu ${idx + 1}`,
-				format: fmt,
-				slots: slotTimes.map(t => ({
-					time: t,
-					price: basePrice,
-					availableSeats: Math.floor(Math.random() * 55) + 5,
-				})),
-			}
-		})
-
-		return {
-			date: dateStr,
-			cinemaId: cinema.id,
-			schedules,
-		}
-	}
-
 	calcEndTime(startTime, durationMinutes = 105) {
 		const [h, m] = startTime.split(":").map(Number)
 		const totalMinutes = h * 60 + m + durationMinutes
@@ -443,47 +511,15 @@ export class ShowtimePicker {
 		return `~${String(endH).padStart(2, "0")}:${String(endM).padStart(2, "0")}`
 	}
 
-	/**
-	 * Lấy suất chiếu đã lọc theo ngày + rạp hiện tại từ LocalStorage
-	 * @returns {Object|null} scheduleEntry { date, cinemaId, schedules: [...] }
-	 */
-	getFilteredShowtimes() {
-		const currentCinema = this.cinemas.find(c => c.id === this.selectedCinemaId)
-		if (!currentCinema) return null
-
-		// Tìm trong dữ liệu showtimes chính xác theo date + cinemaId
-		let scheduleEntry = this.showtimes.find(
-			s => s.date === this.selectedDate && s.cinemaId === this.selectedCinemaId,
-		)
-
-		// Fallback: sinh lịch mẫu nếu không tìm thấy
-		if (!scheduleEntry) {
-			scheduleEntry = this.generateFallbackSchedule(this.selectedDate, currentCinema)
-		}
-
-		// Nếu đang ở mode single-movie, lọc chỉ hiện phim đó
-		if (this.movieId) {
-			const filtered = (scheduleEntry.schedules || []).filter(s => s.movieId === this.movieId)
-			return { ...scheduleEntry, schedules: filtered }
-		}
-
-		return scheduleEntry
-	}
-
 	attachEvents() {
 		const container = document.getElementById(this.containerId)
 		if (!container) return
 
-		// Date buttons - smooth scroll active card vào view
+		// Date buttons
 		container.querySelectorAll(".date-card-btn").forEach(btn => {
 			btn.addEventListener("click", () => {
 				this.selectedDate = btn.dataset.date
-				this.renderShowtimeResultsOnly()
-				// Update active class without full re-render
-				container.querySelectorAll(".date-card-btn").forEach(b => b.classList.remove("active"))
-				btn.classList.add("active")
-				// Smooth scroll date card into view
-				btn.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" })
+				this.render()
 			})
 		})
 
@@ -499,10 +535,8 @@ export class ShowtimePicker {
 		container.querySelectorAll(".cinema-card-choice").forEach(card => {
 			card.addEventListener("click", () => {
 				this.selectedCinemaId = card.dataset.cinemaId
-				// Animate active state
 				container.querySelectorAll(".cinema-card-choice").forEach(c => c.classList.remove("active"))
 				card.classList.add("active")
-				// Only re-render results section (không flash toàn trang)
 				this.renderShowtimeResultsOnly()
 			})
 		})
@@ -511,7 +545,6 @@ export class ShowtimePicker {
 		this.attachSlotEvents(container)
 	}
 
-	/** Attach click events cho các slot-btn (gọi riêng khi partial re-render) */
 	attachSlotEvents(container) {
 		const wrap = container || document.getElementById(this.containerId)
 		if (!wrap) return
@@ -529,12 +562,17 @@ export class ShowtimePicker {
 					price: +btn.dataset.price,
 					date: this.selectedDate,
 				}
-				this.openSeatModal(slotData)
+
+				if (typeof this.onSlotSelect === "function") {
+					this.onSlotSelect(slotData)
+				} else {
+					const bookingUrl = `/booking.html?movieId=${encodeURIComponent(slotData.movieId)}&cinemaId=${encodeURIComponent(slotData.cinemaId)}&date=${encodeURIComponent(slotData.date)}&time=${encodeURIComponent(slotData.time)}&screen=${encodeURIComponent(slotData.screenName)}&format=${encodeURIComponent(slotData.format)}`
+					window.location.href = bookingUrl
+				}
 			})
 		})
 	}
 
-	/** Re-render chỉ phần kết quả suất chiếu (không flash toàn bộ picker) */
 	renderShowtimeResultsOnly() {
 		const resultsWrap = document.getElementById("showtimes-results-wrap")
 		if (!resultsWrap) return
@@ -598,16 +636,20 @@ export class ShowtimePicker {
 						data-seat-id="${seat.id}"
 						data-seat-type="${seat.type}"
 						data-price="${seat.price}"
-						title="${seat.id} (${formatCurrency(seat.price)})">
-						${isSweetbox ? "👫" : seat.id.slice(1)}
+						data-status="${seat.status}"
+						title="${seat.id} (${seat.type === "vip" ? "Ghế VIP" : seat.type === "sweetbox" ? "Ghế Đôi Sweetbox" : "Ghế Thường"}: ${formatCurrency(seat.price)})"
+						role="checkbox"
+						aria-checked="false"
+						tabindex="${isSold ? "-1" : "0"}">
+						${isSweetbox ? "👫" : seat.col}
 					</div>
 				`
 			})
 
 			seatRowsHTML += `
-				<div class="seat-row">
+				<div class="seat-row-line">
 					<span class="row-label">${rowBlock.row}</span>
-					${seatsInRow}
+					<div class="row-seats-wrap ${isSweetbox ? "sweetbox-wrap" : ""}">${seatsInRow}</div>
 					<span class="row-label">${rowBlock.row}</span>
 				</div>
 			`
@@ -615,219 +657,157 @@ export class ShowtimePicker {
 
 		body.innerHTML = `
 			<div class="seat-modal-header">
-				<h3>${slotData.movieTitle}</h3>
-				<div class="seat-modal-meta">
-					<span>🏢 <strong>${slotData.cinemaName}</strong></span>
-					<span>🚪 <strong>${slotData.screenName} (${slotData.format})</strong></span>
-					<span>📅 <strong>${formatDateVN(slotData.date)}</strong></span>
-					<span>⏰ <strong>${slotData.time}</strong></span>
+				<div>
+					<h3 class="sm-movie-title">${slotData.movieTitle}</h3>
+					<div class="sm-meta-info">
+						<span>🏛️ ${slotData.cinemaName}</span>
+						<span>📽️ ${slotData.screenName} (${slotData.format})</span>
+						<span>⏱️ ${slotData.time} - ${formatDateVN(slotData.date)}</span>
+					</div>
 				</div>
-				<div class="seat-modal-timer-badge" id="modal-seat-timer-badge" aria-label="Thời gian giữ ghế">
-					<span>⏱️ Thời gian giữ ghế: <strong id="modal-timer-digits">05:00</strong></span>
+				<div class="hold-timer-pill" id="seat-modal-hold-timer">
+					<span>Giữ ghế: </span>
+					<strong id="modal-timer-digits">05:00</strong>
 				</div>
 			</div>
 
-			<!-- Screen visual -->
-			<div class="screen-graphic-wrap">
-				<div class="screen-curve"></div>
-				<span class="screen-label">MÀN HÌNH CHIẾU / SCREEN</span>
+			<!-- Screen Screen Visual -->
+			<div class="modal-screen-indicator">
+				<div class="screen-glow"></div>
+				<span class="screen-text">MÀN HÌNH CHIẾU PHIM</span>
 			</div>
 
-			<!-- Interactive Seat Map -->
-			<div class="seat-map-grid" id="seat-map-interactive">
+			<!-- Seat Grid Container -->
+			<div class="modal-seat-grid-container" id="modal-seat-grid-container">
 				${seatRowsHTML}
 			</div>
 
 			<!-- Legend -->
-			<div class="seat-legend">
-				<div class="legend-col"><span class="sample-seat sample-std"></span> Ghế Thường (${formatCurrency(basePrice)})</div>
-				<div class="legend-col"><span class="sample-seat sample-vip"></span> Ghế VIP (${formatCurrency(basePrice + 10000)})</div>
-				<div class="legend-col"><span class="sample-seat sample-swb"></span> Ghế Đôi Sweetbox (${formatCurrency(basePrice * 2 + 10000)})</div>
-				<div class="legend-col"><span class="sample-seat sample-sold"></span> Đã bán</div>
-				<div class="legend-col"><span class="sample-seat sample-sel"></span> Đang chọn</div>
+			<div class="modal-seat-legend">
+				<div class="l-item"><div class="l-box std"></div> <span>Thường (${formatCurrency(basePrice)})</span></div>
+				<div class="l-item"><div class="l-box vip"></div> <span>VIP (${formatCurrency(basePrice + 10000)})</span></div>
+				<div class="l-item"><div class="l-box swb"></div> <span>Ghế đôi (${formatCurrency(basePrice * 2 + 15000)})</span></div>
+				<div class="l-item"><div class="l-box sold"></div> <span>Đã bán</span></div>
+				<div class="l-item"><div class="l-box sel"></div> <span>Đang chọn</span></div>
 			</div>
 
-			<!-- Footer Checkout -->
-			<div class="seat-modal-footer">
-				<div class="selected-summary">
-					<div class="seats-chosen-text">Ghế đã chọn: <strong id="chosen-seats-label">Chưa chọn ghế</strong></div>
-					<div class="total-price-text" id="total-price-label">0 đ</div>
+			<!-- Bottom bar with Selected seats & Price -->
+			<div class="modal-booking-bottom-bar">
+				<div class="mb-seats-info">
+					<div class="seats-count-label">Ghế đã chọn: <strong id="modal-selected-seats-text">Chưa chọn</strong></div>
+					<div class="seats-total-price">Tổng cộng: <strong id="modal-total-price-text">0 ₫</strong></div>
 				</div>
-				<div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
-					<a href="/booking.html?movieId=${slotData.movieId}&cinemaId=${slotData.cinemaId}&date=${slotData.date}&time=${slotData.time}&screen=${encodeURIComponent(slotData.screenName)}&format=${encodeURIComponent(slotData.format)}"
-						class="btn-goto-full-booking"
-						style="background:#0284c7; color:#fff; padding:12px 18px; border-radius:8px; font-weight:800; font-size:13px; text-decoration:none; display:inline-flex; align-items:center; gap:6px; transition:background 0.2s;">
-						<span>🍿 Chọn Bắp Nước Kèm Vé</span>
-					</a>
-					<button type="button" class="btn-confirm-booking" id="btn-confirm-seat-booking" disabled>
-						XÁC NHẬN ĐẶT VÉ
-					</button>
-				</div>
+				<button type="button" class="btn-modal-proceed" id="btn-modal-proceed" disabled>
+					<span>TIẾP TỤC ĐẶT VÉ</span>
+					<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:16px;height:16px;"><polyline points="9 18 15 12 9 6"></polyline></svg>
+				</button>
 			</div>
 		`
 
-		// Gán sự kiện click và phím điều khiển cho ghế
-		const seatItems = body.querySelectorAll(".seat-item:not(.seat-sold)")
-		seatItems.forEach(seat => {
-			const toggleSeat = () => {
-				const id = seat.dataset.seatId
-				const price = +seat.dataset.price
-				const type = seat.dataset.seatType
-
-				const existingIdx = this.currentBooking.selectedSeats.findIndex(s => s.id === id)
-				if (existingIdx > -1) {
-					// Bỏ chọn ghế
-					this.currentBooking.selectedSeats.splice(existingIdx, 1)
-					seat.classList.remove("seat-selected")
-					seat.setAttribute("aria-checked", "false")
-				} else {
-					// Giới hạn 8 ghế tối đa
-					const MAX_SEATS = 8
-					if (this.currentBooking.selectedSeats.length >= MAX_SEATS) {
-						seat.classList.add("seat-shake")
-						setTimeout(() => seat.classList.remove("seat-shake"), 400)
-						showToast(`⚠️ Bạn chỉ có thể chọn tối đa ${MAX_SEATS} ghế trong 1 lần đặt.`, "warning")
-						return
-					}
-					// Chọn ghế mới
-					this.currentBooking.selectedSeats.push({ id, price, type })
-					seat.classList.add("seat-selected")
-					seat.setAttribute("aria-checked", "true")
-				}
-
-				if (typeof navigator !== "undefined" && navigator.vibrate) {
-					navigator.vibrate(25)
-				}
-				this.updateBookingSummary()
-			}
-
-			seat.setAttribute("role", "checkbox")
-			seat.setAttribute("aria-checked", "false")
-			seat.setAttribute("tabindex", "0")
-			seat.addEventListener("click", toggleSeat)
-			seat.addEventListener("keydown", e => {
-				if (e.key === "Enter" || e.key === " ") {
-					e.preventDefault()
-					toggleSeat()
-				}
-			})
-		})
-
-		// Confirm booking button
-		const confirmBtn = body.querySelector("#btn-confirm-seat-booking")
-		confirmBtn.addEventListener("click", () => {
-			if (!this.currentBooking.selectedSeats.length) return
-			const seatNames = this.currentBooking.selectedSeats.map(s => s.id).join(", ")
-			const total = this.currentBooking.selectedSeats.reduce((sum, s) => sum + s.price, 0)
-			const bookingCode = "BT" + Math.floor(100000 + Math.random() * 900000)
-
-			this.closeSeatModal()
-			showToast(
-				`🎉 Đặt vé thành công! Mã: <strong>${bookingCode}</strong>. Phim: ${slotData.movieTitle} - Ghế: [${seatNames}] - Tổng: ${formatCurrency(total)}. Vui lòng kiểm tra email.`,
-				"success",
-				7000,
-			)
-		})
-
 		const modal = document.getElementById("seat-booking-modal")
-		modal.classList.add("active")
+		modal?.classList.add("active")
 		document.body.style.overflow = "hidden"
-		this.startModalCountdown()
+
+		this.attachSeatModalEvents(slotData)
+		this.startModalHoldTimer()
 	}
 
-	startModalCountdown() {
-		if (this.modalTimerInterval) clearInterval(this.modalTimerInterval)
-		let seconds = 300
-		let warned = false
+	attachSeatModalEvents(slotData) {
+		const modalBody = document.getElementById("seat-modal-body")
+		if (!modalBody) return
 
-		const digitsEl = document.getElementById("modal-timer-digits")
-		const badgeEl = document.getElementById("modal-seat-timer-badge")
+		modalBody.querySelectorAll(".seat-item:not(.seat-sold)").forEach(seatEl => {
+			seatEl.addEventListener("click", () => this.toggleSeat(seatEl))
+		})
 
-		const updateDigits = () => {
-			const m = Math.floor(Math.max(0, seconds) / 60)
-			const s = Math.max(0, seconds) % 60
-			if (digitsEl) digitsEl.textContent = `${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`
-			if (badgeEl) badgeEl.classList.toggle("timer-danger", seconds <= 60)
-
-			if (seconds === 60 && !warned) {
-				warned = true
-				showToast("⚠️ Thời gian giữ ghế chỉ còn 1 phút! Vui lòng sớm xác nhận.", "warning", 4000)
+		const proceedBtn = document.getElementById("btn-modal-proceed")
+		proceedBtn?.addEventListener("click", () => {
+			if (!this.currentBooking.selectedSeats.length) {
+				showToast("Vui lòng chọn ít nhất 1 ghế để tiếp tục.", "warning")
+				return
 			}
 
-			if (seconds <= 0) {
-				clearInterval(this.modalTimerInterval)
-				this.modalTimerInterval = null
+			const seatNames = this.currentBooking.selectedSeats.map(s => s.id).join(", ")
+			const totalAmount = this.currentBooking.selectedSeats.reduce((sum, s) => sum + s.price, 0)
 
-				if (this.currentBooking && this.currentBooking.selectedSeats.length > 0) {
-					this.currentBooking.selectedSeats = []
-					const body = document.getElementById("seat-modal-body")
-					if (body) {
-						body.querySelectorAll(".seat-item.seat-selected").forEach(s => {
-							s.classList.remove("seat-selected")
-							s.setAttribute("aria-checked", "false")
-						})
-					}
-					this.updateBookingSummary()
-					showToast("⏰ Đã hết thời gian giữ ghế 5 phút! Vui lòng chọn lại ghế.", "warning", 6000)
-				}
-				setTimeout(() => this.startModalCountdown(), 1000)
+			this.closeSeatModal()
+
+			// Redirect to full booking page (Step 2: Concessions & Checkout)
+			const bookingUrl = `/booking.html?movieId=${encodeURIComponent(slotData.movieId)}&cinemaId=${encodeURIComponent(slotData.cinemaId)}&date=${encodeURIComponent(slotData.date)}&time=${encodeURIComponent(slotData.time)}&screen=${encodeURIComponent(slotData.screenName)}&format=${encodeURIComponent(slotData.format)}&seats=${encodeURIComponent(seatNames)}&total=${totalAmount}`
+
+			window.location.href = bookingUrl
+		})
+	}
+
+	toggleSeat(seatEl) {
+		const seatId = seatEl.dataset.seatId
+		const seatType = seatEl.dataset.seatType
+		const seatPrice = +seatEl.dataset.price
+
+		const existingIdx = this.currentBooking.selectedSeats.findIndex(s => s.id === seatId)
+
+		if (existingIdx > -1) {
+			this.currentBooking.selectedSeats.splice(existingIdx, 1)
+			seatEl.classList.remove("seat-selected")
+			seatEl.setAttribute("aria-checked", "false")
+		} else {
+			if (this.currentBooking.selectedSeats.length >= 8) {
+				showToast("Bạn chỉ có thể chọn tối đa 8 ghế trong 1 lượt đặt.", "warning")
+				return
 			}
+			this.currentBooking.selectedSeats.push({
+				id: seatId,
+				type: seatType,
+				price: seatPrice,
+			})
+			seatEl.classList.add("seat-selected")
+			seatEl.setAttribute("aria-checked", "true")
 		}
 
-		updateDigits()
-		this.modalTimerInterval = setInterval(() => {
+		this.updateModalSelectedUI()
+	}
+
+	updateModalSelectedUI() {
+		const seatsTextEl = document.getElementById("modal-selected-seats-text")
+		const priceTextEl = document.getElementById("modal-total-price-text")
+		const proceedBtn = document.getElementById("btn-modal-proceed")
+
+		const seats = this.currentBooking.selectedSeats
+		const total = seats.reduce((sum, s) => sum + s.price, 0)
+
+		if (seatsTextEl) {
+			seatsTextEl.textContent = seats.length ? seats.map(s => s.id).join(", ") : "Chưa chọn"
+		}
+		if (priceTextEl) {
+			priceTextEl.textContent = formatCurrency(total)
+		}
+		if (proceedBtn) {
+			proceedBtn.disabled = seats.length === 0
+		}
+	}
+
+	startModalHoldTimer() {
+		let seconds = 300
+		const timerDigits = document.getElementById("modal-timer-digits")
+
+		if (this.modalHoldInterval) clearInterval(this.modalHoldInterval)
+
+		this.modalHoldInterval = setInterval(() => {
 			seconds--
-			updateDigits()
+			if (seconds <= 0) {
+				clearInterval(this.modalHoldInterval)
+				showToast("Thời gian giữ ghế đã hết! Vui lòng chọn lại.", "warning")
+				this.closeSeatModal()
+				return
+			}
+			const m = String(Math.floor(seconds / 60)).padStart(2, "0")
+			const s = String(seconds % 60).padStart(2, "0")
+			if (timerDigits) timerDigits.textContent = `${m}:${s}`
 		}, 1000)
 	}
 
-	updateBookingSummary() {
-		const chosenLabel = document.getElementById("chosen-seats-label")
-		const totalLabel = document.getElementById("total-price-label")
-		const confirmBtn = document.getElementById("btn-confirm-seat-booking")
-
-		if (!chosenLabel || !totalLabel || !confirmBtn) return
-
-		const seats = this.currentBooking.selectedSeats
-		if (seats.length === 0) {
-			chosenLabel.textContent = "Chưa chọn ghế"
-			totalLabel.textContent = "0 đ"
-			confirmBtn.disabled = true
-		} else {
-			// Phân loại ghế và tính tổng tiền theo từng loại
-			const standardSeats = seats.filter(s => s.type === "standard")
-			const vipSeats = seats.filter(s => s.type === "vip")
-			const sweetboxSeats = seats.filter(s => s.type === "sweetbox")
-
-			const standardTotal = standardSeats.reduce((sum, s) => sum + s.price, 0)
-			const vipTotal = vipSeats.reduce((sum, s) => sum + s.price, 0)
-			const sweetboxTotal = sweetboxSeats.reduce((sum, s) => sum + s.price, 0)
-			const grandTotal = standardTotal + vipTotal + sweetboxTotal
-
-			// Chuỗi tóm tắt theo từng loại ghế
-			const typeDetails = []
-			if (standardSeats.length > 0) {
-				typeDetails.push(`${standardSeats.length} Thường (${formatCurrency(standardTotal)})`)
-			}
-			if (vipSeats.length > 0) {
-				typeDetails.push(`${vipSeats.length} VIP (${formatCurrency(vipTotal)})`)
-			}
-			if (sweetboxSeats.length > 0) {
-				typeDetails.push(`${sweetboxSeats.length} Đôi (${formatCurrency(sweetboxTotal)})`)
-			}
-
-			const seatNames = seats.map(s => s.id).join(", ")
-			chosenLabel.innerHTML = `<strong>${seatNames}</strong> <span style="display:block; font-size:12px; color:#94a3b8; font-weight:500; margin-top:2px;">Phân loại: ${typeDetails.join(" • ")}</span>`
-			totalLabel.textContent = formatCurrency(grandTotal)
-			confirmBtn.disabled = false
-		}
-	}
-
 	closeSeatModal() {
-		if (this.modalTimerInterval) {
-			clearInterval(this.modalTimerInterval)
-			this.modalTimerInterval = null
-		}
+		if (this.modalHoldInterval) clearInterval(this.modalHoldInterval)
 		const modal = document.getElementById("seat-booking-modal")
 		if (modal) {
 			modal.classList.remove("active")

@@ -2,7 +2,7 @@
  * Beta Cinemas - Seat Selection & Concessions Booking Logic
  */
 import { setupHeaderAndFooter, formatCurrency, formatDateVN, showToast } from "./common.js"
-import { getMoviesData, getCinemas, getConcessions, getTicketPricing, getShowtimeSeats, updateShowtimeSeats } from "./storage.js"
+import { getMoviesData, getCinemas, getConcessions, getTicketPricing, getShowtimeSeats, updateShowtimeSeats, calculateVoucherDiscount, savePendingBooking, getPendingBooking } from "./storage.js"
 
 document.addEventListener("DOMContentLoaded", async () => {
 	await setupHeaderAndFooter()
@@ -55,6 +55,17 @@ document.addEventListener("DOMContentLoaded", async () => {
 	const currentMovie = allMovies.find(m => m.id === movieId) || allMovies[0]
 	const currentCinema = cinemasData.find(c => c.id === cinemaId) || cinemasData[0]
 
+	// Base seat prices
+	const isIMAX = formatName.toLowerCase().includes("imax")
+	const baseStandardPrice = isIMAX ? 120000 : 70000
+	const baseVipPrice = baseStandardPrice + 10000
+	const baseSweetboxPrice = baseStandardPrice * 2 + 15000
+
+	// Hold timer variables (defined early to prevent TDZ access)
+	let holdTimerInterval = null
+	let holdSecondsRemaining = 300 // 5 phút = 300 giây
+	let hasNotifiedOneMinute = false
+
 	// Booking State
 	const bookingState = {
 		movie: currentMovie,
@@ -70,11 +81,30 @@ document.addEventListener("DOMContentLoaded", async () => {
 		currentStep: 1, // 1: Seats, 2: Concessions
 	}
 
-	// Base seat prices
-	const isIMAX = formatName.toLowerCase().includes("imax")
-	const baseStandardPrice = isIMAX ? 120000 : 70000
-	const baseVipPrice = baseStandardPrice + 10000
-	const baseSweetboxPrice = baseStandardPrice * 2 + 15000
+	// Pre-populate selected seats from URL if provided (e.g. from modal or direct link)
+	const seatsParam = urlParams.get("seats")
+	if (seatsParam) {
+		const seatIds = seatsParam.split(",").map(s => s.trim()).filter(Boolean)
+		const seatLayout = getShowtimeSeats(currentCinema.id, currentMovie.id, dateStr, timeSlot, {
+			isIMAX,
+			basePrice: baseStandardPrice,
+		})
+		seatIds.forEach(id => {
+			for (const row of seatLayout) {
+				const foundSeat = row.seats.find(s => s.id === id)
+				if (foundSeat && foundSeat.status !== "sold") {
+					bookingState.selectedSeats.push({
+						id: foundSeat.id,
+						row: foundSeat.row,
+						col: foundSeat.col,
+						type: foundSeat.type,
+						price: foundSeat.price,
+					})
+					break
+				}
+			}
+		})
+	}
 
 	initBookingInfoDisplay()
 	renderSeatMap()
@@ -157,8 +187,8 @@ document.addEventListener("DOMContentLoaded", async () => {
 						</div>
 					`
 				} else {
-					// Lối đi sau ghế 3 và ghế 9
-					if (seat.col === 4 || seat.col === 10) {
+					// Lối đi sau ghế 3 và ghế 11 (bố cục chuẩn 3 - 8 - 3 ghế)
+					if (seat.col === 4 || seat.col === 12) {
 						rowSeatsHTML += `<div class="seat-aisle-divider"></div>`
 					}
 
@@ -481,21 +511,70 @@ document.addEventListener("DOMContentLoaded", async () => {
 			}
 		}
 
-		// 3. Discount calculation
+		// 3. Discount calculation using calculateVoucherDiscount helper
 		const rawGrandTotal = seatsTotal + concessionsTotal
 		let discount = 0
-		if (bookingState.appliedCoupon === "BETA10") {
-			discount = Math.round(rawGrandTotal * 0.1)
-		} else if (bookingState.appliedCoupon === "BETA50") {
-			discount = Math.min(50000, rawGrandTotal)
+		let couponMsgText = ""
+
+		if (bookingState.appliedCoupon) {
+			const res = calculateVoucherDiscount(bookingState.appliedCoupon, rawGrandTotal)
+			if (res.isValid) {
+				discount = res.discountAmount
+				couponMsgText = res.message
+			} else {
+				bookingState.appliedCoupon = null
+				discount = 0
+				couponMsgText = ""
+			}
 		}
 		bookingState.discountAmount = discount
 
 		const finalTotal = Math.max(0, rawGrandTotal - discount)
 
+		// Render coupon message & breakdown if coupon is applied
+		const couponMsgEl = document.getElementById("coupon-msg")
+		if (couponMsgEl) {
+			if (couponMsgText) {
+				couponMsgEl.style.display = "block"
+				couponMsgEl.style.color = "#10b981"
+				couponMsgEl.textContent = couponMsgText
+			} else if (!bookingState.appliedCoupon) {
+				couponMsgEl.style.display = "none"
+			}
+		}
+
+		// Add discount breakdown row if discount > 0
+		let discountRow = document.getElementById("summary-discount-row")
+		if (discount > 0) {
+			if (!discountRow && concessionsListWrap) {
+				discountRow = document.createElement("div")
+				discountRow.id = "summary-discount-row"
+				discountRow.className = "summary-breakdown-section"
+				concessionsListWrap.parentElement.insertBefore(discountRow, document.querySelector(".summary-coupon-box"))
+			}
+			if (discountRow) {
+				discountRow.style.display = "block"
+				discountRow.innerHTML = `
+					<div class="breakdown-group-title" style="color: #10b981;">🎟️ Ưu đãi giảm giá (${bookingState.appliedCoupon})</div>
+					<div class="breakdown-row">
+						<div class="row-desc">
+							<strong style="color: #10b981;">Mã voucher ${bookingState.appliedCoupon}</strong>
+							<small>Đã áp dụng giảm trực tiếp</small>
+						</div>
+						<div class="row-val" style="color: #10b981; font-weight: 800;">-${formatCurrency(discount)}</div>
+					</div>
+				`
+			}
+		} else if (discountRow) {
+			discountRow.style.display = "none"
+		}
+
 		if (totalAmountEl) {
 			totalAmountEl.textContent = formatCurrency(finalTotal)
 		}
+
+		// Persist Pending Booking to LocalStorage
+		syncPendingBookingToStorage(seatsTotal, concessionsTotal, finalTotal)
 
 		// Enable / disable buttons
 		const hasSeats = bookingState.selectedSeats.length > 0
@@ -515,6 +594,40 @@ document.addEventListener("DOMContentLoaded", async () => {
 				`
 			}
 		}
+	}
+
+	function syncPendingBookingToStorage(seatsTotal, concessionsTotal, finalTotal) {
+		if (bookingState.selectedSeats.length === 0) return
+
+		const seatNames = bookingState.selectedSeats.map(s => s.id).join(", ")
+		const comboList = []
+		bookingState.selectedConcessions.forEach(({ item, qty }) => {
+			comboList.push({ id: item.id, name: item.name, price: item.price, qty })
+		})
+
+		const pendingPayload = {
+			movieId: currentMovie.id,
+			movieTitle: currentMovie.title,
+			moviePoster: currentMovie.poster,
+			cinemaId: currentCinema.id,
+			cinemaName: currentCinema.name,
+			screenName,
+			formatName,
+			date: dateStr,
+			time: timeSlot,
+			selectedSeats: bookingState.selectedSeats,
+			seatsString: seatNames,
+			selectedConcessions: comboList,
+			concessionsString: comboList.map(c => `${c.qty}x ${c.name}`).join(", ") || "Không kèm bắp nước",
+			seatsTotal,
+			concessionsTotal,
+			voucherCode: bookingState.appliedCoupon,
+			discountAmount: bookingState.discountAmount,
+			grandTotal: finalTotal,
+			holdExpiresAt: Date.now() + (holdSecondsRemaining * 1000),
+		}
+
+		savePendingBooking(pendingPayload)
 	}
 
 	/* ==========================================================================
@@ -575,7 +688,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 			if (bookingState.currentStep === 1) {
 				switchToStep(2)
 			} else {
-				// Proceed to checkout page
+				// Save final pending booking before going to checkout
 				const seatNames = bookingState.selectedSeats.map(s => s.id).join(", ")
 				const comboList = []
 				bookingState.selectedConcessions.forEach(({ item, qty }) => {
@@ -590,7 +703,9 @@ document.addEventListener("DOMContentLoaded", async () => {
 				})
 				const finalTotal = Math.max(0, seatsTotal + concessionsTotal - bookingState.discountAmount)
 
-				const checkoutUrl = `/checkout.html?movieId=${encodeURIComponent(currentMovie.id)}&cinemaId=${encodeURIComponent(currentCinema.id)}&date=${encodeURIComponent(dateStr)}&time=${encodeURIComponent(timeSlot)}&screen=${encodeURIComponent(screenName)}&format=${encodeURIComponent(formatName)}&seats=${encodeURIComponent(seatNames)}&concessions=${encodeURIComponent(concessionsStr)}&total=${finalTotal}`
+				syncPendingBookingToStorage(seatsTotal, concessionsTotal, finalTotal)
+
+				const checkoutUrl = `/checkout.html?movieId=${encodeURIComponent(currentMovie.id)}&cinemaId=${encodeURIComponent(currentCinema.id)}&date=${encodeURIComponent(dateStr)}&time=${encodeURIComponent(timeSlot)}&screen=${encodeURIComponent(screenName)}&format=${encodeURIComponent(formatName)}&seats=${encodeURIComponent(seatNames)}&concessions=${encodeURIComponent(concessionsStr)}&voucher=${encodeURIComponent(bookingState.appliedCoupon || "")}&discount=${bookingState.discountAmount}&total=${finalTotal}`
 
 				window.location.href = checkoutUrl
 			}
@@ -609,25 +724,40 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 		applyBtn.addEventListener("click", () => {
 			const code = input.value.trim().toUpperCase()
-			if (!code) return
-
-			if (code === "BETA10") {
-				bookingState.appliedCoupon = "BETA10"
+			if (!code) {
+				bookingState.appliedCoupon = null
 				if (msg) {
-					msg.style.display = "block"
-					msg.textContent = "Áp dụng thành công mã BETA10: Giảm 10% tổng đơn hàng!"
+					msg.style.display = "none"
+					msg.textContent = ""
 				}
-				showToast("Áp dụng mã giảm giá 10% thành công!", "success")
-			} else if (code === "BETA50") {
-				bookingState.appliedCoupon = "BETA50"
-				if (msg) {
-					msg.style.display = "block"
-					msg.textContent = "Áp dụng thành công mã BETA50: Giảm 50.000đ!"
-				}
-				showToast("Áp dụng mã giảm 50.000đ thành công!", "success")
-			} else {
-				showToast("Mã ưu đãi không hợp lệ hoặc đã hết hạn. Hãy thử BETA10 hoặc BETA50!", "warning")
+				updateSummarySidebar()
 				return
+			}
+
+			const seatsTotal = bookingState.selectedSeats.reduce((sum, s) => sum + s.price, 0)
+			let concessionsTotal = 0
+			bookingState.selectedConcessions.forEach(({ item, qty }) => {
+				concessionsTotal += item.price * qty
+			})
+			const rawTotal = seatsTotal + concessionsTotal
+
+			const result = calculateVoucherDiscount(code, rawTotal)
+			if (result.isValid) {
+				bookingState.appliedCoupon = code
+				if (msg) {
+					msg.style.display = "block"
+					msg.style.color = "#10b981"
+					msg.textContent = result.message
+				}
+				showToast(result.message, "success")
+			} else {
+				bookingState.appliedCoupon = null
+				if (msg) {
+					msg.style.display = "block"
+					msg.style.color = "#ef4444"
+					msg.textContent = result.message
+				}
+				showToast(result.message, "warning")
 			}
 			updateSummarySidebar()
 		})
@@ -764,10 +894,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 	/* ==========================================================================
 	   8. HOLD COUNTDOWN TIMER (5 PHÚT VÀ TỰ ĐỘNG HỦY KHI HẾT GIỜ)
 	   ========================================================================== */
-	let holdTimerInterval = null
-	let holdSecondsRemaining = 300 // 5 phút = 300 giây
-	let hasNotifiedOneMinute = false
-
 	function formatTimeDigits(totalSecs) {
 		const m = Math.floor(Math.max(0, totalSecs) / 60)
 		const s = Math.max(0, totalSecs) % 60
