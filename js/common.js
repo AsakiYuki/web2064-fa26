@@ -389,7 +389,7 @@ function initAuthModalEvents(modal) {
 	document.getElementById("btn-social-facebook")?.addEventListener("click", () => loginSocial("Facebook"))
 
 	// Login form submit with validation
-	document.getElementById("form-auth-login")?.addEventListener("submit", e => {
+	document.getElementById("form-auth-login")?.addEventListener("submit", async e => {
 		e.preventDefault()
 		const accInput = document.getElementById("login-account")
 		const pwdInput = document.getElementById("login-password")
@@ -416,8 +416,8 @@ function initAuthModalEvents(modal) {
 
 		if (hasError) return
 
-		// Authenticate with storage
-		const authResult = authenticateUser(acc, pwd)
+		// Authenticate with json-server-auth / storage
+		const authResult = await authenticateUser(acc, pwd)
 		if (!authResult.success) {
 			// Fallback: If not in list, check if matches default demo pattern or create quick session
 			if (acc.includes("@") && pwd.length >= 6) {
@@ -447,7 +447,7 @@ function initAuthModalEvents(modal) {
 	})
 
 	// Register form submit with full validation
-	document.getElementById("form-auth-register")?.addEventListener("submit", e => {
+	document.getElementById("form-auth-register")?.addEventListener("submit", async e => {
 		e.preventDefault()
 		const name = document.getElementById("reg-fullname")?.value.trim() || ""
 		const rawPhone = document.getElementById("reg-phone")?.value.trim() || ""
@@ -514,8 +514,8 @@ function initAuthModalEvents(modal) {
 
 		if (!isValid) return
 
-		// Register to storage
-		const regResult = registerNewUser({
+		// Register to json-server-auth / storage
+		const regResult = await registerNewUser({
 			name,
 			phone: cleanPhone,
 			email,

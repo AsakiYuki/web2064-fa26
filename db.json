@@ -1,0 +1,2206 @@
+{
+  "users": [
+    {
+      "id": 1,
+      "name": "Nguyễn Hoàng Nam",
+      "email": "nam.nguyen@example.com",
+      "phone": "0987654321",
+      "password": "$2a$10$xMomBhURsHb0ZMqgV.OYCuVett3xQKzHfpdkeVucjPziSkfXtQIe6",
+      "avatarText": "N",
+      "rank": "Thành viên Beta VIP",
+      "points": 850,
+      "gender": "male",
+      "birthday": "1998-05-15",
+      "city": "Hà Nội",
+      "cinemaFavorite": "beta-thainguyen",
+      "createdAt": "2026-01-01T00:00:00.000Z"
+    },
+    {
+      "id": 2,
+      "name": "Nguyễn Văn An",
+      "email": "nguyen.an@gmail.com",
+      "phone": "0912345678",
+      "password": "$2a$10$1AWWtmGZ04PHvnRpr2OH3eSeERLzo3gN4ryfYMpyuGEep1K8DffL2",
+      "avatarText": "A",
+      "rank": "BETA VIP MEMBER",
+      "points": 850,
+      "gender": "male",
+      "birthday": "1998-05-15",
+      "city": "Hà Nội",
+      "cinemaFavorite": "beta-thainguyen",
+      "createdAt": "2026-02-01T00:00:00.000Z"
+    },
+    {
+      "email": "tester_1790856992098@example.com",
+      "password": "$2a$10$mfBylEZIX7O8f7J/lNtcM.cYzsPaYBZHpzOv3053WE0if8dajdTjK",
+      "name": "Tester Automation",
+      "phone": "0953360595",
+      "rank": "Thành viên Beta Mới",
+      "points": 120,
+      "id": 3,
+      "city": "Đà Nẵng"
+    },
+    {
+      "email": "tester_1790857006102@example.com",
+      "password": "$2a$10$JLnzV09vHDFWWshTvk43l.nXCn//zD91zXJ2wZOsvuX6DN9Tc2oI6",
+      "name": "Tester Automation",
+      "phone": "0934775380",
+      "rank": "Thành viên Beta Mới",
+      "points": 120,
+      "id": 4,
+      "city": "Đà Nẵng"
+    },
+    {
+      "email": "tester_1790858329127@example.com",
+      "password": "$2a$10$WfRqBinK9v2M7b6U1c8uLuio4L8MpDD9FEg4cx3qHQtCR5fIM.5OS",
+      "name": "Tester Automation",
+      "phone": "0979645725",
+      "rank": "Thành viên Beta Mới",
+      "points": 120,
+      "id": 5,
+      "city": "Đà Nẵng"
+    },
+    {
+      "email": "tester_1790860242038@example.com",
+      "password": "$2a$10$0M0eS86kINQpsX6Frj/dweTqb6JfGYNxhmfh6pwb0e1ZRYkZg.L6W",
+      "name": "Tester Automation",
+      "phone": "0994631059",
+      "rank": "Thành viên Beta Mới",
+      "points": 120,
+      "id": 6,
+      "city": "Đà Nẵng"
+    }
+  ],
+  "movies": [
+    {
+      "id": "utlan2",
+      "slug": "ut-lan-2",
+      "title": "Út Lan 2",
+      "originalTitle": "Ut Lan Chapter 2",
+      "genre": "Kinh dị",
+      "genreIds": [
+        "kinh-di"
+      ],
+      "director": "Trần Thanh Huy",
+      "cast": [
+        "Việt Hương",
+        "Lâm Thanh Mỹ",
+        "Mạc Văn Khoa"
+      ],
+      "duration": "107 phút",
+      "releaseDate": "20.09.2026",
+      "country": "Việt Nam",
+      "language": "Tiếng Việt",
+      "subtitle": "Phụ đề Tiếng Anh",
+      "poster": "/poster/poster_utlan2.jpg",
+      "banner": "/poster/poster_utlan2.jpg",
+      "badge": "T18",
+      "badgeClass": "mc-badge--t18",
+      "hot": true,
+      "buyId": "buy-utlan2",
+      "buyText": "MUA VÉ",
+      "ratingScore": 9.2,
+      "synopsis": "Phần 2 tiếp nối câu chuyện tâm linh bí ẩn xoay quanh truyền thuyết bóng ma Út Lan tại ngôi làng cổ phía Nam.",
+      "trailerUrl": "https://www.youtube.com/watch?v=0k5G83aK_sI",
+      "format": "2D Digital",
+      "tab": "nowshowing"
+    },
+    {
+      "id": "bongma",
+      "slug": "bong-ma-nha-hat",
+      "title": "Bóng Ma Nhà Hát",
+      "originalTitle": "Phantom of the Opera Night",
+      "genre": "Kinh dị, Hài hước",
+      "genreIds": [
+        "kinh-di",
+        "hai-huoc"
+      ],
+      "director": "Nguyễn Quang Dũng",
+      "cast": [
+        "Ninh Dương Lan Ngọc",
+        "Kiều Minh Tuấn"
+      ],
+      "duration": "97 phút",
+      "releaseDate": "15.09.2026",
+      "country": "Việt Nam",
+      "language": "Tiếng Việt",
+      "subtitle": "Phụ đề Tiếng Anh",
+      "poster": "/poster/poster_bongma.jpg",
+      "banner": "/hero_bongma.jpg",
+      "badge": "T18",
+      "badgeClass": "mc-badge--t18",
+      "hot": true,
+      "buyId": "buy-bongma",
+      "buyText": "MUA VÉ",
+      "ratingScore": 8.8,
+      "synopsis": "Một đoàn kịch bí ẩn phát hiện những hiện tượng kỳ lạ xảy ra đằng sau hậu trường rạp hát trung tâm.",
+      "trailerUrl": "https://www.youtube.com/watch?v=9_b3vK25c50",
+      "format": "2D Digital",
+      "tab": "nowshowing"
+    },
+    {
+      "id": "vungdat",
+      "slug": "vung-dat-quy-du",
+      "title": "Vùng Đất Quỷ Dữ",
+      "originalTitle": "Resident Evil: Requiem",
+      "genre": "Kinh dị, Hành động",
+      "genreIds": [
+        "kinh-di",
+        "hanh-dong"
+      ],
+      "director": "Paul W. S. Anderson",
+      "cast": [
+        "Milla Jovovich",
+        "Ali Larter"
+      ],
+      "duration": "94 phút",
+      "releaseDate": "18.09.2026",
+      "country": "Mỹ",
+      "language": "Tiếng Anh",
+      "subtitle": "Phụ đề Tiếng Việt",
+      "poster": "/poster/poster_vungdat.jpg",
+      "badge": "T18",
+      "badgeClass": "mc-badge--t18",
+      "hot": true,
+      "buyId": "buy-vungdat",
+      "buyText": "MUA VÉ",
+      "ratingScore": 8.5,
+      "synopsis": "Hành trình sống còn giữa vùng đất tràn ngập các sinh vật biến dị hiểm hóc.",
+      "trailerUrl": "https://www.youtube.com/watch?v=4dO3UjJk_qM",
+      "format": "3D Digital",
+      "tab": "nowshowing"
+    },
+    {
+      "id": "lenhuong",
+      "slug": "len-huong",
+      "title": "Lên Hương",
+      "originalTitle": "Rising Fortune",
+      "genre": "Tâm lý, Gia đình",
+      "genreIds": [
+        "tam-ly",
+        "gia-dinh"
+      ],
+      "director": "Vũ Ngọc Đãng",
+      "cast": [
+        "Thái Hòa",
+        "Thu Trang",
+        "Phát La"
+      ],
+      "duration": "121 phút",
+      "releaseDate": "10.09.2026",
+      "country": "Việt Nam",
+      "language": "Tiếng Việt",
+      "subtitle": "Phụ đề Tiếng Anh",
+      "poster": "/poster/poster_lonhuong.jpg",
+      "badge": "K",
+      "badgeClass": "mc-badge--k",
+      "hot": true,
+      "buyId": "buy-lenhuong",
+      "buyText": "MUA VÉ",
+      "ratingScore": 9,
+      "synopsis": "Câu chuyện hài hước nhưng sâu sắc về ước mơ đổi đời của một gia đình giàu tình cảm tại xóm nghèo.",
+      "trailerUrl": "https://www.youtube.com/watch?v=6ZfuNTqbHE8",
+      "format": "2D Digital",
+      "tab": "nowshowing"
+    },
+    {
+      "id": "traibuon",
+      "slug": "trai-buon-nguoi",
+      "title": "Trại Buôn Người",
+      "originalTitle": "Human Syndicate",
+      "genre": "Ly kỳ, Hình sự",
+      "genreIds": [
+        "hinh-su"
+      ],
+      "director": "Lê Bình Giang",
+      "cast": [
+        "Quang Tuấn",
+        "Hoàng Yến Chibi"
+      ],
+      "duration": "118 phút",
+      "releaseDate": "12.09.2026",
+      "country": "Việt Nam",
+      "language": "Tiếng Việt",
+      "subtitle": "Phụ đề Tiếng Anh",
+      "poster": "/poster/poster_traibuonnguoi.jpg",
+      "badge": "T18",
+      "badgeClass": "mc-badge--t18",
+      "hot": true,
+      "buyId": "buy-traibuon",
+      "buyText": "MUA VÉ",
+      "ratingScore": 8.7,
+      "synopsis": "Cuộc thâm nhập nguy hiểm của trinh sát hình sự vào đường dây tội phạm xuyên quốc gia.",
+      "trailerUrl": "https://www.youtube.com/watch?v=8Qn_spdM5Zg",
+      "format": "2D Digital",
+      "tab": "nowshowing"
+    },
+    {
+      "id": "avengers",
+      "slug": "avengers-endgame",
+      "title": "Avengers: Hồi Kết - Phiên Bản ĐB",
+      "originalTitle": "Avengers: Endgame Special Edition",
+      "genre": "Hành động, Phiêu lưu",
+      "genreIds": [
+        "hanh-dong",
+        "phieu-luu"
+      ],
+      "director": "Anthony Russo, Joe Russo",
+      "cast": [
+        "Robert Downey Jr.",
+        "Chris Evans",
+        "Scarlett Johansson"
+      ],
+      "duration": "181 phút",
+      "releaseDate": "01.09.2026",
+      "country": "Mỹ",
+      "language": "Tiếng Anh",
+      "subtitle": "Phụ đề Tiếng Việt",
+      "poster": "/movie_posters.jpg",
+      "posterStyle": "object-position: 75% 0%",
+      "badge": "T13",
+      "badgeClass": "mc-badge--t13",
+      "hot": true,
+      "buyId": "buy-avengers",
+      "buyText": "MUA VÉ",
+      "ratingScore": 9.6,
+      "synopsis": "Trận chiến cuối cùng quyết định vận mệnh toàn vũ trụ của biệt đội siêu anh hùng Avengers.",
+      "trailerUrl": "https://www.youtube.com/watch?v=TcMBFSGVi1c",
+      "format": "3D Digital",
+      "tab": "nowshowing"
+    },
+    {
+      "id": "nghiehu",
+      "slug": "nghi-he-nghi-huu",
+      "title": "Nghỉ Hè Nghỉ Hưu",
+      "originalTitle": "Summer Retirement",
+      "genre": "Hài, Gia đình",
+      "genreIds": [
+        "hai-huoc",
+        "gia-dinh"
+      ],
+      "director": "Đinh Tuấn Vũ",
+      "cast": [
+        "NSND Hồng Vân",
+        "NSƯT Thành Lộc"
+      ],
+      "duration": "98 phút",
+      "releaseDate": "05.09.2026",
+      "country": "Việt Nam",
+      "language": "Tiếng Việt",
+      "subtitle": "Phụ đề Tiếng Anh",
+      "poster": "/promo/promo_nowzone.jpg",
+      "posterStyle": "object-position: center top",
+      "badge": "T13",
+      "badgeClass": "mc-badge--t13",
+      "hot": false,
+      "buyId": "buy-nghiehu",
+      "buyText": "MUA VÉ",
+      "ratingScore": 8.2,
+      "synopsis": "Chuyến du lịch hè nhiều bất ngờ và tiếng cười của những người bạn già về hưu.",
+      "trailerUrl": "https://www.youtube.com/watch?v=XW2E2Fnh52w",
+      "format": "2D Digital",
+      "tab": "nowshowing"
+    },
+    {
+      "id": "yeunhan",
+      "slug": "yeu-nhan-than-tham",
+      "title": "Yêu Nhân Thần Thám",
+      "originalTitle": "Monster Detective",
+      "genre": "Hoạt hình, Phiêu lưu",
+      "genreIds": [
+        "hoat-hinh",
+        "phieu-luu"
+      ],
+      "director": "Hiroyuki Seshita",
+      "cast": [
+        "Lồng tiếng Việt"
+      ],
+      "duration": "112 phút",
+      "releaseDate": "08.09.2026",
+      "country": "Nhật Bản",
+      "language": "Lồng tiếng",
+      "subtitle": "Phụ đề Tiếng Việt",
+      "poster": "/promo/promo_student.jpg",
+      "posterStyle": "object-position: center top",
+      "badge": "K",
+      "badgeClass": "mc-badge--k",
+      "hot": false,
+      "buyId": "buy-yeunhan",
+      "buyText": "MUA VÉ",
+      "ratingScore": 8.6,
+      "synopsis": "Thám tử yêu tinh cùng các đồng đội phá giải những ẩn số thần bí trong thế giới ma quái.",
+      "trailerUrl": "https://www.youtube.com/watch?v=QfpxqI8cWcE",
+      "format": "2D Lồng Tiếng",
+      "tab": "nowshowing"
+    },
+    {
+      "id": "up1",
+      "slug": "tham-tu-conan-ngoi-sao-5-canh",
+      "title": "Thám Tử Conan: Ngôi Sao 5 Cánh 1 Triệu Đô",
+      "originalTitle": "Detective Conan: The Million-dollar Pentagram",
+      "genre": "Hoạt hình, Hành động, Bí ẩn",
+      "genreIds": [
+        "hoat-hinh",
+        "hanh-dong"
+      ],
+      "director": "Chika Nagaoka",
+      "cast": [
+        "Minami Takayama",
+        "Wakana Yamazaki",
+        "Kappei Yamaguchi"
+      ],
+      "duration": "110 phút",
+      "releaseDate": "28.09.2026",
+      "country": "Nhật Bản",
+      "language": "Tiếng Nhật",
+      "subtitle": "Phụ đề & Lồng tiếng Việt",
+      "poster": "/hero_bongma.jpg",
+      "banner": "/hero_bongma.jpg",
+      "badge": "K",
+      "badgeClass": "mc-badge--k",
+      "hot": true,
+      "buyId": "buy-up1",
+      "buyText": "Nhắc Tôi",
+      "outline": true,
+      "ratingScore": 9.4,
+      "synopsis": "Tại Hakodate, Hokkaido, bức thư thách thức từ siêu trộm Kaito Kid xuất hiện nhắm vào thanh kiếm Nhật lịch sử thời Mạc Phủ. Conan và Heiji Hattori cùng nhau tham gia phá giải bí ẩn ly kỳ.",
+      "trailerUrl": "https://www.youtube.com/watch?v=kxy-mG7V7xI",
+      "format": "2D Phụ đề / Lồng tiếng",
+      "tab": "upcoming"
+    },
+    {
+      "id": "up2",
+      "slug": "venom-keo-cuoi",
+      "title": "Venom: Kèo Cuối",
+      "originalTitle": "Venom: The Last Dance",
+      "genre": "Hành động, Khoa học viễn tưởng",
+      "genreIds": [
+        "hanh-dong",
+        "phieu-luu"
+      ],
+      "director": "Kelly Marcel",
+      "cast": [
+        "Tom Hardy",
+        "Chiwetel Ejiofor",
+        "Juno Temple"
+      ],
+      "duration": "115 phút",
+      "releaseDate": "05.10.2026",
+      "country": "Mỹ",
+      "language": "Tiếng Anh",
+      "subtitle": "Phụ đề Tiếng Việt",
+      "poster": "/poster/poster_vungdat.jpg",
+      "banner": "/poster/poster_vungdat.jpg",
+      "badge": "T16",
+      "badgeClass": "mc-badge--t13",
+      "hot": true,
+      "buyId": "buy-up2",
+      "buyText": "Nhắc Tôi",
+      "outline": true,
+      "ratingScore": 8.9,
+      "synopsis": "Eddie và Venom đang trên đường chạy trốn. Bị truy đuổi bởi cả hai thế giới, vòng vây ngày càng khép lại buộc bộ đôi phải đưa ra một quyết định tàn khốc.",
+      "trailerUrl": "https://www.youtube.com/watch?v=__2bjWbetsA",
+      "format": "3D Digital",
+      "tab": "upcoming"
+    },
+    {
+      "id": "sp1",
+      "slug": "avengers-endgame-imax",
+      "title": "Avengers: Hồi Kết IMAX Experience",
+      "originalTitle": "Avengers: Endgame IMAX 3D",
+      "genre": "Hành động, Phiêu lưu, Viễn tưởng",
+      "genreIds": [
+        "hanh-dong",
+        "phieu-luu"
+      ],
+      "director": "Anthony Russo, Joe Russo",
+      "cast": [
+        "Robert Downey Jr.",
+        "Chris Evans",
+        "Mark Ruffalo",
+        "Chris Hemsworth"
+      ],
+      "duration": "181 phút",
+      "releaseDate": "26.09.2026",
+      "country": "Mỹ",
+      "language": "Tiếng Anh",
+      "subtitle": "Phụ đề Tiếng Việt",
+      "format": "IMAX 3D",
+      "poster": "/poster/poster_avengers.jpg",
+      "banner": "/poster/poster_avengers.jpg",
+      "fallbackPoster": "/poster/poster_avengers.jpg",
+      "badge": "T13",
+      "badgeClass": "mc-badge--t13",
+      "specialTag": "IMAX 3D",
+      "hot": true,
+      "buyId": "buy-sp1",
+      "buyText": "MUA VÉ",
+      "ratingScore": 9.8,
+      "synopsis": "Trải nghiệm siêu phẩm điện ảnh vĩ đại nhất của Vũ trụ Điện ảnh Marvel trên màn hình khổng lồ IMAX với chất lượng âm thanh 12 kênh sống động chưa từng có.",
+      "trailerUrl": "https://www.youtube.com/watch?v=TcMBFSGVi1c",
+      "tab": "special"
+    }
+  ],
+  "movie_tabs": [
+    {
+      "id": "upcoming",
+      "label": "PHIM SẮP CHIẾU",
+      "active": false
+    },
+    {
+      "id": "nowshowing",
+      "label": "PHIM ĐANG CHIẾU",
+      "active": true
+    },
+    {
+      "id": "special",
+      "label": "SUẤT CHIẾU ĐẶC BIỆT",
+      "active": false
+    }
+  ],
+  "cinemas": [
+    {
+      "id": "beta-thainguyen",
+      "city": "Thái Nguyên",
+      "name": "Beta Cinemas Thái Nguyên",
+      "active": true,
+      "address": "Tầng 4, TTTM Hoàng Gia, Số 259 Quang Trung, TP. Thái Nguyên",
+      "phone": "0867 460 053",
+      "email": "thainguyen@betacinemas.vn",
+      "facilities": [
+        "Bãi đỗ xe",
+        "Popcorn & Drinks Bar",
+        "Phòng chiếu 2D/3D",
+        "Lounge chờ VIP"
+      ],
+      "screens": [
+        {
+          "screenId": "TN-P1",
+          "name": "Phòng chiếu 1",
+          "type": "2D",
+          "totalSeats": 120
+        },
+        {
+          "screenId": "TN-P2",
+          "name": "Phòng chiếu 2",
+          "type": "2D",
+          "totalSeats": 140
+        },
+        {
+          "screenId": "TN-P3",
+          "name": "Phòng chiếu 3",
+          "type": "3D",
+          "totalSeats": 100
+        },
+        {
+          "screenId": "TN-IMAX",
+          "name": "Phòng IMAX",
+          "type": "IMAX 3D",
+          "totalSeats": 220
+        }
+      ]
+    },
+    {
+      "id": "beta-nowzone",
+      "city": "TP. Hồ Chí Minh",
+      "name": "Beta Cinemas Nowzone",
+      "active": false,
+      "address": "Tầng 5, TTTM Nowzone, 235 Nguyễn Văn Cừ, Quận 1, TP.HCM",
+      "phone": "1900 636807",
+      "email": "nowzone@betacinemas.vn",
+      "facilities": [
+        "Bãi đỗ xe ô tô/xe máy",
+        "Beta Food Court",
+        "Phòng chiếu 2D/3D/IMAX"
+      ],
+      "screens": [
+        {
+          "screenId": "NZ-P1",
+          "name": "Phòng chiếu 1",
+          "type": "2D",
+          "totalSeats": 160
+        },
+        {
+          "screenId": "NZ-P2",
+          "name": "Phòng chiếu 2",
+          "type": "2D",
+          "totalSeats": 180
+        },
+        {
+          "screenId": "NZ-IMAX",
+          "name": "Phòng IMAX",
+          "type": "IMAX 3D",
+          "totalSeats": 280
+        }
+      ]
+    },
+    {
+      "id": "beta-xuanthuy",
+      "city": "Hà Nội",
+      "name": "Beta Cinemas Xuân Thủy",
+      "active": false,
+      "address": "Tầng 4, TTTM HITC, 239 Xuân Thủy, Cầu Giấy, Hà Nội",
+      "phone": "0333 023 183",
+      "email": "xuanthuy@betacinemas.vn",
+      "facilities": [
+        "Bãi đỗ xe",
+        "Coffee Corner",
+        "Phòng chiếu 2D"
+      ],
+      "screens": [
+        {
+          "screenId": "XT-P1",
+          "name": "Phòng chiếu 1",
+          "type": "2D",
+          "totalSeats": 150
+        },
+        {
+          "screenId": "XT-P2",
+          "name": "Phòng chiếu 2",
+          "type": "2D",
+          "totalSeats": 130
+        }
+      ]
+    },
+    {
+      "id": "beta-tayson",
+      "city": "Hà Nội",
+      "name": "Beta Cinemas Tây Sơn",
+      "active": false,
+      "address": "Số 9 Tây Sơn, Đống Đa, Hà Nội",
+      "phone": "0976 894 773",
+      "email": "tayson@betacinemas.vn",
+      "facilities": [
+        "Thanh toán QR",
+        "Quầy bắp nước online"
+      ],
+      "screens": [
+        {
+          "screenId": "TS-P1",
+          "name": "Phòng chiếu 1",
+          "type": "2D",
+          "totalSeats": 110
+        }
+      ]
+    },
+    {
+      "id": "beta-vinhyen",
+      "city": "Phú Thọ",
+      "name": "Beta Cinemas Vĩnh Yên",
+      "active": false,
+      "address": "TTTM Vĩnh Yên, Phú Thọ",
+      "phone": "0977 632 215",
+      "email": "vinhyen@betacinemas.vn",
+      "facilities": [
+        "Bãi đỗ xe",
+        "Phòng chiếu 2D"
+      ],
+      "screens": [
+        {
+          "screenId": "VY-P1",
+          "name": "Phòng chiếu 1",
+          "type": "2D",
+          "totalSeats": 100
+        }
+      ]
+    },
+    {
+      "id": "beta-ungvankhiem",
+      "city": "TP. Hồ Chí Minh",
+      "name": "Beta Cinemas Ung Văn Khiêm",
+      "active": false,
+      "address": "Ung Văn Khiêm, Bình Thạnh, TP.HCM",
+      "phone": "0969 874 873",
+      "email": "ungvankhiem@betacinemas.vn",
+      "facilities": [
+        "Lounge VIP"
+      ],
+      "screens": [
+        {
+          "screenId": "UVK-P1",
+          "name": "Phòng chiếu 1",
+          "type": "2D",
+          "totalSeats": 140
+        }
+      ]
+    },
+    {
+      "id": "beta-laocai",
+      "city": "Lào Cai",
+      "name": "Beta Cinemas Lào Cai",
+      "active": false,
+      "address": "Đại lộ Trần Hưng Đạo, TP. Lào Cai",
+      "phone": "0358 968 970",
+      "email": "laocai@betacinemas.vn",
+      "facilities": [
+        "Bãi đỗ xe rộng rãi"
+      ],
+      "screens": [
+        {
+          "screenId": "LC-P1",
+          "name": "Phòng chiếu 1",
+          "type": "2D",
+          "totalSeats": 120
+        }
+      ]
+    },
+    {
+      "id": "beta-thanhhoa",
+      "city": "Thanh Hóa",
+      "name": "Beta Cinemas Thanh Hóa",
+      "active": false,
+      "address": "Phường Điện Biên, TP. Thanh Hóa",
+      "phone": "0325 360 249",
+      "email": "thanhhoa@betacinemas.vn",
+      "facilities": [
+        "Quầy vé tự phục vụ Kiosk"
+      ],
+      "screens": [
+        {
+          "screenId": "TH-P1",
+          "name": "Phòng chiếu 1",
+          "type": "2D",
+          "totalSeats": 130
+        }
+      ]
+    },
+    {
+      "id": "beta-bacgiang",
+      "city": "Bắc Ninh",
+      "name": "Beta Cinemas Bắc Giang",
+      "active": false,
+      "address": "TP. Bắc Giang, Tỉnh Bắc Ninh",
+      "phone": "0866 493 413",
+      "email": "bacgiang@betacinemas.vn",
+      "facilities": [
+        "Popcorn Bar"
+      ],
+      "screens": [
+        {
+          "screenId": "BG-P1",
+          "name": "Phòng chiếu 1",
+          "type": "2D",
+          "totalSeats": 115
+        }
+      ]
+    },
+    {
+      "id": "beta-trmall",
+      "city": "An Giang",
+      "name": "Beta Cinemas TRMall Phú Quốc",
+      "active": false,
+      "address": "TRMall Phú Quốc, An Giang",
+      "phone": "0983 474 440",
+      "email": "trmall@betacinemas.vn",
+      "facilities": [
+        "Phòng chiếu 2D/3D"
+      ],
+      "screens": [
+        {
+          "screenId": "PQ-P1",
+          "name": "Phòng chiếu 1",
+          "type": "2D",
+          "totalSeats": 125
+        }
+      ]
+    }
+  ],
+  "showtimes": [
+    {
+      "id": "beta-thainguyen_2026-09-26",
+      "date": "2026-09-26",
+      "cinemaId": "beta-thainguyen",
+      "schedules": [
+        {
+          "movieId": "utlan2",
+          "movieTitle": "Út Lan 2: Vùng Đất Mất Tích",
+          "screenId": "TN-P1",
+          "screenName": "Phòng 1",
+          "format": "2D Phụ Đề",
+          "slots": [
+            {
+              "time": "09:15",
+              "price": 65000,
+              "availableSeats": 54
+            },
+            {
+              "time": "11:45",
+              "price": 70000,
+              "availableSeats": 38
+            },
+            {
+              "time": "14:30",
+              "price": 75000,
+              "availableSeats": 22
+            },
+            {
+              "time": "17:15",
+              "price": 85000,
+              "availableSeats": 8
+            },
+            {
+              "time": "20:00",
+              "price": 85000,
+              "availableSeats": 0
+            },
+            {
+              "time": "22:30",
+              "price": 80000,
+              "availableSeats": 19
+            }
+          ]
+        },
+        {
+          "movieId": "bongma",
+          "movieTitle": "Bóng Ma Nhà Hát",
+          "screenId": "TN-P2",
+          "screenName": "Phòng 2",
+          "format": "2D Phụ Đề",
+          "slots": [
+            {
+              "time": "10:00",
+              "price": 65000,
+              "availableSeats": 45
+            },
+            {
+              "time": "13:00",
+              "price": 70000,
+              "availableSeats": 29
+            },
+            {
+              "time": "16:00",
+              "price": 75000,
+              "availableSeats": 14
+            },
+            {
+              "time": "19:15",
+              "price": 85000,
+              "availableSeats": 4
+            },
+            {
+              "time": "21:45",
+              "price": 80000,
+              "availableSeats": 31
+            }
+          ]
+        },
+        {
+          "movieId": "sp1",
+          "movieTitle": "Avengers: Hồi Kết IMAX",
+          "screenId": "TN-IMAX",
+          "screenName": "Phòng IMAX",
+          "format": "IMAX 3D",
+          "slots": [
+            {
+              "time": "13:30",
+              "price": 120000,
+              "availableSeats": 35
+            },
+            {
+              "time": "17:30",
+              "price": 140000,
+              "availableSeats": 6
+            },
+            {
+              "time": "21:00",
+              "price": 135000,
+              "availableSeats": 18
+            }
+          ]
+        },
+        {
+          "movieId": "lenhuong",
+          "movieTitle": "Lên Hương",
+          "screenId": "TN-P3",
+          "screenName": "Phòng 3",
+          "format": "2D Lồng Tiếng",
+          "slots": [
+            {
+              "time": "09:45",
+              "price": 65000,
+              "availableSeats": 60
+            },
+            {
+              "time": "12:30",
+              "price": 70000,
+              "availableSeats": 41
+            },
+            {
+              "time": "15:15",
+              "price": 75000,
+              "availableSeats": 25
+            },
+            {
+              "time": "18:45",
+              "price": 80000,
+              "availableSeats": 12
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "beta-nowzone_2026-09-26",
+      "date": "2026-09-26",
+      "cinemaId": "beta-nowzone",
+      "schedules": [
+        {
+          "movieId": "utlan2",
+          "movieTitle": "Út Lan 2: Vùng Đất Mất Tích",
+          "screenId": "NZ-P1",
+          "screenName": "Phòng 1",
+          "format": "2D Phụ Đề",
+          "slots": [
+            {
+              "time": "10:15",
+              "price": 75000,
+              "availableSeats": 58
+            },
+            {
+              "time": "13:15",
+              "price": 80000,
+              "availableSeats": 40
+            },
+            {
+              "time": "16:15",
+              "price": 85000,
+              "availableSeats": 15
+            },
+            {
+              "time": "19:00",
+              "price": 95000,
+              "availableSeats": 3
+            },
+            {
+              "time": "21:45",
+              "price": 90000,
+              "availableSeats": 22
+            }
+          ]
+        },
+        {
+          "movieId": "vungdat",
+          "movieTitle": "Vùng Đất Quỷ Dữ",
+          "screenId": "NZ-P2",
+          "screenName": "Phòng 2",
+          "format": "2D Phụ Đề",
+          "slots": [
+            {
+              "time": "11:00",
+              "price": 75000,
+              "availableSeats": 62
+            },
+            {
+              "time": "14:00",
+              "price": 80000,
+              "availableSeats": 44
+            },
+            {
+              "time": "17:30",
+              "price": 90000,
+              "availableSeats": 11
+            },
+            {
+              "time": "20:30",
+              "price": 95000,
+              "availableSeats": 0
+            }
+          ]
+        },
+        {
+          "movieId": "sp1",
+          "movieTitle": "Avengers: Hồi Kết IMAX",
+          "screenId": "NZ-IMAX",
+          "screenName": "Phòng IMAX",
+          "format": "IMAX 3D",
+          "slots": [
+            {
+              "time": "14:15",
+              "price": 140000,
+              "availableSeats": 45
+            },
+            {
+              "time": "18:00",
+              "price": 150000,
+              "availableSeats": 12
+            },
+            {
+              "time": "21:30",
+              "price": 145000,
+              "availableSeats": 28
+            }
+          ]
+        },
+        {
+          "movieId": "traibuon",
+          "movieTitle": "Trại Buôn Người",
+          "screenId": "NZ-P1",
+          "screenName": "Phòng 1",
+          "format": "2D Phụ Đề",
+          "slots": [
+            {
+              "time": "12:00",
+              "price": 75000,
+              "availableSeats": 50
+            },
+            {
+              "time": "15:30",
+              "price": 80000,
+              "availableSeats": 32
+            },
+            {
+              "time": "22:15",
+              "price": 85000,
+              "availableSeats": 17
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "beta-xuanthuy_2026-09-26",
+      "date": "2026-09-26",
+      "cinemaId": "beta-xuanthuy",
+      "schedules": [
+        {
+          "movieId": "utlan2",
+          "movieTitle": "Út Lan 2: Vùng Đất Mất Tích",
+          "screenId": "XT-P1",
+          "screenName": "Phòng 1",
+          "format": "2D Phụ Đề",
+          "slots": [
+            {
+              "time": "09:30",
+              "price": 70000,
+              "availableSeats": 40
+            },
+            {
+              "time": "12:45",
+              "price": 75000,
+              "availableSeats": 28
+            },
+            {
+              "time": "16:00",
+              "price": 80000,
+              "availableSeats": 10
+            },
+            {
+              "time": "19:30",
+              "price": 85000,
+              "availableSeats": 2
+            },
+            {
+              "time": "22:00",
+              "price": 80000,
+              "availableSeats": 25
+            }
+          ]
+        },
+        {
+          "movieId": "bongma",
+          "movieTitle": "Bóng Ma Nhà Hát",
+          "screenId": "XT-P2",
+          "screenName": "Phòng 2",
+          "format": "2D Phụ Đề",
+          "slots": [
+            {
+              "time": "10:30",
+              "price": 70000,
+              "availableSeats": 55
+            },
+            {
+              "time": "13:45",
+              "price": 75000,
+              "availableSeats": 34
+            },
+            {
+              "time": "17:00",
+              "price": 80000,
+              "availableSeats": 16
+            },
+            {
+              "time": "20:15",
+              "price": 85000,
+              "availableSeats": 7
+            }
+          ]
+        },
+        {
+          "movieId": "sp1",
+          "movieTitle": "Avengers: Hồi Kết IMAX",
+          "screenId": "XT-P1",
+          "screenName": "Phòng 1",
+          "format": "2D Phụ Đề",
+          "slots": [
+            {
+              "time": "14:15",
+              "price": 80000,
+              "availableSeats": 30
+            },
+            {
+              "time": "18:00",
+              "price": 90000,
+              "availableSeats": 8
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "beta-thainguyen_2026-09-27",
+      "date": "2026-09-27",
+      "cinemaId": "beta-thainguyen",
+      "schedules": [
+        {
+          "movieId": "utlan2",
+          "movieTitle": "Út Lan 2: Vùng Đất Mất Tích",
+          "screenId": "TN-P1",
+          "screenName": "Phòng 1",
+          "format": "2D Phụ Đề",
+          "slots": [
+            {
+              "time": "09:30",
+              "price": 70000,
+              "availableSeats": 60
+            },
+            {
+              "time": "12:15",
+              "price": 75000,
+              "availableSeats": 45
+            },
+            {
+              "time": "15:00",
+              "price": 80000,
+              "availableSeats": 30
+            },
+            {
+              "time": "18:00",
+              "price": 85000,
+              "availableSeats": 14
+            },
+            {
+              "time": "20:45",
+              "price": 85000,
+              "availableSeats": 5
+            }
+          ]
+        },
+        {
+          "movieId": "bongma",
+          "movieTitle": "Bóng Ma Nhà Hát",
+          "screenId": "TN-P2",
+          "screenName": "Phòng 2",
+          "format": "2D Phụ Đề",
+          "slots": [
+            {
+              "time": "10:15",
+              "price": 70000,
+              "availableSeats": 50
+            },
+            {
+              "time": "13:30",
+              "price": 75000,
+              "availableSeats": 35
+            },
+            {
+              "time": "16:45",
+              "price": 80000,
+              "availableSeats": 20
+            },
+            {
+              "time": "19:45",
+              "price": 85000,
+              "availableSeats": 9
+            }
+          ]
+        },
+        {
+          "movieId": "lenhuong",
+          "movieTitle": "Lên Hương",
+          "screenId": "TN-P3",
+          "screenName": "Phòng 3",
+          "format": "2D Lồng Tiếng",
+          "slots": [
+            {
+              "time": "11:00",
+              "price": 70000,
+              "availableSeats": 55
+            },
+            {
+              "time": "14:00",
+              "price": 75000,
+              "availableSeats": 42
+            },
+            {
+              "time": "17:15",
+              "price": 80000,
+              "availableSeats": 22
+            },
+            {
+              "time": "20:30",
+              "price": 85000,
+              "availableSeats": 11
+            }
+          ]
+        },
+        {
+          "movieId": "sp1",
+          "movieTitle": "Avengers: Hồi Kết IMAX",
+          "screenId": "TN-IMAX",
+          "screenName": "Phòng IMAX",
+          "format": "IMAX 3D",
+          "slots": [
+            {
+              "time": "14:00",
+              "price": 130000,
+              "availableSeats": 40
+            },
+            {
+              "time": "18:30",
+              "price": 145000,
+              "availableSeats": 15
+            },
+            {
+              "time": "21:45",
+              "price": 140000,
+              "availableSeats": 22
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "beta-nowzone_2026-09-27",
+      "date": "2026-09-27",
+      "cinemaId": "beta-nowzone",
+      "schedules": [
+        {
+          "movieId": "utlan2",
+          "movieTitle": "Út Lan 2: Vùng Đất Mất Tích",
+          "screenId": "NZ-P1",
+          "screenName": "Phòng 1",
+          "format": "2D Phụ Đề",
+          "slots": [
+            {
+              "time": "09:45",
+              "price": 80000,
+              "availableSeats": 70
+            },
+            {
+              "time": "12:45",
+              "price": 85000,
+              "availableSeats": 48
+            },
+            {
+              "time": "15:45",
+              "price": 90000,
+              "availableSeats": 25
+            },
+            {
+              "time": "18:45",
+              "price": 95000,
+              "availableSeats": 8
+            },
+            {
+              "time": "21:30",
+              "price": 90000,
+              "availableSeats": 19
+            }
+          ]
+        },
+        {
+          "movieId": "vungdat",
+          "movieTitle": "Vùng Đất Quỷ Dữ",
+          "screenId": "NZ-P2",
+          "screenName": "Phòng 2",
+          "format": "2D Phụ Đề",
+          "slots": [
+            {
+              "time": "10:30",
+              "price": 80000,
+              "availableSeats": 65
+            },
+            {
+              "time": "13:30",
+              "price": 85000,
+              "availableSeats": 40
+            },
+            {
+              "time": "17:00",
+              "price": 90000,
+              "availableSeats": 16
+            },
+            {
+              "time": "20:00",
+              "price": 95000,
+              "availableSeats": 4
+            }
+          ]
+        },
+        {
+          "movieId": "sp1",
+          "movieTitle": "Avengers: Hồi Kết IMAX",
+          "screenId": "NZ-IMAX",
+          "screenName": "Phòng IMAX",
+          "format": "IMAX 3D",
+          "slots": [
+            {
+              "time": "13:45",
+              "price": 145000,
+              "availableSeats": 50
+            },
+            {
+              "time": "17:45",
+              "price": 155000,
+              "availableSeats": 14
+            },
+            {
+              "time": "21:15",
+              "price": 150000,
+              "availableSeats": 30
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "beta-thainguyen_2026-09-28",
+      "date": "2026-09-28",
+      "cinemaId": "beta-thainguyen",
+      "schedules": [
+        {
+          "movieId": "utlan2",
+          "movieTitle": "Út Lan 2: Vùng Đất Mất Tích",
+          "screenId": "TN-P1",
+          "screenName": "Phòng 1",
+          "format": "2D Phụ Đề",
+          "slots": [
+            {
+              "time": "10:15",
+              "price": 65000,
+              "availableSeats": 70
+            },
+            {
+              "time": "13:30",
+              "price": 70000,
+              "availableSeats": 50
+            },
+            {
+              "time": "16:45",
+              "price": 70000,
+              "availableSeats": 35
+            },
+            {
+              "time": "19:30",
+              "price": 75000,
+              "availableSeats": 20
+            }
+          ]
+        },
+        {
+          "movieId": "bongma",
+          "movieTitle": "Bóng Ma Nhà Hát",
+          "screenId": "TN-P2",
+          "screenName": "Phòng 2",
+          "format": "2D Phụ Đề",
+          "slots": [
+            {
+              "time": "11:00",
+              "price": 65000,
+              "availableSeats": 60
+            },
+            {
+              "time": "14:15",
+              "price": 70000,
+              "availableSeats": 45
+            },
+            {
+              "time": "17:30",
+              "price": 70000,
+              "availableSeats": 28
+            },
+            {
+              "time": "20:00",
+              "price": 75000,
+              "availableSeats": 15
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "beta-nowzone_2026-09-28",
+      "date": "2026-09-28",
+      "cinemaId": "beta-nowzone",
+      "schedules": [
+        {
+          "movieId": "utlan2",
+          "movieTitle": "Út Lan 2: Vùng Đất Mất Tích",
+          "screenId": "NZ-P1",
+          "screenName": "Phòng 1",
+          "format": "2D Phụ Đề",
+          "slots": [
+            {
+              "time": "10:00",
+              "price": 70000,
+              "availableSeats": 65
+            },
+            {
+              "time": "13:00",
+              "price": 75000,
+              "availableSeats": 52
+            },
+            {
+              "time": "16:00",
+              "price": 80000,
+              "availableSeats": 38
+            },
+            {
+              "time": "19:00",
+              "price": 85000,
+              "availableSeats": 22
+            }
+          ]
+        },
+        {
+          "movieId": "vungdat",
+          "movieTitle": "Vùng Đất Quỷ Dữ",
+          "screenId": "NZ-P2",
+          "screenName": "Phòng 2",
+          "format": "2D Phụ Đề",
+          "slots": [
+            {
+              "time": "11:15",
+              "price": 70000,
+              "availableSeats": 72
+            },
+            {
+              "time": "14:30",
+              "price": 75000,
+              "availableSeats": 55
+            },
+            {
+              "time": "17:45",
+              "price": 80000,
+              "availableSeats": 30
+            },
+            {
+              "time": "20:45",
+              "price": 85000,
+              "availableSeats": 14
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "beta-tayson_2026-09-29",
+      "date": "2026-09-29",
+      "cinemaId": "beta-tayson",
+      "schedules": [
+        {
+          "movieId": "utlan2",
+          "movieTitle": "Út Lan 2: Vùng Đất Mất Tích",
+          "screenId": "TS-P1",
+          "screenName": "Phòng 1",
+          "format": "2D Phụ Đề",
+          "slots": [
+            {
+              "time": "09:30",
+              "price": 65000,
+              "availableSeats": 50
+            },
+            {
+              "time": "13:00",
+              "price": 70000,
+              "availableSeats": 35
+            },
+            {
+              "time": "17:00",
+              "price": 75000,
+              "availableSeats": 18
+            },
+            {
+              "time": "20:15",
+              "price": 80000,
+              "availableSeats": 9
+            }
+          ]
+        },
+        {
+          "movieId": "lenhuong",
+          "movieTitle": "Lên Hương",
+          "screenId": "TS-P1",
+          "screenName": "Phòng 1",
+          "format": "2D Lồng Tiếng",
+          "slots": [
+            {
+              "time": "11:15",
+              "price": 65000,
+              "availableSeats": 55
+            },
+            {
+              "time": "15:00",
+              "price": 70000,
+              "availableSeats": 40
+            },
+            {
+              "time": "18:45",
+              "price": 75000,
+              "availableSeats": 22
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "beta-ungvankhiem_2026-09-29",
+      "date": "2026-09-29",
+      "cinemaId": "beta-ungvankhiem",
+      "schedules": [
+        {
+          "movieId": "vungdat",
+          "movieTitle": "Vùng Đất Quỷ Dữ",
+          "screenId": "UVK-P1",
+          "screenName": "Phòng 1",
+          "format": "2D Phụ Đề",
+          "slots": [
+            {
+              "time": "10:30",
+              "price": 75000,
+              "availableSeats": 60
+            },
+            {
+              "time": "14:00",
+              "price": 80000,
+              "availableSeats": 35
+            },
+            {
+              "time": "17:30",
+              "price": 85000,
+              "availableSeats": 12
+            },
+            {
+              "time": "21:00",
+              "price": 85000,
+              "availableSeats": 20
+            }
+          ]
+        },
+        {
+          "movieId": "traibuon",
+          "movieTitle": "Trại Buôn Người",
+          "screenId": "UVK-P2",
+          "screenName": "Phòng 2",
+          "format": "2D Phụ Đề",
+          "slots": [
+            {
+              "time": "12:15",
+              "price": 75000,
+              "availableSeats": 48
+            },
+            {
+              "time": "16:00",
+              "price": 80000,
+              "availableSeats": 26
+            },
+            {
+              "time": "19:45",
+              "price": 85000,
+              "availableSeats": 8
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "beta-vinhyen_2026-09-30",
+      "date": "2026-09-30",
+      "cinemaId": "beta-vinhyen",
+      "schedules": [
+        {
+          "movieId": "utlan2",
+          "movieTitle": "Út Lan 2: Vùng Đất Mất Tích",
+          "screenId": "VY-P1",
+          "screenName": "Phòng 1",
+          "format": "2D Phụ Đề",
+          "slots": [
+            {
+              "time": "10:00",
+              "price": 60000,
+              "availableSeats": 65
+            },
+            {
+              "time": "13:30",
+              "price": 65000,
+              "availableSeats": 45
+            },
+            {
+              "time": "17:00",
+              "price": 70000,
+              "availableSeats": 25
+            },
+            {
+              "time": "20:30",
+              "price": 75000,
+              "availableSeats": 14
+            }
+          ]
+        },
+        {
+          "movieId": "bongma",
+          "movieTitle": "Bóng Ma Nhà Hát",
+          "screenId": "VY-P2",
+          "screenName": "Phòng 2",
+          "format": "2D Phụ Đề",
+          "slots": [
+            {
+              "time": "11:30",
+              "price": 60000,
+              "availableSeats": 55
+            },
+            {
+              "time": "15:15",
+              "price": 65000,
+              "availableSeats": 38
+            },
+            {
+              "time": "19:00",
+              "price": 70000,
+              "availableSeats": 18
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "beta-thanhhoa_2026-10-01",
+      "date": "2026-10-01",
+      "cinemaId": "beta-thanhhoa",
+      "schedules": [
+        {
+          "movieId": "utlan2",
+          "movieTitle": "Út Lan 2: Vùng Đất Mất Tích",
+          "screenId": "TH-P1",
+          "screenName": "Phòng 1",
+          "format": "2D Phụ Đề",
+          "slots": [
+            {
+              "time": "09:45",
+              "price": 60000,
+              "availableSeats": 58
+            },
+            {
+              "time": "13:15",
+              "price": 65000,
+              "availableSeats": 42
+            },
+            {
+              "time": "16:45",
+              "price": 70000,
+              "availableSeats": 20
+            },
+            {
+              "time": "20:00",
+              "price": 75000,
+              "availableSeats": 10
+            }
+          ]
+        },
+        {
+          "movieId": "sp1",
+          "movieTitle": "Avengers: Hồi Kết IMAX",
+          "screenId": "TH-P2",
+          "screenName": "Phòng 2",
+          "format": "2D Phụ Đề",
+          "slots": [
+            {
+              "time": "14:30",
+              "price": 75000,
+              "availableSeats": 30
+            },
+            {
+              "time": "18:30",
+              "price": 80000,
+              "availableSeats": 12
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "concessions": [
+    {
+      "id": "cbo-solo",
+      "categoryId": "combos",
+      "name": "Beta Combo Solo",
+      "description": "1 Bắp Ngọt (60oz) + 1 Nước Có Ga (22oz)",
+      "price": 68000,
+      "originalPrice": 88000,
+      "image": "/promo/promo_deal.jpg",
+      "badge": "GIẢM 20K"
+    },
+    {
+      "id": "cbo-couple",
+      "categoryId": "combos",
+      "name": "Beta Combo Đôi",
+      "description": "1 Bắp Ngọt (60oz) + 2 Nước Có Ga (22oz)",
+      "price": 95000,
+      "originalPrice": 120000,
+      "image": "/promo/promo_deal.jpg",
+      "badge": "HOT"
+    },
+    {
+      "id": "cbo-family",
+      "categoryId": "combos",
+      "name": "Beta Combo Gia Đình",
+      "description": "2 Bắp Ngọt (60oz) + 3 Nước Có Ga (22oz) + 1 Snack",
+      "price": 149000,
+      "originalPrice": 185000,
+      "image": "/promo/promo_deal.jpg",
+      "badge": "TIẾT KIỆM"
+    },
+    {
+      "id": "pop-sweet",
+      "categoryId": "popcorn",
+      "name": "Bắp Rang Ngọt (60oz)",
+      "description": "Bắp rang bơ truyền thống thơm lừng vị ngọt nhẹ",
+      "price": 49000,
+      "originalPrice": null,
+      "image": "/promo/promo_deal.jpg"
+    },
+    {
+      "id": "pop-cheese",
+      "categoryId": "popcorn",
+      "name": "Bắp Rang Phô Mai (60oz)",
+      "description": "Bắp rang giòn rụm phủ lớp phô Mai béo ngậy",
+      "price": 59000,
+      "originalPrice": null,
+      "image": "/promo/promo_deal.jpg"
+    },
+    {
+      "id": "pop-caramel",
+      "categoryId": "popcorn",
+      "name": "Bắp Rang Caramel (60oz)",
+      "description": "Bắp rang phủ sốt Caramel thơm bơ hảo hạng",
+      "price": 59000,
+      "originalPrice": null,
+      "image": "/promo/promo_deal.jpg"
+    },
+    {
+      "id": "bev-pepsi",
+      "categoryId": "beverages",
+      "name": "Pepsi Tươi (22oz)",
+      "description": "Nước ngọt có ga mát lạnh sảng khoái",
+      "price": 32000,
+      "originalPrice": null,
+      "image": "/promo/promo_deal.jpg"
+    },
+    {
+      "id": "bev-7up",
+      "categoryId": "beverages",
+      "name": "7Up Chanh (22oz)",
+      "description": "Nước giải khát vị chanh thơm mát sảng khoái",
+      "price": 32000,
+      "originalPrice": null,
+      "image": "/promo/promo_deal.jpg"
+    },
+    {
+      "id": "snk-sausage",
+      "categoryId": "snacks",
+      "name": "Xúc Xích Phô Mai Nướng",
+      "description": "Xúc xích Đức nướng nóng giòn nhân phô mai tan chảy",
+      "price": 35000,
+      "originalPrice": null,
+      "image": "/promo/promo_deal.jpg",
+      "badge": "MÓN MỚI"
+    },
+    {
+      "id": "snk-nachos",
+      "categoryId": "snacks",
+      "name": "Bánh Bắp Nachos Sốt Phô Mai",
+      "description": "Bánh bắp giòn rụm kèm sốt phô mai cheddar béo ngậy và salsa",
+      "price": 45000,
+      "originalPrice": null,
+      "image": "/promo/promo_deal.jpg",
+      "badge": "YÊU THÍCH"
+    },
+    {
+      "id": "snk-fries",
+      "categoryId": "snacks",
+      "name": "Khoai Tây Lắc Phô Mai",
+      "description": "Khoai tây chiên vàng giòn rụm lắc bột phô mai thơm ngon",
+      "price": 39000,
+      "originalPrice": null,
+      "image": "/promo/promo_deal.jpg"
+    }
+  ],
+  "concession_categories": [
+    {
+      "id": "combos",
+      "name": "Combo Bắp Nước",
+      "active": true
+    },
+    {
+      "id": "popcorn",
+      "name": "Bắp Rang Bơ",
+      "active": false
+    },
+    {
+      "id": "beverages",
+      "name": "Nước Uống",
+      "active": false
+    },
+    {
+      "id": "snacks",
+      "name": "Đồ Ăn Kèm",
+      "active": false
+    }
+  ],
+  "genres": [
+    {
+      "id": "kinh-di",
+      "name": "Kinh dị",
+      "slug": "kinh-di",
+      "description": "Các bộ phim giật gân, rùng rợn, khám phá các yếu tố tâm linh và siêu nhiên."
+    },
+    {
+      "id": "hanh-dong",
+      "name": "Hành động",
+      "slug": "hanh-dong",
+      "description": "Các trận đánh gay cấn, rượt đuổi nghẹt thở và kỹ xảo điện ảnh đỉnh cao."
+    },
+    {
+      "id": "hai-huoc",
+      "name": "Hài hước",
+      "slug": "hai-huoc",
+      "description": "Những câu chuyện giải trí sảng khoái, hóm hỉnh dành cho gia đình và bạn bè."
+    },
+    {
+      "id": "tam-ly",
+      "name": "Tâm lý",
+      "slug": "tam-ly",
+      "description": "Phản ánh sâu sắc cảm xúc, xung đột nội tâm và mối quan hệ con người."
+    },
+    {
+      "id": "gia-dinh",
+      "name": "Gia đình",
+      "slug": "gia-dinh",
+      "description": "Những bộ phim cảm động về tình thân, sự gắn kết và các giá trị nhân văn."
+    },
+    {
+      "id": "hoat-hinh",
+      "name": "Hoạt hình",
+      "slug": "hoat-hinh",
+      "description": "Thế giới hoạt họa 2D/3D sống động dành cho mọi lứa tuổi."
+    },
+    {
+      "id": "phieu-luu",
+      "name": "Phiêu lưu",
+      "slug": "phieu-luu",
+      "description": "Hành trình khám phá những vùng đất mới, vùng kỳ quan kỳ bí."
+    },
+    {
+      "id": "hinh-su",
+      "name": "Hình sự",
+      "slug": "hinh-su",
+      "description": "Những vụ án phức tạp, cuộc đấu trí giữa điều tra viên và tội phạm."
+    }
+  ],
+  "promotions": [
+    {
+      "id": "promo-happy-tuesday",
+      "title": "Thứ Ba Vui Vẻ - Đồng Giá Vé 50K Toàn Hệ Thống",
+      "category": "promotion",
+      "categoryLabel": "Khuyến Mãi Vé",
+      "image": "/promo/promo_deal.jpg",
+      "discount": "ĐỒNG GIÁ 50K",
+      "date": "Áp dụng: Thứ 3 hàng tuần",
+      "badge": "HOT DEAL",
+      "summary": "Mỗi thứ 3 hàng tuần, Beta Cinemas áp dụng mức giá siêu ưu đãi chỉ 50.000đ/vé 2D cho toàn bộ các suất chiếu trong ngày.",
+      "content": "Chương trình Thứ Ba Vui Vẻ áp dụng cho tất cả khách hàng đến xem phim tại hệ thống rạp Beta Cinemas trên toàn quốc. Không giới hạn số lượng vé mua, áp dụng cho cả hình thức mua vé online và tại quầy kiosk rạp. Phụ thu ghế VIP: +5.000đ, ghế đôi Sweetbox: +25.000đ. Không áp dụng vào các ngày lễ Tết.",
+      "code": "HAPPYTUE"
+    },
+    {
+      "id": "promo-u22-student",
+      "title": "Ưu Đãi Học Sinh - Sinh Viên & U22 Chỉ 50K",
+      "category": "promotion",
+      "categoryLabel": "HSSV - U22",
+      "image": "/promo/promo_student.jpg",
+      "discount": "VÉ 50K",
+      "date": "Hạn dùng: Đến 31/12/2026",
+      "badge": "U22 SPECIAL",
+      "summary": "Xem phim thả ga, giá chỉ 50.000đ dành riêng cho học sinh, sinh viên và khách hàng dưới 22 tuổi từ Thứ 2 đến Thứ 6.",
+      "content": "Chương trình dành riêng cho các bạn học sinh, sinh viên và khán giả dưới 22 tuổi. Vui lòng xuất trình thẻ HSSV hoặc giấy tờ tùy thân (CCCD) có ảnh và năm sinh khi vào rạp soát vé. Mỗi thẻ HSSV được mua 01 vé ưu đãi/suất chiếu.",
+      "code": "BETA-U22"
+    },
+    {
+      "id": "promo-member-day",
+      "title": "Beta Member Day - Tích Điểm Gấp Đôi & Đổi Bắp Miễn Phí",
+      "category": "member",
+      "categoryLabel": "Thành Viên",
+      "image": "/promo/promo_member.jpg",
+      "discount": "X2 ĐIỂM THƯỞNG",
+      "date": "Áp dụng: Ngày 15 hàng tháng",
+      "badge": "MEMBER EXCLUSIVE",
+      "summary": "Ngày hội thành viên Beta: Nhân đôi điểm tích lũy cho mọi giao dịch vé và bắp nước. Đổi ngay combo bắp rang bơ miễn phí.",
+      "content": "Vào ngày 15 hàng tháng, thành viên Beta Cinemas khi thực hiện giao dịch mua vé hoặc combo đồ ăn thức uống sẽ nhận ngay x2 điểm thưởng tích lũy. Điểm có thể dùng để đổi vé xem phim 2D/3D miễn phí, voucher giảm giá hoặc combo bắp nước thượng hạng tại quầy.",
+      "code": "MEMBERX2"
+    },
+    {
+      "id": "news-opening-nowzone",
+      "title": "Khai Trương Cụm Rạp Beta Cinemas Nowzone TP.HCM",
+      "category": "news",
+      "categoryLabel": "Tin Tức",
+      "image": "/promo/promo_nowzone.jpg",
+      "discount": "TẶNG BẮP NƯỚC",
+      "date": "Ngày đăng: 20/09/2026",
+      "badge": "SỰ KIỆN MỚI",
+      "summary": "Chào đón cụm rạp thứ 21 của Beta Cinemas tại TTTM Nowzone Quận 5 với không gian điện ảnh trẻ trung và hệ thống âm thanh Dolby 7.1 đỉnh cao.",
+      "content": "Nhân dịp khai trương rạp mới, từ nay đến hết tháng, mỗi khách hàng mua từ 02 vé xem phim bất kỳ tại Beta Nowzone sẽ được tặng ngay 01 gói bắp ngọt thơm lừng cùng cơ hội bốc thăm trúng thưởng vé xem phim miễn phí 1 năm.",
+      "code": "NOWZONE2026"
+    },
+    {
+      "id": "promo-combo-online",
+      "title": "Đặt Combo Bắp Nước Online Tiết Kiệm Đến 20%",
+      "category": "promotion",
+      "categoryLabel": "Combo Tiết Kiệm",
+      "image": "/promo/promo_deal.jpg",
+      "discount": "GIẢM 20%",
+      "date": "Áp dụng xuyên suốt",
+      "badge": "COMBO DEAL",
+      "summary": "Tiết kiệm hơn khi đặt trước bắp rang và nước ngọt online trên website hoặc app Beta Cinemas trước khi đến rạp.",
+      "content": "Khi đặt vé cùng các combo bắp nước (Beta Combo Solo, Beta Combo Đôi, Family Combo), bạn sẽ được giảm giá trực tiếp đến 20% so với mua trực tiếp tại quầy concession. Nhận đồ ăn nhanh chóng tại quầy VIP Pick-up không cần xếp hàng.",
+      "code": "BETA50"
+    },
+    {
+      "id": "news-technology-upgrade",
+      "title": "Nâng Cấp Màn Chiếu Laser Siêu Nét Trên Toàn Quốc",
+      "category": "news",
+      "categoryLabel": "Công Nghệ",
+      "image": "/hero_bongma.jpg",
+      "discount": "CÔNG NGHỆ MỚI",
+      "date": "Ngày đăng: 15/09/2026",
+      "badge": "TIN MỚI",
+      "summary": "Beta Cinemas tiên phong nâng cấp hệ thống máy chiếu Laser RGB thế hệ mới, mang lại độ tương phản sắc nét và màu sắc sống động vượt bậc.",
+      "content": "Trải nghiệm rạp chiếu phim chất lượng chuẩn quốc tế với mức giá phù hợp cho mọi khán giả. Hệ thống máy chiếu Laser RGB mới giúp tăng độ sáng màn chiếu lên 40%, hình ảnh chân thực, góc nhìn rộng và đặc biệt thân thiện với thị giác người xem trong các thước phim hành động mãn nhãn.",
+      "code": "LASER2026"
+    }
+  ],
+  "banners": {
+    "heroSlides": [
+      {
+        "id": "slide-1",
+        "title": "Bóng Ma Nhà Hát",
+        "image": "/hero_bongma.jpg",
+        "imageStyle": "object-position: center center"
+      },
+      {
+        "id": "slide-2",
+        "title": "Út Lan 2",
+        "image": "/poster/poster_utlan2.jpg",
+        "imageStyle": "object-position: center top"
+      },
+      {
+        "id": "slide-3",
+        "title": "Trại Buôn Người",
+        "image": "/poster/poster_traibuonnguoi.jpg",
+        "imageStyle": "object-position: center top"
+      }
+    ],
+    "sideBanners": {
+      "left": {
+        "logo": "/logo.webp",
+        "badge": "ĐẶC QUYỀN THÀNH VIÊN",
+        "discount": "GIẢM 20K",
+        "sub": "Khi mua<br />Combo Online",
+        "image": "/promo/promo_deal.jpg",
+        "priceOld": "88.000đ",
+        "priceNew": "68.000đ",
+        "ctaText": "ĐẶT NGAY",
+        "ctaId": "side-left-cta"
+      },
+      "right": {
+        "logo": "/logo.webp",
+        "badge": "ĐẶC QUYỀN THÀNH VIÊN",
+        "discount": "GIẢM 20K",
+        "sub": "Khi mua<br />Combo Online",
+        "image": "/promo/promo_deal.jpg",
+        "priceOld": "88.000đ",
+        "priceNew": "68.000đ",
+        "ctaText": "ĐẶT NGAY",
+        "ctaId": "side-right-cta"
+      }
+    }
+  },
+  "ticket_pricing": {
+    "dayTypes": [
+      {
+        "id": "weekday",
+        "label": "Thứ 2 - Thứ 5"
+      },
+      {
+        "id": "weekend",
+        "label": "Thứ 6 - Chủ Nhật & Ngày Lễ"
+      },
+      {
+        "id": "happy_tuesday",
+        "label": "Thứ Ba Hàng Tuần (Happy Tuesday)"
+      }
+    ],
+    "seatTypes": [
+      {
+        "id": "standard",
+        "label": "Ghế Thường",
+        "surcharge": 0
+      },
+      {
+        "id": "vip",
+        "label": "Ghế VIP",
+        "surcharge": 5000
+      },
+      {
+        "id": "sweetbox",
+        "label": "Ghế Đôi (Sweetbox)",
+        "surcharge": 25000
+      }
+    ],
+    "formats": [
+      {
+        "id": "2d",
+        "label": "Phòng Chiếu 2D Standard",
+        "rates": {
+          "weekday": {
+            "standard": 65000,
+            "vip": 70000,
+            "sweetbox": 155000
+          },
+          "weekend": {
+            "standard": 75000,
+            "vip": 80000,
+            "sweetbox": 175000
+          },
+          "happy_tuesday": {
+            "standard": 50000,
+            "vip": 55000,
+            "sweetbox": 125000
+          }
+        }
+      },
+      {
+        "id": "3d",
+        "label": "Phòng Chiếu 3D",
+        "rates": {
+          "weekday": {
+            "standard": 85000,
+            "vip": 90000,
+            "sweetbox": 195000
+          },
+          "weekend": {
+            "standard": 95000,
+            "vip": 100000,
+            "sweetbox": 215000
+          },
+          "happy_tuesday": {
+            "standard": 70000,
+            "vip": 75000,
+            "sweetbox": 165000
+          }
+        }
+      },
+      {
+        "id": "imax",
+        "label": "Phòng Chiếu IMAX 3D",
+        "rates": {
+          "weekday": {
+            "standard": 120000,
+            "vip": 130000,
+            "sweetbox": 270000
+          },
+          "weekend": {
+            "standard": 140000,
+            "vip": 150000,
+            "sweetbox": 310000
+          },
+          "happy_tuesday": {
+            "standard": 100000,
+            "vip": 110000,
+            "sweetbox": 230000
+          }
+        }
+      }
+    ],
+    "discounts": [
+      {
+        "id": "student_u22",
+        "name": "Học Sinh / Sinh Viên & U22",
+        "description": "Áp dụng vé 2D từ Thứ 2 đến Thứ 6 trước 17h00 (Xuất trình thẻ HSSV/CCCD)",
+        "price": 50000
+      },
+      {
+        "id": "beta_member",
+        "name": "Đặc Quyền Thành Viên Beta",
+        "description": "Giảm 10% giá vé và tích điểm đổi quà trên toàn hệ thống",
+        "discountPercent": 10
+      }
+    ]
+  },
+  "footer": [
+    {
+      "id": "fc-nowzone",
+      "name": "Beta Cinemas Nowzone, TP Hồ Chí Minh",
+      "hotline": "1900 636807"
+    },
+    {
+      "id": "fc-xuanthuy",
+      "name": "Beta Cinemas Xuân Thủy, Hà Nội",
+      "hotline": "0333 023 183"
+    },
+    {
+      "id": "fc-tayson",
+      "name": "Beta Cinemas Tây Sơn, Hà Nội",
+      "hotline": "0976 894 773"
+    },
+    {
+      "id": "fc-vinhyen",
+      "name": "Beta Cinemas Vĩnh Yên, Phú Thọ",
+      "hotline": "0977 632 215"
+    },
+    {
+      "id": "fc-ungvankhiem",
+      "name": "Beta Cinemas Ung Văn Khiêm, TP Hồ Chí Minh",
+      "hotline": "0969 874 873"
+    },
+    {
+      "id": "fc-laocai",
+      "name": "Beta Cinemas Lào Cai",
+      "hotline": "0358 968 970"
+    },
+    {
+      "id": "fc-tranquangkhai",
+      "name": "Beta Cinemas Trần Quang Khải, TP Hồ Chí Minh",
+      "hotline": "1900 638 362"
+    },
+    {
+      "id": "fc-trmall",
+      "name": "Beta Cinemas TRMall Phú Quốc, An Giang",
+      "hotline": "0983 474 440"
+    },
+    {
+      "id": "fc-empire",
+      "name": "Beta Cinemas Empire Bình Dương, TP Hồ Chí Minh",
+      "hotline": "0784 531 525"
+    },
+    {
+      "id": "fc-quangtrung",
+      "name": "Beta Cinemas Quang Trung, TP Hồ Chí Minh",
+      "hotline": "0706 075 509"
+    },
+    {
+      "id": "fc-giaiphong",
+      "name": "Beta Cinemas Giải Phóng, Hà Nội",
+      "hotline": "0585 680 360"
+    },
+    {
+      "id": "fc-thanxuan",
+      "name": "Beta Cinemas Thanh Xuân, Hà Nội",
+      "hotline": "082 4812878"
+    },
+    {
+      "id": "fc-mydinh",
+      "name": "Beta Cinemas Mỹ Đình, Hà Nội",
+      "hotline": "082 4812878"
+    },
+    {
+      "id": "fc-danphuong",
+      "name": "Beta Cinemas Đan Phượng, Hà Nội",
+      "hotline": "0983 901 714"
+    },
+    {
+      "id": "fc-thainguyen",
+      "name": "Beta Cinemas Thái Nguyên",
+      "hotline": "0867 460 053"
+    },
+    {
+      "id": "fc-thanhhoa",
+      "name": "Beta Cinemas Thanh Hóa",
+      "hotline": "0325 360 249"
+    },
+    {
+      "id": "fc-bacgiang",
+      "name": "Beta Cinemas Bắc Giang, Bắc Ninh",
+      "hotline": "0866 493 413"
+    },
+    {
+      "id": "fc-nhatrang",
+      "name": "Beta Cinemas Nha Trang, Khánh Hòa",
+      "hotline": "0399 475 165"
+    },
+    {
+      "id": "fc-bienhoa",
+      "name": "Beta Cinemas Biên Hòa, Đồng Nai",
+      "hotline": "0979 460 002"
+    },
+    {
+      "id": "fc-longkhanh",
+      "name": "Beta Cinemas Long Khánh, Đồng Nai",
+      "hotline": "0925 165 684"
+    },
+    {
+      "id": "fc-hotram",
+      "name": "Beta Cinemas Hồ Tràm, TP Hồ Chí Minh",
+      "hotline": "0254 3788601"
+    },
+    {
+      "id": "fc-tanuyen",
+      "name": "Beta Cinemas Tân Uyên, TP Hồ Chí Minh",
+      "hotline": "0937 905 925"
+    }
+  ],
+  "bookings": [
+    {
+      "id": "BT-842915",
+      "movieId": "utlan2",
+      "movieTitle": "Út Lan 2: Vùng Đất Mất Tích",
+      "moviePoster": "/poster/poster_utlan2.jpg",
+      "cinemaId": "beta-thainguyen",
+      "cinemaName": "Beta Thái Nguyên",
+      "screenName": "Phòng chiếu 1",
+      "formatName": "2D Phụ Đề",
+      "date": "2026-09-26",
+      "time": "14:30",
+      "seats": "D05, D06",
+      "concessions": "1x Beta Combo Đôi",
+      "total": 255000,
+      "paymentMethod": "momo",
+      "userName": "Nguyễn Hoàng Nam",
+      "userPhone": "0987654321",
+      "userEmail": "nam.nguyen@example.com",
+      "bookingDate": "2026-09-26T07:30:00.000Z",
+      "status": "paid"
+    },
+    {
+      "id": "BT-613713",
+      "movieId": "utlan2",
+      "movieTitle": "Út Lan 2",
+      "moviePoster": "/poster/poster_utlan2.jpg",
+      "cinemaId": "beta-thainguyen",
+      "cinemaName": "Beta Cinemas Thái Nguyên",
+      "screenName": "Phòng chiếu 1",
+      "formatName": "2D Phụ Đề",
+      "date": "2026-09-26",
+      "time": "14:30",
+      "seats": "D04, D05",
+      "concessions": "1x Beta Combo Đôi",
+      "total": 235000,
+      "voucherCode": null,
+      "discountAmount": 0,
+      "paymentMethod": "momo",
+      "customerName": "NguyNguyen Hoang Nam",
+      "customerPhone": "0912345678",
+      "customerEmail": "nam.nguyen@example.com",
+      "bookingDate": "2026-10-01T12:37:25.095Z",
+      "status": "paid"
+    }
+  ]
+}

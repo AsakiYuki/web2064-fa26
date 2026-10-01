@@ -3,6 +3,19 @@ import { resolve } from 'path'
 
 export default defineConfig({
 	appType: 'mpa', // Multi-page Application: disable default SPA fallback to index.html
+	server: {
+		port: 5173,
+		proxy: {
+			'/api': {
+				target: 'http://localhost:3000',
+				changeOrigin: true,
+				rewrite: (path) => path.replace(/^\/api/, ''),
+			},
+			'/register': 'http://localhost:3000',
+			'/login': 'http://localhost:3000',
+			'/users': 'http://localhost:3000',
+		},
+	},
 	plugins: [
 		{
 			name: 'vite-plugin-404-fallback',
@@ -11,7 +24,7 @@ export default defineConfig({
 					const rawUrl = req.url || '/'
 					const pathname = rawUrl.split('?')[0]
 
-					// Bypass Vite internal endpoints and static assets
+					// Bypass Vite internal endpoints, API proxy and static assets
 					if (
 						pathname.startsWith('/@') ||
 						pathname.startsWith('/__vite') ||
@@ -21,6 +34,10 @@ export default defineConfig({
 						pathname.startsWith('/data') ||
 						pathname.startsWith('/poster') ||
 						pathname.startsWith('/promo') ||
+						pathname.startsWith('/api') ||
+						pathname.startsWith('/register') ||
+						pathname.startsWith('/login') ||
+						pathname.startsWith('/users') ||
 						pathname.endsWith('.ico') ||
 						pathname.endsWith('.webp') ||
 						pathname.endsWith('.jpg') ||
