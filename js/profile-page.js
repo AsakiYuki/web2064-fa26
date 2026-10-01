@@ -2,22 +2,33 @@
  * Beta Cinemas - User Profile & Booking History Logic
  */
 import { setupHeaderAndFooter, formatCurrency, formatDateVN, showToast, getCurrentUser, saveUserSession } from "./common.js"
+import { getBookingHistory, saveBookingTicket, cancelBookingTicket, STORAGE_KEYS, storageSet } from "./storage.js"
+
+const DEFAULT_PROFILE = {
+	name: "Nguyễn Văn An",
+	email: "nguyen.an@gmail.com",
+	phone: "0912 345 678",
+	birthday: "1998-05-15",
+	gender: "Nam",
+	city: "Thái Nguyên",
+	cinemaFavorite: "Beta Thái Nguyên",
+	points: 850,
+	rank: "BETA VIP MEMBER",
+	avatar: "N",
+	avatarColor: "gold",
+}
 
 document.addEventListener("DOMContentLoaded", async () => {
 	await setupHeaderAndFooter()
 
-	// 1. Load User Session
+	// 1. Load User Session from LocalStorage
 	let user = getCurrentUser()
 	if (!user) {
-		user = {
-			name: "Nguyễn Văn An",
-			email: "nguyen.an@gmail.com",
-			phone: "0912 345 678",
-			points: 850,
-			rank: "BETA VIP MEMBER",
-			avatar: "N",
-		}
+		user = { ...DEFAULT_PROFILE }
 		saveUserSession(user)
+	} else {
+		// Merge any missing fields with defaults
+		user = { ...DEFAULT_PROFILE, ...user }
 	}
 
 	renderUserInfo(user)
@@ -31,52 +42,161 @@ document.addEventListener("DOMContentLoaded", async () => {
 		security: document.getElementById("panel-security"),
 	}
 
+	// Check URL param ?tab=info or ?tab=history
+	const urlParams = new URLSearchParams(window.location.search)
+	const initialTab = urlParams.get("tab") || "history"
+	switchTab(initialTab)
+
 	tabBtns.forEach(btn => {
 		btn.addEventListener("click", () => {
-			tabBtns.forEach(b => b.classList.remove("active"))
-			btn.classList.add("active")
-
 			const target = btn.dataset.tab
-			Object.entries(panels).forEach(([key, panel]) => {
-				if (!panel) return
-				if (key === target) {
-					panel.style.display = "block"
-					panel.classList.add("active")
-				} else {
-					panel.style.display = "none"
-					panel.classList.remove("active")
-				}
-			})
+			switchTab(target)
 		})
 	})
 
-	// 3. Render Booking History
+	function switchTab(target) {
+		tabBtns.forEach(b => {
+			if (b.dataset.tab === target) {
+				b.classList.add("active")
+			} else {
+				b.classList.remove("active")
+			}
+		})
+
+		Object.entries(panels).forEach(([key, panel]) => {
+			if (!panel) return
+			if (key === target) {
+				panel.style.display = "block"
+				panel.classList.add("active")
+			} else {
+				panel.style.display = "none"
+				panel.classList.remove("active")
+			}
+		})
+	}
+
+	// 3. Setup Booking History Management
+	let currentHistoryFilter = "all"
+	let currentSearchKeyword = ""
+
 	renderBookingHistory()
 
-	// 4. Personal Info Form Submit
+	// Booking History Status Filter Buttons
+	const filterBtns = document.querySelectorAll("#history-status-filters .btn-filter-status")
+	filterBtns.forEach(btn => {
+		btn.addEventListener("click", () => {
+			filterBtns.forEach(b => {
+				b.classList.remove("active")
+				b.style.background = "#1e293b"
+				b.style.color = "#94a3b8"
+			})
+			btn.classList.add("active")
+			btn.style.background = "#015198"
+			btn.style.color = "#fff"
+
+			currentHistoryFilter = btn.dataset.status
+			renderBookingHistory()
+		})
+	})
+
+	// Booking History Search Input
+	const searchInput = document.getElementById("history-search-input")
+	searchInput?.addEventListener("input", e => {
+		currentSearchKeyword = e.target.value.trim().toLowerCase()
+		renderBookingHistory()
+	})
+
+	// 4. Setup Avatar Color Presets and Live Preview
+	const avatarPreview = document.getElementById("pf-avatar-preview")
+	const avatarInput = document.getElementById("pf-avatar-input")
+	const colorBtns = document.querySelectorAll(".color-preset-btn")
+
+	const colorGradients = {
+		gold: "linear-gradient(135deg, #f5a623 0%, #d97706 100%)",
+		blue: "linear-gradient(135deg, #0284c7 0%, #0369a1 100%)",
+		purple: "linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%)",
+		emerald: "linear-gradient(135deg, #10b981 0%, #047857 100%)",
+	}
+
+	colorBtns.forEach(cbtn => {
+		cbtn.addEventListener("click", () => {
+			colorBtns.forEach(b => (b.style.borderColor = "transparent"))
+			cbtn.style.borderColor = "#fff"
+			const chosenColor = cbtn.dataset.color || "gold"
+			user.avatarColor = chosenColor
+			if (avatarPreview) {
+				avatarPreview.style.background = colorGradients[chosenColor] || colorGradients.gold
+			}
+			const heroAvatar = document.getElementById("user-avatar-circle")
+			if (heroAvatar) {
+				heroAvatar.style.background = colorGradients[chosenColor] || colorGradients.gold
+			}
+		})
+	})
+
+	avatarInput?.addEventListener("input", e => {
+		const val = e.target.value.toUpperCase()
+		if (avatarPreview) avatarPreview.textContent = val || "N"
+	})
+
+	// 5. Bắt sự kiện người dùng bấm Lưu và Ghi vào LocalStorage
 	const infoForm = document.getElementById("form-profile-info")
 	infoForm?.addEventListener("submit", e => {
 		e.preventDefault()
+		// Lấy giá trị từ người dùng gõ vào
 		const name = document.getElementById("pf-name")?.value.trim()
 		const email = document.getElementById("pf-email")?.value.trim()
 		const phone = document.getElementById("pf-phone")?.value.trim()
-
-		if (!name || !email || !phone) {
-			showToast("Vui lòng điền đầy đủ họ tên, email và số điện thoại.", "warning")
+		const birthday = document.getElementById("pf-birthday")?.value
+		const gender = document.getElementById("pf-gender")?.value
+		const city = document.getElementById("pf-city")?.value.trim()
+		const cinemaFavorite = document.getElementById("pf-fav-cinema")?.value
+		const avatar = document.getElementById("pf-avatar-input")?.value.trim().toUpperCase() || name.charAt(0).toUpperCase()
+		// điều kiện kiểm tra lệnh
+		if (!name || name.length < 2) {
+			showToast("Vui lòng nhập họ và tên hợp lệ (tối thiểu 2 ký tự).", "warning")
 			return
 		}
 
+		if (!email || !email.includes("@")) {
+			showToast("Vui lòng nhập địa chỉ email hợp lệ.", "warning")
+			return
+		}
+
+		if (!phone || phone.length < 9) {
+			showToast("Vui lòng nhập số điện thoại hợp lệ.", "warning")
+			return
+		}
+
+		// Cập nhật  thông tin vào OBJECT user
 		user.name = name
 		user.email = email
 		user.phone = phone
-		user.avatar = name.charAt(0).toUpperCase()
+		user.birthday = birthday
+		user.gender = gender
+		user.city = city
+		user.cinemaFavorite = cinemaFavorite
+		user.avatar = avatar
+		user.avatarText = avatar
+
+		// Save to LocalStorage
 		saveUserSession(user)
 		renderUserInfo(user)
-
-		showToast("Cập nhật thông tin tài khoản thành công!", "success")
+		// Báo thành công
+		showToast("✅ Đã cập nhật và lưu thông tin cá nhân vào LocalStorage thành công!", "success")
 	})
 
-	// 5. Voucher Copy Buttons
+	// Reset profile button
+	document.getElementById("btn-reset-profile")?.addEventListener("click", () => {
+		if (confirm("Bạn có chắc chắn muốn đặt lại thông tin cá nhân về mặc định?")) {
+			user = { ...DEFAULT_PROFILE }
+			saveUserSession(user)
+			renderUserInfo(user)
+			showToast("Đã khôi phục thông tin cá nhân về mặc định.", "info")
+		}
+	})
+
+	// 6. Voucher Copy Buttons
 	document.querySelectorAll(".btn-use-voucher").forEach(btn => {
 		btn.addEventListener("click", () => {
 			const code = btn.dataset.code
@@ -87,7 +207,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 		})
 	})
 
-	// 6. Change Password Form
+	// 7. Change Password Form
 	const passForm = document.getElementById("form-change-password")
 	passForm?.addEventListener("submit", e => {
 		e.preventDefault()
@@ -109,7 +229,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 		showToast("Đổi mật khẩu thành công! Hãy ghi nhớ mật khẩu mới của bạn.", "success")
 	})
 
-	// 7. Modal E-Ticket Close
+	// 8. Modal E-Ticket Close
 	const modal = document.getElementById("profile-ticket-modal")
 	const modalClose = document.getElementById("profile-ticket-modal-close")
 	modalClose?.addEventListener("click", () => {
@@ -134,7 +254,19 @@ document.addEventListener("DOMContentLoaded", async () => {
 		const pointsEl = document.getElementById("user-points-val")
 		const rankEl = document.getElementById("user-display-rank")
 
-		if (avatarEl) avatarEl.textContent = u.avatar || u.name?.charAt(0).toUpperCase() || "B"
+		const colorGradients = {
+			gold: "linear-gradient(135deg, #f5a623 0%, #d97706 100%)",
+			blue: "linear-gradient(135deg, #0284c7 0%, #0369a1 100%)",
+			purple: "linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%)",
+			emerald: "linear-gradient(135deg, #10b981 0%, #047857 100%)",
+		}
+		const activeGradient = colorGradients[u.avatarColor] || colorGradients.gold
+
+		const avatarText = u.avatar || u.avatarText || u.name?.charAt(0).toUpperCase() || "N"
+		if (avatarEl) {
+			avatarEl.textContent = avatarText
+			avatarEl.style.background = activeGradient
+		}
 		if (nameEl) nameEl.textContent = u.name
 		if (emailEl) emailEl.textContent = u.email
 		if (phoneEl) phoneEl.textContent = u.phone
@@ -142,12 +274,37 @@ document.addEventListener("DOMContentLoaded", async () => {
 		if (rankEl) rankEl.textContent = u.rank || "BETA VIP MEMBER"
 
 		// Pre-fill form fields
+		const pfAvatarPreview = document.getElementById("pf-avatar-preview")
+		const pfAvatarInput = document.getElementById("pf-avatar-input")
 		const pfName = document.getElementById("pf-name")
 		const pfEmail = document.getElementById("pf-email")
 		const pfPhone = document.getElementById("pf-phone")
-		if (pfName && !pfName.value) pfName.value = u.name || ""
-		if (pfEmail && !pfEmail.value) pfEmail.value = u.email || ""
-		if (pfPhone && !pfPhone.value) pfPhone.value = u.phone || ""
+		const pfBirthday = document.getElementById("pf-birthday")
+		const pfGender = document.getElementById("pf-gender")
+		const pfCity = document.getElementById("pf-city")
+		const pfFavCinema = document.getElementById("pf-fav-cinema")
+
+		if (pfAvatarPreview) {
+			pfAvatarPreview.textContent = avatarText
+			pfAvatarPreview.style.background = activeGradient
+		}
+		if (pfAvatarInput) pfAvatarInput.value = avatarText
+		if (pfName) pfName.value = u.name || ""
+		if (pfEmail) pfEmail.value = u.email || ""
+		if (pfPhone) pfPhone.value = u.phone || ""
+		if (pfBirthday) pfBirthday.value = u.birthday || "1998-05-15"
+		if (pfGender) pfGender.value = u.gender || "Nam"
+		if (pfCity) pfCity.value = u.city || ""
+		if (pfFavCinema && u.cinemaFavorite) pfFavCinema.value = u.cinemaFavorite
+
+		// Preset color indicator
+		document.querySelectorAll(".color-preset-btn").forEach(b => {
+			if (b.dataset.color === u.avatarColor) {
+				b.style.borderColor = "#fff"
+			} else {
+				b.style.borderColor = "transparent"
+			}
+		})
 	}
 
 	function renderBookingHistory() {
@@ -155,12 +312,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 		const badge = document.getElementById("history-count-badge")
 		if (!container) return
 
-		let history = []
-		try {
-			history = JSON.parse(localStorage.getItem("beta_booking_history") || "[]")
-		} catch (e) {
-			history = []
-		}
+		let history = getBookingHistory()
 
 		// Fallback sample tickets if clean state
 		if (history.length === 0) {
@@ -180,6 +332,8 @@ document.addEventListener("DOMContentLoaded", async () => {
 					total: 255000,
 					paymentMethod: "momo",
 					status: "paid",
+					userEmail: user.email,
+					userName: user.name,
 				},
 				{
 					id: "BT718320",
@@ -196,44 +350,105 @@ document.addEventListener("DOMContentLoaded", async () => {
 					total: 160000,
 					paymentMethod: "vnpay",
 					status: "done",
+					userEmail: user.email,
+					userName: user.name,
 				},
 			]
-			localStorage.setItem("beta_booking_history", JSON.stringify(history))
+			storageSet(STORAGE_KEYS.BOOKING_HISTORY, history)
 		}
 
-		if (badge) badge.textContent = history.length
+		// Filter for current user tickets (or tickets without specific user tag)
+		const userTickets = history.filter(t => !t.userEmail || t.userEmail === user.email)
 
-		container.innerHTML = history
-			.map((t, idx) => {
+		if (badge) badge.textContent = userTickets.length
+
+		// Apply status filter
+		let filtered = userTickets
+		if (currentHistoryFilter !== "all") {
+			filtered = filtered.filter(t => t.status === currentHistoryFilter)
+		}
+
+		// Apply search filter
+		if (currentSearchKeyword) {
+			filtered = filtered.filter(
+				t =>
+					(t.movieTitle && t.movieTitle.toLowerCase().includes(currentSearchKeyword)) ||
+					(t.id && t.id.toLowerCase().includes(currentSearchKeyword)) ||
+					(t.cinemaName && t.cinemaName.toLowerCase().includes(currentSearchKeyword))
+			)
+		}
+
+		if (filtered.length === 0) {
+			container.innerHTML = `
+				<div class="empty-history-state" style="text-align: center; padding: 48px 20px; background: #1e293b; border-radius: 12px; border: 1px dashed rgba(255,255,255,0.15);">
+					<div style="font-size: 48px; margin-bottom: 12px;">🎟️</div>
+					<h3 style="color: #fff; font-size: 18px; margin-bottom: 8px;">Không tìm thấy vé xem phim nào</h3>
+					<p style="color: #94a3b8; font-size: 14px; max-width: 400px; margin: 0 auto 20px;">
+						${currentSearchKeyword ? `Không có kết quả nào khớp với "${currentSearchKeyword}".` : "Bạn chưa có vé nào trong mục này. Hãy chọn phim và đặt vé ngay hôm nay!"}
+					</p>
+					<a href="/movies.html" style="display: inline-block; background: #015198; color: #fff; padding: 10px 24px; border-radius: 8px; font-weight: 700; text-decoration: none; transition: background 0.2s;">
+						🎬 Khám Phá Phim Đang Chiếu
+					</a>
+				</div>
+			`
+			return
+		}
+
+		container.innerHTML = filtered
+			.map(t => {
 				const isPaid = t.status === "paid"
-				const statusText = isPaid ? "Đã Thanh Toán" : "Đã Sử Dụng"
-				const statusClass = isPaid ? "status-paid" : "status-done"
+				const isCancelled = t.status === "cancelled"
+				let statusText = "Đã Thanh Toán"
+				let statusClass = "status-paid"
+				let statusBadgeStyle = "background: rgba(16, 185, 129, 0.2); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.4);"
+
+				if (t.status === "done") {
+					statusText = "Đã Sử Dụng"
+					statusClass = "status-done"
+					statusBadgeStyle = "background: rgba(148, 163, 184, 0.2); color: #94a3b8; border: 1px solid rgba(148, 163, 184, 0.4);"
+				} else if (isCancelled) {
+					statusText = "Đã Hủy"
+					statusClass = "status-cancelled"
+					statusBadgeStyle = "background: rgba(239, 68, 68, 0.2); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.4);"
+				}
 
 				return `
-					<div class="history-ticket-card" data-ticket-index="${idx}">
+					<div class="history-ticket-card" id="ticket-card-${t.id}">
 						<div class="ht-poster">
 							<img src="${t.moviePoster || "/poster/poster_utlan2.jpg"}" alt="${t.movieTitle}" onerror="this.src='/poster/poster_utlan2.jpg'" />
 						</div>
 						<div class="ht-details">
-							<span class="ht-status-badge ${statusClass}">● ${statusText}</span>
-							<h3 class="ht-title">${t.movieTitle}</h3>
-							<div class="ht-meta-row">
+							<div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+								<span class="ht-status-badge ${statusClass}" style="padding: 2px 8px; border-radius: 6px; font-size: 11px; font-weight: 700; ${statusBadgeStyle}">● ${statusText}</span>
+								<span style="font-size: 12px; color: #64748b;">${t.paymentMethod ? `Thanh toán qua ${t.paymentMethod.toUpperCase()}` : ""}</span>
+							</div>
+							<h3 class="ht-title" style="margin: 0 0 8px; font-size: 17px; font-weight: 800; color: #fff;">${t.movieTitle}</h3>
+							<div class="ht-meta-row" style="display: flex; gap: 14px; flex-wrap: wrap; font-size: 13px; color: #cbd5e1;">
 								<span>🏛️ <strong>${t.cinemaName}</strong></span>
 								<span>📽️ ${t.screenName || "Phòng 1"} (${t.formatName || "2D"})</span>
 								<span>📅 <strong>${t.time}</strong> - ${formatDateVN(t.date)}</span>
 							</div>
-							<div class="ht-meta-row" style="margin-top: 4px;">
+							<div class="ht-meta-row" style="margin-top: 6px; display: flex; gap: 14px; flex-wrap: wrap; font-size: 13px; color: #cbd5e1;">
 								<span>💺 Ghế: <strong style="color:#10b981;">${t.seats}</strong></span>
 								<span>🍿 ${t.concessions || "Không kèm bắp"}</span>
 								<span>💳 <strong style="color:#fbbf24;">${formatCurrency(t.total)}</strong></span>
 							</div>
-							<div class="ht-code">Mã Vé: ${t.id}</div>
+							<div class="ht-code" style="margin-top: 8px; font-family: monospace; font-size: 12px; color: #94a3b8;">Mã Vé: <span style="color:#38bdf8; font-weight:700;">${t.id}</span></div>
 						</div>
-						<div class="ht-actions">
-							<button type="button" class="btn-view-eticket" data-ticket-id="${t.id}">
-								Xem Vé Điện Tử
+						<div class="ht-actions" style="display: flex; flex-direction: column; gap: 8px; min-width: 140px;">
+							<button type="button" class="btn-view-eticket" data-ticket-id="${t.id}" style="background: #015198; color: #fff; border: none; padding: 8px 14px; border-radius: 6px; font-weight: 700; font-size: 13px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px;">
+								🎟️ Xem Vé Điện Tử
 							</button>
-							<a href="/booking.html?movieId=${t.movieId || 'utlan2'}" class="btn-rebook">
+							${
+								isPaid
+									? `
+								<button type="button" class="btn-cancel-ticket" data-ticket-id="${t.id}" style="background: rgba(239, 68, 68, 0.15); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.3); padding: 6px 12px; border-radius: 6px; font-weight: 600; font-size: 12px; cursor: pointer;">
+									✕ Hủy Vé
+								</button>
+							`
+									: ""
+							}
+							<a href="/booking.html?movieId=${t.movieId || "utlan2"}" class="btn-rebook" style="text-align: center; background: rgba(255,255,255,0.06); color: #cbd5e1; border: 1px solid rgba(255,255,255,0.12); padding: 6px 12px; border-radius: 6px; font-weight: 600; font-size: 12px; text-decoration: none;">
 								Đặt Lại Suất Chiếu
 							</a>
 						</div>
@@ -246,8 +461,20 @@ document.addEventListener("DOMContentLoaded", async () => {
 		container.querySelectorAll(".btn-view-eticket").forEach(btn => {
 			btn.addEventListener("click", () => {
 				const ticketId = btn.dataset.ticketId
-				const targetTicket = history.find(t => t.id === ticketId)
+				const targetTicket = userTickets.find(t => t.id === ticketId)
 				if (targetTicket) openProfileTicketModal(targetTicket)
+			})
+		})
+
+		// Attach cancel ticket clicks
+		container.querySelectorAll(".btn-cancel-ticket").forEach(btn => {
+			btn.addEventListener("click", () => {
+				const ticketId = btn.dataset.ticketId
+				if (confirm(`Bạn có chắc chắn muốn hủy vé ${ticketId}? Tiền vé sẽ được hoàn về phương thức thanh toán ban đầu.`)) {
+					cancelBookingTicket(ticketId)
+					showToast(`Đã hủy vé ${ticketId} thành công.`, "info")
+					renderBookingHistory()
+				}
 			})
 		})
 	}
@@ -258,7 +485,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 		if (!modal || !body) return
 
 		body.innerHTML = `
-			<div class="eticket-success-page-wrap" style="margin: 0; box-shadow: none;">
+			<div class="eticket-success-page-wrap" style="margin: 0; box-shadow: none; max-width: 100%;">
 				<div class="eticket-top-banner">
 					<div class="et-success-badge">✓</div>
 					<h2 style="color:#fff; font-size: 20px; font-weight:900; margin:0 0 4px; text-transform:uppercase;">VÉ XEM PHIM ĐIỆN TỬ</h2>

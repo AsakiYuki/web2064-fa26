@@ -76,7 +76,7 @@ const DEFAULT_USER = {
 	city: "Hà Nội",
 	cinemaFavorite: "Beta Thái Nguyên",
 }
-
+// đây là đọc và lấy dữ liệu người dùng 
 export function getCurrentUser() {
 	try {
 		const raw = localStorage.getItem("beta_user_session")
@@ -85,12 +85,13 @@ export function getCurrentUser() {
 		return null
 	}
 }
-
+//
+// Lưu thông tin người dùng vào LocalStorage và cập nhật UI Header
 export function saveUserSession(userData) {
 	localStorage.setItem("beta_user_session", JSON.stringify(userData))
 	updateHeaderAccountUI()
 }
-
+//
 export function logoutUser() {
 	localStorage.removeItem("beta_user_session")
 	updateHeaderAccountUI()
@@ -126,12 +127,18 @@ export function updateHeaderAccountUI() {
 						<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"></path><line x1="7" y1="7" x2="7.01" y2="7"></line></svg>
 						<span>Ưu đãi của tôi</span>
 					</a>
+					<a href="/admin.html" class="up-item up-admin" style="color: #fbbf24; font-weight: 700;">
+						<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+						<span>Trang Quản Trị (Admin)</span>
+					</a>
 					<a href="#" class="up-item up-logout" id="btn-header-logout">
 						<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
 						<span>Đăng xuất</span>
 					</a>
 				</div>
 			</div>
+			<div class="divider"></div>
+			<a href="/admin.html" style="color: #fbbf24; font-weight: 700; font-size: 13px;" title="Vào Trang Quản Trị">⚙️ Admin</a>
 			<div class="divider"></div>
 			<span style="font-size: 18px; margin-left: 4px; cursor: pointer" title="English">🇬🇧</span>
 		`
@@ -148,6 +155,8 @@ export function updateHeaderAccountUI() {
 		})
 	} else {
 		accountContainer.innerHTML = `
+			<a href="/admin.html" style="color: #fbbf24; font-weight: 700; font-size: 13px;" title="Vào Trang Quản Trị">⚙️ Admin</a>
+			<div class="divider"></div>
 			<a href="#" id="btn-login">Đăng nhập</a>
 			<div class="divider"></div>
 			<a href="#" id="btn-register">Đăng ký</a>

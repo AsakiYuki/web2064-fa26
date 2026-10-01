@@ -23,6 +23,7 @@ export const STORAGE_KEYS = {
 	BANNERS: `${STORAGE_PREFIX}banners`,
 	FOOTER: `${STORAGE_PREFIX}footer`,
 	USER_SESSION: `${STORAGE_PREFIX}user_session`,
+	BOOKING_HISTORY: `${STORAGE_PREFIX}booking_history`,
 	INITIALIZED: `${STORAGE_PREFIX}data_initialized`,
 	DATA_VERSION: `${STORAGE_PREFIX}data_version`,
 }
@@ -475,10 +476,10 @@ export function getShowtimes() {
 
 /**
  * Lấy danh sách combo bắp nước
- * @returns {Array}
+ * @returns {Object} { categories: Array, items: Array }
  */
 export function getConcessions() {
-	return storageGet(STORAGE_KEYS.CONCESSIONS, [])
+	return storageGet(STORAGE_KEYS.CONCESSIONS, { categories: [], items: [] })
 }
 
 /**
@@ -641,5 +642,434 @@ export function updateShowtimeSeats(cinemaId, movieId, date, time, seatIds, stat
 		storageSet(key, layout)
 	}
 	return changed
+}
+
+/* ==========================================================================
+   ADMIN & DATA MANAGEMENT OPERATIONS (LocalStorage)
+   ========================================================================== */
+
+/**
+ * Lưu toàn bộ dữ liệu phim vào LocalStorage
+ * @param {Object} moviesData
+ */
+export function saveMoviesData(moviesData) {
+	return storageSet(STORAGE_KEYS.MOVIES, moviesData)
+}
+
+/**
+ * Thêm một phim mới vào danh sách phim
+ * @param {Object} movie - Thông tin phim
+ * @param {string} [tab='nowshowing'] - Tab lưu trữ (nowshowing | upcoming | special)
+ * @returns {boolean}
+ */
+export function addMovie(movie, tab = "nowshowing") {
+	const data = getMoviesData() || {
+		tabs: [
+			{ id: "upcoming", label: "PHIM SẮP CHIẾU", active: false },
+			{ id: "nowshowing", label: "PHIM ĐANG CHIẾU", active: true },
+			{ id: "special", label: "SUẤT CHIẾU ĐẶC BIỆT", active: false },
+		],
+		items: { nowshowing: [], upcoming: [], special: [] },
+	}
+
+	if (!data.items[tab]) {
+		data.items[tab] = []
+	}
+
+	// Đảm bảo có ID duy nhất
+	if (!movie.id) {
+		movie.id = "mv_" + Date.now().toString(36)
+	}
+	if (!movie.slug && movie.title) {
+		movie.slug = movie.title
+			.toLowerCase()
+			.normalize("NFD")
+			.replace(/[\u0300-\u036f]/g, "")
+			.replace(/đ/g, "d")
+			.replace(/[^a-z0-9]+/g, "-")
+			.replace(/^-+|-+$/g, "")
+	}
+
+	// Thêm vào đầu danh sách của tab
+	data.items[tab].unshift(movie)
+	return saveMoviesData(data)
+}
+
+/**
+ * Cập nhật thông tin một phim
+ * @param {string} movieId - ID phim cần sửa
+ * @param {Object} updatedFields - Các trường cập nhật
+ * @param {string} [targetTab] - Chuyển sang tab mới nếu có (nowshowing/upcoming/special)
+ * @returns {boolean}
+ */
+export function updateMovie(movieId, updatedFields, targetTab = null) {
+	const data = getMoviesData()
+	if (!data || !data.items) return false
+
+	const tabs = ["nowshowing", "upcoming", "special"]
+	let foundMovie = null
+	let foundTab = null
+
+	for (const t of tabs) {
+		const list = data.items[t] || []
+		const idx = list.findIndex(m => m.id === movieId)
+		if (idx !== -1) {
+			foundMovie = list[idx]
+			foundTab = t
+			break
+		}
+	}
+
+	if (!foundMovie) return false
+
+	const newTab = targetTab || foundTab
+	const merged = { ...foundMovie, ...updatedFields }
+
+	if (newTab === foundTab) {
+		const idx = data.items[foundTab].findIndex(m => m.id === movieId)
+		data.items[foundTab][idx] = merged
+	} else {
+		// Xóa khỏi tab cũ và chuyển sang tab mới
+		data.items[foundTab] = data.items[foundTab].filter(m => m.id !== movieId)
+		if (!data.items[newTab]) data.items[newTab] = []
+		data.items[newTab].unshift(merged)
+	}
+
+	return saveMoviesData(data)
+}
+
+/**
+ * Xóa phim theo ID khỏi tất cả các tab
+ * @param {string} movieId - ID phim cần xóa
+ * @returns {boolean}
+ */
+export function deleteMovie(movieId) {
+	const data = getMoviesData()
+	if (!data || !data.items) return false
+
+	const tabs = ["nowshowing", "upcoming", "special"]
+	let deleted = false
+
+	tabs.forEach(t => {
+		if (Array.isArray(data.items[t])) {
+			const prevLen = data.items[t].length
+			data.items[t] = data.items[t].filter(m => m.id !== movieId)
+			if (data.items[t].length < prevLen) deleted = true
+		}
+	})
+
+	if (deleted) {
+		saveMoviesData(data)
+	}
+	return deleted
+}
+
+/* ==========================================================================
+   SHOWTIMES CRUD OPERATIONS
+   ========================================================================== */
+
+/**
+ * Lưu toàn bộ mảng suất chiếu vào LocalStorage
+ * @param {Array} showtimesData
+ */
+export function saveShowtimes(showtimesData) {
+	return storageSet(STORAGE_KEYS.SHOWTIMES, showtimesData)
+}
+
+/**
+ * Thêm một suất chiếu phim mới
+ */
+export function addShowtimeSlot({
+	cinemaId,
+	date,
+	movieId,
+	movieTitle,
+	screenId = "Phòng 1",
+	screenName = "Phòng 1",
+	format = "2D Phụ Đề",
+	time,
+	price = 75000,
+	availableSeats = 60,
+}) {
+	const showtimes = getShowtimes() || []
+
+	// Tìm ngày + rạp
+	let cinemaDateEntry = showtimes.find(st => st.date === date && st.cinemaId === cinemaId)
+	if (!cinemaDateEntry) {
+		cinemaDateEntry = {
+			date,
+			cinemaId,
+			schedules: [],
+		}
+		showtimes.push(cinemaDateEntry)
+	}
+
+	// Tìm lịch của phim
+	let schedule = cinemaDateEntry.schedules.find(sc => sc.movieId === movieId && sc.screenName === screenName)
+	if (!schedule) {
+		schedule = {
+			movieId,
+			movieTitle,
+			screenId,
+			screenName,
+			format,
+			slots: [],
+		}
+		cinemaDateEntry.schedules.push(schedule)
+	}
+
+	// Kiểm tra xem giờ này đã tồn tại chưa
+	const existingSlot = schedule.slots.find(s => s.time === time)
+	if (existingSlot) {
+		existingSlot.price = Number(price)
+		existingSlot.availableSeats = Number(availableSeats)
+	} else {
+		schedule.slots.push({
+			time,
+			price: Number(price),
+			availableSeats: Number(availableSeats),
+		})
+		// Sắp xếp slot theo giờ
+		schedule.slots.sort((a, b) => a.time.localeCompare(b.time))
+	}
+
+	return saveShowtimes(showtimes)
+}
+
+/**
+ * Cập nhật một khung giờ chiếu (hoặc đổi giờ, đổi giá)
+ */
+export function updateShowtimeSlot({
+	cinemaId,
+	date,
+	movieId,
+	oldTime,
+	time,
+	price,
+	availableSeats,
+	screenName,
+	format,
+}) {
+	const showtimes = getShowtimes() || []
+	const cinemaDateEntry = showtimes.find(st => st.date === date && st.cinemaId === cinemaId)
+	if (!cinemaDateEntry) return false
+
+	const schedule = cinemaDateEntry.schedules.find(sc => sc.movieId === movieId)
+	if (!schedule) return false
+
+	if (screenName) schedule.screenName = screenName
+	if (format) schedule.format = format
+
+	const slot = schedule.slots.find(s => s.time === oldTime)
+	if (!slot) return false
+
+	slot.time = time
+	if (price !== undefined) slot.price = Number(price)
+	if (availableSeats !== undefined) slot.availableSeats = Number(availableSeats)
+
+	schedule.slots.sort((a, b) => a.time.localeCompare(b.time))
+	return saveShowtimes(showtimes)
+}
+
+/**
+ * Xóa một khung giờ chiếu cụ thể
+ */
+export function deleteShowtimeSlot(cinemaId, date, movieId, time) {
+	const showtimes = getShowtimes() || []
+	const cinemaDateEntry = showtimes.find(st => st.date === date && st.cinemaId === cinemaId)
+	if (!cinemaDateEntry) return false
+
+	const schedule = cinemaDateEntry.schedules.find(sc => sc.movieId === movieId)
+	if (!schedule) return false
+
+	schedule.slots = schedule.slots.filter(s => s.time !== time)
+
+	// Nếu phim không còn slot nào, xóa luôn schedule
+	if (schedule.slots.length === 0) {
+		cinemaDateEntry.schedules = cinemaDateEntry.schedules.filter(sc => sc !== schedule)
+	}
+
+	return saveShowtimes(showtimes)
+}
+
+/**
+ * Xóa toàn bộ lịch chiếu của một phim trong một ngày tại một rạp
+ */
+export function deleteMovieSchedule(cinemaId, date, movieId) {
+	const showtimes = getShowtimes() || []
+	const cinemaDateEntry = showtimes.find(st => st.date === date && st.cinemaId === cinemaId)
+	if (!cinemaDateEntry) return false
+
+	cinemaDateEntry.schedules = cinemaDateEntry.schedules.filter(sc => sc.movieId !== movieId)
+	return saveShowtimes(showtimes)
+}
+
+/* ==========================================================================
+   CONCESSIONS CRUD OPERATIONS
+   ========================================================================== */
+
+/**
+ * Lưu toàn bộ dữ liệu bắp nước vào LocalStorage
+ * @param {Object} concessionsData
+ */
+export function saveConcessions(concessionsData) {
+	return storageSet(STORAGE_KEYS.CONCESSIONS, concessionsData)
+}
+
+/**
+ * Thêm một combo / bắp nước mới
+ * @param {Object} item
+ */
+export function addConcessionItem(item) {
+	const data = getConcessions() || {
+		categories: [
+			{ id: "combos", name: "Combo Bắp Nước", active: true },
+			{ id: "popcorn", name: "Bắp Rang Bơ", active: false },
+			{ id: "beverages", name: "Nước Uống", active: false },
+			{ id: "snacks", name: "Đồ Ăn Kèm", active: false },
+		],
+		items: [],
+	}
+
+	if (!item.id) {
+		item.id = "cbo_" + Date.now().toString(36)
+	}
+	item.price = Number(item.price)
+	if (item.originalPrice) item.originalPrice = Number(item.originalPrice)
+
+	if (!data.items) data.items = []
+	data.items.unshift(item)
+
+	return saveConcessions(data)
+}
+
+/**
+ * Cập nhật combo / bắp nước và giá bán
+ * @param {string} itemId
+ * @param {Object} updatedFields
+ */
+export function updateConcessionItem(itemId, updatedFields) {
+	const data = getConcessions()
+	if (!data || !data.items) return false
+
+	const idx = data.items.findIndex(it => it.id === itemId)
+	if (idx === -1) return false
+
+	if (updatedFields.price !== undefined) {
+		updatedFields.price = Number(updatedFields.price)
+	}
+	if (updatedFields.originalPrice !== undefined && updatedFields.originalPrice !== null) {
+		updatedFields.originalPrice = Number(updatedFields.originalPrice)
+	}
+
+	data.items[idx] = { ...data.items[idx], ...updatedFields }
+	return saveConcessions(data)
+}
+
+/**
+ * Xóa combo / bắp nước theo ID
+ * @param {string} itemId
+ */
+export function deleteConcessionItem(itemId) {
+	const data = getConcessions()
+	if (!data || !data.items) return false
+
+	const prevLen = data.items.length
+	data.items = data.items.filter(it => it.id !== itemId)
+	if (data.items.length < prevLen) {
+		return saveConcessions(data)
+	}
+	return false
+}
+
+/* ==========================================================================
+   BOOKING HISTORY & USER SESSION HELPERS
+   ========================================================================== */
+
+/**
+ * Lấy lịch sử đặt vé từ LocalStorage
+ * @returns {Array}
+ */
+export function getBookingHistory() {
+	return storageGet(STORAGE_KEYS.BOOKING_HISTORY, [])
+}
+
+/**
+ * Lưu vé mới vào lịch sử đặt vé
+ * @param {Object} ticket
+ */
+export function saveBookingTicket(ticket) {
+	const history = getBookingHistory()
+	history.unshift(ticket)
+	storageSet(STORAGE_KEYS.BOOKING_HISTORY, history)
+	return history
+}
+
+/**
+ * Hủy vé theo mã vé
+ * @param {string} ticketId
+ */
+export function cancelBookingTicket(ticketId) {
+	const history = getBookingHistory()
+	const target = history.find(t => t.id === ticketId)
+	if (target) {
+		target.status = "cancelled"
+		storageSet(STORAGE_KEYS.BOOKING_HISTORY, history)
+		return true
+	}
+	return false
+}
+
+/**
+ * Cập nhật trạng thái vé (paid / done / cancelled)
+ * @param {string} ticketId
+ * @param {string} newStatus
+ * @returns {boolean}
+ */
+export function updateBookingStatus(ticketId, newStatus) {
+	const history = getBookingHistory()
+	const target = history.find(t => t.id === ticketId)
+	if (target) {
+		target.status = newStatus
+		storageSet(STORAGE_KEYS.BOOKING_HISTORY, history)
+		return true
+	}
+	return false
+}
+
+/**
+ * Xóa vĩnh viễn đơn vé khỏi LocalStorage
+ * @param {string} ticketId
+ * @returns {boolean}
+ */
+export function deleteBookingTicket(ticketId) {
+	const history = getBookingHistory()
+	const prevLen = history.length
+	const filtered = history.filter(t => t.id !== ticketId)
+	if (filtered.length < prevLen) {
+		storageSet(STORAGE_KEYS.BOOKING_HISTORY, filtered)
+		return true
+	}
+	return false
+}
+
+/**
+ * Khôi phục một phần dữ liệu về bản gốc JSON
+ * @param {string} storageKey
+ * @returns {Promise<boolean>}
+ */
+export async function resetStorageSection(storageKey) {
+	const path = DATA_SOURCE_MAP[storageKey]
+	if (!path) return false
+	try {
+		const res = await fetch(path)
+		if (!res.ok) throw new Error("Fetch failed")
+		const data = await res.json()
+		storageSet(storageKey, data)
+		return true
+	} catch (err) {
+		console.error(`[Storage] Không thể reset ${storageKey}:`, err)
+		return false
+	}
 }
 

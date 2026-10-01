@@ -135,6 +135,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 			movieId: currentMovie.id,
 			movieTitle: currentMovie.title,
 			moviePoster: currentMovie.poster,
+			cinemaId: currentCinema.id,
 			cinemaName: currentCinema.name,
 			screenName,
 			formatName,
@@ -145,7 +146,10 @@ document.addEventListener("DOMContentLoaded", async () => {
 			total: totalParam,
 			paymentMethod: selectedPayment,
 			bookingDate: new Date().toISOString(),
-			status: "paid", // paid / completed
+			userEmail: user?.email || email,
+			userName: user?.name || fullName,
+			userPhone: user?.phone || phone,
+			status: "paid", // paid / done / cancelled
 		}
 
 		try {
