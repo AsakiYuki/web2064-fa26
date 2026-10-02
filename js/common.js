@@ -747,31 +747,37 @@ function initMegaMenuAndMobileDrawer() {
 
 	// 2. Cinemas Mega Menu on Desktop
 	const navCinemas = document.getElementById("nav-cinemas")
-	if (navCinemas && !navCinemas.parentElement.classList.contains("nav-item-has-mega")) {
-		navCinemas.parentElement.classList.add("nav-item-has-mega")
+	if (navCinemas) {
+		navCinemas.href = "/cinemas.html"
+		if (!navCinemas.parentElement.classList.contains("nav-item-has-mega")) {
+			navCinemas.parentElement.classList.add("nav-item-has-mega")
 
-		const megaCinemas = document.createElement("div")
-		megaCinemas.className = "mega-menu-container mega-menu-cinemas"
-		megaCinemas.innerHTML = `
-			<div class="mega-cinema-region">
-				<div class="region-heading">Khu Vực Hà Nội</div>
-				<a href="/schedule.html?cinema=beta-xuanthuy" class="cinema-quick-link">Beta Cinemas Xuân Thủy</a>
-				<a href="/schedule.html?cinema=beta-tayson" class="cinema-quick-link">Beta Cinemas Tây Sơn</a>
-				<a href="/schedule.html?cinema=beta-vinhyen" class="cinema-quick-link">Beta Cinemas Vĩnh Yên</a>
-			</div>
-			<div class="mega-cinema-region">
-				<div class="region-heading">TP. Hồ Chí Minh</div>
-				<a href="/schedule.html?cinema=beta-nowzone" class="cinema-quick-link">Beta Cinemas Nowzone (Q1)</a>
-				<a href="/schedule.html?cinema=beta-ungvankhiem" class="cinema-quick-link">Beta Cinemas Ung Văn Khiêm</a>
-			</div>
-			<div class="mega-cinema-region">
-				<div class="region-heading">Miền Bắc & Miền Trung</div>
-				<a href="/schedule.html?cinema=beta-thainguyen" class="cinema-quick-link">Beta Cinemas Thái Nguyên</a>
-				<a href="/schedule.html?cinema=beta-laocai" class="cinema-quick-link">Beta Cinemas Lào Cai</a>
-				<a href="/schedule.html?cinema=beta-thanhhoa" class="cinema-quick-link">Beta Cinemas Thanh Hóa</a>
-			</div>
-		`
-		navCinemas.parentElement.appendChild(megaCinemas)
+			const megaCinemas = document.createElement("div")
+			megaCinemas.className = "mega-menu-container mega-menu-cinemas"
+			megaCinemas.innerHTML = `
+				<div class="mega-cinema-region">
+					<div class="region-heading">Khu Vực Hà Nội</div>
+					<a href="/schedule.html?cinema=beta-xuanthuy" class="cinema-quick-link">Beta Cinemas Xuân Thủy</a>
+					<a href="/schedule.html?cinema=beta-tayson" class="cinema-quick-link">Beta Cinemas Tây Sơn</a>
+					<a href="/schedule.html?cinema=beta-vinhyen" class="cinema-quick-link">Beta Cinemas Vĩnh Yên</a>
+				</div>
+				<div class="mega-cinema-region">
+					<div class="region-heading">TP. Hồ Chí Minh</div>
+					<a href="/schedule.html?cinema=beta-nowzone" class="cinema-quick-link">Beta Cinemas Nowzone (Q1)</a>
+					<a href="/schedule.html?cinema=beta-ungvankhiem" class="cinema-quick-link">Beta Cinemas Ung Văn Khiêm</a>
+				</div>
+				<div class="mega-cinema-region">
+					<div class="region-heading">Miền Bắc & Miền Trung</div>
+					<a href="/schedule.html?cinema=beta-thainguyen" class="cinema-quick-link">Beta Cinemas Thái Nguyên</a>
+					<a href="/schedule.html?cinema=beta-laocai" class="cinema-quick-link">Beta Cinemas Lào Cai</a>
+					<a href="/schedule.html?cinema=beta-thanhhoa" class="cinema-quick-link">Beta Cinemas Thanh Hóa</a>
+				</div>
+				<div class="mega-cinema-footer">
+					<a href="/cinemas.html" class="btn-all-cinemas">Khám phá toàn bộ 10 cụm rạp Beta Cinemas & Tiện ích →</a>
+				</div>
+			`
+			navCinemas.parentElement.appendChild(megaCinemas)
+		}
 	}
 
 	// 3. Mobile Hamburger & Drawer
@@ -926,13 +932,15 @@ export async function setupHeaderAndFooter() {
 		updateHeaderAccountUI()
 		initMegaMenuAndMobileDrawer()
 
-		// Wire up pricing, news & member links in nav
+		// Wire up pricing, news, member & cinemas links in nav
 		const navPricing = document.getElementById("nav-pricing")
 		const navNews = document.getElementById("nav-news")
 		const navMember = document.getElementById("nav-member")
+		const navCinemas = document.getElementById("nav-cinemas")
 		if (navPricing) navPricing.href = "/pricing.html"
 		if (navNews) navNews.href = "/news.html"
 		if (navMember) navMember.href = "/member.html"
+		if (navCinemas) navCinemas.href = "/cinemas.html"
 	} catch (err) {
 		console.warn("Could not load header/footer data:", err)
 	}
