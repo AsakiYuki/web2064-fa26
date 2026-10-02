@@ -336,6 +336,16 @@ async function runAllTests() {
 	const cinemasRes = await fetch(`${BACKEND_URL}/cinemas`)
 	const cinemas = await cinemasRes.json()
 	assert(Array.isArray(cinemas) && cinemas.length >= 10, `Tải danh sách cụm rạp thành công (${cinemas.length} rạp)`)
+	assert(cinemas.every(c => c.region && c.openingHours && c.image), 'Tất cả cụm rạp có đầy đủ thông tin khu vực, hình ảnh và giờ mở cửa')
+
+	const hanoiCinemas = cinemas.filter(c => c.region === 'Hà Nội')
+	assert(hanoiCinemas.length >= 2, `Lọc rạp theo khu vực Hà Nội chính xác (${hanoiCinemas.length} rạp)`)
+
+	const hcmCinemas = cinemas.filter(c => c.region === 'TP. Hồ Chí Minh')
+	assert(hcmCinemas.length >= 2, `Lọc rạp theo khu vực TP.HCM chính xác (${hcmCinemas.length} rạp)`)
+
+	const thaiNguyen = cinemas.find(c => c.id === 'beta-thainguyen')
+	assert(thaiNguyen && thaiNguyen.screens.length >= 4, 'Cụm rạp Thái Nguyên có đầy đủ 4 phòng chiếu chuẩn IMAX & 2D/3D')
 
 	const genresRes = await fetch(`${BACKEND_URL}/genres`)
 	const genres = await genresRes.json()
