@@ -549,14 +549,14 @@ export class QRCodeModel {
 /**
  * Generate SVG string of QR Code
  * @param {string} text - text or URL to encode
- * @param {Object} options - { size: 180, darkColor: "#015198", lightColor: "#ffffff", includeLogo: true }
+ * @param {Object} options - { size: 180, darkColor: "#11111b", lightColor: "#cdd6f4", includeLogo: true }
  * @returns {string} SVG HTML string
  */
 export function generateQRCodeSVG(text, options = {}) {
 	const {
 		size = 180,
-		darkColor = "#015198",
-		lightColor = "#ffffff",
+		darkColor = "#11111b",
+		lightColor = "#cdd6f4",
 		errorCorrection = QRErrorCorrectLevel.M,
 		includeLogo = true,
 	} = options

@@ -377,8 +377,8 @@ document.addEventListener("DOMContentLoaded", async () => {
 			})
 			qrCodeBox.innerHTML = generateQRCodeSVG(qrData, {
 				size: 180,
-				darkColor: "#015198",
-				lightColor: "#ffffff",
+				darkColor: "#11111b",
+				lightColor: "#cdd6f4",
 				includeLogo: true,
 			})
 		}
