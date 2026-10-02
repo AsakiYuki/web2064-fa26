@@ -335,7 +335,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 		if (revenueBarsContainer) {
 			const moviesArr = Object.values(movieSalesMap).sort((a, b) => b.revenue - a.revenue)
 			if (moviesArr.length === 0) {
-				revenueBarsContainer.innerHTML = `<div style="color:#94a3b8; font-size:13px; text-align:center; padding: 16px;">Chưa có dữ liệu giao dịch vé nào</div>`
+				revenueBarsContainer.innerHTML = `<div style="color:#a6adc8; font-size:13px; text-align:center; padding: 16px;">Chưa có dữ liệu giao dịch vé nào</div>`
 			} else {
 				revenueBarsContainer.innerHTML = moviesArr
 					.map(m => {
@@ -345,16 +345,16 @@ document.addEventListener("DOMContentLoaded", async () => {
 								<div style="display:flex; justify-content:space-between; align-items:center; font-size:13px; flex-wrap: wrap; gap: 8px;">
 									<div style="display:flex; align-items:center; gap:8px;">
 										<img src="${m.poster}" alt="${m.title}" style="width:24px; height:32px; border-radius:4px; object-fit:cover;" onerror="this.src='/poster/poster_utlan2.jpg'" />
-										<strong style="color:#fff;">${m.title}</strong>
-										<span style="color:#94a3b8; font-size:12px;">(${m.seatsCount} vé đã bán)</span>
+										<strong style="color:#cdd6f4;">${m.title}</strong>
+										<span style="color:#a6adc8; font-size:12px;">(${m.seatsCount} vé đã bán)</span>
 									</div>
 									<div style="display:flex; align-items:center; gap:12px;">
-										<span style="color:#fbbf24; font-weight:800;">${formatCurrency(m.revenue)}</span>
-										<span style="color:#38bdf8; font-weight:700; min-width:40px; text-align:right;">${percent}%</span>
+										<span style="color:#fab387; font-weight:800;">${formatCurrency(m.revenue)}</span>
+										<span style="color:#89b4fa; font-weight:700; min-width:40px; text-align:right;">${percent}%</span>
 									</div>
 								</div>
-								<div style="background:rgba(255,255,255,0.06); height:8px; border-radius:4px; overflow:hidden;">
-									<div style="width:${Math.max(4, percent)}%; height:100%; background:linear-gradient(90deg, #0284c7, #38bdf8); border-radius:4px; transition:width 0.4s;"></div>
+								<div style="background:#181825; height:8px; border-radius:4px; overflow:hidden;">
+									<div style="width:${Math.max(4, percent)}%; height:100%; background:linear-gradient(90deg, #89b4fa, #b4befe); border-radius:4px; transition:width 0.4s;"></div>
 								</div>
 							</div>
 						`
@@ -368,7 +368,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 		if (recentTbody) {
 			const recent5 = bookings.slice(0, 5)
 			if (recent5.length === 0) {
-				recentTbody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: #94a3b8; padding: 24px;">Chưa có đơn đặt vé nào</td></tr>`
+				recentTbody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: #a6adc8; padding: 24px;">Chưa có đơn đặt vé nào</td></tr>`
 			} else {
 				recentTbody.innerHTML = recent5
 					.map(b => {
@@ -379,7 +379,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 						return `
 							<tr>
-								<td><strong style="color: #38bdf8; font-family: monospace;">${b.id}</strong></td>
+								<td><strong style="color: #89b4fa; font-family: monospace;">${b.id}</strong></td>
 								<td>
 									<div class="cell-title">${b.userName || "Khách vãng lai"}</div>
 									<div class="cell-sub">${b.userPhone || b.userEmail || "N/A"}</div>
@@ -388,7 +388,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 									<div class="cell-title">${b.movieTitle}</div>
 									<div class="cell-sub">${b.cinemaName} • ${b.time}</div>
 								</td>
-								<td style="color: #fbbf24; font-weight: 700;">${formatCurrency(b.total)}</td>
+								<td style="color: #fab387; font-weight: 700;">${formatCurrency(b.total)}</td>
 								<td><span class="admin-badge ${badgeClass}">${badgeText}</span></td>
 							</tr>
 						`
@@ -404,13 +404,13 @@ document.addEventListener("DOMContentLoaded", async () => {
 			topMoviesContainer.innerHTML = top4
 				.map(
 					m => `
-					<div style="display: flex; align-items: center; gap: 12px; padding: 10px; background: #1e293b; border-radius: 8px; border: 1px solid rgba(255,255,255,0.06);">
+					<div style="display: flex; align-items: center; gap: 12px; padding: 10px; background: #313244; border-radius: 8px; border: 1px solid rgba(88, 91, 112, 0.4);">
 						<img src="${m.poster}" alt="${m.title}" style="width: 40px; height: 56px; border-radius: 4px; object-fit: cover;" onerror="this.src='/poster/poster_utlan2.jpg'" />
 						<div style="flex: 1; min-width: 0;">
-							<div style="font-weight: 700; color: #fff; font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${m.title}</div>
-							<div style="font-size: 12px; color: #94a3b8;">${m.genre} • ${m.duration}</div>
+							<div style="font-weight: 700; color: #cdd6f4; font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${m.title}</div>
+							<div style="font-size: 12px; color: #a6adc8;">${m.genre} • ${m.duration}</div>
 						</div>
-						<div style="color: #fbbf24; font-weight: 800; font-size: 13px;">★ ${m.ratingScore || 9.0}</div>
+						<div style="color: #fab387; font-weight: 800; font-size: 13px;">★ ${m.ratingScore || 9.0}</div>
 					</div>
 				`
 				)
@@ -517,7 +517,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 		if (movieCountText) movieCountText.textContent = `Hiển thị ${filtered.length} / ${allMovies.length} phim`
 
 		if (filtered.length === 0) {
-			movieTableTbody.innerHTML = `<tr><td colspan="9" style="text-align: center; color: #94a3b8; padding: 32px;">Không có phim nào phù hợp</td></tr>`
+			movieTableTbody.innerHTML = `<tr><td colspan="9" style="text-align: center; color: #a6adc8; padding: 32px;">Không có phim nào phù hợp</td></tr>`
 			return
 		}
 
@@ -544,7 +544,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 						<td>${m.duration || "N/A"}</td>
 						<td><span class="admin-badge badge-age">${m.badge || "T18"}</span></td>
 						<td>${m.director || "Chưa rõ"}</td>
-						<td style="color: #fbbf24; font-weight: 800;">★ ${m.ratingScore || 9.0}</td>
+						<td style="color: #fab387; font-weight: 800;">★ ${m.ratingScore || 9.0}</td>
 						<td style="text-align: center;">
 							<div class="row-actions" style="justify-content: center;">
 								<button type="button" class="btn-action-icon btn-edit-movie" data-id="${m.id}" title="Chỉnh sửa phim">✏️</button>
@@ -750,10 +750,10 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 		if (!dayCinemaEntry || !dayCinemaEntry.schedules || dayCinemaEntry.schedules.length === 0) {
 			showtimesContainer.innerHTML = `
-				<div style="text-align: center; padding: 48px 20px; background: #0f172a; border-radius: 12px; border: 1px dashed rgba(255,255,255,0.15);">
+				<div style="text-align: center; padding: 48px 20px; background: #181825; border-radius: 12px; border: 1px dashed rgba(88, 91, 112, 0.4);">
 					<div style="font-size: 40px; margin-bottom: 12px;">📅</div>
-					<h3 style="color: #fff; font-size: 17px; margin-bottom: 6px;">Chưa có lịch chiếu nào cho ngày ${formatDateVN(selectedDate)}</h3>
-					<p style="color: #94a3b8; font-size: 13px; margin-bottom: 20px;">Hãy tạo suất chiếu đầu tiên cho rạp này để khán giả có thể đặt vé.</p>
+					<h3 style="color: #cdd6f4; font-size: 17px; margin-bottom: 6px;">Chưa có lịch chiếu nào cho ngày ${formatDateVN(selectedDate)}</h3>
+					<p style="color: #a6adc8; font-size: 13px; margin-bottom: 20px;">Hãy tạo suất chiếu đầu tiên cho rạp này để khán giả có thể đặt vé.</p>
 					<button type="button" class="btn-admin-primary" id="btn-empty-add-showtime">
 						➕ Thêm Suất Chiếu Ngay
 					</button>
@@ -777,7 +777,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 								<button type="button" class="btn-admin-secondary btn-add-slot-for-movie" data-movie-id="${sc.movieId}" data-movie-title="${sc.movieTitle}" data-screen="${sc.screenName}" data-format="${sc.format}" style="font-size: 12px; padding: 5px 10px;">
 									➕ Thêm Giờ Chiếu
 								</button>
-								<button type="button" class="btn-admin-secondary btn-del-movie-schedule" data-movie-id="${sc.movieId}" data-movie-title="${sc.movieTitle}" style="font-size: 12px; padding: 5px 10px; color: #ef4444; border-color: rgba(239, 68, 68, 0.3);">
+								<button type="button" class="btn-admin-secondary btn-del-movie-schedule" data-movie-id="${sc.movieId}" data-movie-title="${sc.movieTitle}" style="font-size: 12px; padding: 5px 10px; color: #f38ba8; border-color: rgba(243, 139, 168, 0.3);">
 									🗑️ Xóa Lịch Phim Này
 								</button>
 							</div>
@@ -1061,7 +1061,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 		if (filtered.length === 0) {
 			concessionGrid.innerHTML = `
-				<div style="grid-column: 1 / -1; text-align: center; color: #94a3b8; padding: 40px; background: #1e293b; border-radius: 12px;">
+				<div style="grid-column: 1 / -1; text-align: center; color: #a6adc8; padding: 40px; background: #313244; border-radius: 12px;">
 					Không có sản phẩm nào trong danh mục này.
 				</div>
 			`
@@ -1085,8 +1085,8 @@ document.addEventListener("DOMContentLoaded", async () => {
 						</div>
 						<div class="cc-info">
 							<div style="display: flex; align-items: center; gap: 6px; margin-bottom: 2px;">
-								<span style="font-size: 11px; color: #38bdf8; font-weight: 700;">${catLabel}</span>
-								${it.badge ? `<span style="font-size: 10px; background: rgba(239, 68, 68, 0.2); color: #f87171; padding: 1px 6px; border-radius: 4px; font-weight: 800;">${it.badge}</span>` : ""}
+								<span style="font-size: 11px; color: #89b4fa; font-weight: 700;">${catLabel}</span>
+								${it.badge ? `<span style="font-size: 10px; background: rgba(243, 139, 168, 0.2); color: #f38ba8; padding: 1px 6px; border-radius: 4px; font-weight: 800;">${it.badge}</span>` : ""}
 							</div>
 							<h4 class="cc-name">${it.name}</h4>
 							<p class="cc-desc">${it.description || "Món ăn ngon miệng tại rạp Beta"}</p>
@@ -1245,13 +1245,13 @@ document.addEventListener("DOMContentLoaded", async () => {
 		pill.addEventListener("click", () => {
 			bookingFilterPills.forEach(p => {
 				p.classList.remove("active")
-				p.style.background = "#1e293b"
-				p.style.color = "#94a3b8"
-				p.style.border = "1px solid rgba(255,255,255,0.1)"
+				p.style.background = "#313244"
+				p.style.color = "#a6adc8"
+				p.style.border = "1px solid rgba(88, 91, 112, 0.4)"
 			})
 			pill.classList.add("active")
-			pill.style.background = "#015198"
-			pill.style.color = "#fff"
+			pill.style.background = "#89b4fa"
+			pill.style.color = "#11111b"
 			pill.style.border = "none"
 
 			currentBookingStatusFilter = pill.dataset.status || "all"
@@ -1305,7 +1305,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 		if (bookingsCountText) bookingsCountText.textContent = `Hiển thị ${filtered.length} / ${bookings.length} đơn đặt vé`
 
 		if (filtered.length === 0) {
-			bookingsTableTbody.innerHTML = `<tr><td colspan="8" style="text-align: center; color: #94a3b8; padding: 36px;">Không tìm thấy đơn đặt vé nào phù hợp</td></tr>`
+			bookingsTableTbody.innerHTML = `<tr><td colspan="8" style="text-align: center; color: #a6adc8; padding: 36px;">Không tìm thấy đơn đặt vé nào phù hợp</td></tr>`
 			return
 		}
 
@@ -1320,30 +1320,30 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 				return `
 					<tr>
-						<td><strong style="color: #38bdf8; font-family: monospace; font-size: 13px;">${b.id}</strong></td>
+						<td><strong style="color: #89b4fa; font-family: monospace; font-size: 13px;">${b.id}</strong></td>
 						<td>
 							<div class="cell-title" style="font-weight: 700;">${b.userName || "Khách Hàng"}</div>
-							<div class="cell-sub" style="color: #38bdf8;">📞 ${b.userPhone || "Chưa có SĐT"}</div>
-							<div class="cell-sub" style="color: #94a3b8;">✉️ ${b.userEmail || "Khách vãng lai"}</div>
+							<div class="cell-sub" style="color: #89b4fa;">📞 ${b.userPhone || "Chưa có SĐT"}</div>
+							<div class="cell-sub" style="color: #a6adc8;">✉️ ${b.userEmail || "Khách vãng lai"}</div>
 						</td>
 						<td>
 							<div class="cell-title">${b.movieTitle}</div>
 							<div class="cell-sub">📍 ${b.cinemaName}</div>
 						</td>
 						<td>
-							<div><strong style="color: #fff;">${b.time}</strong></div>
+							<div><strong style="color: #cdd6f4;">${b.time}</strong></div>
 							<div class="cell-sub">🗓️ ${formatDateVN(b.date)}</div>
 						</td>
 						<td>
-							<div style="color: #10b981; font-weight: 700;">🎟️ ${b.seats || "N/A"}</div>
+							<div style="color: #a6e3a1; font-weight: 700;">🎟️ ${b.seats || "N/A"}</div>
 							<div class="cell-sub">🍿 ${b.concessions || "Không kèm combo"}</div>
 						</td>
-						<td style="color: #fbbf24; font-weight: 800; font-size: 14px;">${formatCurrency(b.total)}</td>
+						<td style="color: #fab387; font-weight: 800; font-size: 14px;">${formatCurrency(b.total)}</td>
 						<td>
 							<select class="admin-select-status" data-id="${b.id}" style="background: ${statusBg}; color: ${statusColor}; border: 1px solid ${statusColor}; border-radius: 6px; padding: 6px 10px; font-weight: 700; font-size: 12px; cursor: pointer; outline: none;">
-								<option value="paid" ${isPaid ? "selected" : ""} style="color: #10b981; background: #0f172a;">🟢 Đã thanh toán (Chờ xem)</option>
-								<option value="done" ${isDone ? "selected" : ""} style="color: #38bdf8; background: #0f172a;">🔵 Đã soát vé (Đã xem)</option>
-								<option value="cancelled" ${isCancelled ? "selected" : ""} style="color: #ef4444; background: #0f172a;">🔴 Đã hủy vé</option>
+								<option value="paid" ${isPaid ? "selected" : ""} style="color: #a6e3a1; background: #181825;">🟢 Đã thanh toán (Chờ xem)</option>
+								<option value="done" ${isDone ? "selected" : ""} style="color: #89b4fa; background: #181825;">🔵 Đã soát vé (Đã xem)</option>
+								<option value="cancelled" ${isCancelled ? "selected" : ""} style="color: #f38ba8; background: #181825;">🔴 Đã hủy vé</option>
 							</select>
 						</td>
 						<td style="text-align: center;">
@@ -1351,12 +1351,12 @@ document.addEventListener("DOMContentLoaded", async () => {
 								<button type="button" class="btn-action-icon btn-view-admin-ticket" data-id="${b.id}" title="Xem chi tiết vé điện tử & Mã QR">🎟️</button>
 								${
 									!isDone
-										? `<button type="button" class="btn-action-icon btn-checkin-ticket" data-id="${b.id}" style="color: #10b981;" title="Soát vé nhanh (Xác nhận khách đã vào rạp)">✓</button>`
+										? `<button type="button" class="btn-action-icon btn-checkin-ticket" data-id="${b.id}" style="color: #a6e3a1;" title="Soát vé nhanh (Xác nhận khách đã vào rạp)">✓</button>`
 										: ""
 								}
 								${
 									!isCancelled
-										? `<button type="button" class="btn-action-icon btn-cancel-admin-ticket" data-id="${b.id}" style="color: #f59e0b;" title="Hủy vé">✕</button>`
+										? `<button type="button" class="btn-action-icon btn-cancel-admin-ticket" data-id="${b.id}" style="color: #fab387;" title="Hủy vé">✕</button>`
 										: ""
 								}
 								<button type="button" class="btn-action-icon btn-delete btn-delete-admin-ticket" data-id="${b.id}" title="Xóa vĩnh viễn đơn vé">🗑️</button>
@@ -1457,7 +1457,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 			<div class="eticket-success-page-wrap" style="margin: 0; box-shadow: none; max-width: 100%;">
 				<div class="eticket-top-banner">
 					<div class="et-success-badge">✓</div>
-					<h2 style="color:#fff; font-size: 20px; font-weight:900; margin:0 0 4px; text-transform:uppercase;">VÉ XEM PHIM ĐIỆN TỬ</h2>
+					<h2 style="color:#cdd6f4; font-size: 20px; font-weight:900; margin:0 0 4px; text-transform:uppercase;">VÉ XEM PHIM ĐIỆN TỬ</h2>
 					<p style="font-size: 13px; color: rgba(255,255,255,0.9); margin:0;">Mã vé: ${t.id} • Beta Cinemas Admin Verify</p>
 				</div>
 				<div class="eticket-ticket-pass">
@@ -1468,26 +1468,26 @@ document.addEventListener("DOMContentLoaded", async () => {
 					<div class="et-qr-container">
 						<div class="qr-code-box">
 							<svg viewBox="0 0 200 200" width="160" height="160" xmlns="http://www.w3.org/2000/svg">
-								<rect width="200" height="200" fill="#ffffff" rx="10" />
-								<rect x="15" y="15" width="45" height="45" fill="#015198" rx="6" />
-								<rect x="23" y="23" width="29" height="29" fill="#ffffff" rx="3" />
-								<rect x="29" y="29" width="17" height="17" fill="#015198" rx="2" />
-								<rect x="140" y="15" width="45" height="45" fill="#015198" rx="6" />
-								<rect x="148" y="23" width="29" height="29" fill="#ffffff" rx="3" />
-								<rect x="154" y="29" width="17" height="17" fill="#015198" rx="2" />
-								<rect x="15" y="140" width="45" height="45" fill="#015198" rx="6" />
-								<rect x="23" y="148" width="29" height="29" fill="#ffffff" rx="3" />
-								<rect x="29" y="154" width="17" height="17" fill="#015198" rx="2" />
-								<rect x="70" y="20" width="12" height="12" fill="#1e293b" />
-								<rect x="90" y="20" width="12" height="24" fill="#1e293b" />
-								<rect x="110" y="20" width="18" height="12" fill="#1e293b" />
-								<rect x="70" y="44" width="24" height="12" fill="#1e293b" />
-								<circle cx="100" cy="100" r="22" fill="#015198" />
-								<circle cx="100" cy="100" r="18" fill="#ffffff" />
-								<text x="100" y="105" font-family="'Inter', sans-serif" font-size="13" font-weight="900" fill="#015198" text-anchor="middle">β</text>
-								<rect x="70" y="160" width="24" height="24" fill="#1e293b" />
-								<rect x="110" y="165" width="18" height="18" fill="#1e293b" />
-								<rect x="145" y="165" width="40" height="18" fill="#1e293b" />
+								<rect width="200" height="200" fill="#cdd6f4" rx="10" />
+								<rect x="15" y="15" width="45" height="45" fill="#11111b" rx="6" />
+								<rect x="23" y="23" width="29" height="29" fill="#cdd6f4" rx="3" />
+								<rect x="29" y="29" width="17" height="17" fill="#11111b" rx="2" />
+								<rect x="140" y="15" width="45" height="45" fill="#11111b" rx="6" />
+								<rect x="148" y="23" width="29" height="29" fill="#cdd6f4" rx="3" />
+								<rect x="154" y="29" width="17" height="17" fill="#11111b" rx="2" />
+								<rect x="15" y="140" width="45" height="45" fill="#11111b" rx="6" />
+								<rect x="23" y="148" width="29" height="29" fill="#cdd6f4" rx="3" />
+								<rect x="29" y="154" width="17" height="17" fill="#11111b" rx="2" />
+								<rect x="70" y="20" width="12" height="12" fill="#181825" />
+								<rect x="90" y="20" width="12" height="24" fill="#181825" />
+								<rect x="110" y="20" width="18" height="12" fill="#181825" />
+								<rect x="70" y="44" width="24" height="12" fill="#181825" />
+								<circle cx="100" cy="100" r="22" fill="#89b4fa" />
+								<circle cx="100" cy="100" r="18" fill="#11111b" />
+								<text x="100" y="105" font-family="'Inter', sans-serif" font-size="13" font-weight="900" fill="#89b4fa" text-anchor="middle">β</text>
+								<rect x="70" y="160" width="24" height="24" fill="#181825" />
+								<rect x="110" y="165" width="18" height="18" fill="#181825" />
+								<rect x="145" y="165" width="40" height="18" fill="#181825" />
 							</svg>
 						</div>
 						<div class="qr-hint">Xuất trình mã này cho nhân viên soát vé</div>
