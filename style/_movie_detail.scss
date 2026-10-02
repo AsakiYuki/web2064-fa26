@@ -123,8 +123,8 @@
 		letter-spacing: 0.5px;
 		box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
 
-		&.badge-t18 { background: $accent-red; color: #fff; }
-		&.badge-t16 { background: #d97706; color: #fff; }
+		&.badge-t18 { background: $accent-red; color: $ctp-crust; }
+		&.badge-t16 { background: $ctp-peach; color: $ctp-crust; }
 		&.badge-t13 { background: $ctp-yellow; color: $ctp-crust; }
 		&.badge-k { background: $ctp-green; color: $ctp-crust; }
 		&.badge-p { background: $ctp-blue; color: $ctp-crust; }

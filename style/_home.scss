@@ -362,7 +362,7 @@
 
 		&--t18 {
 			@include rating-badge($accent-red);
-			color: #fff;
+			color: $ctp-crust;
 		}
 		&--t13 {
 			@include rating-badge($ctp-yellow);
