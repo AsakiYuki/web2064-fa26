@@ -48,6 +48,7 @@ export const STORAGE_KEYS = {
 	MOVIES: `${STORAGE_PREFIX}movies`,
 	GENRES: `${STORAGE_PREFIX}genres`,
 	CINEMAS: `${STORAGE_PREFIX}cinemas`,
+	CURRENT_CINEMA: `${STORAGE_PREFIX}current_cinema`,
 	SHOWTIMES: `${STORAGE_PREFIX}showtimes`,
 	CONCESSIONS: `${STORAGE_PREFIX}concessions`,
 	PROMOTIONS: `${STORAGE_PREFIX}promotions`,
@@ -1281,6 +1282,34 @@ export function getGenres() {
 
 export function getCinemas() {
 	return storageGet(STORAGE_KEYS.CINEMAS, [])
+}
+
+export function getCurrentCinemaId() {
+	const stored = storageGet(STORAGE_KEYS.CURRENT_CINEMA)
+	if (stored) return stored
+	const user = getCurrentUser()
+	if (user && user.cinemaFavorite) return user.cinemaFavorite
+	return "beta-thainguyen"
+}
+
+export function setCurrentCinemaId(cinemaId) {
+	if (!cinemaId) return
+	storageSet(STORAGE_KEYS.CURRENT_CINEMA, cinemaId)
+	const user = getCurrentUser()
+	if (user) {
+		user.cinemaFavorite = cinemaId
+		updateCurrentUser(user)
+	}
+	const cinemas = getCinemas()
+	const cinema = cinemas.find(c => c.id === cinemaId)
+	if (cinema && typeof window !== "undefined") {
+		const lbl = document.getElementById("cinema-selector-label")
+		if (lbl) lbl.textContent = cinema.name
+		window.dispatchEvent(
+			new CustomEvent("cinemaChanged", { detail: { id: cinema.id, city: cinema.city, name: cinema.name } }),
+		)
+	}
+	return cinemaId
 }
 
 export function getTicketPricing() {
