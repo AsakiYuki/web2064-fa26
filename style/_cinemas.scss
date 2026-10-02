@@ -1,10 +1,11 @@
 /* ==========================================================================
    BETA CINEMAS - CINEMAS (CỤM RẠP) PAGE STYLES
    ========================================================================== */
+@use 'variables' as *;
 
 .cinemas-page {
-	background-color: #0b0f19;
-	color: #e2e8f0;
+	background-color: $background-color;
+	color: $primary-text-color;
 	min-height: 100vh;
 	font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
@@ -14,10 +15,10 @@
    -------------------------------------------------------------------------- */
 .cinemas-hero {
 	position: relative;
-	background: linear-gradient(135deg, rgba(15, 23, 42, 0.95), rgba(30, 41, 59, 0.92)),
+	background: linear-gradient(135deg, $ctp-crust 0%, $ctp-mantle 60%, $ctp-base 100%),
 		url('/promo/promo_nowzone.jpg') center/cover no-repeat;
 	padding: 56px 0 40px;
-	border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+	border-bottom: 1px solid $border-color;
 	overflow: hidden;
 
 	&::before {
@@ -27,7 +28,7 @@
 		right: -10%;
 		width: 500px;
 		height: 500px;
-		background: radial-gradient(circle, rgba(14, 165, 233, 0.15), transparent 70%);
+		background: radial-gradient(circle, rgba(137, 180, 250, 0.15), transparent 70%);
 		pointer-events: none;
 	}
 
@@ -38,7 +39,7 @@
 		left: -10%;
 		width: 450px;
 		height: 450px;
-		background: radial-gradient(circle, rgba(236, 72, 153, 0.12), transparent 70%);
+		background: radial-gradient(circle, rgba(203, 166, 247, 0.12), transparent 70%);
 		pointer-events: none;
 	}
 
@@ -53,12 +54,12 @@
 	align-items: center;
 	gap: 8px;
 	padding: 6px 14px;
-	background: rgba(14, 165, 233, 0.15);
-	border: 1px solid rgba(14, 165, 233, 0.35);
+	background: rgba(137, 180, 250, 0.15);
+	border: 1px solid rgba(137, 180, 250, 0.35);
 	border-radius: 999px;
 	font-size: 13px;
 	font-weight: 600;
-	color: #38bdf8;
+	color: $primary-color;
 	margin-bottom: 16px;
 	letter-spacing: 0.5px;
 	text-transform: uppercase;
@@ -68,11 +69,11 @@
 	font-size: clamp(28px, 4vw, 42px);
 	font-weight: 800;
 	line-height: 1.2;
-	color: #ffffff;
+	color: $ctp-text;
 	margin-bottom: 12px;
 
 	span {
-		background: linear-gradient(135deg, #38bdf8, #818cf8, #c084fc);
+		background: linear-gradient(135deg, $primary-color, $ctp-mauve);
 		background-clip: text;
 		-webkit-background-clip: text;
 		-webkit-text-fill-color: transparent;
@@ -81,7 +82,7 @@
 
 .cinemas-hero-desc {
 	font-size: 16px;
-	color: #94a3b8;
+	color: $ctp-subtext0;
 	max-width: 680px;
 	line-height: 1.6;
 	margin-bottom: 28px;
@@ -97,8 +98,8 @@
 }
 
 .stat-item {
-	background: rgba(255, 255, 255, 0.04);
-	border: 1px solid rgba(255, 255, 255, 0.08);
+	background: $ctp-surface0;
+	border: 1px solid $border-color;
 	backdrop-filter: blur(8px);
 	border-radius: 12px;
 	padding: 14px 18px;
@@ -106,25 +107,25 @@
 
 	&:hover {
 		transform: translateY(-2px);
-		border-color: rgba(56, 189, 248, 0.3);
+		border-color: $primary-color;
 	}
 
 	.stat-num {
 		font-size: 24px;
 		font-weight: 800;
-		color: #f8fafc;
+		color: $ctp-text;
 		display: flex;
 		align-items: center;
 		gap: 4px;
 
 		.highlight {
-			color: #38bdf8;
+			color: $primary-color;
 		}
 	}
 
 	.stat-label {
 		font-size: 12px;
-		color: #94a3b8;
+		color: $ctp-subtext0;
 		margin-top: 4px;
 		font-weight: 500;
 	}
@@ -132,8 +133,8 @@
 
 /* Search & Filter Toolbar */
 .cinemas-toolbar {
-	background: rgba(15, 23, 42, 0.85);
-	border: 1px solid rgba(255, 255, 255, 0.1);
+	background: $ctp-surface0;
+	border: 1px solid $border-color;
 	border-radius: 16px;
 	padding: 16px 20px;
 	display: flex;
@@ -141,7 +142,7 @@
 	align-items: center;
 	justify-content: space-between;
 	gap: 16px;
-	box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+	box-shadow: $shadow-lg;
 }
 
 .search-input-wrap {
@@ -156,29 +157,29 @@
 		transform: translateY(-50%);
 		width: 18px;
 		height: 18px;
-		stroke: #64748b;
+		stroke: $ctp-overlay1;
 		pointer-events: none;
 	}
 
 	input {
 		width: 100%;
 		padding: 11px 40px 11px 42px;
-		background: rgba(255, 255, 255, 0.06);
-		border: 1px solid rgba(255, 255, 255, 0.12);
+		background: $ctp-mantle;
+		border: 1px solid $border-color;
 		border-radius: 10px;
-		color: #ffffff;
+		color: $ctp-text;
 		font-size: 14px;
 		transition: all 0.2s ease;
 
 		&::placeholder {
-			color: #64748b;
+			color: $ctp-overlay1;
 		}
 
 		&:focus {
 			outline: none;
-			border-color: #38bdf8;
-			background: rgba(255, 255, 255, 0.09);
-			box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.2);
+			border-color: $primary-color;
+			background: $ctp-surface1;
+			box-shadow: 0 0 0 3px rgba(137, 180, 250, 0.2);
 		}
 	}
 
@@ -189,7 +190,7 @@
 		transform: translateY(-50%);
 		background: none;
 		border: none;
-		color: #94a3b8;
+		color: $ctp-subtext0;
 		font-size: 18px;
 		cursor: pointer;
 		display: none;
@@ -200,7 +201,7 @@
 		}
 
 		&:hover {
-			color: #ffffff;
+			color: $ctp-text;
 		}
 	}
 }
@@ -215,9 +216,9 @@
 .region-pill {
 	padding: 9px 16px;
 	border-radius: 999px;
-	background: rgba(255, 255, 255, 0.05);
-	border: 1px solid rgba(255, 255, 255, 0.1);
-	color: #94a3b8;
+	background: $ctp-surface1;
+	border: 1px solid $border-color;
+	color: $ctp-subtext0;
 	font-size: 13px;
 	font-weight: 600;
 	cursor: pointer;
@@ -225,16 +226,16 @@
 	user-select: none;
 
 	&:hover {
-		background: rgba(255, 255, 255, 0.1);
-		color: #f1f5f9;
-		border-color: rgba(255, 255, 255, 0.2);
+		background: $ctp-surface2;
+		color: $ctp-text;
+		border-color: $border-color;
 	}
 
 	&.active {
-		background: linear-gradient(135deg, #0284c7, #2563eb);
-		border-color: #38bdf8;
-		color: #ffffff;
-		box-shadow: 0 4px 12px rgba(2, 132, 199, 0.35);
+		background: $primary-color;
+		border-color: $primary-color;
+		color: $ctp-crust;
+		box-shadow: 0 4px 12px rgba(137, 180, 250, 0.35);
 	}
 }
 
@@ -243,8 +244,9 @@
    -------------------------------------------------------------------------- */
 .current-cinema-banner {
 	margin: 28px 0 20px;
-	background: linear-gradient(90deg, rgba(30, 41, 59, 0.7), rgba(15, 23, 42, 0.8));
-	border-left: 4px solid #38bdf8;
+	background: $ctp-surface0;
+	border: 1px solid $border-color;
+	border-left: 4px solid $primary-color;
 	border-radius: 8px;
 	padding: 14px 20px;
 	display: flex;
@@ -252,9 +254,6 @@
 	justify-content: space-between;
 	flex-wrap: wrap;
 	gap: 12px;
-	border-top: 1px solid rgba(255, 255, 255, 0.06);
-	border-right: 1px solid rgba(255, 255, 255, 0.06);
-	border-bottom: 1px solid rgba(255, 255, 255, 0.06);
 
 	.banner-info {
 		display: flex;
@@ -267,10 +266,10 @@
 
 		.banner-text {
 			font-size: 14px;
-			color: #cbd5e1;
+			color: $ctp-subtext1;
 
 			strong {
-				color: #38bdf8;
+				color: $primary-color;
 				font-weight: 700;
 			}
 		}
@@ -280,17 +279,16 @@
 		padding: 7px 16px;
 		font-size: 13px;
 		font-weight: 600;
-		color: #38bdf8;
-		background: rgba(56, 189, 248, 0.1);
-		border: 1px solid rgba(56, 189, 248, 0.3);
+		color: $ctp-crust;
+		background: $primary-color;
+		border: 1px solid $primary-color;
 		border-radius: 6px;
 		cursor: pointer;
 		text-decoration: none;
 		transition: all 0.2s ease;
 
 		&:hover {
-			background: #38bdf8;
-			color: #0f172a;
+			background: $primary-dark;
 		}
 	}
 }
@@ -306,8 +304,8 @@
 }
 
 .cinema-card {
-	background: rgba(30, 41, 59, 0.5);
-	border: 1px solid rgba(255, 255, 255, 0.08);
+	background: $ctp-surface0;
+	border: 1px solid $border-color;
 	border-radius: 16px;
 	overflow: hidden;
 	display: flex;
@@ -315,16 +313,17 @@
 	transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 	position: relative;
 	backdrop-filter: blur(10px);
+	box-shadow: $shadow-md;
 
 	&:hover {
 		transform: translateY(-6px);
-		border-color: rgba(56, 189, 248, 0.4);
-		box-shadow: 0 16px 32px -8px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(56, 189, 248, 0.2);
+		border-color: $primary-color;
+		box-shadow: $shadow-lg;
 	}
 
 	&.is-active-cinema {
-		border-color: #38bdf8;
-		box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.35);
+		border-color: $primary-color;
+		box-shadow: 0 0 0 2px rgba(137, 180, 250, 0.35);
 
 		.card-active-flag {
 			display: flex;
@@ -340,13 +339,13 @@
 	display: none;
 	align-items: center;
 	gap: 6px;
-	background: linear-gradient(135deg, #0284c7, #2563eb);
-	color: #ffffff;
+	background: $primary-color;
+	color: $ctp-crust;
 	font-size: 11px;
 	font-weight: 700;
 	padding: 4px 10px;
 	border-radius: 999px;
-	box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+	box-shadow: $shadow-sm;
 	text-transform: uppercase;
 	letter-spacing: 0.5px;
 }
@@ -356,7 +355,7 @@
 	width: 100%;
 	height: 190px;
 	overflow: hidden;
-	background: #1e293b;
+	background: $ctp-crust;
 
 	img {
 		width: 100%;
@@ -372,17 +371,17 @@
 	.card-gradient-overlay {
 		position: absolute;
 		inset: 0;
-		background: linear-gradient(to top, rgba(15, 23, 42, 0.95) 0%, rgba(15, 23, 42, 0.3) 50%, transparent 100%);
+		background: linear-gradient(to top, rgba(24, 24, 37, 0.95) 0%, rgba(24, 24, 37, 0.3) 50%, transparent 100%);
 	}
 
 	.card-region-tag {
 		position: absolute;
 		bottom: 12px;
 		left: 14px;
-		background: rgba(15, 23, 42, 0.75);
+		background: rgba(17, 17, 27, 0.75);
 		backdrop-filter: blur(6px);
-		border: 1px solid rgba(255, 255, 255, 0.15);
-		color: #38bdf8;
+		border: 1px solid $border-color;
+		color: $primary-color;
 		font-size: 12px;
 		font-weight: 700;
 		padding: 3px 10px;
@@ -393,9 +392,9 @@
 		position: absolute;
 		bottom: 12px;
 		right: 14px;
-		background: rgba(15, 23, 42, 0.75);
+		background: rgba(17, 17, 27, 0.75);
 		backdrop-filter: blur(6px);
-		color: #e2e8f0;
+		color: $ctp-text;
 		font-size: 12px;
 		font-weight: 600;
 		padding: 3px 10px;
@@ -416,7 +415,7 @@
 .cinema-card-name {
 	font-size: 18px;
 	font-weight: 700;
-	color: #ffffff;
+	color: $ctp-text;
 	margin-bottom: 12px;
 	line-height: 1.35;
 	display: -webkit-box;
@@ -432,7 +431,7 @@
 	gap: 8px;
 	margin-bottom: 16px;
 	font-size: 13px;
-	color: #94a3b8;
+	color: $ctp-subtext0;
 }
 
 .meta-row {
@@ -446,7 +445,7 @@
 		height: 15px;
 		flex-shrink: 0;
 		margin-top: 2px;
-		color: #38bdf8;
+		color: $primary-color;
 	}
 
 	span.meta-val {
@@ -454,7 +453,7 @@
 	}
 
 	a.phone-link {
-		color: #38bdf8;
+		color: $primary-color;
 		text-decoration: none;
 		font-weight: 600;
 
@@ -466,14 +465,14 @@
 	.btn-copy-address {
 		background: none;
 		border: none;
-		color: #64748b;
+		color: $ctp-overlay1;
 		cursor: pointer;
 		padding: 0 4px;
 		font-size: 11px;
 		transition: color 0.2s ease;
 
 		&:hover {
-			color: #38bdf8;
+			color: $primary-color;
 		}
 	}
 }
@@ -489,9 +488,9 @@
 .feature-tag {
 	font-size: 11px;
 	font-weight: 600;
-	color: #cbd5e1;
-	background: rgba(255, 255, 255, 0.05);
-	border: 1px solid rgba(255, 255, 255, 0.08);
+	color: $ctp-subtext1;
+	background: $ctp-surface1;
+	border: 1px solid $border-color;
 	border-radius: 6px;
 	padding: 3px 8px;
 	display: inline-flex;
@@ -506,7 +505,7 @@
 	flex-direction: column;
 	gap: 10px;
 	padding-top: 14px;
-	border-top: 1px solid rgba(255, 255, 255, 0.06);
+	border-top: 1px solid $border-color;
 }
 
 .action-row-primary {
@@ -516,8 +515,8 @@
 
 .btn-cinema-schedule {
 	flex: 1;
-	background: linear-gradient(135deg, #0284c7, #2563eb);
-	color: #ffffff;
+	background: $primary-color;
+	color: $ctp-crust;
 	padding: 10px 14px;
 	border-radius: 8px;
 	font-size: 13px;
@@ -529,19 +528,19 @@
 	justify-content: center;
 	gap: 6px;
 	transition: all 0.2s ease;
-	border: 1px solid rgba(56, 189, 248, 0.4);
+	border: 1px solid $primary-color;
 
 	&:hover {
-		background: linear-gradient(135deg, #0369a1, #1d4ed8);
+		background: $primary-dark;
 		transform: translateY(-1px);
-		box-shadow: 0 4px 12px rgba(2, 132, 199, 0.35);
+		box-shadow: $shadow-md;
 	}
 }
 
 .btn-cinema-detail {
-	background: rgba(255, 255, 255, 0.06);
-	color: #e2e8f0;
-	border: 1px solid rgba(255, 255, 255, 0.12);
+	background: $ctp-surface1;
+	color: $ctp-text;
+	border: 1px solid $border-color;
 	padding: 10px 14px;
 	border-radius: 8px;
 	font-size: 13px;
@@ -550,9 +549,9 @@
 	transition: all 0.2s ease;
 
 	&:hover {
-		background: rgba(255, 255, 255, 0.12);
-		color: #ffffff;
-		border-color: rgba(255, 255, 255, 0.25);
+		background: $ctp-surface2;
+		color: $ctp-text;
+		border-color: $primary-color;
 	}
 }
 
@@ -566,7 +565,7 @@
 .btn-set-default {
 	background: none;
 	border: none;
-	color: #94a3b8;
+	color: $ctp-subtext0;
 	cursor: pointer;
 	display: inline-flex;
 	align-items: center;
@@ -577,17 +576,17 @@
 	transition: color 0.2s ease;
 
 	&:hover {
-		color: #38bdf8;
+		color: $primary-color;
 	}
 
 	&.is-selected {
-		color: #10b981;
+		color: $ctp-green;
 		cursor: default;
 	}
 }
 
 .link-directions {
-	color: #94a3b8;
+	color: $ctp-subtext0;
 	text-decoration: none;
 	display: inline-flex;
 	align-items: center;
@@ -595,7 +594,7 @@
 	transition: color 0.2s ease;
 
 	&:hover {
-		color: #38bdf8;
+		color: $primary-color;
 		text-decoration: underline;
 	}
 }
@@ -605,8 +604,8 @@
 	grid-column: 1 / -1;
 	text-align: center;
 	padding: 60px 20px;
-	background: rgba(255, 255, 255, 0.02);
-	border: 1px dashed rgba(255, 255, 255, 0.1);
+	background: $ctp-surface0;
+	border: 1px dashed $border-color;
 	border-radius: 16px;
 
 	.empty-icon {
@@ -616,20 +615,20 @@
 
 	h3 {
 		font-size: 20px;
-		color: #ffffff;
+		color: $ctp-text;
 		margin-bottom: 8px;
 	}
 
 	p {
-		color: #94a3b8;
+		color: $ctp-subtext0;
 		font-size: 14px;
 		margin-bottom: 18px;
 	}
 
 	.btn-reset-filters {
-		background: rgba(56, 189, 248, 0.15);
-		color: #38bdf8;
-		border: 1px solid rgba(56, 189, 248, 0.3);
+		background: $primary-color;
+		color: $ctp-crust;
+		border: 1px solid $primary-color;
 		padding: 8px 18px;
 		border-radius: 8px;
 		font-size: 13px;
@@ -638,8 +637,7 @@
 		transition: all 0.2s ease;
 
 		&:hover {
-			background: #38bdf8;
-			color: #0f172a;
+			background: $primary-dark;
 		}
 	}
 }
@@ -650,7 +648,7 @@
 .cinema-detail-modal-overlay {
 	position: fixed;
 	inset: 0;
-	background: rgba(0, 0, 0, 0.75);
+	background: rgba(17, 17, 27, 0.75);
 	backdrop-filter: blur(8px);
 	z-index: 9999;
 	display: flex;
@@ -668,14 +666,14 @@
 }
 
 .cinema-detail-modal {
-	background: #111827;
-	border: 1px solid rgba(255, 255, 255, 0.12);
+	background: $ctp-surface0;
+	border: 1px solid $border-color;
 	border-radius: 20px;
 	width: 100%;
 	max-width: 720px;
 	max-height: 90vh;
 	overflow-y: auto;
-	box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+	box-shadow: $shadow-lg;
 	transform: scale(0.95);
 	transition: transform 0.25s ease;
 
@@ -698,7 +696,7 @@
 	.modal-hero-gradient {
 		position: absolute;
 		inset: 0;
-		background: linear-gradient(to top, #111827 0%, rgba(17, 24, 39, 0.4) 60%, transparent 100%);
+		background: linear-gradient(to top, $ctp-surface0 0%, rgba(49, 50, 68, 0.4) 60%, transparent 100%);
 	}
 
 	.btn-close-modal {
@@ -707,11 +705,11 @@
 		right: 16px;
 		width: 36px;
 		height: 36px;
-		background: rgba(0, 0, 0, 0.5);
+		background: rgba(17, 17, 27, 0.6);
 		backdrop-filter: blur(6px);
-		border: 1px solid rgba(255, 255, 255, 0.2);
+		border: 1px solid $border-color;
 		border-radius: 50%;
-		color: #ffffff;
+		color: $ctp-text;
 		font-size: 20px;
 		cursor: pointer;
 		display: flex;
@@ -720,8 +718,9 @@
 		transition: all 0.2s ease;
 
 		&:hover {
-			background: rgba(239, 68, 68, 0.8);
-			border-color: #ef4444;
+			background: $ctp-red;
+			border-color: $ctp-red;
+			color: $ctp-crust;
 		}
 	}
 
@@ -733,9 +732,9 @@
 
 		.modal-region-badge {
 			display: inline-block;
-			background: rgba(14, 165, 233, 0.2);
-			border: 1px solid rgba(56, 189, 248, 0.4);
-			color: #38bdf8;
+			background: rgba(137, 180, 250, 0.2);
+			border: 1px solid rgba(137, 180, 250, 0.4);
+			color: $primary-color;
 			font-size: 12px;
 			font-weight: 700;
 			padding: 2px 8px;
@@ -746,7 +745,7 @@
 		h2 {
 			font-size: 24px;
 			font-weight: 800;
-			color: #ffffff;
+			color: $ctp-text;
 			line-height: 1.25;
 		}
 	}
@@ -762,14 +761,14 @@
 	h4 {
 		font-size: 15px;
 		font-weight: 700;
-		color: #f1f5f9;
+		color: $ctp-text;
 		margin-bottom: 12px;
 		display: flex;
 		align-items: center;
 		gap: 8px;
 
 		svg {
-			color: #38bdf8;
+			color: $primary-color;
 			width: 18px;
 			height: 18px;
 		}
@@ -783,8 +782,8 @@
 }
 
 .modal-screen-card {
-	background: rgba(255, 255, 255, 0.04);
-	border: 1px solid rgba(255, 255, 255, 0.08);
+	background: $ctp-mantle;
+	border: 1px solid $border-color;
 	border-radius: 10px;
 	padding: 12px;
 	text-align: center;
@@ -792,7 +791,7 @@
 	.screen-name {
 		font-size: 13px;
 		font-weight: 700;
-		color: #ffffff;
+		color: $ctp-text;
 		margin-bottom: 4px;
 	}
 
@@ -800,8 +799,8 @@
 		display: inline-block;
 		font-size: 11px;
 		font-weight: 700;
-		color: #38bdf8;
-		background: rgba(56, 189, 248, 0.1);
+		color: $primary-color;
+		background: rgba(137, 180, 250, 0.15);
 		padding: 2px 6px;
 		border-radius: 4px;
 		margin-bottom: 4px;
@@ -809,13 +808,13 @@
 
 	.screen-seats {
 		font-size: 12px;
-		color: #94a3b8;
+		color: $ctp-subtext0;
 	}
 }
 
 .modal-footer-actions {
 	padding: 16px 24px 24px;
-	border-top: 1px solid rgba(255, 255, 255, 0.08);
+	border-top: 1px solid $border-color;
 	display: flex;
 	gap: 12px;
 	justify-content: flex-end;
