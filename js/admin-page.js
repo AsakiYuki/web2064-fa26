@@ -1315,8 +1315,8 @@ document.addEventListener("DOMContentLoaded", async () => {
 				const isDone = b.status === "done"
 				const isCancelled = b.status === "cancelled"
 
-				const statusColor = isPaid ? "#10b981" : isDone ? "#38bdf8" : "#ef4444"
-				const statusBg = isPaid ? "rgba(16, 185, 129, 0.12)" : isDone ? "rgba(56, 189, 248, 0.12)" : "rgba(239, 68, 68, 0.12)"
+				const statusColor = isPaid ? "#a6e3a1" : isDone ? "#89b4fa" : "#f38ba8"
+				const statusBg = isPaid ? "rgba(166, 227, 161, 0.12)" : isDone ? "rgba(137, 180, 250, 0.12)" : "rgba(243, 139, 168, 0.12)"
 
 				return `
 					<tr>
