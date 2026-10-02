@@ -12,7 +12,7 @@
 /* ---- SECTION 1: TICKET PRICING SECTION ---- */
 .pricing-section-container {
 	margin-top: 36px;
-	background: #ffffff;
+	background: $ctp-surface0;
 	border-radius: $radius-xl;
 	padding: 36px 32px;
 	box-shadow: $shadow-sm;
@@ -57,22 +57,23 @@
 			border-radius: 24px;
 			font-size: 14px;
 			font-weight: 700;
-			background: #f1f5f9;
-			border: 1.5px solid #cbd5e1;
-			color: #334155;
+			background: $ctp-surface1;
+			border: 1.5px solid $border-color;
+			color: $ctp-text;
 			cursor: pointer;
 			transition: all 0.2s;
 
 			&:hover {
 				border-color: $primary-color;
 				color: $primary-color;
+				background: $ctp-surface2;
 			}
 
 			&.active {
 				background: $primary-color;
 				border-color: $primary-color;
-				color: #ffffff;
-				box-shadow: 0 4px 12px rgba(1, 81, 152, 0.25);
+				color: $ctp-crust;
+				box-shadow: $shadow-sm;
 			}
 		}
 	}
@@ -88,7 +89,7 @@
 			border-spacing: 0;
 			border-radius: $radius-md;
 			overflow: hidden;
-			border: 1px solid #e2e8f0;
+			border: 1px solid $border-color;
 
 			th,
 			td {
@@ -98,7 +99,7 @@
 			}
 
 			thead {
-				background: #f8fafc;
+				background: $ctp-surface1;
 				th {
 					font-weight: 800;
 					color: $primary-text-color;
@@ -116,16 +117,16 @@
 			tbody {
 				tr {
 					&:nth-child(even) {
-						background: #fcfdfe;
+						background: rgba(69, 71, 90, 0.25);
 					}
 
 					&:hover {
-						background: rgba(1, 81, 152, 0.03);
+						background: rgba(137, 180, 250, 0.08);
 					}
 
 					td {
-						border-bottom: 1px solid #f1f5f9;
-						color: #374151;
+						border-bottom: 1px solid $border-color;
+						color: $ctp-text;
 
 						&:first-child {
 							text-align: left;
@@ -141,8 +142,8 @@
 
 						&.price-tuesday {
 							font-weight: 800;
-							color: #059669;
-							background: rgba(16, 185, 129, 0.06);
+							color: $accent-green;
+							background: rgba(166, 227, 161, 0.12);
 						}
 					}
 				}
@@ -162,8 +163,8 @@
 		}
 
 		.discount-card {
-			background: #f8fafc;
-			border: 1.5px solid #e2e8f0;
+			background: $ctp-surface1;
+			border: 1.5px solid $border-color;
 			border-radius: $radius-lg;
 			padding: 20px;
 			display: flex;
@@ -241,9 +242,9 @@
 		&::-webkit-scrollbar { display: none; }
 
 		.promo-pill {
-			background: #ffffff;
-			border: 1px solid #d1d5db;
-			color: #4b5563;
+			background: $ctp-surface0;
+			border: 1px solid $border-color;
+			color: $ctp-subtext1;
 			padding: 7px 16px;
 			border-radius: 20px;
 			font-size: 13px;
@@ -260,9 +261,9 @@
 			&.active {
 				background: $primary-color;
 				border-color: $primary-color;
-				color: #ffffff;
+				color: $ctp-crust;
 				font-weight: 700;
-				box-shadow: 0 2px 8px rgba(1, 81, 152, 0.25);
+				box-shadow: $shadow-sm;
 			}
 		}
 	}
@@ -281,7 +282,7 @@
 		}
 
 		.promo-card {
-			background: #ffffff;
+			background: $ctp-surface0;
 			border-radius: $radius-lg;
 			overflow: hidden;
 			box-shadow: $shadow-sm;
@@ -293,6 +294,7 @@
 			&:hover {
 				transform: translateY(-4px);
 				box-shadow: $shadow-hover;
+				border-color: rgba($primary-color, 0.4);
 
 				.promo-thumb img {
 					transform: scale(1.04);
@@ -303,7 +305,7 @@
 				position: relative;
 				aspect-ratio: 16 / 9;
 				overflow: hidden;
-				background: #111;
+				background: $ctp-crust;
 
 				img {
 					width: 100%;
@@ -316,8 +318,8 @@
 					position: absolute;
 					top: 10px;
 					left: 10px;
-					background: linear-gradient(135deg, #ef4444, #f97316);
-					color: #fff;
+					background: linear-gradient(135deg, $ctp-red, $ctp-peach);
+					color: $ctp-crust;
 					font-size: 11px;
 					font-weight: 800;
 					padding: 3px 8px;
@@ -354,7 +356,7 @@
 
 				.promo-validity {
 					font-size: 12px;
-					color: #9ca3af;
+					color: $ctp-subtext0;
 					margin-top: auto;
 					padding-top: 10px;
 					display: flex;
@@ -364,8 +366,8 @@
 
 				.btn-view-promo {
 					margin-top: 12px;
-					background: #f1f5f9;
-					border: 1px solid #e2e8f0;
+					background: $ctp-surface1;
+					border: 1px solid $border-color;
 					color: $primary-color;
 					padding: 8px 14px;
 					border-radius: $radius-sm;
@@ -377,7 +379,7 @@
 
 					&:hover {
 						background: $primary-color;
-						color: #fff;
+						color: $ctp-crust;
 						border-color: $primary-color;
 					}
 				}

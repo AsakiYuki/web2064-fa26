@@ -11,17 +11,18 @@
 
 /* ---- PAGE HEADER BANNER ---- */
 .movies-page-header {
-	background: linear-gradient(135deg, #091a38 0%, #013a6e 50%, #015198 100%);
-	color: #fff;
+	background: linear-gradient(135deg, $ctp-crust 0%, $ctp-mantle 50%, $ctp-surface0 100%);
+	color: $ctp-text;
 	padding: 40px 0 32px;
 	position: relative;
 	overflow: hidden;
+	border-bottom: 1px solid $border-color;
 
 	&::after {
 		content: '';
 		position: absolute;
 		inset: 0;
-		background: radial-gradient(circle at 85% 20%, rgba(245, 166, 35, 0.15), transparent 45%);
+		background: radial-gradient(circle at 85% 20%, rgba(137, 180, 250, 0.15), transparent 45%);
 		pointer-events: none;
 	}
 
@@ -35,11 +36,11 @@
 		align-items: center;
 		gap: 8px;
 		font-size: 13px;
-		color: rgba(255, 255, 255, 0.7);
+		color: $ctp-subtext0;
 		margin-bottom: 12px;
 
 		a {
-			color: rgba(255, 255, 255, 0.85);
+			color: $ctp-subtext1;
 			&:hover {
 				color: $accent-color;
 				text-decoration: underline;
@@ -63,11 +64,12 @@
 		letter-spacing: -0.5px;
 		margin: 0 0 8px;
 		text-transform: uppercase;
+		color: $ctp-text;
 	}
 
 	.page-subtitle {
 		font-size: 15px;
-		color: rgba(255, 255, 255, 0.8);
+		color: $ctp-subtext0;
 		margin: 0;
 		max-width: 650px;
 	}
@@ -75,7 +77,7 @@
 
 /* ---- TABS NAVIGATION ---- */
 .movies-nav-tabs {
-	background: #ffffff;
+	background: $ctp-surface0;
 	border-bottom: 2px solid $border-color;
 	box-shadow: $shadow-sm;
 	position: sticky;
@@ -102,15 +104,15 @@
 		border-bottom: 3px solid transparent;
 		font-size: 15px;
 		font-weight: 700;
-		color: $muted-text;
+		color: $ctp-subtext0;
 		cursor: pointer;
 		white-space: nowrap;
 		transition: all 0.2s ease;
 		margin-bottom: -2px;
 
 		.tab-count {
-			background: #e5e7eb;
-			color: #374151;
+			background: $ctp-surface1;
+			color: $ctp-text;
 			font-size: 12px;
 			font-weight: 700;
 			padding: 2px 8px;
@@ -121,7 +123,7 @@
 		&:hover {
 			color: $primary-color;
 			.tab-count {
-				background: rgba(1, 81, 152, 0.1);
+				background: rgba($primary-color, 0.15);
 				color: $primary-color;
 			}
 		}
@@ -132,7 +134,7 @@
 
 			.tab-count {
 				background: $primary-color;
-				color: #ffffff;
+				color: $ctp-crust;
 			}
 		}
 	}
@@ -140,7 +142,7 @@
 
 /* ---- FILTER & SEARCH BAR ---- */
 .movies-filter-bar {
-	background: #ffffff;
+	background: $ctp-surface0;
 	border-radius: $radius-lg;
 	box-shadow: $shadow-sm;
 	padding: 20px 24px;
@@ -176,20 +178,22 @@
 		input {
 			width: 100%;
 			padding: 11px 40px 11px 42px;
+			background: $ctp-surface1;
 			border: 1.5px solid $border-color;
 			border-radius: $radius-md;
 			font-size: 14px;
 			font-family: inherit;
+			color: $ctp-text;
 			outline: none;
 			transition: border-color 0.2s, box-shadow 0.2s;
 
 			&:focus {
 				border-color: $primary-color;
-				box-shadow: 0 0 0 3px rgba(1, 81, 152, 0.12);
+				box-shadow: 0 0 0 3px rgba(137, 180, 250, 0.18);
 			}
 
 			&::placeholder {
-				color: #9ca3af;
+				color: $ctp-overlay0;
 			}
 		}
 
@@ -200,7 +204,7 @@
 			transform: translateY(-50%);
 			background: none;
 			border: none;
-			color: #9ca3af;
+			color: $ctp-overlay0;
 			cursor: pointer;
 			font-size: 18px;
 			display: none;
@@ -229,8 +233,8 @@
 			border-radius: $radius-md;
 			font-size: 13px;
 			font-weight: 600;
-			color: $primary-text-color;
-			background-color: #fff;
+			color: $ctp-text;
+			background-color: $ctp-surface1;
 			outline: none;
 			cursor: pointer;
 			transition: border-color 0.2s;
@@ -243,10 +247,10 @@
 
 		.btn-reset-filters {
 			padding: 10px 16px;
-			border: 1.5px solid #d1d5db;
+			border: 1.5px solid $border-color;
 			border-radius: $radius-md;
-			background: #f9fafb;
-			color: $muted-text;
+			background: $ctp-surface1;
+			color: $ctp-subtext0;
 			font-size: 13px;
 			font-weight: 600;
 			cursor: pointer;
@@ -256,8 +260,8 @@
 			transition: all 0.2s;
 
 			&:hover {
-				background: #fee2e2;
-				border-color: #fca5a5;
+				background: rgba(243, 139, 168, 0.15);
+				border-color: $accent-red;
 				color: $accent-red;
 			}
 		}
@@ -281,8 +285,8 @@
 		}
 
 		.genre-pill {
-			background: #f3f4f6;
-			color: #4b5563;
+			background: $ctp-surface1;
+			color: $ctp-subtext1;
 			border: 1px solid transparent;
 			padding: 5px 12px;
 			border-radius: 20px;
@@ -292,13 +296,13 @@
 			transition: all 0.2s ease;
 
 			&:hover {
-				background: #e5e7eb;
-				color: $primary-text-color;
+				background: $ctp-surface2;
+				color: $ctp-text;
 			}
 
 			&.active {
 				background: $primary-color;
-				color: #fff;
+				color: $ctp-crust;
 				border-color: $primary-color;
 			}
 		}
@@ -326,20 +330,20 @@
 
 /* Modern Movie Card Enhancement */
 .movie-card {
-	background: #ffffff;
+	background: $ctp-surface0;
 	border-radius: $radius-lg;
 	overflow: hidden;
 	box-shadow: $shadow-sm;
 	display: flex;
 	flex-direction: column;
-	border: 1px solid rgba(0, 0, 0, 0.06);
+	border: 1px solid $border-color;
 	transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
 	position: relative;
 
 	&:hover {
 		transform: translateY(-6px);
-		box-shadow: 0 16px 36px rgba(1, 81, 152, 0.16);
-		border-color: rgba(1, 81, 152, 0.2);
+		box-shadow: $shadow-hover;
+		border-color: rgba($primary-color, 0.4);
 
 		.movie-poster-wrap img {
 			transform: scale(1.05);
@@ -359,7 +363,7 @@
 		position: relative;
 		aspect-ratio: 2 / 3;
 		overflow: hidden;
-		background: #111;
+		background: $ctp-crust;
 		display: block;
 
 		img {
@@ -375,9 +379,9 @@
 			inset: 0;
 			background: linear-gradient(
 				to top,
-				rgba(0, 0, 0, 0.85) 0%,
-				rgba(0, 0, 0, 0.3) 50%,
-				rgba(0, 0, 0, 0.1) 100%
+				rgba(17, 17, 27, 0.9) 0%,
+				rgba(17, 17, 27, 0.4) 50%,
+				rgba(17, 17, 27, 0.1) 100%
 			);
 			opacity: 0;
 			transition: opacity 0.3s ease;
@@ -388,7 +392,7 @@
 			padding: 16px;
 
 			.overlay-synopsis {
-				color: #f3f4f6;
+				color: $ctp-subtext1;
 				font-size: 12px;
 				line-height: 1.5;
 				display: -webkit-box;
@@ -408,26 +412,26 @@
 			border-radius: 4px;
 			font-size: 11px;
 			font-weight: 800;
-			color: #fff;
+			color: $ctp-crust;
 			z-index: 3;
 			letter-spacing: 0.5px;
 			box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
 
-			&.badge-t18 { background: $accent-red; }
-			&.badge-t16 { background: #d97706; }
-			&.badge-t13 { background: #f59e0b; }
-			&.badge-k { background: #10b981; }
-			&.badge-p { background: #3b82f6; }
+			&.badge-t18 { background: $accent-red; color: #fff; }
+			&.badge-t16 { background: #d97706; color: #fff; }
+			&.badge-t13 { background: $ctp-yellow; color: $ctp-crust; }
+			&.badge-k { background: $ctp-green; color: $ctp-crust; }
+			&.badge-p { background: $ctp-blue; color: $ctp-crust; }
 		}
 
 		.badge-rating {
 			position: absolute;
 			top: 10px;
 			right: 10px;
-			background: rgba(0, 0, 0, 0.75);
+			background: rgba(17, 17, 27, 0.75);
 			backdrop-filter: blur(4px);
-			color: #fbbf24;
-			border: 1px solid rgba(251, 191, 36, 0.4);
+			color: $ctp-peach;
+			border: 1px solid rgba(250, 179, 135, 0.4);
 			padding: 4px 8px;
 			border-radius: 14px;
 			font-size: 11px;
@@ -442,8 +446,8 @@
 			position: absolute;
 			top: 36px;
 			left: 10px;
-			background: linear-gradient(135deg, #ef4444, #f97316);
-			color: #fff;
+			background: linear-gradient(135deg, $ctp-red, $ctp-peach);
+			color: $ctp-crust;
 			font-size: 10px;
 			font-weight: 900;
 			padding: 2px 7px;
@@ -456,13 +460,13 @@
 			position: absolute;
 			top: 36px;
 			left: 10px;
-			background: #111827;
-			color: #38bdf8;
+			background: $ctp-crust;
+			color: $ctp-blue;
 			font-size: 10px;
 			font-weight: 800;
 			padding: 2px 7px;
 			border-radius: 3px;
-			border: 1px solid rgba(56, 189, 248, 0.4);
+			border: 1px solid rgba(137, 180, 250, 0.4);
 			z-index: 3;
 		}
 
@@ -473,7 +477,8 @@
 			transform: translate(-50%, -50%) scale(0.7);
 			width: 52px;
 			height: 52px;
-			background: rgba(255, 255, 255, 0.95);
+			background: rgba(24, 24, 37, 0.95);
+			border: 1px solid $border-color;
 			border-radius: 50%;
 			display: flex;
 			align-items: center;
@@ -482,7 +487,6 @@
 			opacity: 0;
 			transition: all 0.3s ease;
 			box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
-			border: none;
 			cursor: pointer;
 
 			svg {
@@ -496,7 +500,7 @@
 				transform: translate(-50%, -50%) scale(1.1);
 				background: $accent-color;
 				svg {
-					fill: #fff;
+					fill: $ctp-crust;
 				}
 			}
 		}
@@ -541,7 +545,7 @@
 
 		.movie-meta-item {
 			font-size: 12px;
-			color: #4b5563;
+			color: $ctp-subtext0;
 			display: flex;
 			align-items: center;
 			gap: 6px;
@@ -549,7 +553,7 @@
 
 			.meta-label {
 				font-weight: 600;
-				color: #6b7280;
+				color: $ctp-subtext1;
 			}
 		}
 
@@ -562,7 +566,7 @@
 			.btn-buy-ticket {
 				flex: 1;
 				background: $primary-color;
-				color: #fff;
+				color: $ctp-crust;
 				border: none;
 				border-radius: $radius-sm;
 				padding: 9px 12px;
@@ -587,9 +591,10 @@
 				}
 
 				&.btn-remind {
-					background: #f59e0b;
+					background: $ctp-peach;
+					color: $ctp-crust;
 					&:hover {
-						background: #d97706;
+						background: color.adjust($ctp-peach, $lightness: -8%);
 					}
 				}
 			}
@@ -597,7 +602,7 @@
 			.btn-details {
 				padding: 9px 12px;
 				border: 1.5px solid $border-color;
-				background: #fff;
+				background: $ctp-surface1;
 				color: $primary-text-color;
 				border-radius: $radius-sm;
 				font-size: 13px;
@@ -608,7 +613,7 @@
 				&:hover {
 					border-color: $primary-color;
 					color: $primary-color;
-					background: rgba(1, 81, 152, 0.05);
+					background: rgba(137, 180, 250, 0.12);
 				}
 			}
 		}
@@ -619,7 +624,8 @@
 .movies-empty-state {
 	text-align: center;
 	padding: 60px 20px;
-	background: #fff;
+	background: $ctp-surface0;
+	border: 1px solid $border-color;
 	border-radius: $radius-lg;
 	margin-top: 24px;
 	box-shadow: $shadow-sm;
@@ -644,11 +650,16 @@
 
 	button {
 		background: $primary-color;
-		color: #fff;
+		color: $ctp-crust;
 		border: none;
 		border-radius: $radius-md;
 		padding: 10px 20px;
 		font-weight: 600;
 		cursor: pointer;
+		transition: $transition-base;
+
+		&:hover {
+			background: $primary-dark;
+		}
 	}
 }

@@ -9,7 +9,7 @@
 	position: relative;
 	width: 100%;
 	overflow: hidden;
-	background: #000;
+	background: $ctp-crust;
 	height: 480px;
 
 	.hero-track {
@@ -44,7 +44,7 @@
 			background: linear-gradient(
 				to bottom,
 				transparent 40%,
-				rgba(0, 0, 0, 0.55) 100%
+				rgba(17, 17, 27, 0.7) 100%
 			);
 		}
 	}
@@ -53,9 +53,9 @@
 		position: absolute;
 		top: 50%;
 		transform: translateY(-50%);
-		background: rgba(0, 0, 0, 0.35);
-		color: #fff;
-		border: none;
+		background: rgba(17, 17, 27, 0.55);
+		color: $ctp-text;
+		border: 1px solid rgba(88, 91, 112, 0.4);
 		width: 44px;
 		height: 44px;
 		border-radius: 50%;
@@ -63,11 +63,13 @@
 		cursor: pointer;
 		z-index: 10;
 		@include flex-center;
-		transition: background 0.2s ease;
+		transition: background 0.2s ease, border-color 0.2s ease;
 		backdrop-filter: blur(4px);
 
 		&:hover {
-			background: rgba(1, 81, 152, 0.75);
+			background: rgba(137, 180, 250, 0.85);
+			border-color: $ctp-blue;
+			color: $ctp-crust;
 		}
 
 		&.hero-prev {
@@ -92,15 +94,15 @@
 			width: 10px;
 			height: 10px;
 			border-radius: 50%;
-			border: 2px solid rgba(255, 255, 255, 0.7);
+			border: 2px solid $ctp-subtext0;
 			background: transparent;
 			cursor: pointer;
 			transition: background 0.2s, border-color 0.2s;
 			padding: 0;
 
 			&.active {
-				background: #fff;
-				border-color: #fff;
+				background: $primary-color;
+				border-color: $primary-color;
 			}
 		}
 	}
@@ -124,7 +126,8 @@
 	align-self: start;
 
 	.side-banner-card {
-		background: linear-gradient(180deg, #1a4fa8 0%, #0e3580 40%, #1a6ad6 100%);
+		background: linear-gradient(180deg, $ctp-surface1 0%, $ctp-surface0 50%, $ctp-mantle 100%);
+		border: 1px solid $border-color;
 		border-radius: 0;
 		padding: 14px 8px 16px;
 		display: flex;
@@ -144,8 +147,8 @@
 		.sb-badge {
 			font-size: 9px;
 			font-weight: 800;
-			color: #fff;
-			background: rgba(255, 255, 255, 0.15);
+			color: $ctp-crust;
+			background: $ctp-blue;
 			border-radius: 4px;
 			padding: 3px 6px;
 			letter-spacing: 0.3px;
@@ -155,16 +158,16 @@
 		.sb-discount {
 			font-size: 22px;
 			font-weight: 900;
-			color: #ffd700;
+			color: $ctp-peach;
 			line-height: 1.1;
 			margin: 4px 0 0;
-			text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+			text-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
 		}
 
 		.sb-sub {
 			font-size: 10px;
 			font-weight: 600;
-			color: rgba(255, 255, 255, 0.9);
+			color: $ctp-subtext1;
 			line-height: 1.4;
 		}
 
@@ -178,7 +181,7 @@
 
 		.sb-price-old {
 			font-size: 11px;
-			color: rgba(255, 255, 255, 0.6);
+			color: $ctp-overlay0;
 			text-decoration: line-through;
 			font-weight: 500;
 		}
@@ -186,13 +189,13 @@
 		.sb-price-new {
 			font-size: 20px;
 			font-weight: 900;
-			color: #ffd700;
+			color: $ctp-peach;
 			line-height: 1;
 		}
 
 		.sb-cta {
-			background: $accent-color;
-			color: #fff;
+			background: $primary-color;
+			color: $ctp-crust;
 			border: none;
 			border-radius: 20px;
 			padding: 7px 14px;
@@ -204,7 +207,7 @@
 			margin-top: 4px;
 
 			&:hover {
-				background: color.adjust($accent-color, $lightness: -10%);
+				background: $primary-dark;
 				transform: scale(1.03);
 			}
 		}
@@ -222,7 +225,7 @@
 .movie-tabs {
 	@include flex-center;
 	gap: 0;
-	background: #fff;
+	background: $ctp-surface0;
 	border-bottom: 2px solid $border-color;
 	padding: 0 16px;
 
@@ -233,7 +236,7 @@
 		padding: 18px 28px;
 		font-size: 14px;
 		font-weight: 700;
-		color: $muted-text;
+		color: $ctp-subtext0;
 		cursor: pointer;
 		letter-spacing: 0.5px;
 		transition: color 0.2s, border-color 0.2s;
@@ -265,7 +268,8 @@
 
 /* ---- MOVIE CARD ---- */
 .mc {
-	background: #fff;
+	background: $ctp-surface0;
+	border: 1px solid $border-color;
 	border-radius: $radius-md;
 	overflow: hidden;
 	box-shadow: $shadow-sm;
@@ -276,6 +280,7 @@
 	&:hover {
 		transform: translateY(-4px);
 		box-shadow: $shadow-hover;
+		border-color: rgba($primary-color, 0.4);
 
 		.mc-poster {
 			transform: scale(1.04);
@@ -302,7 +307,7 @@
 			content: '';
 			position: absolute;
 			inset: 0;
-			background: rgba(0, 0, 0, 0.45);
+			background: rgba(17, 17, 27, 0.45);
 			opacity: 0;
 			transition: opacity 0.3s ease;
 			z-index: 3;
@@ -324,7 +329,8 @@
 		transform: translate(-50%, -50%) scale(0.7);
 		width: 56px;
 		height: 56px;
-		background: rgba(255, 255, 255, 0.92);
+		background: rgba(24, 24, 37, 0.88);
+		border: 1px solid $border-color;
 		border-radius: 50%;
 		@include flex-center;
 		z-index: 4;
@@ -350,21 +356,25 @@
 		font-weight: 800;
 		padding: 3px 7px;
 		border-radius: 3px;
-		color: #fff;
+		color: $ctp-crust;
 		z-index: 2;
 		letter-spacing: 0.5px;
 
 		&--t18 {
 			@include rating-badge($accent-red);
+			color: #fff;
 		}
 		&--t13 {
-			@include rating-badge(#f59e0b);
+			@include rating-badge($ctp-yellow);
+			color: $ctp-crust;
 		}
 		&--k {
-			@include rating-badge(#10b981);
+			@include rating-badge($ctp-green);
+			color: $ctp-crust;
 		}
 		&--p {
-			@include rating-badge(#3b82f6);
+			@include rating-badge($ctp-blue);
+			color: $ctp-crust;
 		}
 	}
 
@@ -372,8 +382,8 @@
 		position: absolute;
 		top: 0;
 		right: 0;
-		background: linear-gradient(135deg, #ff6b35, #f7c948);
-		color: #fff;
+		background: linear-gradient(135deg, $ctp-peach, $ctp-yellow);
+		color: $ctp-crust;
 		font-size: 10px;
 		font-weight: 900;
 		letter-spacing: 1px;
@@ -386,8 +396,9 @@
 		position: absolute;
 		top: 36px;
 		left: 8px;
-		background: #1a1a2e;
-		color: #fff;
+		background: $ctp-crust;
+		color: $ctp-text;
+		border: 1px solid $border-color;
 		font-size: 10px;
 		font-weight: 800;
 		padding: 2px 6px;
@@ -429,7 +440,7 @@
 
 	.mc-label {
 		font-weight: 600;
-		color: #374151;
+		color: $ctp-subtext1;
 	}
 
 	.mc-btn {
@@ -438,7 +449,7 @@
 		width: 100%;
 		margin-top: auto;
 		background: $primary-color;
-		color: #fff;
+		color: $ctp-crust;
 		border: none;
 		border-radius: $radius-sm;
 		padding: 10px 0;
@@ -466,7 +477,7 @@
 
 			&:hover {
 				background: $primary-color;
-				color: #fff;
+				color: $ctp-crust;
 			}
 		}
 	}
@@ -480,7 +491,7 @@
 	width: 44px;
 	height: 44px;
 	background: $primary-color;
-	color: #fff;
+	color: $ctp-crust;
 	border: none;
 	border-radius: 50%;
 	font-size: 24px;
