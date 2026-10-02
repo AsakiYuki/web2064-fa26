@@ -145,7 +145,7 @@ export function updateHeaderAccountUI() {
 						<span>Ưu đãi của tôi</span>
 					</a>
 					${isAdmin ? `
-					<a href="/admin.html" class="up-item up-admin" style="color: #fbbf24; font-weight: 700;">
+					<a href="/admin.html" class="up-item up-admin" style="color: #fab387; font-weight: 700;">
 						<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
 						<span>Trang Quản Trị (Admin)</span>
 					</a>` : ""}
@@ -157,7 +157,7 @@ export function updateHeaderAccountUI() {
 			</div>
 			${isAdmin ? `
 			<div class="divider"></div>
-			<a href="/admin.html" style="color: #fbbf24; font-weight: 700; font-size: 13px;" title="Vào Trang Quản Trị">⚙️ Admin</a>` : ""}
+			<a href="/admin.html" style="color: #fab387; font-weight: 700; font-size: 13px;" title="Vào Trang Quản Trị">⚙️ Admin</a>` : ""}
 			<div class="divider"></div>
 			<span style="font-size: 18px; margin-left: 4px; cursor: pointer" title="English">🇬🇧</span>
 		`
@@ -714,7 +714,7 @@ function initMegaMenuAndMobileDrawer() {
 				<a href="/movies.html?tab=special" class="mega-cat-link">
 					<span>🌟 Suất Chiếu Đặc Biệt</span> <span>›</span>
 				</a>
-				<a href="/schedule.html" class="mega-cat-link" style="margin-top:auto; color:#0284c7;">
+				<a href="/schedule.html" class="mega-cat-link" style="margin-top:auto; color:#89b4fa;">
 					<span>🍿 Xem Lịch Chiếu</span> <span>›</span>
 				</a>
 			</div>
@@ -736,7 +736,7 @@ function initMegaMenuAndMobileDrawer() {
 				<a href="/movie-detail.html?id=sp1" class="mm-card" title="Avengers: Hồi Kết IMAX">
 					<div class="mm-thumb">
 						<img src="/poster/poster_avengers.jpg" alt="Avengers: Hồi Kết IMAX" />
-						<span class="mm-badge" style="background:#0284c7;">IMAX</span>
+						<span class="mm-badge" style="background:#89b4fa; color:#11111b;">IMAX</span>
 					</div>
 					<span class="mm-title">Avengers: Hồi Kết</span>
 				</a>
@@ -861,11 +861,11 @@ function updateDrawerAccountUI() {
 			</div>
 			<div style="margin-top: 10px; display: flex; flex-direction: column; gap: 8px;">
 				<div style="display: flex; gap: 8px;">
-					<a href="/profile.html" style="flex:1; background:#0284c7; color:#fff; text-align:center; padding:8px; border-radius:6px; font-size:12px; font-weight:700; text-decoration:none;">Trang cá nhân</a>
-					<button type="button" id="btn-drawer-logout" style="background:rgba(239,68,68,0.2); border:1px solid rgba(239,68,68,0.4); color:#f87171; padding:8px 12px; border-radius:6px; font-size:12px; font-weight:700; cursor:pointer;">Đăng xuất</button>
+					<a href="/profile.html" style="flex:1; background:#89b4fa; color:#11111b; text-align:center; padding:8px; border-radius:6px; font-size:12px; font-weight:700; text-decoration:none;">Trang cá nhân</a>
+					<button type="button" id="btn-drawer-logout" style="background:rgba(243,139,168,0.2); border:1px solid rgba(243,139,168,0.4); color:#f38ba8; padding:8px 12px; border-radius:6px; font-size:12px; font-weight:700; cursor:pointer;">Đăng xuất</button>
 				</div>
 				${isAdmin ? `
-				<a href="/admin.html" style="background:#f59e0b; color:#1e293b; text-align:center; padding:8px; border-radius:6px; font-size:12px; font-weight:700; text-decoration:none;">⚙️ Trang Quản Trị (Admin)</a>
+				<a href="/admin.html" style="background:#fab387; color:#11111b; text-align:center; padding:8px; border-radius:6px; font-size:12px; font-weight:700; text-decoration:none;">⚙️ Trang Quản Trị (Admin)</a>
 				` : ""}
 			</div>
 		`
