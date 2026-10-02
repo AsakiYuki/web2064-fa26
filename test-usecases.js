@@ -397,6 +397,26 @@ async function runAllTests() {
 	const vFail = calculateVoucherDiscount('INVALID_CODE', 200000)
 	assert(!vFail.isValid, 'Mã không tồn tại bị từ chối chính xác')
 
+	// 6.4 [Ngoại lệ] Bỏ trống hoặc mã không hợp lệ
+	const vEmpty = calculateVoucherDiscount('', 200000)
+	assert(!vEmpty.isValid, 'Bỏ trống mã voucher bị từ chối với thông báo yêu cầu nhập mã')
+
+	// 6.5 [Ngoại lệ] Không phân biệt chữ hoa / thường (Case-insensitivity)
+	const vLower = calculateVoucherDiscount('beta10', 200000)
+	assert(vLower.isValid && vLower.discountAmount === 20000, 'Mã chữ thường "beta10" được nhận diện và áp dụng giảm 10% chính xác')
+
+	// 6.6 [Ngoại lệ] Tự động cắt khoảng trắng thừa (Trim whitespace)
+	const vSpace = calculateVoucherDiscount('   BETA10   ', 200000)
+	assert(vSpace.isValid && vSpace.discountAmount === 20000, 'Mã có khoảng trắng thừa được tự động chuẩn hóa chính xác')
+
+	// 6.7 [Ngoại lệ] Đơn hàng chưa đạt giá trị tối thiểu (minOrder)
+	const vMinOrder = calculateVoucherDiscount('BETA50', 50000)
+	assert(!vMinOrder.isValid, 'Đơn 50.000đ chưa đạt giá trị tối thiểu 100.000đ của mã BETA50 bị từ chối chính xác')
+
+	// 6.8 [Ngoại lệ] Giới hạn số tiền giảm tối đa (maxDiscount cap)
+	const vCap = calculateVoucherDiscount('BETA10', 2000000)
+	assert(vCap.isValid && vCap.discountAmount === 100000, 'Đơn 2.000.000đ áp dụng mã 10% được trần tối đa 100.000đ theo chính sách voucher')
+
 	/* ------------------------------------------------------------------
 	   USE CASE 7: STATIC DATA (CINEMAS, GENRES, PRICING, BANNERS)
 	   ------------------------------------------------------------------ */
