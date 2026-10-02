@@ -40,10 +40,10 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 		if (filtered.length === 0) {
 			promoContainer.innerHTML = `
-				<div style="grid-column: 1 / -1; text-align: center; padding: 60px 20px; color: #94a3b8; background: #fff; border-radius: 12px; border: 1px dashed #cbd5e1;">
+				<div style="grid-column: 1 / -1; text-align: center; padding: 60px 20px; color: #a6adc8; background: #313244; border-radius: 12px; border: 1px dashed rgba(88, 91, 112, 0.4);">
 					<div style="font-size: 32px; margin-bottom: 12px;">🎟️</div>
-					<div style="font-size: 16px; font-weight: 700; color: #475569; margin-bottom: 6px;">Không có bài viết khuyến mãi nào trong danh mục này</div>
-					<p style="font-size: 13px; color: #94a3b8; margin: 0;">Vui lòng chọn danh mục khác hoặc quay lại sau nhé!</p>
+					<div style="font-size: 16px; font-weight: 700; color: #cdd6f4; margin-bottom: 6px;">Không có bài viết khuyến mãi nào trong danh mục này</div>
+					<p style="font-size: 13px; color: #a6adc8; margin: 0;">Vui lòng chọn danh mục khác hoặc quay lại sau nhé!</p>
 				</div>
 			`
 			return
@@ -110,31 +110,31 @@ document.addEventListener("DOMContentLoaded", async () => {
 		if (!modal || !modalBody) return
 
 		modalBody.innerHTML = `
-			<div style="position: relative; max-height: 240px; overflow: hidden; background: #000;">
+			<div style="position: relative; max-height: 240px; overflow: hidden; background: #11111b;">
 				<img src="${p.image}" alt="${p.title}" style="width: 100%; height: 240px; object-fit: cover; opacity: 0.9;" />
-				<span style="position: absolute; bottom: 16px; left: 20px; background: #015198; color: #fff; font-size: 12px; font-weight: 800; padding: 4px 10px; border-radius: 4px;">
+				<span style="position: absolute; bottom: 16px; left: 20px; background: #89b4fa; color: #11111b; font-size: 12px; font-weight: 800; padding: 4px 10px; border-radius: 4px;">
 					${p.categoryLabel || "ƯU ĐÃI"}
 				</span>
 			</div>
 			<div style="padding: 24px;">
-				<h2 style="font-size: 20px; font-weight: 800; color: #1e293b; margin: 0 0 10px; line-height: 1.35;">${p.title}</h2>
-				<div style="font-size: 13px; color: #64748b; margin-bottom: 16px; display: flex; gap: 8px; align-items: center;">
+				<h2 style="font-size: 20px; font-weight: 800; color: #cdd6f4; margin: 0 0 10px; line-height: 1.35;">${p.title}</h2>
+				<div style="font-size: 13px; color: #a6adc8; margin-bottom: 16px; display: flex; gap: 8px; align-items: center;">
 					<span>📅 ${p.date}</span>
 					<span>•</span>
-					<span style="color: #ef4444; font-weight: 700;">${p.discount}</span>
+					<span style="color: #f38ba8; font-weight: 700;">${p.discount}</span>
 				</div>
-				<div style="font-size: 14px; line-height: 1.6; color: #334155; margin-bottom: 24px;">
+				<div style="font-size: 14px; line-height: 1.6; color: #bac2de; margin-bottom: 24px;">
 					<p>${p.content || p.summary}</p>
 				</div>
 				${
 					p.code
 						? `
-					<div style="background: #f8fafc; border: 1.5px dashed #015198; border-radius: 8px; padding: 14px 18px; display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px;">
+					<div style="background: #313244; border: 1.5px dashed #89b4fa; border-radius: 8px; padding: 14px 18px; display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px;">
 						<div>
-							<div style="font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase;">Mã khuyến mãi áp dụng khi đặt vé:</div>
-							<div style="font-size: 18px; font-weight: 900; color: #015198; letter-spacing: 1px;">${p.code}</div>
+							<div style="font-size: 11px; font-weight: 700; color: #a6adc8; text-transform: uppercase;">Mã khuyến mãi áp dụng khi đặt vé:</div>
+							<div style="font-size: 18px; font-weight: 900; color: #89b4fa; letter-spacing: 1px;">${p.code}</div>
 						</div>
-						<button type="button" id="btn-copy-modal-code" style="background: #015198; color: #fff; border: none; padding: 8px 16px; border-radius: 6px; font-size: 13px; font-weight: 700; cursor: pointer;">
+						<button type="button" id="btn-copy-modal-code" style="background: #89b4fa; color: #11111b; border: none; padding: 8px 16px; border-radius: 6px; font-size: 13px; font-weight: 700; cursor: pointer;">
 							Sao Chép Mã
 						</button>
 					</div>
@@ -142,10 +142,10 @@ document.addEventListener("DOMContentLoaded", async () => {
 						: ""
 				}
 				<div style="display: flex; gap: 12px; justify-content: flex-end;">
-					<button type="button" id="btn-close-modal-action" style="background: #f1f5f9; border: 1px solid #cbd5e1; color: #475569; padding: 10px 20px; border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer;">
+					<button type="button" id="btn-close-modal-action" style="background: #45475a; border: 1px solid rgba(88, 91, 112, 0.4); color: #cdd6f4; padding: 10px 20px; border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer;">
 						Đóng
 					</button>
-					<a href="/movies.html" style="background: #015198; color: #fff; padding: 10px 24px; border-radius: 6px; font-size: 14px; font-weight: 700; text-decoration: none; display: flex; align-items: center; gap: 6px;">
+					<a href="/movies.html" style="background: #89b4fa; color: #11111b; padding: 10px 24px; border-radius: 6px; font-size: 14px; font-weight: 700; text-decoration: none; display: flex; align-items: center; gap: 6px;">
 						Đặt Vé Ngay
 					</a>
 				</div>

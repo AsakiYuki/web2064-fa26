@@ -68,12 +68,12 @@ document.addEventListener("DOMContentLoaded", async () => {
 		btn.addEventListener("click", () => {
 			filterBtns.forEach(b => {
 				b.classList.remove("active")
-				b.style.background = "#1e293b"
-				b.style.color = "#94a3b8"
+				b.style.background = "#313244"
+				b.style.color = "#a6adc8"
 			})
 			btn.classList.add("active")
-			btn.style.background = "#015198"
-			btn.style.color = "#fff"
+			btn.style.background = "#89b4fa"
+			btn.style.color = "#11111b"
 
 			currentHistoryFilter = btn.dataset.status
 			renderBookingHistory()
@@ -93,16 +93,16 @@ document.addEventListener("DOMContentLoaded", async () => {
 	const colorBtns = document.querySelectorAll(".color-preset-btn")
 
 	const colorGradients = {
-		gold: "linear-gradient(135deg, #f5a623 0%, #d97706 100%)",
-		blue: "linear-gradient(135deg, #0284c7 0%, #0369a1 100%)",
-		purple: "linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%)",
-		emerald: "linear-gradient(135deg, #10b981 0%, #047857 100%)",
+		gold: "linear-gradient(135deg, #fab387 0%, #eba0ac 100%)",
+		blue: "linear-gradient(135deg, #89b4fa 0%, #74c7ec 100%)",
+		purple: "linear-gradient(135deg, #cba6f7 0%, #b4befe 100%)",
+		emerald: "linear-gradient(135deg, #a6e3a1 0%, #94e2d5 100%)",
 	}
 
 	colorBtns.forEach(cbtn => {
 		cbtn.addEventListener("click", () => {
 			colorBtns.forEach(b => (b.style.borderColor = "transparent"))
-			cbtn.style.borderColor = "#fff"
+			cbtn.style.borderColor = "#cdd6f4"
 			const chosenColor = cbtn.dataset.color || "gold"
 			user.avatarColor = chosenColor
 			if (avatarPreview) {
@@ -267,11 +267,11 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 		if (history.length === 0) {
 			container.innerHTML = `
-				<div style="text-align: center; padding: 48px 20px; color: #94a3b8;">
+				<div style="text-align: center; padding: 48px 20px; color: #a6adc8;">
 					<span style="font-size: 48px; display: block; margin-bottom: 12px;">🎟️</span>
-					<h3 style="color: #fff; font-size: 18px; margin: 0 0 8px;">Bạn Chưa Có Lịch Sử Đặt Vé</h3>
+					<h3 style="color: #cdd6f4; font-size: 18px; margin: 0 0 8px;">Bạn Chưa Có Lịch Sử Đặt Vé</h3>
 					<p style="font-size: 14px; margin: 0 0 20px;">Hãy chọn phim yêu thích và trải nghiệm rạp Beta Cinemas ngay hôm nay!</p>
-					<a href="/movies.html" style="background: #015198; color: #fff; padding: 10px 24px; border-radius: 6px; text-decoration: none; font-weight: 700; font-size: 14px; display: inline-block;">Xem Danh Sách Phim</a>
+					<a href="/movies.html" style="background: #89b4fa; color: #11111b; padding: 10px 24px; border-radius: 6px; text-decoration: none; font-weight: 700; font-size: 14px; display: inline-block;">Xem Danh Sách Phim</a>
 				</div>
 			`
 			return
@@ -283,16 +283,16 @@ document.addEventListener("DOMContentLoaded", async () => {
 				const isCancelled = t.status === "cancelled"
 				let statusText = "Đã Thanh Toán"
 				let statusClass = "status-paid"
-				let statusBadgeStyle = "background: rgba(16, 185, 129, 0.2); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.4);"
+				let statusBadgeStyle = "background: rgba(166, 227, 161, 0.2); color: #a6e3a1; border: 1px solid rgba(166, 227, 161, 0.4);"
 
 				if (t.status === "done") {
 					statusText = "Đã Sử Dụng"
 					statusClass = "status-done"
-					statusBadgeStyle = "background: rgba(148, 163, 184, 0.2); color: #94a3b8; border: 1px solid rgba(148, 163, 184, 0.4);"
+					statusBadgeStyle = "background: rgba(148, 163, 184, 0.2); color: #bac2de; border: 1px solid rgba(148, 163, 184, 0.4);"
 				} else if (isCancelled) {
 					statusText = "Đã Hủy"
 					statusClass = "status-cancelled"
-					statusBadgeStyle = "background: rgba(239, 68, 68, 0.2); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.4);"
+					statusBadgeStyle = "background: rgba(243, 139, 168, 0.2); color: #f38ba8; border: 1px solid rgba(243, 139, 168, 0.4);"
 				}
 
 				return `
@@ -303,35 +303,35 @@ document.addEventListener("DOMContentLoaded", async () => {
 						<div class="ht-details">
 							<div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
 								<span class="ht-status-badge ${statusClass}" style="padding: 2px 8px; border-radius: 6px; font-size: 11px; font-weight: 700; ${statusBadgeStyle}">● ${statusText}</span>
-								<span style="font-size: 12px; color: #64748b;">${t.paymentMethod ? `Thanh toán qua ${t.paymentMethod.toUpperCase()}` : ""}</span>
+								<span style="font-size: 12px; color: #a6adc8;">${t.paymentMethod ? `Thanh toán qua ${t.paymentMethod.toUpperCase()}` : ""}</span>
 							</div>
-							<h3 class="ht-title" style="margin: 0 0 8px; font-size: 17px; font-weight: 800; color: #fff;">${t.movieTitle}</h3>
-							<div class="ht-meta-row" style="display: flex; gap: 14px; flex-wrap: wrap; font-size: 13px; color: #cbd5e1;">
+							<h3 class="ht-title" style="margin: 0 0 8px; font-size: 17px; font-weight: 800; color: #cdd6f4;">${t.movieTitle}</h3>
+							<div class="ht-meta-row" style="display: flex; gap: 14px; flex-wrap: wrap; font-size: 13px; color: #bac2de;">
 								<span>🏛️ <strong>${t.cinemaName}</strong></span>
 								<span>📽️ ${t.screenName || "Phòng 1"} (${t.formatName || "2D"})</span>
 								<span>📅 <strong>${t.time}</strong> - ${formatDateVN(t.date)}</span>
 							</div>
-							<div class="ht-meta-row" style="margin-top: 6px; display: flex; gap: 14px; flex-wrap: wrap; font-size: 13px; color: #cbd5e1;">
-								<span>💺 Ghế: <strong style="color:#10b981;">${t.seats}</strong></span>
+							<div class="ht-meta-row" style="margin-top: 6px; display: flex; gap: 14px; flex-wrap: wrap; font-size: 13px; color: #bac2de;">
+								<span>💺 Ghế: <strong style="color:#a6e3a1;">${t.seats}</strong></span>
 								<span>🍿 ${t.concessions || "Không kèm bắp"}</span>
-								<span>💳 <strong style="color:#fbbf24;">${formatCurrency(t.total)}</strong></span>
+								<span>💳 <strong style="color:#fab387;">${formatCurrency(t.total)}</strong></span>
 							</div>
-							<div class="ht-code" style="margin-top: 8px; font-family: monospace; font-size: 12px; color: #94a3b8;">Mã Vé: <span style="color:#38bdf8; font-weight:700;">${t.id}</span></div>
+							<div class="ht-code" style="margin-top: 8px; font-family: monospace; font-size: 12px; color: #a6adc8;">Mã Vé: <span style="color:#89b4fa; font-weight:700;">${t.id}</span></div>
 						</div>
 						<div class="ht-actions" style="display: flex; flex-direction: column; gap: 8px; min-width: 140px;">
-							<button type="button" class="btn-view-eticket" data-ticket-id="${t.id}" style="background: #015198; color: #fff; border: none; padding: 8px 14px; border-radius: 6px; font-weight: 700; font-size: 13px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px;">
+							<button type="button" class="btn-view-eticket" data-ticket-id="${t.id}" style="background: #89b4fa; color: #11111b; border: none; padding: 8px 14px; border-radius: 6px; font-weight: 700; font-size: 13px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px;">
 								🎟️ Xem Vé Điện Tử
 							</button>
 							${
 								isPaid
 									? `
-								<button type="button" class="btn-cancel-ticket" data-ticket-id="${t.id}" style="background: rgba(239, 68, 68, 0.15); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.3); padding: 6px 12px; border-radius: 6px; font-weight: 600; font-size: 12px; cursor: pointer;">
+								<button type="button" class="btn-cancel-ticket" data-ticket-id="${t.id}" style="background: rgba(243, 139, 168, 0.15); color: #f38ba8; border: 1px solid rgba(243, 139, 168, 0.3); padding: 6px 12px; border-radius: 6px; font-weight: 600; font-size: 12px; cursor: pointer;">
 									✕ Hủy Vé
 								</button>
 							`
 									: ""
 							}
-							<a href="/booking.html?movieId=${t.movieId || "utlan2"}" class="btn-rebook" style="text-align: center; background: rgba(255,255,255,0.06); color: #cbd5e1; border: 1px solid rgba(255,255,255,0.12); padding: 6px 12px; border-radius: 6px; font-weight: 600; font-size: 12px; text-decoration: none;">
+							<a href="/booking.html?movieId=${t.movieId || "utlan2"}" class="btn-rebook" style="text-align: center; background: rgba(49, 50, 68, 0.6); color: #cdd6f4; border: 1px solid rgba(88, 91, 112, 0.4); padding: 6px 12px; border-radius: 6px; font-weight: 600; font-size: 12px; text-decoration: none;">
 								Đặt Lại Suất Chiếu
 							</a>
 						</div>
@@ -378,8 +378,8 @@ document.addEventListener("DOMContentLoaded", async () => {
 			}),
 			{
 				size: 160,
-				darkColor: "#015198",
-				lightColor: "#ffffff",
+				darkColor: "#11111b",
+				lightColor: "#cdd6f4",
 				includeLogo: true,
 			}
 		)
@@ -388,7 +388,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 			<div class="eticket-success-page-wrap" style="margin: 0; box-shadow: none; max-width: 100%;">
 				<div class="eticket-top-banner">
 					<div class="et-success-badge">✓</div>
-					<h2 style="color:#fff; font-size: 20px; font-weight:900; margin:0 0 4px; text-transform:uppercase;">VÉ XEM PHIM ĐIỆN TỬ</h2>
+					<h2 style="color:#cdd6f4; font-size: 20px; font-weight:900; margin:0 0 4px; text-transform:uppercase;">VÉ XEM PHIM ĐIỆN TỬ</h2>
 					<p style="font-size: 13px; color: rgba(255,255,255,0.9); margin:0;">Mã vé: ${t.id} • Beta Cinemas</p>
 				</div>
 				<div class="eticket-ticket-pass">

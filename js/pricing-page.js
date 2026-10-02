@@ -57,7 +57,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 			<tr>
 				<td><strong>${row.name}</strong></td>
 				<td class="price-highlight">${formatCurrency(row.weekday)}</td>
-				<td class="price-highlight" style="color: #0284c7;">${formatCurrency(row.weekend)}</td>
+				<td class="price-highlight" style="color: #89b4fa;">${formatCurrency(row.weekend)}</td>
 				<td class="price-tuesday">${formatCurrency(row.tuesday)}</td>
 			</tr>
 		`

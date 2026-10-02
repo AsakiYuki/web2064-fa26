@@ -263,13 +263,13 @@ export class ShowtimePicker {
 			const targetMovie = this.movieId ? this.movies.find(m => m.id === this.movieId) : null
 			const movieNameText = targetMovie ? ` của phim <strong>${targetMovie.title}</strong>` : ""
 			return `
-				<div class="no-showtimes-notice" style="background: rgba(15, 23, 42, 0.6); border: 1px dashed rgba(255,255,255,0.15); border-radius: 12px; padding: 48px 24px; text-align: center; margin-top: 24px;">
+				<div class="no-showtimes-notice" style="background: rgba(24, 24, 37, 0.7); border: 1px dashed rgba(88, 91, 112, 0.4); border-radius: 12px; padding: 48px 24px; text-align: center; margin-top: 24px;">
 					<div class="notice-icon" style="font-size: 48px; margin-bottom: 12px;">🎬</div>
-					<h3 style="color: #fff; font-size: 18px; margin: 0 0 8px;">Không Có Suất Chiếu Vào Ngày Này</h3>
-					<p style="color: #94a3b8; font-size: 14px; margin: 0 0 16px; max-width: 520px; margin-left: auto; margin-right: auto;">
+					<h3 style="color: #cdd6f4; font-size: 18px; margin: 0 0 8px;">Không Có Suất Chiếu Vào Ngày Này</h3>
+					<p style="color: #a6adc8; font-size: 14px; margin: 0 0 16px; max-width: 520px; margin-left: auto; margin-right: auto;">
 						Hiện tại không có rạp nào có lịch chiếu${movieNameText} vào ngày <strong>${formatDateVN(this.selectedDate)}</strong>.
 					</p>
-					<p style="color: #38bdf8; font-size: 13px; font-weight: 600; margin: 0;">
+					<p style="color: #89b4fa; font-size: 13px; font-weight: 600; margin: 0;">
 						💡 Quý khách vui lòng chọn các ngày khác có suất chiếu ở mục <strong>1. CHỌN NGÀY XEM</strong> phía trên.
 					</p>
 				</div>
@@ -440,18 +440,18 @@ export class ShowtimePicker {
 			}
 
 			html += `
-				<div class="schedule-movie-row" style="background:#fff; border-radius:12px; border:1px solid #e2e8f0; padding:20px; margin-bottom:20px; box-shadow:0 2px 8px rgba(0,0,0,0.05); display:grid; grid-template-columns: 140px 1fr; gap:20px;">
+				<div class="schedule-movie-row" style="background:#313244; border-radius:12px; border:1px solid rgba(88, 91, 112, 0.4); padding:20px; margin-bottom:20px; box-shadow:0 8px 24px rgba(0,0,0,0.25); display:grid; grid-template-columns: 140px 1fr; gap:20px;">
 					<div class="schedule-movie-thumb" style="aspect-ratio:2/3; border-radius:8px; overflow:hidden; position:relative;">
 						<a href="/movie-detail.html?id=${mId}">
 							<img src="${movieInfo.poster}" alt="${movieInfo.title}" style="width:100%; height:100%; object-fit:cover;" />
-							<span style="position:absolute; top:6px; left:6px; background:#e63946; color:#fff; font-size:10px; font-weight:800; padding:2px 6px; border-radius:3px;">${movieInfo.badge || "T18"}</span>
+							<span style="position:absolute; top:6px; left:6px; background:#f38ba8; color:#11111b; font-size:10px; font-weight:800; padding:2px 6px; border-radius:3px;">${movieInfo.badge || "T18"}</span>
 						</a>
 					</div>
 					<div class="schedule-movie-content" style="display:flex; flex-direction:column; gap:8px;">
-						<h3 style="margin:0; font-size:18px; font-weight:800; color:#1a1a2e;">
+						<h3 style="margin:0; font-size:18px; font-weight:800; color:#cdd6f4;">
 							<a href="/movie-detail.html?id=${mId}" style="color:inherit; text-decoration:none;">${movieInfo.title}</a>
 						</h3>
-						<div style="font-size:13px; color:#6b7280; display:flex; gap:12px; flex-wrap:wrap;">
+						<div style="font-size:13px; color:#a6adc8; display:flex; gap:12px; flex-wrap:wrap;">
 							<span>🎭 ${movieInfo.genre || "Hành động"}</span>
 							<span>⏱️ ${movieInfo.duration || "110 phút"}</span>
 							${movieInfo.ratingScore ? `<span>⭐ ${movieInfo.ratingScore}/10</span>` : ""}
@@ -462,9 +462,9 @@ export class ShowtimePicker {
 								.map(
 									g => `
 								<div style="margin-bottom:12px;">
-									<div style="font-size:13px; font-weight:700; color:#0284c7; margin-bottom:8px; display:flex; align-items:center; gap:6px;">
-										<span style="background:#e0f2fe; padding:2px 8px; border-radius:4px;">${g.format}</span>
-										<span style="color:#64748b; font-size:12px;">- ${g.screenName}</span>
+									<div style="font-size:13px; font-weight:700; color:#89b4fa; margin-bottom:8px; display:flex; align-items:center; gap:6px;">
+										<span style="background:rgba(137, 180, 250, 0.15); color:#89b4fa; padding:2px 8px; border-radius:4px;">${g.format}</span>
+										<span style="color:#a6adc8; font-size:12px;">- ${g.screenName}</span>
 									</div>
 									<div class="slots-grid" style="display:grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap:10px;">
 										${g.slots
