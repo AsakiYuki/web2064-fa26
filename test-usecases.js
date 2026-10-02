@@ -228,6 +228,21 @@ async function runAllTests() {
 	})
 	assert(deleteMovieRes.status === 200, 'Xóa phim (DELETE /movies/:id) thành công')
 
+	// 2.6 [Ngoại lệ] Đọc chi tiết phim với ID không tồn tại
+	const getNonExistentMovieRes = await fetch(`${BACKEND_URL}/movies/nonexistent_movie_9999`)
+	assert(getNonExistentMovieRes.status === 404, 'Đọc chi tiết phim không tồn tại trả về HTTP 404 Not Found')
+
+	// 2.7 [Ngoại lệ] Xóa phim đã bị xóa hoặc ID không tồn tại
+	const deleteNonExistentMovieRes = await fetch(`${BACKEND_URL}/movies/nonexistent_movie_9999`, {
+		method: 'DELETE',
+	})
+	assert(deleteNonExistentMovieRes.status === 404, 'Xóa phim không tồn tại trả về HTTP 404 Not Found')
+
+	// 2.8 Phân loại danh sách phim theo tab Phim Đang Chiếu vs Phim Sắp Chiếu
+	const nowShowing = movies.filter(m => m.tab === 'nowshowing')
+	const upcoming = movies.filter(m => m.tab === 'upcoming')
+	assert(nowShowing.length > 0 && upcoming.length > 0, `Phân loại phim chính xác (${nowShowing.length} đang chiếu, ${upcoming.length} sắp chiếu)`)
+
 	/* ------------------------------------------------------------------
 	   USE CASE 3: SHOWTIMES CRUD VIA JSON-SERVER
 	   ------------------------------------------------------------------ */
