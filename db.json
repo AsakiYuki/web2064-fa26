@@ -46,26 +46,6 @@
       "city": "Hà Nội",
       "cinemaFavorite": "beta-thainguyen",
       "createdAt": "2026-01-01T00:00:00.000Z"
-    },
-    {
-      "email": "tester_1790915054198@example.com",
-      "password": "$2a$10$lD3/MmtSbfG.kS1FkGxLxurfNyr6f00Fb41mFUv27jH3fGkbCdEw6",
-      "name": "Tester Automation",
-      "phone": "0917823019",
-      "rank": "Thành viên Beta Mới",
-      "points": 120,
-      "id": 1000,
-      "city": "Đà Nẵng"
-    },
-    {
-      "email": "tester_1790938233860@example.com",
-      "password": "$2a$10$NsMbAPcytKaXRClpByiCEuUgKvLWhNkUbgNym1L61WICOVm9emIKq",
-      "name": "Tester Automation",
-      "phone": "0987311445",
-      "rank": "Thành viên Beta Mới",
-      "points": 120,
-      "id": 1001,
-      "city": "Đà Nẵng"
     }
   ],
   "movies": [
@@ -2279,6 +2259,27 @@
       "userEmail": "nam.nguyen@example.com",
       "bookingDate": "2026-09-26T07:30:00.000Z",
       "status": "paid"
+    },
+    {
+      "id": "BT-718320",
+      "movieId": "bongma",
+      "movieTitle": "Bóng Ma Nhà Hát",
+      "moviePoster": "/poster/poster_bongma.jpg",
+      "cinemaId": "beta-thanhxuan",
+      "cinemaName": "Beta Thanh Xuân (Hà Nội)",
+      "screenName": "Phòng chiếu VIP 2",
+      "formatName": "2D Lồng Tiếng",
+      "date": "2026-09-20",
+      "time": "20:00",
+      "seats": "F07, F08",
+      "concessions": "Không kèm bắp nước",
+      "total": 160000,
+      "paymentMethod": "vnpay",
+      "userName": "Nguyễn Văn An",
+      "userPhone": "0912345678",
+      "userEmail": "nguyen.an@gmail.com",
+      "bookingDate": "2026-09-20T13:00:00.000Z",
+      "status": "done"
     }
   ],
   "member_rewards": [
