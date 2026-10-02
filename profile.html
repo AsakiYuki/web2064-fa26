@@ -11,6 +11,13 @@
 	<link rel="preconnect" href="https://fonts.googleapis.com" />
 	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 	<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+	<script>
+		(function () {
+			const t = localStorage.getItem("beta_theme") || "mocha";
+			document.documentElement.setAttribute("data-theme", t);
+			document.documentElement.style.colorScheme = t === "latte" ? "light" : "dark";
+		})();
+	</script>
 </head>
 
 <body class="profile-page">
@@ -21,7 +28,13 @@
 				<a href="#" id="btn-login">Đăng nhập</a>
 				<div class="divider"></div>
 				<a href="#" id="btn-register">Đăng ký</a>
-				<span style="font-size: 18px; margin-left: 4px; cursor: pointer" title="English">🇬🇧</span>
+				<div class="divider"></div>
+				<button type="button" class="theme-toggle-btn" id="theme-toggle-btn" aria-label="Chuyển chế độ Giao diện Sáng / Tối" title="Chuyển chế độ Giao diện Sáng (Latte) / Tối (Mocha)">
+					<span class="theme-toggle-icon">🌙</span>
+					<span class="theme-toggle-text">Tối</span>
+				</button>
+				<div class="divider"></div>
+				<span style="font-size: 18px; margin-left: 2px; cursor: pointer" title="English">🇬🇧</span>
 			</div>
 		</div>
 		<div class="header-navigator">
