@@ -1,0 +1,1007 @@
+/* ==========================================================================
+   BETA CINEMAS - CATPPUCCIN LATTE (LIGHT MODE THEME)
+   Primary Accent: Blue (#1e66f5) | Background: Base (#eff1f5)
+   ========================================================================== */
+@use 'variables' as *;
+
+[data-theme="latte"] {
+	color-scheme: light;
+
+	// --- Root Body & Base Elements ---
+	body {
+		background-color: $latte-base;
+		color: $latte-text;
+	}
+
+	::selection {
+		background-color: rgba($latte-blue, 0.25);
+		color: $latte-text;
+	}
+
+	/* Custom Scrollbar - Catppuccin Latte */
+	::-webkit-scrollbar-track {
+		background: $latte-mantle;
+	}
+
+	::-webkit-scrollbar-thumb {
+		background: $latte-surface2;
+		border-radius: $radius-full;
+		border: 2px solid $latte-mantle;
+
+		&:hover {
+			background: $latte-overlay1;
+		}
+	}
+
+	// --- Header & Navigation ---
+	.main-header {
+		box-shadow: 0 4px 18px rgba(76, 79, 105, 0.08);
+
+		.header-account-manager {
+			background-color: $latte-crust;
+			border-bottom: 1px solid rgba($latte-surface2, 0.45);
+
+			.container {
+				a,
+				span {
+					color: $latte-subtext1;
+
+					&:hover {
+						color: $latte-blue;
+						background-color: rgba($latte-blue, 0.1);
+					}
+				}
+
+				.divider {
+					background-color: $latte-surface2;
+				}
+			}
+		}
+
+		.header-navigator {
+			background-color: $latte-mantle;
+			border-bottom: 2px solid $latte-blue;
+
+			.nav-links a {
+				color: $latte-text;
+
+				&:hover,
+				&.active {
+					color: $latte-blue;
+					background-color: rgba($latte-blue, 0.08);
+				}
+			}
+		}
+	}
+
+	// Cinema Selector in Header
+	.cinema-selector {
+		background: #ffffff;
+		border-color: $latte-surface2;
+		color: $latte-text;
+
+		&:hover {
+			border-color: $latte-blue;
+			color: $latte-blue;
+			background: $latte-base;
+		}
+	}
+
+	.cinema-dropdown {
+		background: #ffffff;
+		border-color: $latte-surface2;
+		box-shadow: 0 10px 30px rgba(76, 79, 105, 0.15);
+
+		.cinema-dropdown-item {
+			color: $latte-text;
+			border-bottom: 1px solid rgba($latte-surface2, 0.25);
+
+			&:hover,
+			&.active {
+				background: rgba($latte-blue, 0.1);
+				color: $latte-blue;
+			}
+		}
+	}
+
+	// Header User Account Badge & Dropdown
+	.user-account-badge {
+		background: rgba($latte-blue, 0.12);
+		border-color: rgba($latte-blue, 0.35);
+		color: $latte-text;
+
+		.user-avatar-circle {
+			background: $latte-blue;
+			color: #ffffff;
+		}
+
+		.user-name-text {
+			color: $latte-text;
+		}
+
+		&:hover,
+		&.active {
+			background: rgba($latte-blue, 0.18);
+			border-color: $latte-blue;
+		}
+
+		.user-profile-dropdown {
+			background: #ffffff;
+			border-color: $latte-surface2;
+			box-shadow: 0 12px 32px rgba(76, 79, 105, 0.18);
+
+			.up-header {
+				background: $latte-mantle;
+				border-bottom-color: $latte-surface2;
+
+				.up-rank {
+					color: $latte-peach;
+				}
+
+				.up-points {
+					color: $latte-blue;
+				}
+			}
+
+			.up-item {
+				color: $latte-text;
+
+				&:hover {
+					background: rgba($latte-blue, 0.08);
+					color: $latte-blue;
+				}
+			}
+
+			.up-logout {
+				color: $latte-red;
+
+				&:hover {
+					background: rgba($latte-red, 0.08);
+					color: $latte-red;
+				}
+			}
+		}
+	}
+
+	// Mobile Navigation Drawer
+	.mobile-nav-drawer {
+		background: $latte-base;
+		border-right: 1px solid $latte-surface2;
+
+		.drawer-header {
+			background: $latte-mantle;
+			border-bottom-color: $latte-surface2;
+
+			.drawer-close-btn {
+				color: $latte-text;
+
+				&:hover {
+					color: $latte-red;
+				}
+			}
+		}
+
+		.drawer-account-box {
+			background: #ffffff;
+			border: 1px solid $latte-surface2;
+
+			.drawer-user-info .d-avatar {
+				background: $latte-blue;
+				color: #ffffff;
+			}
+
+			.drawer-user-info .d-details strong {
+				color: $latte-text;
+			}
+
+			.drawer-user-info .d-details span {
+				color: $latte-peach;
+			}
+
+			.btn-drawer-auth {
+				background: $latte-blue;
+				color: #ffffff;
+
+				&:hover {
+					background: $latte-sapphire;
+				}
+			}
+		}
+
+		.drawer-links-list a {
+			color: $latte-text;
+			border-bottom-color: rgba($latte-surface2, 0.35);
+
+			&:hover {
+				color: $latte-blue;
+				background: rgba($latte-blue, 0.08);
+			}
+		}
+
+		.drawer-footer {
+			border-top-color: $latte-surface2;
+			color: $latte-subtext0;
+		}
+	}
+
+	// Mega Menu
+	.megamenu-panel {
+		background: #ffffff;
+		border-color: $latte-surface2;
+		box-shadow: 0 16px 40px rgba(76, 79, 105, 0.16);
+
+		.megamenu-column {
+			border-right-color: rgba($latte-surface2, 0.35);
+		}
+
+		.megamenu-title {
+			color: $latte-blue;
+		}
+
+		.megamenu-link {
+			color: $latte-text;
+
+			&:hover {
+				color: $latte-blue;
+				background: rgba($latte-blue, 0.08);
+			}
+		}
+	}
+
+	// Modals & Authentication Popup
+	.modal-backdrop {
+		background-color: rgba(76, 79, 105, 0.45);
+	}
+
+	.modal-content,
+	.auth-modal-content {
+		background-color: #ffffff;
+		border-color: $latte-surface2;
+		color: $latte-text;
+		box-shadow: 0 20px 50px rgba(76, 79, 105, 0.22);
+
+		.modal-close-btn {
+			color: $latte-overlay1;
+
+			&:hover {
+				color: $latte-red;
+			}
+		}
+	}
+
+	.auth-header-tabs {
+		background-color: $latte-mantle;
+		border-bottom-color: $latte-surface2;
+
+		.auth-tab-btn {
+			color: $latte-subtext0;
+
+			&.active {
+				color: $latte-blue;
+				background-color: #ffffff;
+				border-bottom-color: $latte-blue;
+			}
+		}
+	}
+
+	.auth-divider-line {
+		&::before {
+			background-color: $latte-surface2;
+		}
+
+		span {
+			background-color: #ffffff;
+			color: $latte-subtext0;
+		}
+	}
+
+	.btn-social {
+		background-color: $latte-mantle;
+		border-color: $latte-surface2;
+		color: $latte-text;
+
+		&:hover {
+			background-color: $latte-surface0;
+		}
+	}
+
+	// Form Controls & Inputs
+	input,
+	select,
+	textarea {
+		background-color: #ffffff;
+		border-color: $latte-surface2;
+		color: $latte-text;
+
+		&::placeholder {
+			color: $latte-overlay0;
+		}
+
+		&:focus {
+			border-color: $latte-blue;
+			box-shadow: 0 0 0 3px rgba($latte-blue, 0.2);
+			outline: none;
+		}
+	}
+
+	.input-icon-wrap input {
+		background-color: #ffffff;
+	}
+
+	// Buttons
+	.btn-primary,
+	.btn-submit-auth,
+	.btn-book-now,
+	.btn-buy-ticket,
+	.btn-checkout-confirm {
+		background-color: $latte-blue;
+		color: #ffffff;
+
+		&:hover {
+			background-color: $latte-sapphire;
+			box-shadow: 0 6px 16px rgba($latte-blue, 0.3);
+		}
+	}
+
+	.btn-secondary {
+		background-color: $latte-mantle;
+		border-color: $latte-surface2;
+		color: $latte-text;
+
+		&:hover {
+			background-color: $latte-surface0;
+			color: $latte-blue;
+		}
+	}
+
+	.btn-outline {
+		border-color: $latte-blue;
+		color: $latte-blue;
+
+		&:hover {
+			background-color: $latte-blue;
+			color: #ffffff;
+		}
+	}
+
+	// Quick Booking Bar
+	.quick-booking-bar {
+		background-color: #ffffff;
+		border-color: $latte-surface2;
+		box-shadow: 0 8px 24px rgba(76, 79, 105, 0.1);
+
+		.qb-item select,
+		.quick-booking-select {
+			background-color: $latte-mantle;
+			border-color: $latte-surface2;
+			color: $latte-text;
+		}
+	}
+
+	// Movie Cards & Grids
+	.movie-card {
+		background-color: #ffffff;
+		border-color: $latte-surface2;
+		box-shadow: 0 4px 14px rgba(76, 79, 105, 0.08);
+
+		&:hover {
+			border-color: $latte-blue;
+			box-shadow: 0 10px 28px rgba(30, 102, 245, 0.15);
+		}
+
+		.movie-info {
+			background-color: #ffffff;
+		}
+
+		.movie-title a {
+			color: $latte-text;
+
+			&:hover {
+				color: $latte-blue;
+			}
+		}
+
+		.movie-genre,
+		.movie-duration {
+			color: $latte-subtext0;
+		}
+	}
+
+	.filter-pill,
+	.btn-filter {
+		background-color: #ffffff;
+		border-color: $latte-surface2;
+		color: $latte-text;
+
+		&:hover {
+			border-color: $latte-blue;
+			color: $latte-blue;
+		}
+
+		&.active {
+			background-color: $latte-blue;
+			border-color: $latte-blue;
+			color: #ffffff;
+		}
+	}
+
+	// Movie Detail Page
+	.detail-hero-section,
+	.detail-content-wrap {
+		background-color: #ffffff;
+		border-color: $latte-surface2;
+	}
+
+	.detail-title {
+		color: $latte-text;
+	}
+
+	.detail-meta-item {
+		color: $latte-subtext1;
+	}
+
+	.showtime-date-picker .date-tab,
+	.schedule-date-nav .date-nav-btn {
+		background-color: #ffffff;
+		border-color: $latte-surface2;
+		color: $latte-text;
+
+		&:hover {
+			border-color: $latte-blue;
+			color: $latte-blue;
+		}
+
+		&.active {
+			background-color: $latte-blue;
+			border-color: $latte-blue;
+			color: #ffffff;
+		}
+	}
+
+	.showtime-chip,
+	.st-item {
+		background-color: #ffffff;
+		border-color: $latte-surface2;
+		color: $latte-text;
+
+		&:hover {
+			border-color: $latte-blue;
+			color: $latte-blue;
+			background-color: rgba($latte-blue, 0.08);
+		}
+	}
+
+	// Cinema Cards & Sections
+	.cinema-card {
+		background-color: #ffffff;
+		border-color: $latte-surface2;
+
+		&:hover {
+			border-color: $latte-blue;
+			box-shadow: 0 8px 24px rgba(30, 102, 245, 0.12);
+		}
+
+		.cinema-card-header {
+			background-color: $latte-mantle;
+			border-bottom-color: $latte-surface2;
+		}
+
+		.cinema-name {
+			color: $latte-text;
+		}
+
+		.cinema-address {
+			color: $latte-subtext0;
+		}
+
+		.cinema-hotline {
+			color: $latte-peach;
+		}
+
+		.cinema-feature-tag {
+			background-color: rgba($latte-blue, 0.1);
+			color: $latte-blue;
+		}
+	}
+
+	// News & Promotion Cards
+	.news-card {
+		background-color: #ffffff;
+		border-color: $latte-surface2;
+
+		&:hover {
+			border-color: $latte-blue;
+			box-shadow: 0 8px 24px rgba(30, 102, 245, 0.12);
+		}
+
+		.news-title {
+			color: $latte-text;
+
+			&:hover {
+				color: $latte-blue;
+			}
+		}
+
+		.news-desc {
+			color: $latte-subtext0;
+		}
+
+		.news-date {
+			color: $latte-overlay1;
+		}
+	}
+
+	// Concessions / Combo Cards
+	.concession-card {
+		background-color: #ffffff;
+		border-color: $latte-surface2;
+
+		&:hover {
+			border-color: $latte-blue;
+		}
+
+		.concession-title {
+			color: $latte-text;
+		}
+
+		.concession-desc {
+			color: $latte-subtext0;
+		}
+
+		.concession-price {
+			color: $latte-peach;
+		}
+
+		.qty-btn {
+			background-color: $latte-mantle;
+			border-color: $latte-surface2;
+			color: $latte-text;
+
+			&:hover {
+				background-color: $latte-surface0;
+				color: $latte-blue;
+			}
+		}
+	}
+
+	// Member Page
+	.member-hero {
+		background: linear-gradient(135deg, $latte-mantle 0%, $latte-crust 100%);
+		border-bottom: 1px solid $latte-surface2;
+
+		.member-hero-title {
+			color: $latte-text;
+		}
+
+		.member-hero-sub {
+			color: $latte-subtext0;
+		}
+	}
+
+	.tier-card,
+	.member-tier-card {
+		background-color: #ffffff;
+		border-color: $latte-surface2;
+
+		&.active {
+			border-color: $latte-blue;
+			box-shadow: 0 8px 24px rgba(30, 102, 245, 0.15);
+		}
+
+		.tier-title {
+			color: $latte-text;
+		}
+
+		.tier-benefit-item {
+			color: $latte-subtext1;
+		}
+	}
+
+	.reward-card,
+	.member-reward-card {
+		background-color: #ffffff;
+		border-color: $latte-surface2;
+
+		.reward-title {
+			color: $latte-text;
+		}
+
+		.reward-points-badge {
+			background-color: rgba($latte-peach, 0.15);
+			color: $latte-peach;
+		}
+	}
+
+	// Tables: Member, Pricing, History
+	table,
+	.pricing-table,
+	.point-history-table,
+	.admin-table {
+		background-color: #ffffff;
+		border-color: $latte-surface2;
+
+		th {
+			background-color: $latte-mantle;
+			color: $latte-text;
+			border-bottom: 2px solid $latte-surface2;
+		}
+
+		td {
+			border-bottom: 1px solid rgba($latte-surface2, 0.4);
+			color: $latte-text;
+		}
+
+		tr:hover td {
+			background-color: rgba($latte-blue, 0.04);
+		}
+	}
+
+	// Booking Room & Seat Map
+	.booking-room {
+		background-color: #ffffff;
+		border-color: $latte-surface2;
+	}
+
+	.screen-display {
+		background: linear-gradient(180deg, rgba($latte-blue, 0.2) 0%, transparent 100%);
+		border-top: 4px solid $latte-blue;
+		color: $latte-subtext0;
+	}
+
+	.seat {
+		background-color: $latte-surface0;
+		border-color: $latte-surface2;
+		color: $latte-text;
+
+		&:hover:not(.seat-occupied) {
+			border-color: $latte-blue;
+			transform: scale(1.12);
+		}
+
+		&.seat-vip {
+			background-color: rgba($latte-peach, 0.2);
+			border-color: $latte-peach;
+			color: $latte-peach;
+		}
+
+		&.seat-sweetbox {
+			background-color: rgba($latte-mauve, 0.2);
+			border-color: $latte-mauve;
+			color: $latte-mauve;
+		}
+
+		&.seat-selected {
+			background-color: $latte-green !important;
+			border-color: $latte-green !important;
+			color: #ffffff !important;
+		}
+
+		&.seat-occupied {
+			background-color: $latte-surface2 !important;
+			border-color: $latte-surface2 !important;
+			color: $latte-overlay1 !important;
+			cursor: not-allowed;
+		}
+	}
+
+	.booking-summary-card {
+		background-color: #ffffff;
+		border-color: $latte-surface2;
+		box-shadow: 0 8px 24px rgba(76, 79, 105, 0.1);
+
+		.bs-row {
+			border-bottom-color: rgba($latte-surface2, 0.35);
+		}
+
+		.bs-label {
+			color: $latte-subtext0;
+		}
+
+		.bs-value {
+			color: $latte-text;
+		}
+
+		.bs-total-amount {
+			color: $latte-peach;
+		}
+	}
+
+	// Checkout Page
+	.checkout-card,
+	.summary-box {
+		background-color: #ffffff;
+		border-color: $latte-surface2;
+	}
+
+	.payment-method-item {
+		background-color: $latte-mantle;
+		border-color: $latte-surface2;
+		color: $latte-text;
+
+		&:hover {
+			border-color: $latte-blue;
+		}
+
+		&.active {
+			border-color: $latte-blue;
+			background-color: rgba($latte-blue, 0.08);
+		}
+	}
+
+	.countdown-timer {
+		background-color: rgba($latte-peach, 0.12);
+		border-color: $latte-peach;
+		color: $latte-peach;
+	}
+
+	// Profile Page
+	.profile-sidebar {
+		background-color: #ffffff;
+		border-color: $latte-surface2;
+	}
+
+	.profile-nav-link {
+		color: $latte-subtext0;
+
+		&:hover {
+			color: $latte-blue;
+			background-color: rgba($latte-blue, 0.06);
+		}
+
+		&.active {
+			color: $latte-blue;
+			background-color: rgba($latte-blue, 0.1);
+			border-left-color: $latte-blue;
+		}
+	}
+
+	.profile-content-card {
+		background-color: #ffffff;
+		border-color: $latte-surface2;
+	}
+
+	// Admin Portal
+	.admin-sidebar {
+		background-color: $latte-mantle;
+		border-right-color: $latte-surface2;
+
+		.admin-sidebar-logo {
+			border-bottom-color: $latte-surface2;
+		}
+
+		.admin-nav-item {
+			color: $latte-subtext1;
+
+			&:hover,
+			&.active {
+				color: $latte-blue;
+				background-color: rgba($latte-blue, 0.12);
+			}
+		}
+	}
+
+	.admin-topbar {
+		background-color: #ffffff;
+		border-bottom-color: $latte-surface2;
+
+		.topbar-breadcrumb h1 {
+			color: $latte-text;
+		}
+
+		.topbar-breadcrumb span {
+			color: $latte-subtext0;
+		}
+
+		.btn-topbar-action {
+			background-color: $latte-mantle;
+			border-color: $latte-surface2;
+			color: $latte-text;
+
+			&:hover {
+				background-color: $latte-surface0;
+				color: $latte-blue;
+			}
+		}
+	}
+
+	.admin-viewport {
+		background-color: $latte-base;
+	}
+
+	.kpi-card {
+		background-color: #ffffff;
+		border-color: $latte-surface2;
+
+		.kpi-title {
+			color: $latte-subtext0;
+		}
+
+		.kpi-value {
+			color: $latte-text;
+		}
+	}
+
+	.admin-card,
+	.admin-table-container {
+		background-color: #ffffff;
+		border-color: $latte-surface2;
+	}
+
+	.auth-gate-card {
+		background-color: #ffffff;
+		border-color: $latte-surface2;
+		box-shadow: 0 16px 40px rgba(76, 79, 105, 0.16);
+
+		.auth-gate-title {
+			color: $latte-text;
+		}
+
+		.auth-gate-desc {
+			color: $latte-subtext0;
+		}
+	}
+
+	// Footer
+	.main-footer {
+		background-color: $latte-mantle;
+		border-top: 1px solid $latte-surface2;
+		color: $latte-text;
+
+		.footer-brand img {
+			filter: none;
+		}
+
+		.footer-brand .footer-links-list li a {
+			color: $latte-subtext0;
+
+			&::before {
+				color: $latte-blue;
+			}
+
+			&:hover {
+				color: $latte-blue;
+			}
+		}
+
+		.footer-brand .footer-download-title,
+		.footer-cinema-cluster h3,
+		.footer-contact h3 {
+			color: $latte-blue;
+			border-bottom-color: rgba($latte-blue, 0.3);
+
+			&::before {
+				background: $latte-blue;
+			}
+		}
+
+		.footer-cinema-cluster .cinema-cluster-list li a {
+			color: $latte-subtext0;
+
+			&::before {
+				color: $latte-blue;
+			}
+
+			&:hover {
+				color: $latte-blue;
+			}
+		}
+
+		.footer-contact {
+			.company-name {
+				color: $latte-text;
+			}
+
+			p {
+				color: $latte-subtext0;
+			}
+
+			.contact-group .contact-group-title {
+				color: $latte-text;
+			}
+
+			.social-icons .social-icon {
+				background: $latte-surface0;
+				border-color: $latte-surface2;
+				color: $latte-text;
+
+				&:hover {
+					background: $latte-blue;
+					color: #ffffff;
+					border-color: $latte-blue;
+				}
+			}
+
+			.bct-badge {
+				background: #ffffff;
+				border-color: $latte-surface2;
+
+				.bct-badge-text {
+					color: $latte-text;
+				}
+
+				.bct-badge-sub {
+					color: $latte-subtext0;
+				}
+			}
+		}
+
+		.footer-bottom {
+			background-color: $latte-crust;
+			border-top-color: rgba($latte-surface2, 0.5);
+
+			p {
+				color: $latte-subtext0;
+			}
+		}
+	}
+
+	// Toast
+	.toast {
+		background-color: #ffffff;
+		border-color: $latte-surface2;
+		color: $latte-text;
+		box-shadow: 0 10px 28px rgba(76, 79, 105, 0.18);
+	}
+}
+
+/* ==========================================================================
+   THEME TOGGLE BUTTON COMPONENT
+   ========================================================================== */
+.theme-toggle-btn {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	background: rgba(137, 180, 250, 0.14);
+	border: 1px solid rgba(137, 180, 250, 0.35);
+	color: $ctp-blue;
+	padding: 4px 10px;
+	border-radius: $radius-full;
+	font-size: 12px;
+	font-weight: 600;
+	cursor: pointer;
+	transition: $transition-base;
+	user-select: none;
+
+	.theme-toggle-icon {
+		font-size: 14px;
+		line-height: 1;
+		transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+	}
+
+	.theme-toggle-text {
+		font-size: 11px;
+		text-transform: uppercase;
+		letter-spacing: 0.5px;
+	}
+
+	&:hover {
+		background: rgba(137, 180, 250, 0.25);
+		border-color: $ctp-blue;
+		transform: translateY(-1px);
+		box-shadow: 0 2px 8px rgba(137, 180, 250, 0.25);
+
+		.theme-toggle-icon {
+			transform: rotate(20deg) scale(1.15);
+		}
+	}
+
+	&:active {
+		transform: translateY(0) scale(0.96);
+	}
+}
+
+[data-theme="latte"] .theme-toggle-btn {
+	background: rgba(30, 102, 245, 0.1);
+	border: 1px solid rgba(30, 102, 245, 0.3);
+	color: $latte-blue;
+
+	&:hover {
+		background: rgba(30, 102, 245, 0.18);
+		border-color: $latte-blue;
+		box-shadow: 0 2px 8px rgba(30, 102, 245, 0.2);
+
+		.theme-toggle-icon {
+			transform: rotate(45deg) scale(1.15);
+		}
+	}
+}
