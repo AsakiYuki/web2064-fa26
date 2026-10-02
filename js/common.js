@@ -62,6 +62,99 @@ export function showToast(message, type = "info", duration = 3500) {
 }
 
 /* ==========================================================================
+   THEME MANAGER (CATPPUCCIN MOCHA / CATPPUCCIN LATTE)
+   ========================================================================== */
+export const THEME_KEY = "beta_theme"
+
+export function getSavedTheme() {
+	if (typeof localStorage === "undefined") return "mocha"
+	return localStorage.getItem(THEME_KEY) || "mocha"
+}
+
+export function applyTheme(theme, notify = false) {
+	const validTheme = theme === "latte" ? "latte" : "mocha"
+	if (typeof document !== "undefined") {
+		document.documentElement.setAttribute("data-theme", validTheme)
+		document.documentElement.style.colorScheme = validTheme === "latte" ? "light" : "dark"
+
+		// Update all toggle buttons currently on page
+		document.querySelectorAll(".theme-toggle-btn").forEach(btn => {
+			const iconEl = btn.querySelector(".theme-toggle-icon")
+			const textEl = btn.querySelector(".theme-toggle-text")
+			if (iconEl) iconEl.textContent = validTheme === "latte" ? "☀️" : "🌙"
+			if (textEl) textEl.textContent = validTheme === "latte" ? "Sáng" : "Tối"
+			btn.setAttribute(
+				"title",
+				validTheme === "latte"
+					? "Giao diện: Sáng (Catppuccin Latte) - Nhấp để chuyển sang Tối (Catppuccin Mocha)"
+					: "Giao diện: Tối (Catppuccin Mocha) - Nhấp để chuyển sang Sáng (Catppuccin Latte)",
+			)
+			btn.setAttribute("aria-label", `Giao diện hiện tại: ${validTheme === "latte" ? "Sáng" : "Tối"}. Nhấp để đổi.`)
+		})
+	}
+
+	try {
+		if (typeof localStorage !== "undefined") {
+			localStorage.setItem(THEME_KEY, validTheme)
+		}
+	} catch (e) {
+		console.warn("Could not save theme to localStorage:", e)
+	}
+
+	if (typeof window !== "undefined") {
+		window.dispatchEvent(new CustomEvent("betaThemeChange", { detail: { theme: validTheme } }))
+	}
+
+	if (notify) {
+		const label = validTheme === "latte" ? "Sáng (Catppuccin Latte)" : "Tối (Catppuccin Mocha)"
+		showToast(`Đã chuyển sang giao diện ${label}`, "info", 2000)
+	}
+}
+
+export function toggleTheme(notify = true) {
+	const current = getSavedTheme()
+	const next = current === "latte" ? "mocha" : "latte"
+	applyTheme(next, notify)
+	return next
+}
+
+export function renderThemeToggleButtonHtml(extraClasses = "") {
+	const theme = getSavedTheme()
+	const isLatte = theme === "latte"
+	return `
+		<button type="button" class="theme-toggle-btn ${extraClasses}" id="theme-toggle-btn"
+			title="${isLatte ? "Giao diện: Sáng (Catppuccin Latte) - Nhấp để chuyển sang Tối (Catppuccin Mocha)" : "Giao diện: Tối (Catppuccin Mocha) - Nhấp để chuyển sang Sáng (Catppuccin Latte)"}"
+			aria-label="Chuyển chế độ Giao diện Sáng / Tối">
+			<span class="theme-toggle-icon">${isLatte ? "☀️" : "🌙"}</span>
+			<span class="theme-toggle-text">${isLatte ? "Sáng" : "Tối"}</span>
+		</button>
+	`
+}
+
+export function bindThemeToggleEvents() {
+	if (typeof document === "undefined") return
+	document.querySelectorAll(".theme-toggle-btn").forEach(btn => {
+		if (btn.dataset.themeBound === "true") return
+		btn.dataset.themeBound = "true"
+		btn.addEventListener("click", e => {
+			e.preventDefault()
+			e.stopPropagation()
+			toggleTheme(true)
+		})
+	})
+}
+
+// Auto initialize theme on module execution
+if (typeof document !== "undefined") {
+	applyTheme(getSavedTheme(), false)
+	if (document.readyState === "loading") {
+		document.addEventListener("DOMContentLoaded", () => bindThemeToggleEvents())
+	} else {
+		bindThemeToggleEvents()
+	}
+}
+
+/* ==========================================================================
    USER AUTHENTICATION STATE & LOGIC
    ========================================================================== */
 import {
@@ -159,7 +252,9 @@ export function updateHeaderAccountUI() {
 			<div class="divider"></div>
 			<a href="/admin.html" style="color: #fab387; font-weight: 700; font-size: 13px;" title="Vào Trang Quản Trị">⚙️ Admin</a>` : ""}
 			<div class="divider"></div>
-			<span style="font-size: 18px; margin-left: 4px; cursor: pointer" title="English">🇬🇧</span>
+			${renderThemeToggleButtonHtml()}
+			<div class="divider"></div>
+			<span style="font-size: 18px; margin-left: 2px; cursor: pointer" title="English">🇬🇧</span>
 		`
 
 		const menuBtn = document.getElementById("header-user-menu-btn")
@@ -177,7 +272,10 @@ export function updateHeaderAccountUI() {
 			<a href="#" id="btn-login">Đăng nhập</a>
 			<div class="divider"></div>
 			<a href="#" id="btn-register">Đăng ký</a>
-			<span style="font-size: 18px; margin-left: 4px; cursor: pointer" title="English">🇬🇧</span>
+			<div class="divider"></div>
+			${renderThemeToggleButtonHtml()}
+			<div class="divider"></div>
+			<span style="font-size: 18px; margin-left: 2px; cursor: pointer" title="English">🇬🇧</span>
 		`
 		document.getElementById("btn-login")?.addEventListener("click", e => {
 			e.preventDefault()
@@ -188,6 +286,8 @@ export function updateHeaderAccountUI() {
 			openAuthModal("register")
 		})
 	}
+
+	bindThemeToggleEvents()
 
 	// Đồng bộ hiển thị nút quản trị trên thanh menu chính
 	updateNavAdminVisibility()
@@ -867,6 +967,10 @@ function updateDrawerAccountUI() {
 				${isAdmin ? `
 				<a href="/admin.html" style="background:#fab387; color:#11111b; text-align:center; padding:8px; border-radius:6px; font-size:12px; font-weight:700; text-decoration:none;">⚙️ Trang Quản Trị (Admin)</a>
 				` : ""}
+				<div class="drawer-theme-toggle-row" style="display: flex; align-items: center; justify-content: space-between; padding: 6px 10px; background: rgba(137, 180, 250, 0.08); border: 1px solid rgba(137, 180, 250, 0.2); border-radius: 6px; margin-top: 4px;">
+					<span style="font-size: 12px; font-weight: 600;">Giao diện:</span>
+					${renderThemeToggleButtonHtml()}
+				</div>
 			</div>
 		`
 		document.getElementById("btn-drawer-logout")?.addEventListener("click", () => {
@@ -877,6 +981,10 @@ function updateDrawerAccountUI() {
 			<button type="button" class="btn-drawer-auth" id="btn-drawer-login-trigger">
 				Đăng nhập / Đăng ký thành viên
 			</button>
+			<div class="drawer-theme-toggle-row" style="display: flex; align-items: center; justify-content: space-between; padding: 6px 10px; background: rgba(137, 180, 250, 0.08); border: 1px solid rgba(137, 180, 250, 0.2); border-radius: 6px; margin-top: 10px;">
+				<span style="font-size: 12px; font-weight: 600;">Giao diện:</span>
+				${renderThemeToggleButtonHtml()}
+			</div>
 		`
 		document.getElementById("btn-drawer-login-trigger")?.addEventListener("click", () => {
 			document.querySelector(".mobile-drawer-backdrop")?.classList.remove("open")
@@ -886,6 +994,7 @@ function updateDrawerAccountUI() {
 			openAuthModal("login")
 		})
 	}
+	bindThemeToggleEvents()
 }
 
 /* ==========================================================================
