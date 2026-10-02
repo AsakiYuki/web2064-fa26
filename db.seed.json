@@ -475,7 +475,18 @@
           "type": "IMAX 3D",
           "totalSeats": 220
         }
-      ]
+      ],
+      "region": "Miền Bắc",
+      "image": "/promo/promo_nowzone.jpg",
+      "openingHours": "08:00 - 23:30",
+      "mapUrl": "https://maps.google.com/?q=Beta+Cinemas+Thái+Nguyên",
+      "features": [
+        "Phòng chiếu IMAX 3D",
+        "Âm thanh Dolby 7.1",
+        "Ghế Sweetbox",
+        "Bãi đỗ xe"
+      ],
+      "description": "Cụm rạp tiêu chuẩn quốc tế đầu tiên tại Thái Nguyên với hệ thống phòng chiếu hiện đại và sảnh chờ phong cách trẻ trung."
     },
     {
       "id": "beta-nowzone",
@@ -509,7 +520,18 @@
           "type": "IMAX 3D",
           "totalSeats": 280
         }
-      ]
+      ],
+      "region": "TP. Hồ Chí Minh",
+      "image": "/promo/promo_nowzone.jpg",
+      "openingHours": "08:30 - 24:00",
+      "mapUrl": "https://maps.google.com/?q=Beta+Cinemas+Nowzone+Quận+1",
+      "features": [
+        "Phòng IMAX Laser",
+        "Beta Food Court",
+        "Ghế da cao cấp",
+        "Kiosk tự động"
+      ],
+      "description": "Tọa lạc tại trung tâm Quận 1 sôi động, không gian nghệ thuật cùng dàn máy chiếu kỹ thuật số sắc nét chuẩn Hollywood."
     },
     {
       "id": "beta-xuanthuy",
@@ -537,7 +559,18 @@
           "type": "2D",
           "totalSeats": 130
         }
-      ]
+      ],
+      "region": "Hà Nội",
+      "image": "/promo/promo_deal.jpg",
+      "openingHours": "08:00 - 23:45",
+      "mapUrl": "https://maps.google.com/?q=Beta+Cinemas+Xuân+Thủy+Cầu+Giấy",
+      "features": [
+        "Sảnh chờ Coffee",
+        "Phòng 2D/3D",
+        "Ghế bọc nhung",
+        "Check-in sống ảo"
+      ],
+      "description": "Điểm hẹn điện ảnh quen thuộc của giới trẻ và sinh viên Cầu Giấy với mức giá vé ưu đãi và bắp nước hảo hạng."
     },
     {
       "id": "beta-tayson",
@@ -558,7 +591,18 @@
           "type": "2D",
           "totalSeats": 110
         }
-      ]
+      ],
+      "region": "Hà Nội",
+      "image": "/promo/promo_member.jpg",
+      "openingHours": "08:30 - 23:30",
+      "mapUrl": "https://maps.google.com/?q=Beta+Cinemas+Tây+Sơn+Đống+Đa",
+      "features": [
+        "Thanh toán QR Code",
+        "Màn chiếu uốn cong",
+        "Lounge VIP",
+        "Trạm sạc miễn phí"
+      ],
+      "description": "Không gian ấm cúng, thiết kế hiện đại ngay trục đường Tây Sơn sầm uất, dịch vụ đặt vé thông minh không lo xếp hàng."
     },
     {
       "id": "beta-vinhyen",
@@ -579,7 +623,17 @@
           "type": "2D",
           "totalSeats": 100
         }
-      ]
+      ],
+      "region": "Miền Bắc",
+      "image": "/promo/promo_student.jpg",
+      "openingHours": "08:00 - 23:00",
+      "mapUrl": "https://maps.google.com/?q=Beta+Cinemas+Vĩnh+Yên",
+      "features": [
+        "Hệ thống âm thanh vòm",
+        "Quầy bắp nước thơm giòn",
+        "Bãi giữ xe rộng rãi"
+      ],
+      "description": "Điểm giải trí số một cho các gia đình và bạn trẻ Vĩnh Yên dịp cuối tuần với hàng loạt bom tấn cập nhật liên tục."
     },
     {
       "id": "beta-ungvankhiem",
@@ -599,7 +653,17 @@
           "type": "2D",
           "totalSeats": 140
         }
-      ]
+      ],
+      "region": "TP. Hồ Chí Minh",
+      "image": "/promo/promo_deal.jpg",
+      "openingHours": "08:30 - 23:45",
+      "mapUrl": "https://maps.google.com/?q=Beta+Cinemas+Ung+Văn+Khiêm+Bình+Thạnh",
+      "features": [
+        "Phòng chiếu VIP",
+        "Âm thanh sống động",
+        "Combo bắp nước signature"
+      ],
+      "description": "Thiết kế phong cách retro trẻ trung tại Bình Thạnh, mang đến trải nghiệm điện ảnh chuẩn rạp Hollywood."
     },
     {
       "id": "beta-laocai",
@@ -619,7 +683,17 @@
           "type": "2D",
           "totalSeats": 120
         }
-      ]
+      ],
+      "region": "Miền Bắc",
+      "image": "/promo/promo_member.jpg",
+      "openingHours": "08:00 - 23:00",
+      "mapUrl": "https://maps.google.com/?q=Beta+Cinemas+Lào+Cai",
+      "features": [
+        "Màn hình siêu sáng",
+        "Khu ẩm thực tiện lợi",
+        "Bãi đỗ xe ô tô"
+      ],
+      "description": "Cụm rạp hiện đại bậc nhất thành phố cửa khẩu Lào Cai, phục vụ khán giả yêu điện ảnh Tây Bắc."
     },
     {
       "id": "beta-thanhhoa",
@@ -639,7 +713,17 @@
           "type": "2D",
           "totalSeats": 130
         }
-      ]
+      ],
+      "region": "Miền Bắc",
+      "image": "/promo/promo_student.jpg",
+      "openingHours": "08:00 - 23:30",
+      "mapUrl": "https://maps.google.com/?q=Beta+Cinemas+Thanh+Hóa",
+      "features": [
+        "Kiosk mua vé nhanh",
+        "Phòng chiếu tiêu chuẩn quốc tế",
+        "Đổi điểm hội viên"
+      ],
+      "description": "Vị trí đắc địa tại trung tâm TP. Thanh Hóa, không gian trẻ trung tràn đầy năng lượng điện ảnh."
     },
     {
       "id": "beta-bacgiang",
@@ -659,7 +743,17 @@
           "type": "2D",
           "totalSeats": 115
         }
-      ]
+      ],
+      "region": "Miền Bắc",
+      "image": "/promo/promo_nowzone.jpg",
+      "openingHours": "08:00 - 23:00",
+      "mapUrl": "https://maps.google.com/?q=Beta+Cinemas+Bắc+Giang",
+      "features": [
+        "Popcorn Bar",
+        "Máy lạnh 24/7",
+        "Âm thanh chân thực"
+      ],
+      "description": "Cụm rạp thân thiện với dịch vụ chuyên nghiệp, là điểm đến hàng đầu của người dân Bắc Giang và Bắc Ninh."
     },
     {
       "id": "beta-trmall",
@@ -679,7 +773,17 @@
           "type": "2D",
           "totalSeats": 125
         }
-      ]
+      ],
+      "region": "Miền Trung - Miền Nam",
+      "image": "/promo/promo_deal.jpg",
+      "openingHours": "09:00 - 23:30",
+      "mapUrl": "https://maps.google.com/?q=Beta+Cinemas+TRMall+Phú+Quốc",
+      "features": [
+        "Phòng chiếu đảo ngọc",
+        "Ghế ngả thoải mái",
+        "View biển check-in"
+      ],
+      "description": "Rạp chiếu phim độc đáo phục vụ cư dân và du khách tại Phú Quốc với trải nghiệm thư giãn đẳng cấp."
     }
   ],
   "showtimes": [

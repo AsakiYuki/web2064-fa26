@@ -7,13 +7,49 @@
     "address": "Tầng 4, TTTM Hoàng Gia, Số 259 Quang Trung, TP. Thái Nguyên",
     "phone": "0867 460 053",
     "email": "thainguyen@betacinemas.vn",
-    "facilities": ["Bãi đỗ xe", "Popcorn & Drinks Bar", "Phòng chiếu 2D/3D", "Lounge chờ VIP"],
+    "facilities": [
+      "Bãi đỗ xe",
+      "Popcorn & Drinks Bar",
+      "Phòng chiếu 2D/3D",
+      "Lounge chờ VIP"
+    ],
     "screens": [
-      { "screenId": "TN-P1", "name": "Phòng chiếu 1", "type": "2D", "totalSeats": 120 },
-      { "screenId": "TN-P2", "name": "Phòng chiếu 2", "type": "2D", "totalSeats": 140 },
-      { "screenId": "TN-P3", "name": "Phòng chiếu 3", "type": "3D", "totalSeats": 100 },
-      { "screenId": "TN-IMAX", "name": "Phòng IMAX", "type": "IMAX 3D", "totalSeats": 220 }
-    ]
+      {
+        "screenId": "TN-P1",
+        "name": "Phòng chiếu 1",
+        "type": "2D",
+        "totalSeats": 120
+      },
+      {
+        "screenId": "TN-P2",
+        "name": "Phòng chiếu 2",
+        "type": "2D",
+        "totalSeats": 140
+      },
+      {
+        "screenId": "TN-P3",
+        "name": "Phòng chiếu 3",
+        "type": "3D",
+        "totalSeats": 100
+      },
+      {
+        "screenId": "TN-IMAX",
+        "name": "Phòng IMAX",
+        "type": "IMAX 3D",
+        "totalSeats": 220
+      }
+    ],
+    "region": "Miền Bắc",
+    "image": "/promo/promo_nowzone.jpg",
+    "openingHours": "08:00 - 23:30",
+    "mapUrl": "https://maps.google.com/?q=Beta+Cinemas+Thái+Nguyên",
+    "features": [
+      "Phòng chiếu IMAX 3D",
+      "Âm thanh Dolby 7.1",
+      "Ghế Sweetbox",
+      "Bãi đỗ xe"
+    ],
+    "description": "Cụm rạp tiêu chuẩn quốc tế đầu tiên tại Thái Nguyên với hệ thống phòng chiếu hiện đại và sảnh chờ phong cách trẻ trung."
   },
   {
     "id": "beta-nowzone",
@@ -23,12 +59,42 @@
     "address": "Tầng 5, TTTM Nowzone, 235 Nguyễn Văn Cừ, Quận 1, TP.HCM",
     "phone": "1900 636807",
     "email": "nowzone@betacinemas.vn",
-    "facilities": ["Bãi đỗ xe ô tô/xe máy", "Beta Food Court", "Phòng chiếu 2D/3D/IMAX"],
+    "facilities": [
+      "Bãi đỗ xe ô tô/xe máy",
+      "Beta Food Court",
+      "Phòng chiếu 2D/3D/IMAX"
+    ],
     "screens": [
-      { "screenId": "NZ-P1", "name": "Phòng chiếu 1", "type": "2D", "totalSeats": 160 },
-      { "screenId": "NZ-P2", "name": "Phòng chiếu 2", "type": "2D", "totalSeats": 180 },
-      { "screenId": "NZ-IMAX", "name": "Phòng IMAX", "type": "IMAX 3D", "totalSeats": 280 }
-    ]
+      {
+        "screenId": "NZ-P1",
+        "name": "Phòng chiếu 1",
+        "type": "2D",
+        "totalSeats": 160
+      },
+      {
+        "screenId": "NZ-P2",
+        "name": "Phòng chiếu 2",
+        "type": "2D",
+        "totalSeats": 180
+      },
+      {
+        "screenId": "NZ-IMAX",
+        "name": "Phòng IMAX",
+        "type": "IMAX 3D",
+        "totalSeats": 280
+      }
+    ],
+    "region": "TP. Hồ Chí Minh",
+    "image": "/promo/promo_nowzone.jpg",
+    "openingHours": "08:30 - 24:00",
+    "mapUrl": "https://maps.google.com/?q=Beta+Cinemas+Nowzone+Quận+1",
+    "features": [
+      "Phòng IMAX Laser",
+      "Beta Food Court",
+      "Ghế da cao cấp",
+      "Kiosk tự động"
+    ],
+    "description": "Tọa lạc tại trung tâm Quận 1 sôi động, không gian nghệ thuật cùng dàn máy chiếu kỹ thuật số sắc nét chuẩn Hollywood."
   },
   {
     "id": "beta-xuanthuy",
@@ -38,11 +104,36 @@
     "address": "Tầng 4, TTTM HITC, 239 Xuân Thủy, Cầu Giấy, Hà Nội",
     "phone": "0333 023 183",
     "email": "xuanthuy@betacinemas.vn",
-    "facilities": ["Bãi đỗ xe", "Coffee Corner", "Phòng chiếu 2D"],
+    "facilities": [
+      "Bãi đỗ xe",
+      "Coffee Corner",
+      "Phòng chiếu 2D"
+    ],
     "screens": [
-      { "screenId": "XT-P1", "name": "Phòng chiếu 1", "type": "2D", "totalSeats": 150 },
-      { "screenId": "XT-P2", "name": "Phòng chiếu 2", "type": "2D", "totalSeats": 130 }
-    ]
+      {
+        "screenId": "XT-P1",
+        "name": "Phòng chiếu 1",
+        "type": "2D",
+        "totalSeats": 150
+      },
+      {
+        "screenId": "XT-P2",
+        "name": "Phòng chiếu 2",
+        "type": "2D",
+        "totalSeats": 130
+      }
+    ],
+    "region": "Hà Nội",
+    "image": "/promo/promo_deal.jpg",
+    "openingHours": "08:00 - 23:45",
+    "mapUrl": "https://maps.google.com/?q=Beta+Cinemas+Xuân+Thủy+Cầu+Giấy",
+    "features": [
+      "Sảnh chờ Coffee",
+      "Phòng 2D/3D",
+      "Ghế bọc nhung",
+      "Check-in sống ảo"
+    ],
+    "description": "Điểm hẹn điện ảnh quen thuộc của giới trẻ và sinh viên Cầu Giấy với mức giá vé ưu đãi và bắp nước hảo hạng."
   },
   {
     "id": "beta-tayson",
@@ -52,10 +143,29 @@
     "address": "Số 9 Tây Sơn, Đống Đa, Hà Nội",
     "phone": "0976 894 773",
     "email": "tayson@betacinemas.vn",
-    "facilities": ["Thanh toán QR", "Quầy bắp nước online"],
+    "facilities": [
+      "Thanh toán QR",
+      "Quầy bắp nước online"
+    ],
     "screens": [
-      { "screenId": "TS-P1", "name": "Phòng chiếu 1", "type": "2D", "totalSeats": 110 }
-    ]
+      {
+        "screenId": "TS-P1",
+        "name": "Phòng chiếu 1",
+        "type": "2D",
+        "totalSeats": 110
+      }
+    ],
+    "region": "Hà Nội",
+    "image": "/promo/promo_member.jpg",
+    "openingHours": "08:30 - 23:30",
+    "mapUrl": "https://maps.google.com/?q=Beta+Cinemas+Tây+Sơn+Đống+Đa",
+    "features": [
+      "Thanh toán QR Code",
+      "Màn chiếu uốn cong",
+      "Lounge VIP",
+      "Trạm sạc miễn phí"
+    ],
+    "description": "Không gian ấm cúng, thiết kế hiện đại ngay trục đường Tây Sơn sầm uất, dịch vụ đặt vé thông minh không lo xếp hàng."
   },
   {
     "id": "beta-vinhyen",
@@ -65,10 +175,28 @@
     "address": "TTTM Vĩnh Yên, Phú Thọ",
     "phone": "0977 632 215",
     "email": "vinhyen@betacinemas.vn",
-    "facilities": ["Bãi đỗ xe", "Phòng chiếu 2D"],
+    "facilities": [
+      "Bãi đỗ xe",
+      "Phòng chiếu 2D"
+    ],
     "screens": [
-      { "screenId": "VY-P1", "name": "Phòng chiếu 1", "type": "2D", "totalSeats": 100 }
-    ]
+      {
+        "screenId": "VY-P1",
+        "name": "Phòng chiếu 1",
+        "type": "2D",
+        "totalSeats": 100
+      }
+    ],
+    "region": "Miền Bắc",
+    "image": "/promo/promo_student.jpg",
+    "openingHours": "08:00 - 23:00",
+    "mapUrl": "https://maps.google.com/?q=Beta+Cinemas+Vĩnh+Yên",
+    "features": [
+      "Hệ thống âm thanh vòm",
+      "Quầy bắp nước thơm giòn",
+      "Bãi giữ xe rộng rãi"
+    ],
+    "description": "Điểm giải trí số một cho các gia đình và bạn trẻ Vĩnh Yên dịp cuối tuần với hàng loạt bom tấn cập nhật liên tục."
   },
   {
     "id": "beta-ungvankhiem",
@@ -78,10 +206,27 @@
     "address": "Ung Văn Khiêm, Bình Thạnh, TP.HCM",
     "phone": "0969 874 873",
     "email": "ungvankhiem@betacinemas.vn",
-    "facilities": ["Lounge VIP"],
+    "facilities": [
+      "Lounge VIP"
+    ],
     "screens": [
-      { "screenId": "UVK-P1", "name": "Phòng chiếu 1", "type": "2D", "totalSeats": 140 }
-    ]
+      {
+        "screenId": "UVK-P1",
+        "name": "Phòng chiếu 1",
+        "type": "2D",
+        "totalSeats": 140
+      }
+    ],
+    "region": "TP. Hồ Chí Minh",
+    "image": "/promo/promo_deal.jpg",
+    "openingHours": "08:30 - 23:45",
+    "mapUrl": "https://maps.google.com/?q=Beta+Cinemas+Ung+Văn+Khiêm+Bình+Thạnh",
+    "features": [
+      "Phòng chiếu VIP",
+      "Âm thanh sống động",
+      "Combo bắp nước signature"
+    ],
+    "description": "Thiết kế phong cách retro trẻ trung tại Bình Thạnh, mang đến trải nghiệm điện ảnh chuẩn rạp Hollywood."
   },
   {
     "id": "beta-laocai",
@@ -91,10 +236,27 @@
     "address": "Đại lộ Trần Hưng Đạo, TP. Lào Cai",
     "phone": "0358 968 970",
     "email": "laocai@betacinemas.vn",
-    "facilities": ["Bãi đỗ xe rộng rãi"],
+    "facilities": [
+      "Bãi đỗ xe rộng rãi"
+    ],
     "screens": [
-      { "screenId": "LC-P1", "name": "Phòng chiếu 1", "type": "2D", "totalSeats": 120 }
-    ]
+      {
+        "screenId": "LC-P1",
+        "name": "Phòng chiếu 1",
+        "type": "2D",
+        "totalSeats": 120
+      }
+    ],
+    "region": "Miền Bắc",
+    "image": "/promo/promo_member.jpg",
+    "openingHours": "08:00 - 23:00",
+    "mapUrl": "https://maps.google.com/?q=Beta+Cinemas+Lào+Cai",
+    "features": [
+      "Màn hình siêu sáng",
+      "Khu ẩm thực tiện lợi",
+      "Bãi đỗ xe ô tô"
+    ],
+    "description": "Cụm rạp hiện đại bậc nhất thành phố cửa khẩu Lào Cai, phục vụ khán giả yêu điện ảnh Tây Bắc."
   },
   {
     "id": "beta-thanhhoa",
@@ -104,10 +266,27 @@
     "address": "Phường Điện Biên, TP. Thanh Hóa",
     "phone": "0325 360 249",
     "email": "thanhhoa@betacinemas.vn",
-    "facilities": ["Quầy vé tự phục vụ Kiosk"],
+    "facilities": [
+      "Quầy vé tự phục vụ Kiosk"
+    ],
     "screens": [
-      { "screenId": "TH-P1", "name": "Phòng chiếu 1", "type": "2D", "totalSeats": 130 }
-    ]
+      {
+        "screenId": "TH-P1",
+        "name": "Phòng chiếu 1",
+        "type": "2D",
+        "totalSeats": 130
+      }
+    ],
+    "region": "Miền Bắc",
+    "image": "/promo/promo_student.jpg",
+    "openingHours": "08:00 - 23:30",
+    "mapUrl": "https://maps.google.com/?q=Beta+Cinemas+Thanh+Hóa",
+    "features": [
+      "Kiosk mua vé nhanh",
+      "Phòng chiếu tiêu chuẩn quốc tế",
+      "Đổi điểm hội viên"
+    ],
+    "description": "Vị trí đắc địa tại trung tâm TP. Thanh Hóa, không gian trẻ trung tràn đầy năng lượng điện ảnh."
   },
   {
     "id": "beta-bacgiang",
@@ -117,10 +296,27 @@
     "address": "TP. Bắc Giang, Tỉnh Bắc Ninh",
     "phone": "0866 493 413",
     "email": "bacgiang@betacinemas.vn",
-    "facilities": ["Popcorn Bar"],
+    "facilities": [
+      "Popcorn Bar"
+    ],
     "screens": [
-      { "screenId": "BG-P1", "name": "Phòng chiếu 1", "type": "2D", "totalSeats": 115 }
-    ]
+      {
+        "screenId": "BG-P1",
+        "name": "Phòng chiếu 1",
+        "type": "2D",
+        "totalSeats": 115
+      }
+    ],
+    "region": "Miền Bắc",
+    "image": "/promo/promo_nowzone.jpg",
+    "openingHours": "08:00 - 23:00",
+    "mapUrl": "https://maps.google.com/?q=Beta+Cinemas+Bắc+Giang",
+    "features": [
+      "Popcorn Bar",
+      "Máy lạnh 24/7",
+      "Âm thanh chân thực"
+    ],
+    "description": "Cụm rạp thân thiện với dịch vụ chuyên nghiệp, là điểm đến hàng đầu của người dân Bắc Giang và Bắc Ninh."
   },
   {
     "id": "beta-trmall",
@@ -130,9 +326,26 @@
     "address": "TRMall Phú Quốc, An Giang",
     "phone": "0983 474 440",
     "email": "trmall@betacinemas.vn",
-    "facilities": ["Phòng chiếu 2D/3D"],
+    "facilities": [
+      "Phòng chiếu 2D/3D"
+    ],
     "screens": [
-      { "screenId": "PQ-P1", "name": "Phòng chiếu 1", "type": "2D", "totalSeats": 125 }
-    ]
+      {
+        "screenId": "PQ-P1",
+        "name": "Phòng chiếu 1",
+        "type": "2D",
+        "totalSeats": 125
+      }
+    ],
+    "region": "Miền Trung - Miền Nam",
+    "image": "/promo/promo_deal.jpg",
+    "openingHours": "09:00 - 23:30",
+    "mapUrl": "https://maps.google.com/?q=Beta+Cinemas+TRMall+Phú+Quốc",
+    "features": [
+      "Phòng chiếu đảo ngọc",
+      "Ghế ngả thoải mái",
+      "View biển check-in"
+    ],
+    "description": "Rạp chiếu phim độc đáo phục vụ cư dân và du khách tại Phú Quốc với trải nghiệm thư giãn đẳng cấp."
   }
 ]
