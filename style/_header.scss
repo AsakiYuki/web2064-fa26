@@ -14,7 +14,8 @@
 
 	/* Top Account Manager Bar */
 	.header-account-manager {
-		background-color: $primary-color;
+		background-color: $ctp-crust;
+		border-bottom: 1px solid rgba($ctp-surface2, 0.35);
 		height: 36px;
 
 		.container {
@@ -25,7 +26,7 @@
 
 			a,
 			span {
-				color: $secondary-text-color;
+				color: $ctp-subtext1;
 				font-size: $font-size-sm;
 				font-weight: 500;
 				cursor: pointer;
@@ -34,7 +35,8 @@
 				border-radius: $radius-sm;
 
 				&:hover {
-					background-color: rgba(255, 255, 255, 0.15);
+					color: $ctp-blue;
+					background-color: rgba($ctp-blue, 0.12);
 				}
 			}
 		}
@@ -42,13 +44,13 @@
 		.divider {
 			width: 1px;
 			height: 16px;
-			background-color: rgba(255, 255, 255, 0.4);
+			background-color: $ctp-surface2;
 		}
 	}
 
 	/* Main Navigator Bar */
 	.header-navigator {
-		background-color: #ffffff;
+		background-color: $ctp-mantle;
 		border-bottom: 2px solid $primary-color;
 
 		.container {
@@ -85,8 +87,8 @@
 		cursor: pointer;
 		font-size: $font-size-sm;
 		font-weight: 600;
-		color: $primary-text-color;
-		background: #fff;
+		color: $ctp-text;
+		background: $ctp-surface0;
 		white-space: nowrap;
 		transition: $transition-base;
 		flex-shrink: 0;
@@ -94,12 +96,13 @@
 		&:hover {
 			border-color: $primary-color;
 			color: $primary-color;
+			background: $ctp-surface1;
 		}
 
 		svg {
 			width: 14px;
 			height: 14px;
-			opacity: 0.6;
+			opacity: 0.75;
 			transition: transform 0.2s ease;
 		}
 
@@ -113,7 +116,7 @@
 		top: calc(100% + 8px);
 		left: 0;
 		width: 200px;
-		background: #fff;
+		background: $ctp-surface0;
 		border: 1px solid $border-color;
 		border-radius: $radius-md;
 		box-shadow: $shadow-lg;
@@ -139,7 +142,7 @@
 			padding: 8px 16px;
 			font-size: $font-size-sm;
 			font-weight: 500;
-			color: $primary-text-color;
+			color: $ctp-text;
 			cursor: pointer;
 			display: flex;
 			align-items: center;
@@ -155,7 +158,7 @@
 
 			&:hover,
 			&.active {
-				background-color: rgba(1, 81, 152, 0.08);
+				background-color: rgba($primary-color, 0.14);
 				color: $primary-color;
 				font-weight: 700;
 
@@ -178,7 +181,7 @@
 		a {
 			font-size: $font-size-sm;
 			font-weight: 700;
-			color: $primary-text-color;
+			color: $ctp-text;
 			padding: 8px 12px;
 			border-radius: $radius-sm;
 			text-transform: uppercase;
@@ -201,7 +204,7 @@
 
 			&:hover {
 				color: $primary-color;
-				background-color: rgba(1, 81, 152, 0.06);
+				background-color: rgba($primary-color, 0.12);
 
 				&::after {
 					transform: scaleX(1);
@@ -210,6 +213,10 @@
 
 			&.active {
 				color: $primary-color;
+
+				&::after {
+					transform: scaleX(1);
+				}
 			}
 
 			&.admin-only {

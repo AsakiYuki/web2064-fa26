@@ -11,6 +11,32 @@
 
 html {
 	scroll-behavior: smooth;
+	color-scheme: dark;
+}
+
+::selection {
+	background-color: rgba($primary-color, 0.35);
+	color: $ctp-text;
+}
+
+/* Custom Scrollbar - Catppuccin Mocha */
+::-webkit-scrollbar {
+	width: 10px;
+	height: 10px;
+}
+
+::-webkit-scrollbar-track {
+	background: $ctp-mantle;
+}
+
+::-webkit-scrollbar-thumb {
+	background: $ctp-surface2;
+	border-radius: $radius-full;
+	border: 2px solid $ctp-mantle;
+
+	&:hover {
+		background: $ctp-overlay1;
+	}
 }
 
 body {
