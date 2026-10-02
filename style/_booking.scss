@@ -5,21 +5,21 @@
 @use 'variables' as *;
 
 .booking-page {
-	background-color: #0b1120;
-	color: #e2e8f0;
+	background-color: $background-color;
+	color: $primary-text-color;
 	min-height: 100vh;
 	padding-bottom: 80px;
 }
 
 /* ---- BOOKING HEADER & STEPPER ---- */
 .booking-header-bar {
-	background: #0f172a;
-	border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+	background: $ctp-mantle;
+	border-bottom: 1px solid $border-color;
 	padding: 20px 0;
 	position: sticky;
 	top: 72px;
 	z-index: 100;
-	box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+	box-shadow: $shadow-md;
 
 	.container {
 		display: flex;
@@ -34,10 +34,10 @@
 		align-items: center;
 		gap: 8px;
 		font-size: 13px;
-		color: #94a3b8;
+		color: $ctp-subtext0;
 
 		a {
-			color: #cbd5e1;
+			color: $ctp-subtext1;
 			&:hover {
 				color: $accent-color;
 			}
@@ -48,7 +48,7 @@
 		}
 
 		.bc-current {
-			color: #ffffff;
+			color: $ctp-text;
 			font-weight: 700;
 		}
 	}
@@ -65,7 +65,7 @@
 			gap: 8px;
 			font-size: 13px;
 			font-weight: 700;
-			color: #64748b;
+			color: $ctp-subtext0;
 			transition: all 0.2s;
 			cursor: pointer;
 
@@ -73,32 +73,32 @@
 				width: 28px;
 				height: 28px;
 				border-radius: 50%;
-				background: rgba(255, 255, 255, 0.08);
-				border: 1.5px solid #475569;
+				background: $ctp-surface1;
+				border: 1.5px solid $border-color;
 				display: flex;
 				align-items: center;
 				justify-content: center;
 				font-size: 12px;
-				color: #94a3b8;
+				color: $ctp-subtext0;
 				transition: all 0.2s;
 			}
 
 			&.completed {
-				color: #10b981;
+				color: $accent-green;
 				.step-number {
-					background: #10b981;
-					border-color: #10b981;
-					color: #ffffff;
+					background: $accent-green;
+					border-color: $accent-green;
+					color: $ctp-crust;
 				}
 			}
 
 			&.active {
-				color: #ffffff;
+				color: $ctp-text;
 				.step-number {
 					background: $primary-color;
-					border-color: #38bdf8;
-					color: #ffffff;
-					box-shadow: 0 0 12px rgba(56, 189, 248, 0.6);
+					border-color: $primary-color;
+					color: $ctp-crust;
+					box-shadow: $shadow-hover;
 				}
 			}
 		}
@@ -106,7 +106,7 @@
 		.step-divider {
 			width: 24px;
 			height: 2px;
-			background: #334155;
+			background: $ctp-surface2;
 		}
 	}
 }
@@ -129,13 +129,13 @@
 	display: flex;
 	gap: 12px;
 	margin-bottom: 24px;
-	border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+	border-bottom: 1px solid $border-color;
 	padding-bottom: 12px;
 
 	.view-tab-btn {
-		background: rgba(255, 255, 255, 0.05);
-		border: 1px solid rgba(255, 255, 255, 0.12);
-		color: #94a3b8;
+		background: $ctp-surface0;
+		border: 1px solid $border-color;
+		color: $ctp-subtext0;
 		padding: 12px 24px;
 		border-radius: $radius-md;
 		font-size: 15px;
@@ -152,27 +152,28 @@
 		}
 
 		.tab-badge {
-			background: #334155;
-			color: #cbd5e1;
+			background: $ctp-surface1;
+			color: $ctp-text;
 			font-size: 11px;
 			padding: 2px 8px;
 			border-radius: 10px;
 		}
 
 		&:hover {
-			background: rgba(255, 255, 255, 0.1);
-			color: #fff;
+			background: $ctp-surface1;
+			color: $ctp-text;
+			border-color: $primary-color;
 		}
 
 		&.active {
-			background: linear-gradient(135deg, $primary-color 0%, #0284c7 100%);
-			border-color: #38bdf8;
-			color: #ffffff;
-			box-shadow: 0 4px 16px rgba(2, 132, 199, 0.35);
+			background: $primary-color;
+			border-color: $primary-color;
+			color: $ctp-crust;
+			box-shadow: $shadow-sm;
 
 			.tab-badge {
-				background: rgba(255, 255, 255, 0.25);
-				color: #fff;
+				background: rgba(17, 17, 27, 0.25);
+				color: $ctp-crust;
 			}
 		}
 	}
@@ -182,11 +183,11 @@
    1. SEAT MAP SECTION (STANDARD, VIP, DOUBLE/SWEETBOX)
    ========================================================================== */
 .seat-selection-card {
-	background: #0f172a;
+	background: $ctp-surface0;
 	border-radius: $radius-xl;
 	padding: 32px 24px;
-	border: 1px solid rgba(255, 255, 255, 0.08);
-	box-shadow: 0 16px 40px rgba(0, 0, 0, 0.4);
+	border: 1px solid $border-color;
+	box-shadow: $shadow-md;
 
 	@media (max-width: 640px) {
 		padding: 20px 12px;
@@ -199,14 +200,14 @@
 		flex-wrap: wrap;
 		gap: 12px;
 		padding-bottom: 20px;
-		border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+		border-bottom: 1px solid $border-color;
 		margin-bottom: 28px;
 
 		.hall-title-wrap {
 			h2 {
 				font-size: 20px;
 				font-weight: 800;
-				color: #ffffff;
+				color: $ctp-text;
 				margin: 0 0 4px;
 				display: flex;
 				align-items: center;
@@ -214,7 +215,7 @@
 			}
 			p {
 				font-size: 13px;
-				color: #94a3b8;
+				color: $ctp-subtext0;
 				margin: 0;
 			}
 		}
@@ -224,9 +225,9 @@
 			gap: 8px;
 
 			.ht-tag {
-				background: rgba(56, 189, 248, 0.15);
-				border: 1px solid rgba(56, 189, 248, 0.3);
-				color: #38bdf8;
+				background: rgba(137, 180, 250, 0.15);
+				border: 1px solid rgba(137, 180, 250, 0.3);
+				color: $primary-color;
 				padding: 4px 10px;
 				border-radius: 6px;
 				font-size: 12px;
@@ -237,9 +238,9 @@
 				display: flex;
 				align-items: center;
 				gap: 6px;
-				background: rgba(245, 158, 11, 0.15);
-				border: 1px solid rgba(245, 158, 11, 0.4);
-				color: #fbbf24;
+				background: rgba(250, 179, 135, 0.15);
+				border: 1px solid rgba(250, 179, 135, 0.4);
+				color: $ctp-peach;
 				padding: 4px 10px;
 				border-radius: 6px;
 				font-size: 12px;
@@ -250,16 +251,16 @@
 					width: 7px;
 					height: 7px;
 					border-radius: 50%;
-					background: #f59e0b;
+					background: $ctp-peach;
 					animation: pulseDot 1.5s infinite;
 				}
 
 				&.timer-danger {
-					background: rgba(239, 68, 68, 0.2);
-					border-color: #ef4444;
-					color: #f87171;
+					background: rgba(243, 139, 168, 0.2);
+					border-color: $accent-red;
+					color: $accent-red;
 					.pulse-dot {
-						background: #ef4444;
+						background: $accent-red;
 						animation: pulseDot 0.8s infinite;
 					}
 				}
@@ -279,16 +280,16 @@
 			left: 10%;
 			right: 10%;
 			height: 50px;
-			background: linear-gradient(180deg, rgba(56, 189, 248, 0.12) 0%, transparent 100%);
+			background: linear-gradient(180deg, rgba(137, 180, 250, 0.12) 0%, transparent 100%);
 			clip-path: polygon(25% 0%, 75% 0%, 100% 100%, 0% 100%);
 			pointer-events: none;
 		}
 
 		.screen-arc {
 			height: 10px;
-			background: linear-gradient(90deg, transparent 0%, #38bdf8 25%, #bae6fd 50%, #38bdf8 75%, transparent 100%);
+			background: linear-gradient(90deg, transparent 0%, $primary-color 25%, $ctp-sapphire 50%, $primary-color 75%, transparent 100%);
 			border-radius: 50% 50% 0 0;
-			box-shadow: 0 4px 30px rgba(56, 189, 248, 0.7);
+			box-shadow: 0 4px 30px rgba(137, 180, 250, 0.7);
 			margin-bottom: 10px;
 		}
 
@@ -296,7 +297,7 @@
 			font-size: 12px;
 			font-weight: 800;
 			letter-spacing: 4px;
-			color: #94a3b8;
+			color: $ctp-subtext0;
 			text-transform: uppercase;
 		}
 	}
@@ -306,7 +307,7 @@
 		overflow-x: auto;
 		padding: 10px 0 30px;
 		scrollbar-width: thin;
-		scrollbar-color: #334155 transparent;
+		scrollbar-color: $ctp-surface2 transparent;
 		display: flex;
 		flex-direction: column;
 		align-items: center;
@@ -330,7 +331,7 @@
 				width: 24px;
 				font-size: 12px;
 				font-weight: 800;
-				color: #94a3b8;
+				color: $ctp-subtext0;
 				text-align: center;
 				user-select: none;
 				flex-shrink: 0;
@@ -359,12 +360,12 @@
 
 				/* Standard Seat */
 				&.seat-standard {
-					background: #334155;
-					color: #e2e8f0;
-					border-color: #1e293b;
+					background: $ctp-surface1;
+					color: $ctp-text;
+					border-color: $ctp-surface2;
 
 					&:hover {
-						background: #475569;
+						background: $ctp-surface2;
 						transform: translateY(-2px);
 						box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
 					}
@@ -372,23 +373,23 @@
 
 				/* VIP Seat */
 				&.seat-vip {
-					background: linear-gradient(180deg, #d97706 0%, #b45309 100%);
-					color: #ffffff;
-					border-color: #78350f;
+					background: $ctp-peach;
+					color: $ctp-crust;
+					border-color: color.adjust($ctp-peach, $lightness: -8%);
 
 					&:hover {
-						background: linear-gradient(180deg, #f59e0b 0%, #d97706 100%);
+						background: color.adjust($ctp-peach, $lightness: -4%);
 						transform: translateY(-2px);
-						box-shadow: 0 4px 14px rgba(217, 119, 6, 0.45);
+						box-shadow: 0 4px 14px rgba(250, 179, 135, 0.45);
 					}
 				}
 
 				/* Double / Sweetbox Seat */
 				&.seat-sweetbox {
 					width: 74px;
-					background: linear-gradient(180deg, #be185d 0%, #9d174d 100%);
-					color: #ffffff;
-					border-color: #700d36;
+					background: $ctp-mauve;
+					color: $ctp-crust;
+					border-color: color.adjust($ctp-mauve, $lightness: -8%);
 					border-radius: 8px 8px 3px 3px;
 					gap: 4px;
 
@@ -397,18 +398,18 @@
 					}
 
 					&:hover {
-						background: linear-gradient(180deg, #db2777 0%, #be185d 100%);
+						background: color.adjust($ctp-mauve, $lightness: -4%);
 						transform: translateY(-2px);
-						box-shadow: 0 4px 16px rgba(190, 24, 93, 0.5);
+						box-shadow: 0 4px 16px rgba(203, 166, 247, 0.5);
 					}
 				}
 
 				/* Sold / Booked Seat */
 				&.seat-sold {
-					background: #1e293b !important;
-					color: #475569 !important;
+					background: $ctp-surface0 !important;
+					color: $ctp-overlay0 !important;
 					cursor: not-allowed !important;
-					border-color: #0f172a !important;
+					border-color: $border-color !important;
 					transform: none !important;
 					box-shadow: none !important;
 					opacity: 0.5;
@@ -416,17 +417,17 @@
 					&::after {
 						content: '✕';
 						font-size: 12px;
-						color: #64748b;
+						color: $ctp-overlay0;
 					}
 				}
 
 				/* Selected Seat */
 				&.seat-selected {
-					background: linear-gradient(180deg, #10b981 0%, #059669 100%) !important;
-					color: #ffffff !important;
-					border-color: #047857 !important;
+					background: $accent-green !important;
+					color: $ctp-crust !important;
+					border-color: color.adjust($accent-green, $lightness: -8%) !important;
 					transform: scale(1.12) translateY(-2px) !important;
-					box-shadow: 0 0 14px rgba(16, 185, 129, 0.8) !important;
+					box-shadow: 0 0 14px rgba(166, 227, 161, 0.8) !important;
 					z-index: 5;
 
 					&::before {
@@ -435,8 +436,8 @@
 						position: absolute;
 						top: -6px;
 						right: -4px;
-						background: #ffffff;
-						color: #059669;
+						background: $ctp-text;
+						color: $ctp-crust;
 						border-radius: 50%;
 						width: 14px;
 						height: 14px;
@@ -469,9 +470,9 @@
 		gap: 24px;
 		flex-wrap: wrap;
 		padding: 16px 20px;
-		background: rgba(255, 255, 255, 0.03);
+		background: $ctp-surface1;
 		border-radius: $radius-lg;
-		border: 1px solid rgba(255, 255, 255, 0.06);
+		border: 1px solid $border-color;
 		margin-top: 10px;
 
 		.legend-cell {
@@ -484,11 +485,11 @@
 				height: 22px;
 				border-radius: 4px;
 
-				&.sample-std { background: #334155; }
-				&.sample-vip { background: #d97706; }
-				&.sample-swb { width: 44px; background: #be185d; }
-				&.sample-sold { background: #1e293b; opacity: 0.6; display: flex; align-items: center; justify-content: center; font-size: 10px; color: #64748b; }
-				&.sample-selected { background: #10b981; box-shadow: 0 0 8px rgba(16, 185, 129, 0.7); }
+				&.sample-std { background: $ctp-surface1; border: 1px solid $border-color; }
+				&.sample-vip { background: $ctp-peach; }
+				&.sample-swb { width: 44px; background: $ctp-mauve; }
+				&.sample-sold { background: $ctp-surface0; border: 1px solid $border-color; opacity: 0.6; display: flex; align-items: center; justify-content: center; font-size: 10px; color: $ctp-overlay0; }
+				&.sample-selected { background: $accent-green; box-shadow: 0 0 8px rgba(166, 227, 161, 0.7); }
 			}
 
 			.legend-text {
@@ -498,12 +499,12 @@
 				.legend-name {
 					font-size: 13px;
 					font-weight: 700;
-					color: #f1f5f9;
+					color: $ctp-text;
 				}
 
 				.legend-price {
 					font-size: 12px;
-					color: #94a3b8;
+					color: $ctp-subtext0;
 					font-weight: 600;
 				}
 			}
@@ -516,8 +517,8 @@
 		justify-content: flex-end;
 
 		.btn-goto-concessions {
-			background: linear-gradient(135deg, $primary-color 0%, #0066cc 100%);
-			color: #fff;
+			background: $primary-color;
+			color: $ctp-crust;
 			border: none;
 			padding: 14px 28px;
 			border-radius: $radius-md;
@@ -528,12 +529,12 @@
 			align-items: center;
 			gap: 10px;
 			transition: all 0.2s;
-			box-shadow: 0 4px 16px rgba(1, 81, 152, 0.4);
+			box-shadow: $shadow-md;
 
 			&:hover {
-				background: linear-gradient(135deg, #0066cc 0%, #015198 100%);
+				background: $primary-dark;
 				transform: translateY(-2px);
-				box-shadow: 0 8px 24px rgba(1, 81, 152, 0.6);
+				box-shadow: $shadow-hover;
 			}
 
 			&:disabled {
@@ -550,21 +551,21 @@
    2. CONCESSIONS & FOOD/DRINKS SECTION
    ========================================================================== */
 .concessions-selection-card {
-	background: #0f172a;
+	background: $ctp-surface0;
 	border-radius: $radius-xl;
 	padding: 32px 24px;
-	border: 1px solid rgba(255, 255, 255, 0.08);
-	box-shadow: 0 16px 40px rgba(0, 0, 0, 0.4);
+	border: 1px solid $border-color;
+	box-shadow: $shadow-lg;
 
 	.concessions-header-bar {
 		padding-bottom: 20px;
-		border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+		border-bottom: 1px solid $border-color;
 		margin-bottom: 24px;
 
 		h2 {
 			font-size: 22px;
 			font-weight: 800;
-			color: #fff;
+			color: $ctp-text;
 			margin: 0 0 6px;
 			display: flex;
 			align-items: center;
@@ -573,7 +574,7 @@
 
 		p {
 			font-size: 13px;
-			color: #94a3b8;
+			color: $ctp-subtext0;
 			margin: 0;
 		}
 	}
@@ -591,9 +592,9 @@
 		}
 
 		.cat-btn {
-			background: rgba(255, 255, 255, 0.05);
-			border: 1px solid rgba(255, 255, 255, 0.1);
-			color: #94a3b8;
+			background: $ctp-surface1;
+			border: 1px solid $border-color;
+			color: $ctp-subtext0;
 			padding: 8px 16px;
 			border-radius: 20px;
 			font-size: 13px;
@@ -603,16 +604,16 @@
 			transition: all 0.2s;
 
 			&:hover {
-				background: rgba(255, 255, 255, 0.12);
-				color: #fff;
+				background: $ctp-surface2;
+				color: $ctp-text;
 			}
 
 			&.active {
-				background: $accent-color;
-				border-color: $accent-color;
-				color: #1a1a2e;
+				background: $primary-color;
+				border-color: $primary-color;
+				color: $ctp-crust;
 				font-weight: 800;
-				box-shadow: 0 2px 10px rgba(245, 166, 35, 0.4);
+				box-shadow: 0 2px 10px rgba(137, 180, 250, 0.4);
 			}
 		}
 	}
@@ -628,31 +629,31 @@
 		}
 
 		.concession-item-card {
-			background: #1e293b;
+			background: $ctp-mantle;
 			border-radius: $radius-lg;
 			overflow: hidden;
-			border: 1px solid rgba(255, 255, 255, 0.08);
+			border: 1px solid $border-color;
 			display: grid;
 			grid-template-columns: 120px 1fr;
 			transition: transform 0.2s ease, border-color 0.2s;
 			position: relative;
 
 			&:hover {
-				border-color: rgba(245, 166, 35, 0.4);
+				border-color: $primary-color;
 				transform: translateY(-2px);
 			}
 
 			&.has-qty {
-				border-color: #38bdf8;
-				background: rgba(30, 41, 59, 0.95);
-				box-shadow: 0 4px 16px rgba(56, 189, 248, 0.15);
+				border-color: $primary-color;
+				background: $ctp-surface1;
+				box-shadow: 0 4px 16px rgba(137, 180, 250, 0.2);
 			}
 
 			.c-thumb-wrap {
 				position: relative;
 				height: 100%;
 				min-height: 120px;
-				background: #0f172a;
+				background: $ctp-crust;
 
 				img {
 					width: 100%;
@@ -665,8 +666,8 @@
 					position: absolute;
 					top: 8px;
 					left: 8px;
-					background: linear-gradient(135deg, #ef4444, #f97316);
-					color: #fff;
+					background: linear-gradient(135deg, $ctp-red, $ctp-peach);
+					color: $ctp-crust;
 					font-size: 10px;
 					font-weight: 900;
 					padding: 2px 6px;
@@ -685,14 +686,14 @@
 				.c-name {
 					font-size: 15px;
 					font-weight: 800;
-					color: #f8fafc;
+					color: $ctp-text;
 					margin: 0;
 					line-height: 1.3;
 				}
 
 				.c-desc {
 					font-size: 12px;
-					color: #94a3b8;
+					color: $ctp-subtext0;
 					margin: 0;
 					line-height: 1.4;
 					display: -webkit-box;
@@ -717,12 +718,12 @@
 						.price-current {
 							font-size: 16px;
 							font-weight: 800;
-							color: #fbbf24;
+							color: $ctp-peach;
 						}
 
 						.price-old {
 							font-size: 11px;
-							color: #64748b;
+							color: $ctp-overlay1;
 							text-decoration: line-through;
 						}
 					}
@@ -732,8 +733,8 @@
 						display: flex;
 						align-items: center;
 						gap: 6px;
-						background: rgba(15, 23, 42, 0.6);
-						border: 1px solid rgba(255, 255, 255, 0.1);
+						background: $ctp-crust;
+						border: 1px solid $border-color;
 						border-radius: 20px;
 						padding: 3px 6px;
 
@@ -742,8 +743,8 @@
 							height: 26px;
 							border-radius: 50%;
 							border: none;
-							background: #334155;
-							color: #ffffff;
+							background: $ctp-surface1;
+							color: $ctp-text;
 							font-size: 16px;
 							line-height: 1;
 							cursor: pointer;
@@ -754,13 +755,15 @@
 
 							&:hover {
 								background: $primary-color;
+								color: $ctp-crust;
 							}
 
 							&:disabled {
 								opacity: 0.3;
 								cursor: not-allowed;
 								&:hover {
-									background: #334155;
+									background: $ctp-surface1;
+									color: $ctp-text;
 								}
 							}
 						}
@@ -768,7 +771,7 @@
 						.qty-display {
 							font-size: 13px;
 							font-weight: 800;
-							color: #ffffff;
+							color: $ctp-text;
 							min-width: 18px;
 							text-align: center;
 						}
@@ -784,12 +787,12 @@
 		justify-content: space-between;
 		margin-top: 28px;
 		padding-top: 20px;
-		border-top: 1px solid rgba(255, 255, 255, 0.08);
+		border-top: 1px solid $border-color;
 
 		.btn-back-to-seats {
-			background: rgba(255, 255, 255, 0.08);
-			border: 1px solid rgba(255, 255, 255, 0.15);
-			color: #cbd5e1;
+			background: $ctp-surface1;
+			border: 1px solid $border-color;
+			color: $ctp-subtext1;
 			padding: 12px 20px;
 			border-radius: $radius-md;
 			font-size: 14px;
@@ -801,8 +804,8 @@
 			transition: all 0.2s;
 
 			&:hover {
-				background: rgba(255, 255, 255, 0.15);
-				color: #fff;
+				background: $ctp-surface2;
+				color: $ctp-text;
 			}
 		}
 	}
@@ -812,23 +815,23 @@
    3. ORDER SUMMARY SIDEBAR (STICKY TỔNG KẾT ĐƠN HÀNG)
    ========================================================================== */
 .order-summary-sidebar {
-	background: #0f172a;
+	background: $ctp-surface0;
 	border-radius: $radius-xl;
 	padding: 24px;
-	border: 1px solid rgba(255, 255, 255, 0.1);
+	border: 1px solid $border-color;
 	position: sticky;
 	top: 150px;
-	box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5);
+	box-shadow: $shadow-lg;
 
 	.summary-header {
 		padding-bottom: 16px;
-		border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+		border-bottom: 1px solid $border-color;
 		margin-bottom: 18px;
 
 		h3 {
 			font-size: 18px;
 			font-weight: 800;
-			color: #ffffff;
+			color: $ctp-text;
 			margin: 0;
 			text-transform: uppercase;
 			letter-spacing: 0.5px;
@@ -843,8 +846,8 @@
 		display: flex;
 		align-items: center;
 		gap: 12px;
-		background: linear-gradient(135deg, rgba(245, 158, 11, 0.14) 0%, rgba(217, 119, 6, 0.08) 100%);
-		border: 1.5px solid rgba(245, 158, 11, 0.35);
+		background: rgba(250, 179, 135, 0.12);
+		border: 1.5px solid rgba(250, 179, 135, 0.35);
 		border-radius: $radius-md;
 		padding: 10px 14px;
 		margin-bottom: 18px;
@@ -862,7 +865,7 @@
 			.timer-subtext {
 				font-size: 11px;
 				font-weight: 600;
-				color: #94a3b8;
+				color: $ctp-subtext0;
 				text-transform: uppercase;
 				letter-spacing: 0.5px;
 			}
@@ -870,19 +873,19 @@
 			.timer-countdown-val {
 				font-size: 20px;
 				font-weight: 900;
-				color: #fbbf24;
+				color: $ctp-peach;
 				font-variant-numeric: tabular-nums;
 				letter-spacing: 1px;
 			}
 		}
 
 		&.timer-danger {
-			background: linear-gradient(135deg, rgba(239, 68, 68, 0.22) 0%, rgba(185, 28, 28, 0.15) 100%);
-			border-color: #ef4444;
+			background: rgba(243, 139, 168, 0.2);
+			border-color: $ctp-red;
 			animation: dangerPulse 1.2s infinite;
 
 			.timer-countdown-val {
-				color: #f87171;
+				color: $ctp-red;
 			}
 		}
 	}
@@ -892,17 +895,17 @@
 		display: grid;
 		grid-template-columns: 70px 1fr;
 		gap: 14px;
-		background: rgba(255, 255, 255, 0.03);
+		background: $ctp-mantle;
 		padding: 12px;
 		border-radius: $radius-md;
-		border: 1px solid rgba(255, 255, 255, 0.06);
+		border: 1px solid $border-color;
 		margin-bottom: 18px;
 
 		.sm-poster {
 			aspect-ratio: 2 / 3;
 			border-radius: 6px;
 			overflow: hidden;
-			background: #1e293b;
+			background: $ctp-crust;
 
 			img {
 				width: 100%;
@@ -919,30 +922,30 @@
 			.sm-title {
 				font-size: 15px;
 				font-weight: 800;
-				color: #ffffff;
+				color: $ctp-text;
 				line-height: 1.3;
 				margin: 0;
 			}
 
 			.sm-cinema {
 				font-size: 12px;
-				color: #38bdf8;
+				color: $primary-color;
 				font-weight: 600;
 			}
 
 			.sm-time {
 				font-size: 12px;
-				color: #94a3b8;
+				color: $ctp-subtext0;
 			}
 
 			.sm-format {
 				display: inline-block;
 				font-size: 10px;
 				font-weight: 800;
-				background: rgba(255, 255, 255, 0.1);
+				background: $ctp-surface1;
 				padding: 2px 6px;
 				border-radius: 4px;
-				color: #e2e8f0;
+				color: $ctp-text;
 				align-self: flex-start;
 				margin-top: 4px;
 			}
@@ -956,13 +959,13 @@
 		gap: 12px;
 		margin-bottom: 20px;
 		padding-bottom: 16px;
-		border-bottom: 1px dashed rgba(255, 255, 255, 0.12);
+		border-bottom: 1px dashed $border-color;
 
 		.breakdown-group-title {
 			font-size: 12px;
 			font-weight: 800;
 			text-transform: uppercase;
-			color: #64748b;
+			color: $ctp-overlay1;
 			letter-spacing: 0.5px;
 			margin-bottom: 4px;
 		}
@@ -972,7 +975,7 @@
 			justify-content: space-between;
 			align-items: flex-start;
 			font-size: 13px;
-			color: #cbd5e1;
+			color: $ctp-subtext1;
 
 			.row-desc {
 				display: flex;
@@ -980,17 +983,17 @@
 				gap: 1px;
 
 				strong {
-					color: #ffffff;
+					color: $ctp-text;
 				}
 				small {
-					color: #94a3b8;
+					color: $ctp-subtext0;
 					font-size: 11px;
 				}
 			}
 
 			.row-val {
 				font-weight: 700;
-				color: #f1f5f9;
+				color: $ctp-text;
 				white-space: nowrap;
 			}
 		}
@@ -1000,18 +1003,18 @@
 			justify-content: space-between;
 			align-items: center;
 			font-size: 12px;
-			color: #94a3b8;
+			color: $ctp-subtext0;
 			padding-top: 8px;
 			margin-top: 6px;
-			border-top: 1px dashed rgba(255, 255, 255, 0.12);
+			border-top: 1px dashed $border-color;
 
 			span {
-				color: #cbd5e1;
+				color: $ctp-subtext1;
 				font-weight: 500;
 			}
 
 			strong {
-				color: #38bdf8;
+				color: $primary-color;
 				font-size: 14px;
 				font-weight: 800;
 			}
@@ -1019,7 +1022,7 @@
 
 		.empty-placeholder {
 			font-size: 12px;
-			color: #64748b;
+			color: $ctp-overlay1;
 			font-style: italic;
 		}
 	}
@@ -1034,29 +1037,29 @@
 
 			input {
 				flex: 1;
-				background: rgba(255, 255, 255, 0.05);
-				border: 1px solid rgba(255, 255, 255, 0.15);
+				background: $ctp-mantle;
+				border: 1px solid $border-color;
 				border-radius: $radius-md;
 				padding: 10px 12px;
-				color: #fff;
+				color: $ctp-text;
 				font-size: 13px;
 				outline: none;
 				text-transform: uppercase;
 
 				&:focus {
-					border-color: $accent-color;
+					border-color: $primary-color;
 				}
 
 				&::placeholder {
-					color: #64748b;
+					color: $ctp-overlay1;
 					text-transform: none;
 				}
 			}
 
 			button {
-				background: rgba(255, 255, 255, 0.1);
-				border: 1px solid rgba(255, 255, 255, 0.2);
-				color: #f8fafc;
+				background: $ctp-surface1;
+				border: 1px solid $border-color;
+				color: $ctp-text;
 				padding: 0 16px;
 				border-radius: $radius-md;
 				font-size: 13px;
@@ -1065,16 +1068,16 @@
 				transition: all 0.2s;
 
 				&:hover {
-					background: $accent-color;
-					color: #1a1a2e;
-					border-color: $accent-color;
+					background: $primary-color;
+					color: $ctp-crust;
+					border-color: $primary-color;
 				}
 			}
 		}
 
 		.coupon-applied-msg {
 			font-size: 12px;
-			color: #10b981;
+			color: $ctp-green;
 			margin-top: 6px;
 			display: none;
 		}
@@ -1090,24 +1093,24 @@
 		.total-title {
 			font-size: 14px;
 			font-weight: 700;
-			color: #94a3b8;
+			color: $ctp-subtext0;
 			text-transform: uppercase;
 		}
 
 		.total-amount {
 			font-size: 26px;
 			font-weight: 900;
-			color: #fbbf24;
+			color: $ctp-peach;
 			letter-spacing: -0.5px;
-			text-shadow: 0 2px 10px rgba(251, 191, 36, 0.3);
+			text-shadow: 0 2px 10px rgba(250, 179, 135, 0.3);
 		}
 	}
 
 	/* Checkout CTA Button */
 	.btn-checkout-now {
 		width: 100%;
-		background: linear-gradient(135deg, #015198 0%, #0066cc 100%);
-		color: #ffffff;
+		background: $primary-color;
+		color: $ctp-crust;
 		border: none;
 		padding: 16px;
 		border-radius: $radius-md;
@@ -1120,7 +1123,7 @@
 		align-items: center;
 		justify-content: center;
 		gap: 8px;
-		box-shadow: 0 6px 20px rgba(1, 81, 152, 0.5);
+		box-shadow: $shadow-md;
 		transition: all 0.25s;
 
 		svg {
@@ -1129,9 +1132,9 @@
 		}
 
 		&:hover {
-			background: linear-gradient(135deg, #0066cc 0%, #015198 100%);
+			background: $primary-dark;
 			transform: translateY(-2px);
-			box-shadow: 0 10px 28px rgba(1, 81, 152, 0.7);
+			box-shadow: $shadow-hover;
 		}
 
 		&:disabled {
@@ -1147,17 +1150,18 @@
    4. E-TICKET CONFIRMATION MODAL
    ========================================================================== */
 .eticket-modal-content {
-	background: #0f172a;
-	color: #fff;
+	background: $ctp-surface0;
+	color: $ctp-text;
 	max-width: 520px;
 	border-radius: $radius-xl;
 	padding: 0;
 	overflow: hidden;
-	box-shadow: 0 25px 60px rgba(0, 0, 0, 0.8);
-	border: 1px solid rgba(255, 255, 255, 0.15);
+	box-shadow: $shadow-lg;
+	border: 1px solid $border-color;
 
 	.ticket-head-banner {
-		background: linear-gradient(135deg, $primary-color 0%, #0066cc 100%);
+		background: $primary-color;
+		color: $ctp-crust;
 		padding: 24px 24px 20px;
 		text-align: center;
 		position: relative;
@@ -1172,25 +1176,26 @@
 			font-weight: 900;
 			margin: 0 0 4px;
 			text-transform: uppercase;
+			color: $ctp-crust;
 		}
 
 		p {
 			font-size: 13px;
-			color: rgba(255, 255, 255, 0.85);
+			color: rgba($ctp-crust, 0.85);
 			margin: 0;
 		}
 	}
 
 	.ticket-body-details {
 		padding: 24px;
-		background: #1e293b;
+		background: $ctp-surface0;
 		display: flex;
 		flex-direction: column;
 		gap: 16px;
 
 		.ticket-code-row {
-			background: rgba(15, 23, 42, 0.8);
-			border: 1px dashed rgba(255, 255, 255, 0.2);
+			background: $ctp-mantle;
+			border: 1px dashed $border-color;
 			border-radius: $radius-md;
 			padding: 12px;
 			text-align: center;
@@ -1198,7 +1203,7 @@
 			.t-code-label {
 				font-size: 11px;
 				font-weight: 700;
-				color: #94a3b8;
+				color: $ctp-subtext0;
 				text-transform: uppercase;
 				letter-spacing: 1px;
 			}
@@ -1206,7 +1211,7 @@
 			.t-code-val {
 				font-size: 22px;
 				font-weight: 900;
-				color: #fbbf24;
+				color: $ctp-peach;
 				letter-spacing: 3px;
 				margin-top: 2px;
 			}
@@ -1225,13 +1230,13 @@
 
 				.ti-lbl {
 					font-size: 11px;
-					color: #94a3b8;
+					color: $ctp-subtext0;
 					text-transform: uppercase;
 				}
 
 				.ti-val {
 					font-weight: 700;
-					color: #ffffff;
+					color: $ctp-text;
 				}
 			}
 		}
@@ -1240,18 +1245,18 @@
 		.barcode-wrapper {
 			text-align: center;
 			padding: 12px 0 4px;
-			border-top: 1px solid rgba(255, 255, 255, 0.08);
+			border-top: 1px solid $border-color;
 
 			.barcode-lines {
 				height: 48px;
 				background: repeating-linear-gradient(
 					90deg,
-					#ffffff 0px,
-					#ffffff 2px,
+					$ctp-text 0px,
+					$ctp-text 2px,
 					transparent 2px,
 					transparent 4px,
-					#ffffff 4px,
-					#ffffff 7px,
+					$ctp-text 4px,
+					$ctp-text 7px,
 					transparent 7px,
 					transparent 9px
 				);
@@ -1263,7 +1268,7 @@
 			span {
 				font-family: monospace;
 				font-size: 12px;
-				color: #94a3b8;
+				color: $ctp-subtext0;
 				letter-spacing: 2px;
 			}
 		}
@@ -1271,14 +1276,14 @@
 
 	.ticket-footer-actions {
 		padding: 18px 24px;
-		background: #0f172a;
+		background: $ctp-mantle;
 		display: flex;
 		gap: 12px;
 
 		.btn-ticket-done {
 			flex: 1;
 			background: $primary-color;
-			color: #fff;
+			color: $ctp-crust;
 			border: none;
 			padding: 12px;
 			border-radius: $radius-md;
