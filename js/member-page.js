@@ -482,8 +482,8 @@ function setupModals() {
 
 						return `
 							<tr>
-								<td style="color:#64748b; font-size:12px;">${dateFormatted}</td>
-								<td style="font-weight:600; color:#1e293b;">${item.title || "Giao dịch tích điểm"}</td>
+								<td style="color:#a6adc8; font-size:12px;">${dateFormatted}</td>
+								<td style="font-weight:600; color:#cdd6f4;">${item.title || "Giao dịch tích điểm"}</td>
 								<td class="${ptsClass}" style="text-align:right;">${ptsPrefix}${item.points} Điểm</td>
 							</tr>
 						`
