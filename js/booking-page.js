@@ -448,10 +448,10 @@ document.addEventListener("DOMContentLoaded", async () => {
 					seatRowsHTML += `
 						<div class="breakdown-row">
 							<div class="row-desc">
-								<strong style="color: #fbbf24;">Ghế VIP (${vipSeats.length}x)</strong>
+								<strong style="color: #fab387;">Ghế VIP (${vipSeats.length}x)</strong>
 								<small>${vipSeats.map(s => s.id).join(", ")} • ${formatCurrency(vipSeats[0].price)}/ghế</small>
 							</div>
-							<div class="row-val" style="color: #fbbf24;">${formatCurrency(vipTotal)}</div>
+							<div class="row-val" style="color: #fab387;">${formatCurrency(vipTotal)}</div>
 						</div>
 					`
 				}
@@ -826,7 +826,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 				<div class="ticket-info-grid">
 					<div class="ti-item" style="grid-column: 1 / -1;">
 						<span class="ti-lbl">Phim</span>
-						<span class="ti-val" style="color:#fbbf24; font-size:15px;">${currentMovie.title}</span>
+						<span class="ti-val" style="color:#fab387; font-size:15px;">${currentMovie.title}</span>
 					</div>
 
 					<div class="ti-item">
@@ -851,7 +851,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 					<div class="ti-item" style="grid-column: 1 / -1;">
 						<span class="ti-lbl">Ghế Đã Chọn</span>
-						<span class="ti-val" style="color:#10b981; font-size:16px;">${seatNames}</span>
+						<span class="ti-val" style="color:#a6e3a1; font-size:16px;">${seatNames}</span>
 					</div>
 
 					<div class="ti-item" style="grid-column: 1 / -1;">
@@ -861,7 +861,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 					<div class="ti-item" style="grid-column: 1 / -1; border-top: 1px dashed rgba(255,255,255,0.15); padding-top: 10px;">
 						<span class="ti-lbl">Tổng Tiền Thanh Toán</span>
-						<span class="ti-val" style="color:#fbbf24; font-size:20px;">${formatCurrency(finalTotal)}</span>
+						<span class="ti-val" style="color:#fab387; font-size:20px;">${formatCurrency(finalTotal)}</span>
 					</div>
 				</div>
 
