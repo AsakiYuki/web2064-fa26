@@ -25,12 +25,126 @@ import {
 	resetStorageSection,
 	STORAGE_KEYS,
 	storageSet,
+	getCurrentUser,
+	saveUserSession,
+	logoutUser,
+	isUserAdmin,
+	isCurrentAdmin,
+	authenticateUser,
 } from "./storage.js"
 import { formatCurrency, formatDateVN, showToast } from "./common.js"
 
 document.addEventListener("DOMContentLoaded", async () => {
 	// Khởi tạo LocalStorage nếu chưa có
 	await initializeStorage()
+
+	/* ==========================================================================
+	   0. ADMIN ACCESS CONTROL & AUTH GATE
+	   ========================================================================== */
+	const authGate = document.getElementById("admin-auth-gate")
+	const adminLayout = document.getElementById("admin-layout")
+	const roleAlert = document.getElementById("auth-gate-role-alert")
+	const roleAlertText = document.getElementById("auth-gate-role-alert-text")
+	const loginForm = document.getElementById("form-admin-login")
+	const accountInput = document.getElementById("admin-login-account")
+	const passwordInput = document.getElementById("admin-login-password")
+	const loginError = document.getElementById("admin-login-error")
+	const btnTogglePwd = document.getElementById("btn-toggle-admin-pwd")
+
+	let isDashboardReady = false
+
+	function checkAdminAccess() {
+		const currentUser = getCurrentUser()
+		const isAdmin = isUserAdmin(currentUser)
+
+		if (isAdmin) {
+			if (authGate) authGate.style.display = "none"
+			if (adminLayout) adminLayout.style.display = "flex"
+
+			const nameEl = document.getElementById("sidebar-admin-name")
+			const roleEl = document.getElementById("sidebar-admin-role")
+			const avatarEl = document.getElementById("sidebar-admin-avatar")
+			if (nameEl) nameEl.textContent = currentUser.name || "Ban Quản Trị Hệ Thống"
+			if (roleEl) roleEl.textContent = currentUser.rank || "Super Admin Online"
+			if (avatarEl) avatarEl.textContent = currentUser.avatarText || "AD"
+
+			if (!isDashboardReady) {
+				initDashboard()
+			}
+			return true
+		} else {
+			if (adminLayout) adminLayout.style.display = "none"
+			if (authGate) authGate.style.display = "flex"
+
+			if (currentUser) {
+				if (roleAlert && roleAlertText) {
+					roleAlert.style.display = "flex"
+					roleAlertText.innerHTML = `Bạn đang đăng nhập bằng tài khoản <strong>${currentUser.name || currentUser.email}</strong> (không có quyền Quản trị viên). Vui lòng đăng nhập tài khoản <strong>admin</strong>.`
+				}
+			} else {
+				if (roleAlert) roleAlert.style.display = "none"
+			}
+			return false
+		}
+	}
+
+	btnTogglePwd?.addEventListener("click", () => {
+		if (!passwordInput) return
+		const isPwd = passwordInput.type === "password"
+		passwordInput.type = isPwd ? "text" : "password"
+		btnTogglePwd.textContent = isPwd ? "🙈" : "👁️"
+	})
+
+	loginForm?.addEventListener("submit", async e => {
+		e.preventDefault()
+		const account = (accountInput?.value || "").trim()
+		const password = passwordInput?.value || ""
+
+		if (loginError) loginError.style.display = "none"
+
+		if (!account || !password) {
+			if (loginError) {
+				loginError.textContent = "Vui lòng nhập tài khoản và mật khẩu quản trị!"
+				loginError.style.display = "block"
+			}
+			return
+		}
+
+		const res = await authenticateUser(account, password)
+		if (!res.success) {
+			if (loginError) {
+				loginError.textContent = res.message || "Tài khoản hoặc mật khẩu không chính xác! Yêu cầu tài khoản: admin, mật khẩu: 12345678"
+				loginError.style.display = "block"
+			}
+			return
+		}
+
+		if (!isUserAdmin(res.user)) {
+			if (loginError) {
+				loginError.textContent = "Tài khoản này không có quyền Quản trị viên! Vui lòng đăng nhập tài khoản admin."
+				loginError.style.display = "block"
+			}
+			return
+		}
+
+		showToast("Đăng nhập Quản trị viên thành công!", "success")
+		if (passwordInput) passwordInput.value = ""
+		if (loginError) loginError.style.display = "none"
+
+		checkAdminAccess()
+	})
+
+	function handleAdminLogout() {
+		logoutUser()
+		showToast("Đã đăng xuất khỏi tài khoản Quản trị viên!", "info")
+		checkAdminAccess()
+	}
+
+	document.getElementById("btn-admin-logout")?.addEventListener("click", handleAdminLogout)
+	document.getElementById("btn-sidebar-logout")?.addEventListener("click", handleAdminLogout)
+
+	function initDashboard() {
+		isDashboardReady = true
 
 	/* ==========================================================================
 	   1. NAVIGATION & TAB SWITCHING
@@ -1423,5 +1537,9 @@ document.addEventListener("DOMContentLoaded", async () => {
 		adminTicketModal.classList.add("active")
 		document.body.style.overflow = "hidden"
 	}
+	} // Kết thúc initDashboard
+
+	// Kiểm tra quyền truy cập ngay khi load trang
+	checkAdminAccess()
 })
 

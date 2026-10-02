@@ -211,6 +211,10 @@
 			&.active {
 				color: $primary-color;
 			}
+
+			&.admin-only {
+				display: none;
+			}
 		}
 	}
 }

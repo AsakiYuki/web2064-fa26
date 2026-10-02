@@ -5,8 +5,8 @@
 	<meta charset="UTF-8" />
 	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 	<meta name="description"
-		content="Bảng giá vé rạp chiếu phim Beta Cinemas (2D, 3D, IMAX) cùng các chương trình khuyến mãi, ưu đãi học sinh sinh viên U22 và thành viên mới nhất." />
-	<title>Bảng Giá Vé & Khuyến Mãi | Beta Cinemas</title>
+		content="Bảng giá vé rạp chiếu phim Beta Cinemas (2D, 3D, IMAX) tiêu chuẩn toàn quốc. Xem chi tiết giá vé ngày thường, cuối tuần, Happy Tuesday và ưu đãi U22." />
+	<title>Bảng Giá Vé Xem Phim | Beta Cinemas</title>
 	<link rel="stylesheet" href="/style/main.scss" />
 	<link rel="preconnect" href="https://fonts.googleapis.com" />
 	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -46,9 +46,10 @@
 					<a href="/movies.html" id="nav-movies">Phim</a>
 					<a href="#" id="nav-cinemas">Rạp</a>
 					<a href="/pricing.html" id="nav-pricing" class="active">Giá Vé</a>
-					<a href="/pricing.html#promotions" id="nav-news">Tin Mới Và Ưu Đãi</a>
+					<a href="/news.html" id="nav-news">Tin Mới Và Ưu Đãi</a>
 					<a href="#" id="nav-franchise">Nhượng Quyền</a>
 					<a href="/profile.html" id="nav-member">Thành Viên</a>
+					<a href="/admin.html" id="nav-admin" class="admin-only" style="display: none; color: #fbbf24; font-weight: 700;">⚙️ Quản Trị</a>
 				</nav>
 			</div>
 		</div>
@@ -60,7 +61,7 @@
 			<nav class="booking-breadcrumb" aria-label="Breadcrumb">
 				<a href="/">Trang chủ</a>
 				<span class="bc-separator">/</span>
-				<span class="bc-current">Bảng Giá Vé & Khuyến Mãi</span>
+				<span class="bc-current">Bảng Giá Vé</span>
 			</nav>
 		</div>
 	</div>
@@ -129,36 +130,39 @@
 			</div>
 		</section>
 
-		<!-- SECTION 2: PROMOTIONS & NEWS -->
-		<section class="promotions-section-container" id="promotions">
-			<div class="promotions-header-bar">
-				<h2>Tin Tức & Chương Trình Khuyến Mãi Mới Nhất</h2>
+		<!-- PRICING POLICIES & REGULATIONS -->
+		<section class="pricing-section-container" style="margin-top: 28px;">
+			<div class="pricing-header-wrap" style="text-align: left; max-width: 100%; margin-bottom: 20px;">
+				<h3 style="font-size: 20px; font-weight: 800; color: #015198; margin: 0 0 8px;">Quy Định & Phụ Thu Giá Vé</h3>
+				<p style="font-size: 14px; color: #64748b;">Một số lưu ý quan trọng khi mua vé xem phim tại các cụm rạp Beta Cinemas:</p>
+			</div>
+			<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; font-size: 13.5px; line-height: 1.6; color: #334155;">
+				<div style="background: #f8fafc; border-left: 4px solid #0284c7; padding: 14px 18px; border-radius: 6px;">
+					<strong style="color: #0f172a; display: block; margin-bottom: 4px;">📅 Phụ Thu Ngày Lễ & Tết:</strong>
+					Áp dụng biểu giá Thứ 7 - Chủ Nhật cho tất cả các ngày nghỉ lễ, Tết theo quy định của Nhà nước.
+				</div>
+				<div style="background: #f8fafc; border-left: 4px solid #10b981; padding: 14px 18px; border-radius: 6px;">
+					<strong style="color: #0f172a; display: block; margin-bottom: 4px;">👓 Kính 3D & Phòng Chiếu Laser:</strong>
+					Giá vé 3D đã bao gồm mượn kính 3D tiêu chuẩn. Vui lòng hoàn trả kính nguyên vẹn sau khi kết thúc suất chiếu.
+				</div>
+				<div style="background: #f8fafc; border-left: 4px solid #f59e0b; padding: 14px 18px; border-radius: 6px;">
+					<strong style="color: #0f172a; display: block; margin-bottom: 4px;">👶 Trẻ Em & Người Cao Tuổi:</strong>
+					Trẻ em dưới 0.7m được miễn phí vé khi ngồi cùng ghế với người lớn. Người cao tuổi trên 55 tuổi áp dụng đồng giá 50.000đ (kèm CCCD).
+				</div>
 			</div>
 
-			<!-- Category Filter Pills -->
-			<div class="promo-filter-pills" role="tablist">
-				<button class="promo-pill active" data-category="all">Tất Cả Ưu Đãi</button>
-				<button class="promo-pill" data-category="promotion">Khuyến Mãi Vé</button>
-				<button class="promo-pill" data-category="member">Ưu Đãi Thành Viên</button>
-				<button class="promo-pill" data-category="news">Tin Tức Rạp</button>
-			</div>
-
-			<!-- Promotions Grid -->
-			<div class="promotions-grid" id="promotions-grid-container">
-				<!-- Dynamically injected via pricing-page.js -->
+			<!-- Banner to News & Promotions Page -->
+			<div style="margin-top: 28px; background: linear-gradient(135deg, #015198 0%, #0284c7 100%); border-radius: 12px; padding: 24px; color: #fff; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px;">
+				<div>
+					<h4 style="font-size: 18px; font-weight: 800; margin: 0 0 6px;">🎁 Bạn đang tìm kiếm chương trình khuyến mãi & mã giảm giá?</h4>
+					<p style="font-size: 14px; opacity: 0.9; margin: 0;">Khám phá ngay các ưu đãi vé phim hot nhất, mã voucher bắp nước tại trang Tin Mới & Ưu Đãi.</p>
+				</div>
+				<a href="/news.html" style="background: #fbbf24; color: #1e293b; font-weight: 800; font-size: 14px; padding: 12px 24px; border-radius: 8px; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
+					Xem Tin Mới & Ưu Đãi →
+				</a>
 			</div>
 		</section>
 	</main>
-
-	<!-- ===================== PROMO DETAIL MODAL ===================== -->
-	<div class="modal-backdrop" id="promo-detail-modal">
-		<div class="modal-content" style="max-width: 680px; padding: 0; overflow: hidden;">
-			<button class="modal-close-btn" id="promo-modal-close" aria-label="Đóng">&#x2715;</button>
-			<div id="promo-modal-body">
-				<!-- Rendered dynamically -->
-			</div>
-		</div>
-	</div>
 
 	<!-- ===================== FOOTER ===================== -->
 	<footer class="main-footer" id="footer-container"></footer>

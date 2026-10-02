@@ -1,5 +1,6 @@
 {
   "version": 2,
+  "cleanUrls": true,
   "rewrites": [
     { "source": "/api/register", "destination": "/api/server.js" },
     { "source": "/api/login", "destination": "/api/server.js" },
@@ -7,6 +8,8 @@
     { "source": "/api/:match*", "destination": "/api/server.js" },
     { "source": "/register", "destination": "/api/server.js" },
     { "source": "/login", "destination": "/api/server.js" },
-    { "source": "/users/:match*", "destination": "/api/server.js" }
+    { "source": "/users/:match*", "destination": "/api/server.js" },
+    { "source": "/users", "destination": "/api/server.js" },
+    { "source": "/reset-db", "destination": "/api/server.js" }
   ]
 }

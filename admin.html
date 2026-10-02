@@ -4,16 +4,85 @@
 <head>
 	<meta charset="UTF-8" />
 	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-	<meta name="description" content="Trang Quản Trị Hệ Thống Rạp Phim Beta Cinemas - Quản lý phim, suất chiếu, bắp nước và đơn vé." />
+	<meta name="description"
+		content="Trang Quản Trị Hệ Thống Rạp Phim Beta Cinemas - Quản lý phim, suất chiếu, bắp nước và đơn vé." />
 	<title>Trang Quản Trị (Admin Portal) | Beta Cinemas</title>
 	<link rel="stylesheet" href="/style/main.scss" />
 	<link rel="preconnect" href="https://fonts.googleapis.com" />
 	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-	<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+	<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"
+		rel="stylesheet" />
 </head>
 
 <body class="admin-body">
-	<div class="admin-layout">
+	<!-- ===================== AUTH GUARD / LOGIN GATE ===================== -->
+	<div class="admin-auth-gate" id="admin-auth-gate" style="display: none;">
+		<div class="auth-gate-card">
+			<div class="auth-gate-brand">
+				<img src="/logo.webp" alt="Beta Cinemas Logo" class="auth-gate-logo" />
+				<div class="brand-texts">
+					<span class="brand-title">Beta Cinemas</span>
+					<span class="brand-badge">ADMIN SECURITY GATEWAY</span>
+				</div>
+			</div>
+
+			<div class="auth-gate-icon-wrap">
+				<div class="auth-gate-shield-icon">🔐</div>
+			</div>
+
+			<h2 class="auth-gate-title">Cổng Đăng Nhập Quản Trị Viên</h2>
+			<p class="auth-gate-desc">
+				Khu vực này yêu cầu xác thực bảo mật. Bạn cần đăng nhập tài khoản <strong>admin</strong>
+			</p>
+
+			<div class="auth-gate-alert" id="auth-gate-role-alert" style="display: none;">
+				<span class="alert-icon">⚠️</span>
+				<div class="alert-text" id="auth-gate-role-alert-text"></div>
+			</div>
+
+			<form class="auth-gate-form" id="form-admin-login" novalidate>
+				<div class="form-field-group">
+					<label for="admin-login-account">Tài khoản Quản trị <span class="req">*</span></label>
+					<div class="input-with-icon">
+						<span class="input-icon">👤</span>
+						<input type="text" id="admin-login-account" placeholder="admin" value="admin" required
+							autocomplete="username" />
+					</div>
+				</div>
+
+				<div class="form-field-group">
+					<label for="admin-login-password">Mật khẩu bảo mật <span class="req">*</span></label>
+					<div class="input-with-icon">
+						<span class="input-icon">🔑</span>
+						<input type="password" id="admin-login-password" placeholder="Nhập mật khẩu" required
+							autocomplete="current-password" />
+						<button type="button" class="btn-toggle-pwd" id="btn-toggle-admin-pwd"
+							aria-label="Hiện mật khẩu">👁️</button>
+					</div>
+				</div>
+
+				<div class="auth-gate-error" id="admin-login-error" style="display: none;"></div>
+
+				<button type="submit" class="btn-auth-gate-submit" id="btn-admin-login-submit">
+					<span>Đăng Nhập Quản Trị</span>
+					<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="18"
+						height="18">
+						<line x1="5" y1="12" x2="19" y2="12"></line>
+						<polyline points="12 5 19 12 12 19"></polyline>
+					</svg>
+				</button>
+			</form>
+
+			<div class="auth-gate-footer">
+				<a href="/" class="btn-back-home">
+					<span>← Quay lại trang chủ rạp chiếu</span>
+				</a>
+			</div>
+		</div>
+	</div>
+
+	<!-- ===================== ADMIN DASHBOARD LAYOUT ===================== -->
+	<div class="admin-layout" id="admin-layout" style="display: none;">
 		<!-- ===================== SIDEBAR ===================== -->
 		<aside class="admin-sidebar" id="admin-sidebar">
 			<div class="sidebar-brand">
@@ -27,10 +96,10 @@
 			</div>
 
 			<div class="sidebar-admin-profile">
-				<div class="admin-avatar">AD</div>
+				<div class="admin-avatar" id="sidebar-admin-avatar">AD</div>
 				<div class="admin-meta">
-					<span class="admin-name">Ban Quản Trị Hệ Thống</span>
-					<span class="admin-role">Super Admin Online</span>
+					<span class="admin-name" id="sidebar-admin-name">Ban Quản Trị Hệ Thống</span>
+					<span class="admin-role" id="sidebar-admin-role">Super Admin Online</span>
 				</div>
 			</div>
 
@@ -90,6 +159,10 @@
 			</nav>
 
 			<div class="sidebar-footer">
+				<button type="button" class="btn-sidebar-logout" id="btn-sidebar-logout"
+					title="Đăng xuất khỏi tài khoản Quản trị">
+					<span>🚪 Đăng Xuất Admin</span>
+				</button>
 				<a href="/" class="btn-view-site" target="_blank" rel="noopener">
 					<span>🌐 Xem Trang Rạp Chiếu</span>
 				</a>
@@ -105,7 +178,8 @@
 			<!-- TOPBAR -->
 			<header class="admin-topbar">
 				<div class="topbar-left">
-					<button type="button" class="btn-toggle-sidebar" id="btn-toggle-sidebar" aria-label="Mở Menu">☰</button>
+					<button type="button" class="btn-toggle-sidebar" id="btn-toggle-sidebar"
+						aria-label="Mở Menu">☰</button>
 					<div class="topbar-breadcrumb">
 						<h1 id="topbar-title">Tổng Quan Dashboard</h1>
 						<span id="topbar-sub">Hệ thống quản trị rạp Beta Cinemas</span>
@@ -116,12 +190,17 @@
 					<button type="button" class="btn-topbar-action" id="btn-quick-add">
 						<span>➕ Thêm Nhanh</span>
 					</button>
-					<button type="button" class="btn-topbar-action btn-reset-data" id="btn-global-reset" title="Khôi phục toàn bộ dữ liệu mẫu ban đầu">
+					<button type="button" class="btn-topbar-action btn-reset-data" id="btn-global-reset"
+						title="Khôi phục toàn bộ dữ liệu mẫu ban đầu">
 						<span>🔄 Reset Dữ Liệu</span>
 					</button>
 					<a href="/profile.html" class="btn-topbar-action" title="Xem hồ sơ cá nhân">
 						<span>👤 Hồ Sơ Cá Nhân</span>
 					</a>
+					<button type="button" class="btn-topbar-action btn-logout-admin" id="btn-admin-logout"
+						title="Đăng xuất khỏi tài khoản Quản trị viên">
+						<span>🚪 Đăng Xuất</span>
+					</button>
 				</div>
 			</header>
 
@@ -132,9 +211,11 @@
 					<!-- KPI GRID -->
 					<div class="admin-kpi-grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));">
 						<div class="kpi-card" style="border-left: 4px solid #ef4444;">
-							<div class="kpi-icon-wrap" style="background: rgba(239, 68, 68, 0.15); color: #f87171;">💰</div>
+							<div class="kpi-icon-wrap" style="background: rgba(239, 68, 68, 0.15); color: #f87171;">💰
+							</div>
 							<span class="kpi-label">Tổng Doanh Thu</span>
-							<span class="kpi-value" id="kpi-revenue-total" style="color: #fbbf24; font-size: 24px;">0 đ</span>
+							<span class="kpi-value" id="kpi-revenue-total" style="color: #fbbf24; font-size: 24px;">0
+								đ</span>
 							<div class="kpi-subtext">
 								<span class="badge-trend trend-up" id="kpi-paid-count">0 đơn hợp lệ</span>
 								<span>từ LocalStorage</span>
@@ -142,7 +223,8 @@
 						</div>
 
 						<div class="kpi-card" style="border-left: 4px solid #10b981;">
-							<div class="kpi-icon-wrap" style="background: rgba(16, 185, 129, 0.15); color: #10b981;">🎟️</div>
+							<div class="kpi-icon-wrap" style="background: rgba(16, 185, 129, 0.15); color: #10b981;">🎟️
+							</div>
 							<span class="kpi-label">Số Vé Bán Ra</span>
 							<span class="kpi-value" id="kpi-tickets-count">0 vé</span>
 							<div class="kpi-subtext">
@@ -152,7 +234,8 @@
 						</div>
 
 						<div class="kpi-card" style="border-left: 4px solid #38bdf8;">
-							<div class="kpi-icon-wrap" style="background: rgba(56, 189, 248, 0.15); color: #38bdf8;">🎬</div>
+							<div class="kpi-icon-wrap" style="background: rgba(56, 189, 248, 0.15); color: #38bdf8;">🎬
+							</div>
 							<span class="kpi-label">Tổng Phim Hệ Thống</span>
 							<span class="kpi-value" id="kpi-movies-total">0</span>
 							<div class="kpi-subtext">
@@ -162,7 +245,8 @@
 						</div>
 
 						<div class="kpi-card" style="border-left: 4px solid #8b5cf6;">
-							<div class="kpi-icon-wrap" style="background: rgba(139, 92, 246, 0.15); color: #a78bfa;">📅</div>
+							<div class="kpi-icon-wrap" style="background: rgba(139, 92, 246, 0.15); color: #a78bfa;">📅
+							</div>
 							<span class="kpi-label">Suất Chiếu Đang Lịch</span>
 							<span class="kpi-value" id="kpi-showtimes-total">0</span>
 							<div class="kpi-subtext">
@@ -172,7 +256,8 @@
 						</div>
 
 						<div class="kpi-card" style="border-left: 4px solid #f5a623;">
-							<div class="kpi-icon-wrap" style="background: rgba(251, 191, 36, 0.15); color: #fbbf24;">🍿</div>
+							<div class="kpi-icon-wrap" style="background: rgba(251, 191, 36, 0.15); color: #fbbf24;">🍿
+							</div>
 							<span class="kpi-label">Combo Bắp Nước</span>
 							<span class="kpi-value" id="kpi-concessions-total">0</span>
 							<div class="kpi-subtext">
@@ -189,7 +274,8 @@
 							<span class="card-subtitle">Dữ liệu phân tích trực tiếp từ LocalStorage</span>
 						</div>
 						<div class="card-body">
-							<div id="stats-movies-revenue-bars" style="display: flex; flex-direction: column; gap: 14px;">
+							<div id="stats-movies-revenue-bars"
+								style="display: flex; flex-direction: column; gap: 14px;">
 								<!-- Dynamically populated progress bars -->
 							</div>
 						</div>
@@ -205,10 +291,12 @@
 							<button type="button" class="btn-admin-primary" id="btn-quick-add-movie">
 								➕ Thêm Phim Mới
 							</button>
-							<button type="button" class="btn-admin-primary" id="btn-quick-add-showtime" style="background: #0284c7;">
+							<button type="button" class="btn-admin-primary" id="btn-quick-add-showtime"
+								style="background: #0284c7;">
 								➕ Tạo Suất Chiếu Mới
 							</button>
-							<button type="button" class="btn-admin-primary" id="btn-quick-add-concession" style="background: #059669;">
+							<button type="button" class="btn-admin-primary" id="btn-quick-add-concession"
+								style="background: #059669;">
 								➕ Thêm Combo Bắp Nước
 							</button>
 							<button type="button" class="btn-admin-secondary" id="btn-view-booking-history">
@@ -223,7 +311,8 @@
 						<div class="admin-card" style="margin-bottom: 0;">
 							<div class="card-head">
 								<h2>🎟️ Đơn Đặt Vé Mới Nhất</h2>
-								<button type="button" class="btn-admin-secondary" id="btn-goto-all-bookings" style="font-size: 12px; padding: 4px 10px;">Xem tất cả</button>
+								<button type="button" class="btn-admin-secondary" id="btn-goto-all-bookings"
+									style="font-size: 12px; padding: 4px 10px;">Xem tất cả</button>
 							</div>
 							<div class="admin-table-wrap">
 								<table class="admin-data-table">
@@ -247,9 +336,11 @@
 						<div class="admin-card" style="margin-bottom: 0;">
 							<div class="card-head">
 								<h2>🎬 Phim Nổi Bật Đang Chiếu</h2>
-								<button type="button" class="btn-admin-secondary" id="btn-goto-all-movies" style="font-size: 12px; padding: 4px 10px;">Quản lý phim</button>
+								<button type="button" class="btn-admin-secondary" id="btn-goto-all-movies"
+									style="font-size: 12px; padding: 4px 10px;">Quản lý phim</button>
 							</div>
-							<div class="card-body" id="dashboard-top-movies-list" style="display: flex; flex-direction: column; gap: 12px; padding: 18px 24px;">
+							<div class="card-body" id="dashboard-top-movies-list"
+								style="display: flex; flex-direction: column; gap: 12px; padding: 18px 24px;">
 								<!-- Dynamically populated -->
 							</div>
 						</div>
@@ -269,13 +360,15 @@
 								<option value="upcoming">Phim sắp chiếu (upcoming)</option>
 								<option value="special">Suất chiếu đặc biệt (special)</option>
 							</select>
-							<button type="button" class="btn-admin-secondary" id="btn-reset-movies-data" title="Khôi phục danh sách phim ban đầu từ file JSON">
+							<button type="button" class="btn-admin-secondary" id="btn-reset-movies-data"
+								title="Khôi phục danh sách phim ban đầu từ file JSON">
 								🔄 Khôi phục phim gốc
 							</button>
 						</div>
 
 						<div class="actions-group">
-							<input type="text" class="admin-search-input" id="search-movies-input" placeholder="Tìm theo tên, đạo diễn, thể loại..." />
+							<input type="text" class="admin-search-input" id="search-movies-input"
+								placeholder="Tìm theo tên, đạo diễn, thể loại..." />
 						</div>
 					</div>
 
@@ -324,7 +417,8 @@
 							<button type="button" class="btn-admin-primary" id="btn-open-add-showtime-modal">
 								➕ Thêm Suất Chiếu Mới
 							</button>
-							<button type="button" class="btn-admin-secondary" id="btn-reset-showtimes-data" title="Khôi phục toàn bộ lịch chiếu gốc từ JSON">
+							<button type="button" class="btn-admin-secondary" id="btn-reset-showtimes-data"
+								title="Khôi phục toàn bộ lịch chiếu gốc từ JSON">
 								🔄 Khôi phục lịch chiếu
 							</button>
 						</div>
@@ -339,7 +433,8 @@
 				<section class="admin-tab-panel" id="tab-panel-concessions">
 					<div class="admin-actions-bar">
 						<div class="actions-group">
-							<button type="button" class="btn-admin-primary" id="btn-open-add-concession-modal" style="background: #059669;">
+							<button type="button" class="btn-admin-primary" id="btn-open-add-concession-modal"
+								style="background: #059669;">
 								➕ Thêm Combo / Bắp Nước
 							</button>
 							<select class="admin-filter-select" id="filter-concessions-category">
@@ -354,7 +449,8 @@
 							</button>
 						</div>
 						<div class="actions-group">
-							<input type="text" class="admin-search-input" id="search-concessions-input" placeholder="Tìm tên combo, món..." />
+							<input type="text" class="admin-search-input" id="search-concessions-input"
+								placeholder="Tìm tên combo, món..." />
 						</div>
 					</div>
 
@@ -375,21 +471,26 @@
 				<section class="admin-tab-panel" id="tab-panel-bookings">
 					<div class="admin-actions-bar" style="gap: 14px;">
 						<div class="actions-group" id="admin-booking-filter-pills" style="gap: 8px;">
-							<button type="button" class="btn-filter-bk active" data-status="all" style="background: #015198; color: #fff; border: none; padding: 7px 14px; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer;">
+							<button type="button" class="btn-filter-bk active" data-status="all"
+								style="background: #015198; color: #fff; border: none; padding: 7px 14px; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer;">
 								Tất Cả (<span id="cnt-bk-all">0</span>)
 							</button>
-							<button type="button" class="btn-filter-bk" data-status="paid" style="background: #1e293b; color: #94a3b8; border: 1px solid rgba(255,255,255,0.1); padding: 7px 14px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer;">
+							<button type="button" class="btn-filter-bk" data-status="paid"
+								style="background: #1e293b; color: #94a3b8; border: 1px solid rgba(255,255,255,0.1); padding: 7px 14px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer;">
 								Chờ Xem / Đã Thanh Toán (<span id="cnt-bk-paid">0</span>)
 							</button>
-							<button type="button" class="btn-filter-bk" data-status="done" style="background: #1e293b; color: #94a3b8; border: 1px solid rgba(255,255,255,0.1); padding: 7px 14px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer;">
+							<button type="button" class="btn-filter-bk" data-status="done"
+								style="background: #1e293b; color: #94a3b8; border: 1px solid rgba(255,255,255,0.1); padding: 7px 14px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer;">
 								Đã Soát Vé / Đã Xem (<span id="cnt-bk-done">0</span>)
 							</button>
-							<button type="button" class="btn-filter-bk" data-status="cancelled" style="background: #1e293b; color: #94a3b8; border: 1px solid rgba(255,255,255,0.1); padding: 7px 14px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer;">
+							<button type="button" class="btn-filter-bk" data-status="cancelled"
+								style="background: #1e293b; color: #94a3b8; border: 1px solid rgba(255,255,255,0.1); padding: 7px 14px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer;">
 								Đã Hủy (<span id="cnt-bk-cancelled">0</span>)
 							</button>
 						</div>
 						<div class="actions-group">
-							<input type="text" class="admin-search-input" id="search-admin-bookings-input" placeholder="Tìm theo mã vé, tên khách, phim, rạp..." style="width: 280px;" />
+							<input type="text" class="admin-search-input" id="search-admin-bookings-input"
+								placeholder="Tìm theo mã vé, tên khách, phim, rạp..." style="width: 280px;" />
 						</div>
 					</div>
 
@@ -495,11 +596,15 @@
 						<label for="movie-poster-preset">Chọn Ảnh Poster Nhanh</label>
 						<select id="movie-poster-preset">
 							<option value="/poster/poster_utlan2.jpg">Út Lan 2 (/poster/poster_utlan2.jpg)</option>
-							<option value="/poster/poster_bongma.jpg">Bóng Ma Nhà Hát (/poster/poster_bongma.jpg)</option>
-							<option value="/poster/poster_vungdat.jpg">Vùng Đất Quỷ Dữ (/poster/poster_vungdat.jpg)</option>
-							<option value="/poster/poster_avengers.jpg">Avengers Hồi Kết (/poster/poster_avengers.jpg)</option>
+							<option value="/poster/poster_bongma.jpg">Bóng Ma Nhà Hát (/poster/poster_bongma.jpg)
+							</option>
+							<option value="/poster/poster_vungdat.jpg">Vùng Đất Quỷ Dữ (/poster/poster_vungdat.jpg)
+							</option>
+							<option value="/poster/poster_avengers.jpg">Avengers Hồi Kết (/poster/poster_avengers.jpg)
+							</option>
 							<option value="/poster/poster_lonhuong.jpg">Lên Hương (/poster/poster_lonhuong.jpg)</option>
-							<option value="/poster/poster_traibuonnguoi.jpg">Trại Buôn Người (/poster/poster_traibuonnguoi.jpg)</option>
+							<option value="/poster/poster_traibuonnguoi.jpg">Trại Buôn Người
+								(/poster/poster_traibuonnguoi.jpg)</option>
 							<option value="custom">URL Tùy Chọn</option>
 						</select>
 					</div>
@@ -509,7 +614,8 @@
 					</div>
 					<div class="form-field form-col-full">
 						<label for="movie-synopsis">Tóm Tắt Nội Dung Phim</label>
-						<textarea id="movie-synopsis" placeholder="Nhập tóm tắt nội dung hấp dẫn của bộ phim..."></textarea>
+						<textarea id="movie-synopsis"
+							placeholder="Nhập tóm tắt nội dung hấp dẫn của bộ phim..."></textarea>
 					</div>
 				</div>
 				<div class="modal-card-footer" style="padding: 16px 0 0; background: none; border-top: none;">
@@ -568,7 +674,8 @@
 					</div>
 					<div class="form-field">
 						<label for="st-form-price">Giá Vé Cơ Bản (VNĐ) <span style="color:#ef4444;">*</span></label>
-						<input type="number" step="5000" min="40000" max="250000" id="st-form-price" value="75000" required />
+						<input type="number" step="5000" min="40000" max="250000" id="st-form-price" value="75000"
+							required />
 					</div>
 					<div class="form-field form-col-full">
 						<label for="st-form-seats">Số Ghế Khả Dụng</label>
@@ -631,7 +738,8 @@
 					</div>
 					<div class="form-field form-col-full">
 						<label for="cc-description">Mô Tả Thành Phần</label>
-						<textarea id="cc-description" placeholder="Ví dụ: 1 Bắp Rang Phô Mai lớn + 2 Ly Nước ngọt có ga 22oz..."></textarea>
+						<textarea id="cc-description"
+							placeholder="Ví dụ: 1 Bắp Rang Phô Mai lớn + 2 Ly Nước ngọt có ga 22oz..."></textarea>
 					</div>
 				</div>
 				<div class="modal-card-footer" style="padding: 16px 0 0; background: none; border-top: none;">
@@ -645,7 +753,8 @@
 	<!-- MODAL: VIEW E-TICKET QR -->
 	<div class="admin-modal-backdrop" id="modal-admin-ticket">
 		<div class="admin-modal-card" style="max-width: 540px; padding: 0; background: transparent; border: none;">
-			<button class="btn-close-modal" id="modal-admin-ticket-close" style="position: absolute; top: 14px; right: 14px; z-index: 10; color: #fff; font-size: 24px;">&times;</button>
+			<button class="btn-close-modal" id="modal-admin-ticket-close"
+				style="position: absolute; top: 14px; right: 14px; z-index: 10; color: #fff; font-size: 24px;">&times;</button>
 			<div id="modal-admin-ticket-body"></div>
 		</div>
 	</div>
@@ -655,4 +764,3 @@
 </body>
 
 </html>
-

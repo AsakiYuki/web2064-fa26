@@ -30,3 +30,7 @@ dist-ssr
 # Vite cache
 .vite
 
+# Office lock and backup files
+.~lock.*
+*.bak
+

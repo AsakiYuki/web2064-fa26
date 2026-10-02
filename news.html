@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="vi">
+
+<head>
+	<meta charset="UTF-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<meta name="description"
+		content="Tin tức điện ảnh mới nhất, ưu đãi giảm giá vé xem phim, combo bắp nước và chương trình thành viên độc quyền tại Beta Cinemas." />
+	<title>Tin Mới & Khuyến Mãi | Beta Cinemas</title>
+	<link rel="stylesheet" href="/style/main.scss" />
+	<link rel="preconnect" href="https://fonts.googleapis.com" />
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+	<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+</head>
+
+<body class="pricing-page news-page">
+	<!-- ===================== HEADER ===================== -->
+	<header class="main-header">
+		<div class="header-account-manager">
+			<div class="container">
+				<a href="#" id="btn-login">Đăng nhập</a>
+				<div class="divider"></div>
+				<a href="#" id="btn-register">Đăng ký</a>
+				<span style="font-size: 18px; margin-left: 4px; cursor: pointer" title="English">🇬🇧</span>
+			</div>
+		</div>
+		<div class="header-navigator">
+			<div class="container">
+				<a href="/" class="header-logo" id="logo-link">
+					<img src="/logo.webp" alt="Beta Cinemas Logo" />
+				</a>
+				<div class="cinema-selector-wrap" id="cinema-selector-wrap">
+					<button class="cinema-selector" id="cinema-selector-btn" aria-haspopup="listbox" aria-expanded="false">
+						<span class="cinema-selector-label" id="cinema-selector-label">Beta Thái Nguyên</span>
+						<svg class="cinema-selector-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+							stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+							<polyline points="6 9 12 15 18 9"></polyline>
+						</svg>
+					</button>
+					<div class="cinema-dropdown" id="cinema-dropdown" role="listbox">
+						<ul id="cinema-dropdown-ul"></ul>
+					</div>
+				</div>
+				<nav class="nav-links">
+					<a href="/schedule.html" id="nav-schedule">Lịch Chiếu Theo Rạp</a>
+					<a href="/movies.html" id="nav-movies">Phim</a>
+					<a href="#" id="nav-cinemas">Rạp</a>
+					<a href="/pricing.html" id="nav-pricing">Giá Vé</a>
+					<a href="/news.html" id="nav-news" class="active">Tin Mới Và Ưu Đãi</a>
+					<a href="#" id="nav-franchise">Nhượng Quyền</a>
+					<a href="/profile.html" id="nav-member">Thành Viên</a>
+					<a href="/admin.html" id="nav-admin" class="admin-only" style="display: none; color: #fbbf24; font-weight: 700;">⚙️ Quản Trị</a>
+				</nav>
+			</div>
+		</div>
+	</header>
+
+	<!-- ===================== BREADCRUMB BAR ===================== -->
+	<div class="booking-header-bar" style="background:#0f172a; padding: 14px 0;">
+		<div class="container">
+			<nav class="booking-breadcrumb" aria-label="Breadcrumb">
+				<a href="/">Trang chủ</a>
+				<span class="bc-separator">/</span>
+				<span class="bc-current">Tin Mới & Ưu Đãi</span>
+			</nav>
+		</div>
+	</div>
+
+	<!-- ===================== MAIN CONTENT ===================== -->
+	<main class="container">
+		<section class="promotions-section-container" style="margin-top: 32px;">
+			<div class="promotions-header-bar">
+				<div>
+					<h1 style="font-size: 28px; font-weight: 900; color: #015198; margin: 0 0 8px; text-transform: uppercase;">
+						Tin Mới & Chương Trình Khuyến Mãi
+					</h1>
+					<p style="font-size: 14px; color: #64748b; margin: 0;">
+						Cập nhật liên tục các ưu đãi vé phim hot nhất, mã voucher bắp nước và sự kiện điện ảnh đặc biệt tại Beta Cinemas.
+					</p>
+				</div>
+			</div>
+
+			<!-- Category Filter Pills -->
+			<div class="promo-filter-pills" role="tablist" style="margin-top: 24px;">
+				<button class="promo-pill active" data-category="all">Tất Cả Ưu Đãi</button>
+				<button class="promo-pill" data-category="promotion">Khuyến Mãi Vé</button>
+				<button class="promo-pill" data-category="member">Ưu Đãi Thành Viên</button>
+				<button class="promo-pill" data-category="news">Tin Tức Rạp</button>
+			</div>
+
+			<!-- Promotions Grid -->
+			<div class="promotions-grid" id="promotions-grid-container">
+				<!-- Dynamically injected via news-page.js -->
+			</div>
+		</section>
+	</main>
+
+	<!-- ===================== PROMO DETAIL MODAL ===================== -->
+	<div class="modal-backdrop" id="promo-detail-modal">
+		<div class="modal-content" style="max-width: 680px; padding: 0; overflow: hidden;">
+			<button class="modal-close-btn" id="promo-modal-close" aria-label="Đóng">&#x2715;</button>
+			<div id="promo-modal-body">
+				<!-- Rendered dynamically -->
+			</div>
+		</div>
+	</div>
+
+	<!-- ===================== FOOTER ===================== -->
+	<footer class="main-footer" id="footer-container"></footer>
+
+	<!-- Scripts -->
+	<script type="module" src="/js/news-page.js"></script>
+</body>
+
+</html>

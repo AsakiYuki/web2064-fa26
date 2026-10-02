@@ -16,16 +16,31 @@ server.db = router.db
 server.use(middlewares)
 server.use(jsonServer.bodyParser)
 
-// Custom middleware: Support login via phone number in addition to email
+// Normalize /api prefix if present (allows calling http://localhost:3000/api/... directly)
+server.use((req, res, next) => {
+	if (req.url.startsWith('/api/')) {
+		req.url = req.url.replace(/^\/api/, '')
+	} else if (req.url === '/api') {
+		req.url = '/'
+	}
+	next()
+})
+
+// Custom middleware: Support login via phone number, username, or admin account in addition to email
 server.use((req, res, next) => {
 	if (req.method === 'POST' && req.path === '/login') {
-		const { email, account, phone } = req.body || {}
-		const identifier = (email || account || phone || '').trim().toLowerCase()
-		if (identifier && !identifier.includes('@')) {
+		const { email, account, username, phone } = req.body || {}
+		const identifier = (email || account || username || phone || '').trim().toLowerCase()
+		if (identifier) {
 			const cleanPhone = identifier.replace(/[\s.-]/g, '')
 			const user = server.db
 				.get('users')
-				.find(u => u.phone && u.phone.replace(/[\s.-]/g, '') === cleanPhone)
+				.find(u =>
+					(u.email && u.email.toLowerCase() === identifier) ||
+					(u.username && u.username.toLowerCase() === identifier) ||
+					(identifier === 'admin' && (u.role === 'admin' || u.username === 'admin' || (u.email && u.email.toLowerCase().startsWith('admin')))) ||
+					(u.phone && u.phone.replace(/[\s.-]/g, '') === cleanPhone)
+				)
 				.value()
 			if (user && user.email) {
 				req.body.email = user.email

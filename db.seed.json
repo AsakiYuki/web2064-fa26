@@ -29,6 +29,23 @@
       "city": "Hà Nội",
       "cinemaFavorite": "beta-thainguyen",
       "createdAt": "2026-02-01T00:00:00.000Z"
+    },
+    {
+      "id": 999,
+      "username": "admin",
+      "name": "Ban Quản Trị Hệ Thống",
+      "email": "admin@betacinemas.vn",
+      "phone": "0999999999",
+      "password": "$2a$10$c22tdnOAzHd4E9wn1BZb/OPu9fyK84q70SJkOmPfOmv2x79apsp1e",
+      "role": "admin",
+      "avatarText": "AD",
+      "rank": "Super Admin Online",
+      "points": 9999,
+      "gender": "male",
+      "birthday": "1990-01-01",
+      "city": "Hà Nội",
+      "cinemaFavorite": "beta-thainguyen",
+      "createdAt": "2026-01-01T00:00:00.000Z"
     }
   ],
   "movies": [

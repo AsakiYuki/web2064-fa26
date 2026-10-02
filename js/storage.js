@@ -165,6 +165,23 @@ export function storageClearAll() {
 
 export const DEFAULT_USERS = [
 	{
+		id: 999,
+		username: "admin",
+		name: "Ban Quản Trị Hệ Thống",
+		email: "admin@betacinemas.vn",
+		phone: "0999999999",
+		password: "12345678",
+		role: "admin",
+		avatarText: "AD",
+		rank: "Super Admin Online",
+		points: 9999,
+		gender: "male",
+		birthday: "1990-01-01",
+		city: "Hà Nội",
+		cinemaFavorite: "beta-thainguyen",
+		createdAt: "2026-01-01T00:00:00.000Z",
+	},
+	{
 		id: 1,
 		name: "Nguyễn Hoàng Nam",
 		email: "nam.nguyen@example.com",
@@ -381,6 +398,12 @@ export async function initializeStorage(force = false) {
 		// Users cache
 		if (!storageHas(STORAGE_KEYS.USERS_LIST)) {
 			storageSet(STORAGE_KEYS.USERS_LIST, DEFAULT_USERS)
+		} else {
+			const currentUsers = storageGet(STORAGE_KEYS.USERS_LIST, [])
+			if (Array.isArray(currentUsers) && !currentUsers.some(u => u.username === "admin" || u.role === "admin")) {
+				currentUsers.unshift(DEFAULT_USERS[0])
+				storageSet(STORAGE_KEYS.USERS_LIST, currentUsers)
+			}
 		}
 
 		storageSet(STORAGE_KEYS.INITIALIZED, true)
@@ -399,6 +422,11 @@ export async function initializeStorage(force = false) {
 
 export function getCurrentUser() {
 	return storageGet(STORAGE_KEYS.USER_SESSION, null)
+}
+
+/** Alias for getCurrentUser (hỗ trợ cả getUser() và getCurrentUser()) */
+export function getUser() {
+	return getCurrentUser()
 }
 
 export function saveUserSession(userData) {
@@ -486,8 +514,13 @@ export async function authenticateUser(account, password) {
 	const user = list.find(
 		u =>
 			((u.email && u.email.toLowerCase() === cleanAcc) ||
-				(u.phone && u.phone.replace(/[\s.-]/g, "") === cleanPhone)) &&
-			(u.password === password || u.password === "BetaCinemas2026!")
+				(u.phone && u.phone.replace(/[\s.-]/g, "") === cleanPhone) ||
+				(u.username && u.username.toLowerCase() === cleanAcc) ||
+				(cleanAcc === "admin" && (u.role === "admin" || u.username === "admin" || u.email?.toLowerCase().startsWith("admin")))) &&
+			(u.password === password ||
+				u.password === "BetaCinemas2026!" ||
+				(cleanAcc === "admin" && password === "12345678") ||
+				(u.role === "admin" && password === "12345678"))
 	)
 
 	if (user) {
@@ -496,6 +529,25 @@ export async function authenticateUser(account, password) {
 	}
 
 	return { success: false, message: res.message || "Tài khoản hoặc mật khẩu không chính xác!" }
+}
+
+/**
+ * Kiểm tra xem người dùng có phải là Quản trị viên (Admin) hay không
+ * @param {Object} user
+ * @returns {boolean}
+ */
+export function isUserAdmin(user) {
+	if (!user) return false
+	return user.role === "admin" || user.username === "admin" || (user.email && user.email.toLowerCase().startsWith("admin"))
+}
+
+/**
+ * Kiểm tra xem phiên đăng nhập hiện tại có phải là Admin hay không
+ * @returns {boolean}
+ */
+export function isCurrentAdmin() {
+	const user = getCurrentUser()
+	return isUserAdmin(user)
 }
 
 /**

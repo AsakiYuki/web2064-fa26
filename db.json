@@ -31,6 +31,23 @@
       "createdAt": "2026-02-01T00:00:00.000Z"
     },
     {
+      "id": 999,
+      "username": "admin",
+      "name": "Ban Quản Trị Hệ Thống",
+      "email": "admin@betacinemas.vn",
+      "phone": "0999999999",
+      "password": "$2a$10$c22tdnOAzHd4E9wn1BZb/OPu9fyK84q70SJkOmPfOmv2x79apsp1e",
+      "role": "admin",
+      "avatarText": "AD",
+      "rank": "Super Admin Online",
+      "points": 10147,
+      "gender": "male",
+      "birthday": "1990-01-01",
+      "city": "Hà Nội",
+      "cinemaFavorite": "beta-thainguyen",
+      "createdAt": "2026-01-01T00:00:00.000Z"
+    },
+    {
       "email": "tester_1790856992098@example.com",
       "password": "$2a$10$mfBylEZIX7O8f7J/lNtcM.cYzsPaYBZHpzOv3053WE0if8dajdTjK",
       "name": "Tester Automation",
@@ -68,6 +85,66 @@
       "rank": "Thành viên Beta Mới",
       "points": 120,
       "id": 6,
+      "city": "Đà Nẵng"
+    },
+    {
+      "email": "tester_1790909858201@example.com",
+      "password": "$2a$10$dnRW93VsX1c9F4.zyoMPDefMBlv2jJ79lxqKFjMMmcNE3wkaTJveS",
+      "name": "Tester Automation",
+      "phone": "0956426993",
+      "rank": "Thành viên Beta Mới",
+      "points": 120,
+      "id": 1000,
+      "city": "Đà Nẵng"
+    },
+    {
+      "email": "tester_1790910035748@example.com",
+      "password": "$2a$10$H0JzeamuJ26GgdrbyIlQLuPVvAeCy8HKAtVXIFElCM.EtT04uNk3S",
+      "name": "Tester Automation",
+      "phone": "0921761938",
+      "rank": "Thành viên Beta Mới",
+      "points": 120,
+      "id": 1001,
+      "city": "Đà Nẵng"
+    },
+    {
+      "email": "tester_1790910286099@example.com",
+      "password": "$2a$10$G/5ZHVMFtmErRhKaZUA.6etgc48ZN989GNHspiHzYQ0fclKrNV3rm",
+      "name": "Tester Automation",
+      "phone": "0960656445",
+      "rank": "Thành viên Beta Mới",
+      "points": 120,
+      "id": 1002,
+      "city": "Đà Nẵng"
+    },
+    {
+      "email": "tester_1790910596105@example.com",
+      "password": "$2a$10$Mw15t.U0eBKSfi6Qjo5al.1CPhBWS6FdJmVrmQwJ6TCX5wtgCU.B.",
+      "name": "Tester Automation",
+      "phone": "0961096774",
+      "rank": "Thành viên Beta Mới",
+      "points": 120,
+      "id": 1003,
+      "city": "Đà Nẵng"
+    },
+    {
+      "email": "tester_1790912392715@example.com",
+      "password": "$2a$10$Ia9xIpSXUc8uE2XI.2iq4Ogsz3HDU9xYkRh0aYCRlJQbf9M6bqE4e",
+      "name": "Tester Automation",
+      "phone": "0924844841",
+      "rank": "Thành viên Beta Mới",
+      "points": 120,
+      "id": 1004,
+      "city": "Đà Nẵng"
+    },
+    {
+      "email": "tester_1790912780653@example.com",
+      "password": "$2a$10$w6n3DBkjyjHpF2UELeEjb.2oQbpMml1valZQ2KMA2tfJww7Wve1vS",
+      "name": "Tester Automation",
+      "phone": "0911935136",
+      "rank": "Thành viên Beta Mới",
+      "points": 120,
+      "id": 1005,
       "city": "Đà Nẵng"
     }
   ],
@@ -834,6 +911,25 @@
               "time": "18:45",
               "price": 80000,
               "availableSeats": 12
+            }
+          ]
+        },
+        {
+          "movieId": "traibuon",
+          "movieTitle": "Trại Buôn Người",
+          "screenId": "Phòng VIP 1",
+          "screenName": "Phòng VIP 1",
+          "format": "IMAX 3D",
+          "slots": [
+            {
+              "time": "14:30",
+              "price": 75000,
+              "availableSeats": 60
+            },
+            {
+              "time": "17:30",
+              "price": 75000,
+              "availableSeats": 60
             }
           ]
         }
@@ -2159,47 +2255,26 @@
   ],
   "bookings": [
     {
-      "id": "BT-842915",
-      "movieId": "utlan2",
-      "movieTitle": "Út Lan 2: Vùng Đất Mất Tích",
-      "moviePoster": "/poster/poster_utlan2.jpg",
-      "cinemaId": "beta-thainguyen",
-      "cinemaName": "Beta Thái Nguyên",
-      "screenName": "Phòng chiếu 1",
+      "id": "BT-484373",
+      "movieId": "vungdat",
+      "movieTitle": "Vùng Đất Quỷ Dữ",
+      "moviePoster": "/poster/poster_vungdat.jpg",
+      "cinemaId": "beta-nowzone",
+      "cinemaName": "Beta Cinemas Nowzone",
+      "screenName": "Phòng 2",
       "formatName": "2D Phụ Đề",
       "date": "2026-09-26",
-      "time": "14:30",
-      "seats": "D05, D06",
-      "concessions": "1x Beta Combo Đôi",
-      "total": 255000,
-      "paymentMethod": "momo",
-      "userName": "Nguyễn Hoàng Nam",
-      "userPhone": "0987654321",
-      "userEmail": "nam.nguyen@example.com",
-      "bookingDate": "2026-09-26T07:30:00.000Z",
-      "status": "paid"
-    },
-    {
-      "id": "BT-613713",
-      "movieId": "utlan2",
-      "movieTitle": "Út Lan 2",
-      "moviePoster": "/poster/poster_utlan2.jpg",
-      "cinemaId": "beta-thainguyen",
-      "cinemaName": "Beta Cinemas Thái Nguyên",
-      "screenName": "Phòng chiếu 1",
-      "formatName": "2D Phụ Đề",
-      "date": "2026-09-26",
-      "time": "14:30",
-      "seats": "D04, D05",
-      "concessions": "1x Beta Combo Đôi",
-      "total": 235000,
+      "time": "11:00",
+      "seats": "F13",
+      "concessions": "1x Beta Combo Solo",
+      "total": 148000,
       "voucherCode": null,
       "discountAmount": 0,
-      "paymentMethod": "momo",
-      "customerName": "NguyNguyen Hoang Nam",
-      "customerPhone": "0912345678",
-      "customerEmail": "nam.nguyen@example.com",
-      "bookingDate": "2026-10-01T12:37:25.095Z",
+      "paymentMethod": "zalopay",
+      "customerName": "Ban Quản Trị Hệ Thống",
+      "customerPhone": "0999999999",
+      "customerEmail": "admin@betacinemas.vn",
+      "bookingDate": "2026-10-02T03:03:09.915Z",
       "status": "paid"
     }
   ]

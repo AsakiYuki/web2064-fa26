@@ -114,6 +114,35 @@ async function runAllTests() {
 	const updatedUserData = await updateRes.json()
 	assert(updateRes.status === 200 && updatedUserData.points === 120, 'Cập nhật thông tin cá nhân (PATCH /users/:id) thành công')
 
+	// 1.6 Login with Admin Account (admin / 12345678)
+	const loginAdminRes = await fetch(`${BACKEND_URL}/login`, {
+		method: 'POST',
+		headers: { 'Content-Type': 'application/json' },
+		body: JSON.stringify({
+			email: 'admin',
+			password: '12345678',
+		}),
+	})
+	const loginAdminData = await loginAdminRes.json()
+	assert(
+		loginAdminRes.status === 200 &&
+		loginAdminData.accessToken &&
+		loginAdminData.user?.role === 'admin' &&
+		loginAdminData.user?.username === 'admin',
+		'Đăng nhập tài khoản quản trị (admin / 12345678) thành công với quyền admin'
+	)
+
+	// 1.7 Login Admin with Wrong Password
+	const loginAdminFailRes = await fetch(`${BACKEND_URL}/login`, {
+		method: 'POST',
+		headers: { 'Content-Type': 'application/json' },
+		body: JSON.stringify({
+			email: 'admin',
+			password: 'wrong_password',
+		}),
+	})
+	assert(loginAdminFailRes.status === 400, 'Đăng nhập admin sai mật khẩu bị từ chối với HTTP 400')
+
 	/* ------------------------------------------------------------------
 	   USE CASE 2: MOVIES CRUD VIA JSON-SERVER
 	   ------------------------------------------------------------------ */

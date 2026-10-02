@@ -1064,3 +1064,327 @@
 	}
 }
 
+/* ==========================================================================
+   ADMIN AUTHENTICATION GATE
+   ========================================================================== */
+.admin-auth-gate {
+	position: fixed;
+	inset: 0;
+	z-index: 9999;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	background: radial-gradient(circle at 50% 25%, #1e293b 0%, #0b1120 100%);
+	padding: 24px;
+	overflow-y: auto;
+
+	.auth-gate-card {
+		width: 100%;
+		max-width: 480px;
+		background: rgba(15, 23, 42, 0.92);
+		backdrop-filter: blur(20px);
+		border: 1px solid rgba(255, 255, 255, 0.12);
+		border-radius: 20px;
+		padding: 36px 32px;
+		box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7), 0 0 40px rgba(56, 189, 248, 0.08);
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		text-align: center;
+		animation: authCardAppear 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+	}
+
+	.auth-gate-brand {
+		display: flex;
+		align-items: center;
+		gap: 12px;
+		margin-bottom: 20px;
+
+		img {
+			height: 36px;
+			width: auto;
+		}
+
+		.brand-texts {
+			display: flex;
+			flex-direction: column;
+			align-items: flex-start;
+
+			.brand-title {
+				font-size: 16px;
+				font-weight: 800;
+				color: #fff;
+				letter-spacing: -0.3px;
+			}
+
+			.brand-badge {
+				font-size: 9px;
+				font-weight: 800;
+				color: #38bdf8;
+				background: rgba(56, 189, 248, 0.15);
+				padding: 2px 6px;
+				border-radius: 4px;
+				letter-spacing: 0.5px;
+			}
+		}
+	}
+
+	.auth-gate-icon-wrap {
+		width: 68px;
+		height: 68px;
+		border-radius: 50%;
+		background: linear-gradient(135deg, rgba(2, 132, 199, 0.25), rgba(56, 189, 248, 0.1));
+		border: 1px solid rgba(56, 189, 248, 0.3);
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		font-size: 32px;
+		margin-bottom: 16px;
+		box-shadow: 0 0 24px rgba(56, 189, 248, 0.2);
+	}
+
+	.auth-gate-title {
+		font-size: 22px;
+		font-weight: 800;
+		color: #fff;
+		margin: 0 0 8px;
+	}
+
+	.auth-gate-desc {
+		font-size: 13px;
+		color: #94a3b8;
+		line-height: 1.5;
+		margin: 0 0 20px;
+
+		strong {
+			color: #38bdf8;
+		}
+	}
+
+	.auth-gate-alert {
+		width: 100%;
+		background: rgba(245, 158, 11, 0.12);
+		border: 1px solid rgba(245, 158, 11, 0.3);
+		border-radius: 10px;
+		padding: 12px 14px;
+		margin-bottom: 18px;
+		display: flex;
+		align-items: flex-start;
+		gap: 10px;
+		text-align: left;
+
+		.alert-icon {
+			font-size: 18px;
+			flex-shrink: 0;
+		}
+
+		.alert-text {
+			font-size: 12px;
+			color: #fbbf24;
+			line-height: 1.4;
+
+			strong {
+				color: #fff;
+			}
+		}
+	}
+
+	.auth-gate-form {
+		width: 100%;
+		display: flex;
+		flex-direction: column;
+		gap: 16px;
+		text-align: left;
+
+		.form-field-group {
+			display: flex;
+			flex-direction: column;
+			gap: 6px;
+
+			label {
+				font-size: 12px;
+				font-weight: 700;
+				color: #cbd5e1;
+
+				.req {
+					color: #ef4444;
+				}
+			}
+
+			.input-with-icon {
+				position: relative;
+				display: flex;
+				align-items: center;
+
+				.input-icon {
+					position: absolute;
+					left: 12px;
+					font-size: 15px;
+					color: #64748b;
+					pointer-events: none;
+				}
+
+				input {
+					width: 100%;
+					background: #1e293b;
+					border: 1px solid rgba(255, 255, 255, 0.14);
+					border-radius: 10px;
+					padding: 11px 40px 11px 38px;
+					color: #fff;
+					font-size: 14px;
+					font-family: inherit;
+					transition: all 0.2s;
+
+					&:focus {
+						outline: none;
+						border-color: #38bdf8;
+						box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.2);
+						background: #0f172a;
+					}
+				}
+
+				.btn-toggle-pwd {
+					position: absolute;
+					right: 12px;
+					background: none;
+					border: none;
+					cursor: pointer;
+					font-size: 16px;
+					color: #94a3b8;
+					padding: 0;
+					display: flex;
+					align-items: center;
+					justify-content: center;
+
+					&:hover {
+						color: #fff;
+					}
+				}
+			}
+		}
+
+		.auth-gate-error {
+			background: rgba(239, 68, 68, 0.15);
+			border: 1px solid rgba(239, 68, 68, 0.4);
+			color: #fca5a5;
+			border-radius: 8px;
+			padding: 10px 12px;
+			font-size: 12px;
+			line-height: 1.4;
+			text-align: center;
+		}
+
+		.btn-auth-gate-submit {
+			margin-top: 4px;
+			background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+			color: #fff;
+			border: none;
+			border-radius: 10px;
+			padding: 12px 18px;
+			font-size: 14px;
+			font-weight: 700;
+			cursor: pointer;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			gap: 8px;
+			transition: all 0.2s;
+			box-shadow: 0 4px 14px rgba(2, 132, 199, 0.35);
+
+			&:hover {
+				background: linear-gradient(135deg, #0369a1 0%, #0284c7 100%);
+				transform: translateY(-1px);
+				box-shadow: 0 6px 20px rgba(2, 132, 199, 0.5);
+			}
+
+			&:active {
+				transform: translateY(0);
+			}
+		}
+	}
+
+	.auth-gate-footer {
+		width: 100%;
+		margin-top: 24px;
+		padding-top: 18px;
+		border-top: 1px solid rgba(255, 255, 255, 0.08);
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: 12px;
+
+		.btn-back-home {
+			color: #94a3b8;
+			font-size: 13px;
+			text-decoration: none;
+			transition: color 0.2s;
+
+			&:hover {
+				color: #fff;
+				text-decoration: underline;
+			}
+		}
+
+		.auth-hint {
+			font-size: 12px;
+			color: #64748b;
+
+			code {
+				background: rgba(255, 255, 255, 0.08);
+				color: #38bdf8;
+				padding: 2px 6px;
+				border-radius: 4px;
+				font-size: 11px;
+			}
+		}
+	}
+}
+
+@keyframes authCardAppear {
+	from {
+		opacity: 0;
+		transform: scale(0.95) translateY(10px);
+	}
+	to {
+		opacity: 1;
+		transform: scale(1) translateY(0);
+	}
+}
+
+.btn-logout-admin {
+	background: rgba(239, 68, 68, 0.15) !important;
+	color: #f87171 !important;
+	border: 1px solid rgba(239, 68, 68, 0.3) !important;
+
+	&:hover {
+		background: rgba(239, 68, 68, 0.25) !important;
+		color: #fff !important;
+		border-color: rgba(239, 68, 68, 0.5) !important;
+	}
+}
+
+.btn-sidebar-logout {
+	width: 100%;
+	margin-bottom: 10px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 8px;
+	background: rgba(239, 68, 68, 0.12);
+	color: #f87171;
+	border: 1px solid rgba(239, 68, 68, 0.25);
+	padding: 10px 14px;
+	border-radius: 8px;
+	cursor: pointer;
+	font-weight: 600;
+	font-size: 13px;
+	transition: all 0.2s;
+
+	&:hover {
+		background: rgba(239, 68, 68, 0.22);
+		color: #fff;
+		border-color: rgba(239, 68, 68, 0.45);
+	}
+}
+
+

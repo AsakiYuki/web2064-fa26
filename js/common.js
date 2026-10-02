@@ -64,21 +64,46 @@ export function showToast(message, type = "info", duration = 3500) {
 /* ==========================================================================
    USER AUTHENTICATION STATE & LOGIC
    ========================================================================== */
-export { getCurrentUser, saveUserSession, logoutUser } from "./storage.js"
 import {
-	getCurrentUser as storageGetCurrentUser,
-	saveUserSession as storageSaveUserSession,
-	logoutUser as storageLogoutUser,
+	getCurrentUser,
+	getUser,
+	saveUserSession,
+	logoutUser,
 	registerNewUser,
 	authenticateUser,
 	isAccountRegistered,
+	isUserAdmin,
+	isCurrentAdmin,
 	DEFAULT_USERS,
 } from "./storage.js"
 
+export { getCurrentUser, getUser, saveUserSession, logoutUser }
+
+if (typeof window !== "undefined") {
+	window.getCurrentUser = getCurrentUser
+	window.getUser = getCurrentUser
+}
+
+/** Ẩn/hiện toàn bộ các mục liên kết Quản trị (Admin) trên menu theo vai trò người dùng */
+export function updateNavAdminVisibility() {
+	const user = getCurrentUser()
+	const isAdmin = isUserAdmin(user)
+
+	const adminElements = document.querySelectorAll("#nav-admin, .nav-admin-link, .admin-only, [data-admin-only]")
+	adminElements.forEach(el => {
+		el.style.display = isAdmin ? "" : "none"
+	})
+}
+
 export function logoutUserAndNotify() {
-	storageLogoutUser()
-	updateHeaderAccountUI()
-	updateDrawerAccountUI()
+	logoutUser()
+	try {
+		updateHeaderAccountUI()
+		updateDrawerAccountUI()
+		updateNavAdminVisibility()
+	} catch (err) {
+		console.warn("UI update error on logout:", err)
+	}
 	showToast("Bạn đã đăng xuất tài khoản thành công.", "info")
 
 	// If on profile page, refresh or notify
@@ -91,7 +116,8 @@ export function logoutUserAndNotify() {
 
 /** Update Account Bar in Header (Logged in vs Logged out) */
 export function updateHeaderAccountUI() {
-	const user = storageGetCurrentUser()
+	const user = getCurrentUser()
+	const isAdmin = isUserAdmin(user)
 	const accountContainer = document.querySelector(".header-account-manager .container")
 	if (!accountContainer) return
 
@@ -118,18 +144,20 @@ export function updateHeaderAccountUI() {
 						<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"></path><line x1="7" y1="7" x2="7.01" y2="7"></line></svg>
 						<span>Ưu đãi của tôi</span>
 					</a>
+					${isAdmin ? `
 					<a href="/admin.html" class="up-item up-admin" style="color: #fbbf24; font-weight: 700;">
 						<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
 						<span>Trang Quản Trị (Admin)</span>
-					</a>
+					</a>` : ""}
 					<a href="#" class="up-item up-logout" id="btn-header-logout">
 						<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
 						<span>Đăng xuất</span>
 					</a>
 				</div>
 			</div>
+			${isAdmin ? `
 			<div class="divider"></div>
-			<a href="/admin.html" style="color: #fbbf24; font-weight: 700; font-size: 13px;" title="Vào Trang Quản Trị">⚙️ Admin</a>
+			<a href="/admin.html" style="color: #fbbf24; font-weight: 700; font-size: 13px;" title="Vào Trang Quản Trị">⚙️ Admin</a>` : ""}
 			<div class="divider"></div>
 			<span style="font-size: 18px; margin-left: 4px; cursor: pointer" title="English">🇬🇧</span>
 		`
@@ -146,8 +174,6 @@ export function updateHeaderAccountUI() {
 		})
 	} else {
 		accountContainer.innerHTML = `
-			<a href="/admin.html" style="color: #fbbf24; font-weight: 700; font-size: 13px;" title="Vào Trang Quản Trị">⚙️ Admin</a>
-			<div class="divider"></div>
 			<a href="#" id="btn-login">Đăng nhập</a>
 			<div class="divider"></div>
 			<a href="#" id="btn-register">Đăng ký</a>
@@ -162,6 +188,9 @@ export function updateHeaderAccountUI() {
 			openAuthModal("register")
 		})
 	}
+
+	// Đồng bộ hiển thị nút quản trị trên thanh menu chính
+	updateNavAdminVisibility()
 }
 
 /* ==========================================================================
@@ -198,14 +227,14 @@ export function openAuthModal(defaultTab = "login") {
 						<div class="form-group">
 							<label for="login-account">Email hoặc Số điện thoại <span class="req">*</span></label>
 							<div class="input-icon-wrap">
-								<input type="text" id="login-account" placeholder="nam.nguyen@example.com hoặc 0987654321" value="nam.nguyen@example.com" />
+								<input type="text" id="login-account" placeholder="username@example.com"  />
 							</div>
 							<span class="field-error-msg" id="err-login-account"></span>
 						</div>
 						<div class="form-group">
 							<label for="login-password">Mật khẩu <span class="req">*</span></label>
 							<div class="input-icon-wrap">
-								<input type="password" id="login-password" placeholder="••••••••" value="BetaCinemas2026!" />
+								<input type="password" id="login-password" placeholder="********"  />
 								<button type="button" class="toggle-pwd-btn" data-target="login-password" aria-label="Hiện mật khẩu">👁</button>
 							</div>
 							<span class="field-error-msg" id="err-login-password"></span>
@@ -228,21 +257,21 @@ export function openAuthModal(defaultTab = "login") {
 						<div class="form-group">
 							<label for="reg-fullname">Họ và tên <span class="req">*</span></label>
 							<div class="input-icon-wrap">
-								<input type="text" id="reg-fullname" placeholder="Nguyễn Hoàng Nam" />
+								<input type="text" id="reg-fullname" placeholder="Nguyễn Văn A" />
 							</div>
 							<span class="field-error-msg" id="err-reg-fullname"></span>
 						</div>
 						<div class="form-group">
 							<label for="reg-phone">Số điện thoại <span class="req">*</span></label>
 							<div class="input-icon-wrap">
-								<input type="tel" id="reg-phone" placeholder="0987 654 321" />
+								<input type="tel" id="reg-phone" placeholder="0123456789" />
 							</div>
 							<span class="field-error-msg" id="err-reg-phone"></span>
 						</div>
 						<div class="form-group">
 							<label for="reg-email">Email <span class="req">*</span></label>
 							<div class="input-icon-wrap">
-								<input type="email" id="reg-email" placeholder="nam.nguyen@example.com" />
+								<input type="email" id="reg-email" placeholder="username@example.com" />
 							</div>
 							<span class="field-error-msg" id="err-reg-email"></span>
 						</div>
@@ -379,10 +408,15 @@ function initAuthModalEvents(modal) {
 
 	// Social Logins (Google / Facebook mock)
 	const loginSocial = provider => {
-		storageSaveUserSession(DEFAULT_USERS[0])
-		updateHeaderAccountUI()
-		updateDrawerAccountUI()
-		closeAuthModal()
+		saveUserSession(DEFAULT_USERS[0])
+		try {
+			updateHeaderAccountUI()
+			updateDrawerAccountUI()
+		} catch (err) {
+			console.warn("UI update error:", err)
+		} finally {
+			closeAuthModal()
+		}
 		showToast(`Đăng nhập thành công với tài khoản ${provider}! Chào mừng bạn.`, "success")
 	}
 	document.getElementById("btn-social-google")?.addEventListener("click", () => loginSocial("Google"))
@@ -428,10 +462,15 @@ function initAuthModalEvents(modal) {
 					email: acc,
 					avatarText: fallbackName.charAt(0).toUpperCase(),
 				}
-				storageSaveUserSession(userObj)
-				updateHeaderAccountUI()
-				updateDrawerAccountUI()
-				closeAuthModal()
+				saveUserSession(userObj)
+				try {
+					updateHeaderAccountUI()
+					updateDrawerAccountUI()
+				} catch (err) {
+					console.warn("UI update error:", err)
+				} finally {
+					closeAuthModal()
+				}
 				showToast(`Đăng nhập thành công! Chào mừng ${userObj.name} đã quay lại.`, "success")
 				return
 			}
@@ -440,9 +479,14 @@ function initAuthModalEvents(modal) {
 			return
 		}
 
-		updateHeaderAccountUI()
-		updateDrawerAccountUI()
-		closeAuthModal()
+		try {
+			updateHeaderAccountUI()
+			updateDrawerAccountUI()
+		} catch (err) {
+			console.warn("UI update error on login:", err)
+		} finally {
+			closeAuthModal()
+		}
 		showToast(`Đăng nhập thành công! Chào mừng ${authResult.user.name} đã quay lại.`, "success")
 	})
 
@@ -528,13 +572,18 @@ function initAuthModalEvents(modal) {
 			return
 		}
 
-		updateHeaderAccountUI()
-		updateDrawerAccountUI()
-		closeAuthModal()
+		try {
+			updateHeaderAccountUI()
+			updateDrawerAccountUI()
+		} catch (err) {
+			console.warn("UI update error on register:", err)
+		} finally {
+			closeAuthModal()
+		}
 		showToast(
 			`🎉 Chúc mừng ${name} đã đăng ký tài khoản thành công và nhận ngay 50 điểm thưởng thành viên!`,
 			"success",
-			6000
+			6000,
 		)
 	})
 
@@ -756,7 +805,8 @@ function initMegaMenuAndMobileDrawer() {
 			<nav class="drawer-links-list">
 				<a href="/schedule.html">Lịch Chiếu Theo Rạp <span>›</span></a>
 				<a href="/movies.html">Danh Sách Phim <span>›</span></a>
-				<a href="/pricing.html">Bảng Giá Vé & Khuyến Mãi <span>›</span></a>
+				<a href="/pricing.html">Bảng Giá Vé <span>›</span></a>
+				<a href="/news.html">Tin Mới & Ưu Đãi <span>›</span></a>
 				<a href="/profile.html">Tài Khoản Thành Viên <span>›</span></a>
 			</nav>
 			<div class="drawer-footer">
@@ -793,6 +843,7 @@ function updateDrawerAccountUI() {
 	const box = document.getElementById("drawer-account-box")
 	if (!box) return
 	const user = getCurrentUser()
+	const isAdmin = isUserAdmin(user)
 	if (user) {
 		box.innerHTML = `
 			<div class="drawer-user-info">
@@ -802,14 +853,18 @@ function updateDrawerAccountUI() {
 					<span>⭐ ${user.rank || "Beta VIP"} (${user.points || 0} điểm)</span>
 				</div>
 			</div>
-			<div style="margin-top: 10px; display: flex; gap: 8px;">
-				<a href="/profile.html" style="flex:1; background:#0284c7; color:#fff; text-align:center; padding:8px; border-radius:6px; font-size:12px; font-weight:700; text-decoration:none;">Trang cá nhân</a>
-				<button type="button" id="btn-drawer-logout" style="background:rgba(239,68,68,0.2); border:1px solid rgba(239,68,68,0.4); color:#f87171; padding:8px 12px; border-radius:6px; font-size:12px; font-weight:700; cursor:pointer;">Đăng xuất</button>
+			<div style="margin-top: 10px; display: flex; flex-direction: column; gap: 8px;">
+				<div style="display: flex; gap: 8px;">
+					<a href="/profile.html" style="flex:1; background:#0284c7; color:#fff; text-align:center; padding:8px; border-radius:6px; font-size:12px; font-weight:700; text-decoration:none;">Trang cá nhân</a>
+					<button type="button" id="btn-drawer-logout" style="background:rgba(239,68,68,0.2); border:1px solid rgba(239,68,68,0.4); color:#f87171; padding:8px 12px; border-radius:6px; font-size:12px; font-weight:700; cursor:pointer;">Đăng xuất</button>
+				</div>
+				${isAdmin ? `
+				<a href="/admin.html" style="background:#f59e0b; color:#1e293b; text-align:center; padding:8px; border-radius:6px; font-size:12px; font-weight:700; text-decoration:none;">⚙️ Trang Quản Trị (Admin)</a>
+				` : ""}
 			</div>
 		`
 		document.getElementById("btn-drawer-logout")?.addEventListener("click", () => {
-			logoutUser()
-			updateDrawerAccountUI()
+			logoutUserAndNotify()
 		})
 	} else {
 		box.innerHTML = `
@@ -876,7 +931,7 @@ export async function setupHeaderAndFooter() {
 		const navNews = document.getElementById("nav-news")
 		const navMember = document.getElementById("nav-member")
 		if (navPricing) navPricing.href = "/pricing.html"
-		if (navNews) navNews.href = "/pricing.html#promotions"
+		if (navNews) navNews.href = "/news.html"
 		if (navMember) {
 			navMember.href = getCurrentUser() ? "/profile.html" : "#"
 			navMember.addEventListener("click", e => {
