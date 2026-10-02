@@ -1,5 +1,6 @@
 /* ============================================
    BETA CINEMAS - MODAL & TOAST STYLES
+   CATPPUCCIN MOCHA THEMED
    ============================================ */
 @use 'variables' as *;
 
@@ -30,9 +31,11 @@
 }
 
 .modal-content {
-	background: #ffffff;
+	background: $ctp-mantle;
+	color: $ctp-text;
+	border: 1px solid rgba($ctp-surface2, 0.5);
 	border-radius: $radius-lg;
-	box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+	box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
 	position: relative;
 	width: 100%;
 	max-width: 840px;
@@ -50,9 +53,9 @@
 	width: 36px;
 	height: 36px;
 	border-radius: 50%;
-	background: rgba(0, 0, 0, 0.6);
-	color: #ffffff;
-	border: none;
+	background: $ctp-surface0;
+	color: $ctp-text;
+	border: 1px solid rgba($ctp-surface2, 0.4);
 	font-size: 20px;
 	line-height: 1;
 	cursor: pointer;
@@ -60,17 +63,19 @@
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	transition: background 0.2s, transform 0.2s;
+	transition: background 0.2s, transform 0.2s, color 0.2s;
 
 	&:hover {
-		background: $accent-red;
+		background: $ctp-red;
+		color: $ctp-crust;
 		transform: rotate(90deg);
 	}
 }
 
 /* ---- TRAILER MODAL ---- */
 .trailer-modal-content {
-	background: #000;
+	background: $ctp-crust;
+	border: 1px solid rgba($ctp-surface2, 0.4);
 	padding: 0;
 	overflow: hidden;
 	border-radius: $radius-md;
@@ -107,23 +112,24 @@
 
 .toast {
 	pointer-events: auto;
-	background: #1a1a2e;
-	color: #fff;
+	background: $ctp-surface0;
+	color: $ctp-text;
+	border: 1px solid rgba($ctp-surface2, 0.4);
 	padding: 14px 20px;
 	border-radius: $radius-md;
-	box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+	box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
 	display: flex;
 	align-items: center;
 	gap: 12px;
 	font-size: 14px;
 	min-width: 280px;
 	max-width: 420px;
-	border-left: 4px solid $accent-color;
+	border-left: 4px solid $primary-color;
 	animation: toastSlideIn 0.3s ease-out forwards;
 	transition: transform 0.25s, opacity 0.25s;
 
 	&.toast--success {
-		border-left-color: #10b981;
+		border-left-color: $ctp-green;
 	}
 
 	&.toast--info {
@@ -131,7 +137,11 @@
 	}
 
 	&.toast--warning {
-		border-left-color: $accent-color;
+		border-left-color: $ctp-peach;
+	}
+
+	&.toast--error {
+		border-left-color: $ctp-red;
 	}
 
 	.toast-icon {
@@ -147,14 +157,14 @@
 	.toast-close {
 		background: none;
 		border: none;
-		color: rgba(255, 255, 255, 0.6);
+		color: $ctp-subtext0;
 		font-size: 16px;
 		cursor: pointer;
 		padding: 0;
 		margin-left: 6px;
 
 		&:hover {
-			color: #fff;
+			color: $ctp-text;
 		}
 	}
 }
