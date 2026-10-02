@@ -1051,6 +1051,12 @@ export function clearPendingBooking() {
 	storageRemove(STORAGE_KEYS.PENDING_BOOKING)
 }
 
+export function isPendingBookingExpired() {
+	const pending = getPendingBooking()
+	if (!pending) return true
+	return Date.now() > (pending.holdExpiresAt || 0)
+}
+
 export const VOUCHER_LIST = [
 	{
 		code: "BETA10",
