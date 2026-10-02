@@ -7,7 +7,7 @@
  */
 
 import { apiRegister, apiLogin, apiUpdateUser, apiGetMovies, apiCreateMovie, apiUpdateMovie, apiDeleteMovie, apiGetShowtimes, apiGetConcessions, apiCreateConcession, apiUpdateConcession, apiDeleteConcession, apiGetBookings, apiCreateBooking, apiUpdateBooking, apiDeleteBooking, apiGetCinemas, apiGetGenres, apiGetTicketPricing } from './js/api.js'
-import { calculateVoucherDiscount, savePendingBooking, isPendingBookingExpired, clearPendingBooking } from './js/storage.js'
+import { calculateVoucherDiscount, savePendingBooking, isPendingBookingExpired, clearPendingBooking, redeemMemberReward, saveUserSession, logoutUser, initializeStorage } from './js/storage.js'
 
 const BACKEND_URL = 'http://localhost:3000'
 
@@ -436,6 +436,10 @@ async function runAllTests() {
 	const thaiNguyen = cinemas.find(c => c.id === 'beta-thainguyen')
 	assert(thaiNguyen && thaiNguyen.screens.length >= 4, 'Cụm rạp Thái Nguyên có đầy đủ 4 phòng chiếu chuẩn IMAX & 2D/3D')
 
+	// 7.8 [Ngoại lệ] Tra cứu cụm rạp không tồn tại
+	const nonExistentCinemaRes = await fetch(`${BACKEND_URL}/cinemas/nonexistent_cinema_9999`)
+	assert(nonExistentCinemaRes.status === 404, 'Tra cứu cụm rạp không tồn tại trả về HTTP 404 Not Found')
+
 	const genresRes = await fetch(`${BACKEND_URL}/genres`)
 	const genres = await genresRes.json()
 	assert(Array.isArray(genres) && genres.length >= 8, `Tải danh mục thể loại thành công (${genres.length} thể loại)`)
@@ -455,6 +459,29 @@ async function runAllTests() {
 
 	const rewardItem = rewards.find(r => r.code === 'BETA10')
 	assert(rewardItem && rewardItem.points === 30, 'Phần thưởng BETA10 có giá quy đổi chính xác 30 điểm')
+
+	// Initialize local storage with member rewards
+	await initializeStorage()
+
+	// 8.3 [Ngoại lệ] Đổi quà khi chưa đăng nhập
+	logoutUser()
+	const noAuthRedeem = await redeemMemberReward('rw-beta10')
+	assert(!noAuthRedeem.success && noAuthRedeem.error === 'NOT_LOGGED_IN', 'Đổi điểm thưởng khi chưa đăng nhập bị từ chối chính xác')
+
+	// 8.4 [Ngoại lệ] Đổi quà với ID phần thưởng không tồn tại
+	saveUserSession({ id: 1001, name: 'Tester', email: 'tester@example.com', points: 10 })
+	const invalidRewardRedeem = await redeemMemberReward('rw-invalid-9999')
+	assert(!invalidRewardRedeem.success && invalidRewardRedeem.error === 'REWARD_NOT_FOUND', 'Đổi phần thưởng không tồn tại bị từ chối chính xác')
+
+	// 8.5 [Ngoại lệ] Đổi quà khi điểm tích lũy không đủ
+	const insufficientPointsRedeem = await redeemMemberReward('rw-ticket2d')
+	assert(!insufficientPointsRedeem.success && insufficientPointsRedeem.error === 'INSUFFICIENT_POINTS', 'Đổi quà khi không đủ điểm bị từ chối chính xác')
+
+	// 8.6 [Thành công] Đổi quà khi đủ điểm tích lũy
+	saveUserSession({ id: 1001, name: 'Tester', email: 'tester@example.com', points: 100 })
+	const successRedeem = await redeemMemberReward('rw-beta10')
+	assert(successRedeem.success && successRedeem.remainingPoints === 70, 'Đổi quà thành công: trừ chính xác 30 điểm và còn lại 70 điểm')
+	assert(successRedeem.voucher && successRedeem.voucher.code === 'BETA10', 'Cấp mã voucher đổi thưởng thành công vào kho quà cá nhân')
 
 	console.log('\n======================================================')
 	console.log(`📊 KẾT QUẢ KIỂM THỬ: ${passed} PASS, ${failed} FAIL`)
