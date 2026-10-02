@@ -70,8 +70,13 @@ export const CURRENT_DATA_VERSION = "3.0"
    CORE LOCALSTORAGE HELPERS
    ========================================================================== */
 
+/* In-memory store fallback when running in Node.js / Bun / SSR environments */
+const memoryStore = new Map()
+
 export function storageGet(key, defaultValue = null) {
-	if (typeof localStorage === "undefined") return defaultValue
+	if (typeof localStorage === "undefined") {
+		return memoryStore.has(key) ? memoryStore.get(key) : defaultValue
+	}
 	try {
 		const raw = localStorage.getItem(key)
 		if (raw === null) return defaultValue
@@ -83,7 +88,10 @@ export function storageGet(key, defaultValue = null) {
 }
 
 export function storageSet(key, value) {
-	if (typeof localStorage === "undefined") return false
+	if (typeof localStorage === "undefined") {
+		memoryStore.set(key, value)
+		return true
+	}
 	try {
 		localStorage.setItem(key, JSON.stringify(value))
 		return true
@@ -94,7 +102,10 @@ export function storageSet(key, value) {
 }
 
 export function storageRemove(key) {
-	if (typeof localStorage === "undefined") return
+	if (typeof localStorage === "undefined") {
+		memoryStore.delete(key)
+		return
+	}
 	try {
 		localStorage.removeItem(key)
 	} catch (err) {
@@ -144,7 +155,7 @@ export function storageArrayFind(key, predicate) {
 }
 
 export function storageHas(key) {
-	if (typeof localStorage === "undefined") return false
+	if (typeof localStorage === "undefined") return memoryStore.has(key)
 	return localStorage.getItem(key) !== null
 }
 

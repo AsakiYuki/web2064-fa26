@@ -7,7 +7,7 @@
  */
 
 import { apiRegister, apiLogin, apiUpdateUser, apiGetMovies, apiCreateMovie, apiUpdateMovie, apiDeleteMovie, apiGetShowtimes, apiGetConcessions, apiCreateConcession, apiUpdateConcession, apiDeleteConcession, apiGetBookings, apiCreateBooking, apiUpdateBooking, apiDeleteBooking, apiGetCinemas, apiGetGenres, apiGetTicketPricing } from './js/api.js'
-import { calculateVoucherDiscount } from './js/storage.js'
+import { calculateVoucherDiscount, savePendingBooking, isPendingBookingExpired, clearPendingBooking } from './js/storage.js'
 
 const BACKEND_URL = 'http://localhost:3000'
 
@@ -277,6 +277,10 @@ async function runAllTests() {
 		})
 	}
 
+	// 3.3 [Ngoại lệ] Tra cứu lịch chiếu không tồn tại
+	const nonExistentShowtimeRes = await fetch(`${BACKEND_URL}/showtimes/nonexistent_st_9999`)
+	assert(nonExistentShowtimeRes.status === 404, 'Tra cứu suất chiếu không tồn tại trả về HTTP 404 Not Found')
+
 	/* ------------------------------------------------------------------
 	   USE CASE 4: CONCESSIONS CRUD VIA JSON-SERVER
 	   ------------------------------------------------------------------ */
@@ -316,6 +320,10 @@ async function runAllTests() {
 		method: 'DELETE',
 	})
 	assert(deleteComboRes.status === 200, 'Xóa combo bắp nước (DELETE /concessions/:id) thành công')
+
+	// 4.5 [Ngoại lệ] Tra cứu combo không tồn tại
+	const nonExistentConcessionRes = await fetch(`${BACKEND_URL}/concessions/nonexistent_cbo_9999`)
+	assert(nonExistentConcessionRes.status === 404, 'Tra cứu combo bắp nước không tồn tại trả về HTTP 404 Not Found')
 
 	/* ------------------------------------------------------------------
 	   USE CASE 5: BOOKINGS & E-TICKET CRUD VIA JSON-SERVER
@@ -361,6 +369,19 @@ async function runAllTests() {
 		method: 'DELETE',
 	})
 	assert(deleteTicketRes.status === 200, 'Xóa đơn vé (DELETE /bookings/:id) thành công')
+
+	// 5.4 [Ngoại lệ] Tra cứu đơn vé không tồn tại
+	const nonExistentBookingRes = await fetch(`${BACKEND_URL}/bookings/BT-999999`)
+	assert(nonExistentBookingRes.status === 404, 'Tra cứu vé không tồn tại trả về HTTP 404 Not Found')
+
+	// 5.5 Kiểm tra logic phiên giữ ghế (Countdown timer 5 phút)
+	savePendingBooking({ cinemaId: 'beta-thainguyen', seats: ['E05'], holdExpiresAt: Date.now() + 300000 })
+	assert(!isPendingBookingExpired(), 'Ghế trong phiên 5 phút được ghi nhận đang giữ hợp lệ')
+
+	// 5.6 [Ngoại lệ] Hết hạn phiên giữ ghế (Timeout expired)
+	savePendingBooking({ cinemaId: 'beta-thainguyen', seats: ['E05'], holdExpiresAt: Date.now() - 1000 })
+	assert(isPendingBookingExpired(), 'Phiên giữ ghế quá hạn được tự động nhận diện để giải phóng ghế')
+	clearPendingBooking()
 
 	/* ------------------------------------------------------------------
 	   USE CASE 6: VOUCHER VALIDATION BUSINESS LOGIC
