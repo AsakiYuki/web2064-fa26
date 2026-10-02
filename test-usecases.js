@@ -143,6 +143,39 @@ async function runAllTests() {
 	})
 	assert(loginAdminFailRes.status === 400, 'Đăng nhập admin sai mật khẩu bị từ chối với HTTP 400')
 
+	// 1.8 [Ngoại lệ] Đăng ký tài khoản với Email đã tồn tại
+	const duplicateRegRes = await fetch(`${BACKEND_URL}/register`, {
+		method: 'POST',
+		headers: { 'Content-Type': 'application/json' },
+		body: JSON.stringify({
+			email: testEmail,
+			password: 'AnotherPassword!',
+			name: 'Duplicate Email User',
+		}),
+	})
+	assert(duplicateRegRes.status === 400, 'Đăng ký với email đã tồn tại bị từ chối với HTTP 400')
+
+	// 1.9 [Ngoại lệ] Đăng ký thiếu mật khẩu hoặc trường bắt buộc
+	const emptyPassRegRes = await fetch(`${BACKEND_URL}/register`, {
+		method: 'POST',
+		headers: { 'Content-Type': 'application/json' },
+		body: JSON.stringify({
+			email: `incomplete_${Date.now()}@example.com`,
+		}),
+	})
+	assert(emptyPassRegRes.status === 400, 'Đăng ký thiếu mật khẩu bị từ chối với HTTP 400')
+
+	// 1.10 [Ngoại lệ] Đăng nhập với tài khoản/email không tồn tại
+	const loginNonExistentRes = await fetch(`${BACKEND_URL}/login`, {
+		method: 'POST',
+		headers: { 'Content-Type': 'application/json' },
+		body: JSON.stringify({
+			email: `non_existent_${Date.now()}@example.com`,
+			password: 'SomePassword123!',
+		}),
+	})
+	assert(loginNonExistentRes.status === 400, 'Đăng nhập với email không tồn tại bị từ chối với HTTP 400')
+
 	/* ------------------------------------------------------------------
 	   USE CASE 2: MOVIES CRUD VIA JSON-SERVER
 	   ------------------------------------------------------------------ */
