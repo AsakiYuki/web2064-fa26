@@ -13,8 +13,8 @@
    1. HERO & DIGITAL MEMBERSHIP CARD SECTION
    ========================================================================== */
 .member-hero-section {
-	background: linear-gradient(135deg, #091322 0%, #0f2347 50%, #013a6e 100%);
-	color: #ffffff;
+	background: linear-gradient(135deg, $ctp-crust 0%, $ctp-mantle 50%, $ctp-base 100%);
+	color: $ctp-text;
 	padding: 48px 0 56px;
 	position: relative;
 	overflow: hidden;
@@ -26,7 +26,7 @@
 		right: -10%;
 		width: 600px;
 		height: 600px;
-		background: radial-gradient(circle, rgba(245, 166, 35, 0.15) 0%, rgba(1, 81, 152, 0) 70%);
+		background: radial-gradient(circle, rgba(137, 180, 250, 0.15) 0%, rgba(30, 30, 46, 0) 70%);
 		border-radius: 50%;
 		pointer-events: none;
 	}
@@ -38,7 +38,7 @@
 		left: 0;
 		right: 0;
 		height: 1px;
-		background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.15), transparent);
+		background: linear-gradient(90deg, transparent, $border-color, transparent);
 	}
 }
 
@@ -70,7 +70,7 @@
 	transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
 	transform-style: preserve-3d;
 	cursor: pointer;
-	box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.15);
+	box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.6), 0 0 0 1px $border-color;
 
 	&.is-flipped {
 		transform: rotateY(180deg);
@@ -97,37 +97,37 @@
 		left: 0;
 		right: 0;
 		bottom: 0;
-		background: radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.25) 0%, transparent 60%);
+		background: radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.15) 0%, transparent 60%);
 		pointer-events: none;
 	}
 }
 
 /* Card Themes based on rank */
 .card-front {
-	background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+	background: linear-gradient(135deg, $ctp-surface1 0%, $ctp-surface0 100%);
 
 	&.tier-standard {
-		background: linear-gradient(135deg, #475569 0%, #1e293b 60%, #0f172a 100%);
+		background: linear-gradient(135deg, $ctp-surface2 0%, $ctp-surface1 60%, $ctp-surface0 100%);
 	}
 
 	&.tier-vip {
-		background: linear-gradient(135deg, #b45309 0%, #d97706 40%, #78350f 100%);
-		box-shadow: 0 20px 40px -15px rgba(217, 119, 6, 0.4), 0 0 0 1px rgba(251, 191, 36, 0.3);
+		background: linear-gradient(135deg, $ctp-peach 0%, $ctp-maroon 100%);
+		box-shadow: 0 20px 40px -15px rgba(250, 179, 135, 0.4), 0 0 0 1px rgba(250, 179, 135, 0.3);
 	}
 
 	&.tier-diamond {
-		background: linear-gradient(135deg, #0284c7 0%, #2563eb 50%, #4f46e5 100%);
-		box-shadow: 0 20px 40px -15px rgba(37, 99, 235, 0.4), 0 0 0 1px rgba(147, 197, 253, 0.3);
+		background: linear-gradient(135deg, $ctp-sapphire 0%, $ctp-blue 50%, $ctp-mauve 100%);
+		box-shadow: 0 20px 40px -15px rgba(137, 180, 250, 0.4), 0 0 0 1px rgba(137, 180, 250, 0.3);
 	}
 }
 
 .card-back {
-	background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+	background: linear-gradient(135deg, $ctp-mantle 0%, $ctp-surface0 100%);
 	transform: rotateY(180deg);
 	display: flex;
 	flex-direction: column;
 	justify-content: space-between;
-	border: 1px solid rgba(255, 255, 255, 0.1);
+	border: 1px solid $border-color;
 }
 
 /* Card Elements */
@@ -153,20 +153,20 @@
 			font-weight: 800;
 			letter-spacing: 1px;
 			text-transform: uppercase;
-			color: rgba(255, 255, 255, 0.9);
+			color: $ctp-text;
 		}
 	}
 
 	.card-rank-pill {
-		background: rgba(0, 0, 0, 0.3);
+		background: rgba(17, 17, 27, 0.4);
 		backdrop-filter: blur(8px);
-		border: 1px solid rgba(255, 255, 255, 0.2);
+		border: 1px solid $border-color;
 		padding: 4px 12px;
 		border-radius: 20px;
 		font-size: 11px;
 		font-weight: 800;
 		letter-spacing: 0.5px;
-		color: #fbbf24;
+		color: $ctp-peach;
 		display: flex;
 		align-items: center;
 		gap: 6px;
@@ -184,7 +184,7 @@
 	.emv-chip {
 		width: 44px;
 		height: 32px;
-		background: linear-gradient(135deg, #fbbf24 0%, #d97706 100%);
+		background: linear-gradient(135deg, $ctp-peach 0%, $ctp-maroon 100%);
 		border-radius: 6px;
 		border: 1px solid rgba(0, 0, 0, 0.2);
 		position: relative;
@@ -211,7 +211,7 @@
 	font-size: 18px;
 	letter-spacing: 3px;
 	font-weight: 700;
-	color: #ffffff;
+	color: $ctp-text;
 	text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
 	position: relative;
 	z-index: 2;
@@ -230,14 +230,14 @@
 			font-size: 9px;
 			text-transform: uppercase;
 			letter-spacing: 1px;
-			color: rgba(255, 255, 255, 0.6);
+			color: $ctp-subtext0;
 			margin-bottom: 2px;
 		}
 		.val {
 			font-size: 14px;
 			font-weight: 800;
 			text-transform: uppercase;
-			color: #ffffff;
+			color: $ctp-text;
 			letter-spacing: 1px;
 		}
 	}
@@ -249,27 +249,28 @@
 			font-size: 9px;
 			text-transform: uppercase;
 			letter-spacing: 1px;
-			color: rgba(255, 255, 255, 0.6);
+			color: $ctp-subtext0;
 			margin-bottom: 2px;
 		}
 		.val {
 			font-size: 12px;
 			font-weight: 700;
 			font-family: monospace;
+			color: $ctp-text;
 		}
 	}
 }
 
 /* Card Back Design */
 .card-magstripe {
-	background: #000000;
+	background: $ctp-crust;
 	height: 40px;
 	margin: -24px -24px 12px;
 	width: calc(100% + 48px);
 }
 
 .card-barcode-wrap {
-	background: #ffffff;
+	background: $ctp-text;
 	padding: 12px 16px;
 	border-radius: 8px;
 	display: flex;
@@ -285,7 +286,7 @@
 	.barcode-num {
 		font-family: monospace;
 		font-size: 13px;
-		color: #1a1a2e;
+		color: $ctp-crust;
 		font-weight: 700;
 		letter-spacing: 2px;
 		margin-top: 4px;
@@ -294,7 +295,7 @@
 
 .card-back-help {
 	font-size: 11px;
-	color: #94a3b8;
+	color: $ctp-subtext0;
 	text-align: center;
 	line-height: 1.4;
 }
@@ -306,9 +307,9 @@
 	align-items: center;
 	justify-content: center;
 	gap: 8px;
-	background: rgba(255, 255, 255, 0.08);
-	border: 1px solid rgba(255, 255, 255, 0.15);
-	color: #cbd5e1;
+	background: $ctp-surface1;
+	border: 1px solid $border-color;
+	color: $ctp-subtext1;
 	padding: 8px 16px;
 	border-radius: 20px;
 	font-size: 13px;
@@ -317,8 +318,8 @@
 	transition: $transition-base;
 
 	&:hover {
-		background: rgba(255, 255, 255, 0.15);
-		color: #ffffff;
+		background: $ctp-surface2;
+		color: $ctp-text;
 	}
 }
 
@@ -328,9 +329,9 @@
 		display: inline-flex;
 		align-items: center;
 		gap: 6px;
-		background: rgba(245, 166, 35, 0.15);
-		border: 1px solid rgba(245, 166, 35, 0.3);
-		color: #fbbf24;
+		background: rgba(250, 179, 135, 0.15);
+		border: 1px solid rgba(250, 179, 135, 0.3);
+		color: $ctp-peach;
 		padding: 4px 12px;
 		border-radius: 16px;
 		font-size: 12px;
@@ -342,13 +343,13 @@
 		font-size: 32px;
 		font-weight: 900;
 		margin: 0 0 8px;
-		color: #ffffff;
+		color: $ctp-text;
 		letter-spacing: -0.5px;
 	}
 
 	.m-sub-text {
 		font-size: 15px;
-		color: #cbd5e1;
+		color: $ctp-subtext0;
 		margin: 0 0 24px;
 		line-height: 1.5;
 	}
@@ -365,8 +366,8 @@
 		}
 
 		.m-stat-box {
-			background: rgba(255, 255, 255, 0.06);
-			border: 1px solid rgba(255, 255, 255, 0.1);
+			background: $ctp-surface0;
+			border: 1px solid $border-color;
 			backdrop-filter: blur(10px);
 			border-radius: $radius-lg;
 			padding: 16px;
@@ -374,7 +375,7 @@
 			.lbl {
 				display: block;
 				font-size: 12px;
-				color: #94a3b8;
+				color: $ctp-subtext0;
 				font-weight: 600;
 				margin-bottom: 4px;
 			}
@@ -382,13 +383,13 @@
 			.val {
 				font-size: 24px;
 				font-weight: 900;
-				color: #fbbf24;
+				color: $ctp-peach;
 			}
 
 			.sub {
 				display: block;
 				font-size: 11px;
-				color: #cbd5e1;
+				color: $ctp-subtext1;
 				margin-top: 4px;
 			}
 		}
@@ -396,8 +397,8 @@
 
 	/* Rank Progress Bar */
 	.m-rank-progress-card {
-		background: rgba(255, 255, 255, 0.04);
-		border: 1px solid rgba(255, 255, 255, 0.08);
+		background: $ctp-surface0;
+		border: 1px solid $border-color;
 		border-radius: $radius-lg;
 		padding: 16px 20px;
 		margin-bottom: 24px;
@@ -410,23 +411,23 @@
 			font-weight: 700;
 
 			.curr-rank {
-				color: #fbbf24;
+				color: $ctp-peach;
 			}
 			.next-rank {
-				color: #60a5fa;
+				color: $primary-color;
 			}
 		}
 
 		.prog-track {
 			height: 8px;
-			background: rgba(255, 255, 255, 0.1);
+			background: $ctp-surface1;
 			border-radius: 4px;
 			overflow: hidden;
 			position: relative;
 
 			.prog-fill {
 				height: 100%;
-				background: linear-gradient(90deg, #f5a623 0%, #10b981 100%);
+				background: linear-gradient(90deg, $ctp-peach 0%, $ctp-green 100%);
 				border-radius: 4px;
 				transition: width 1s ease-in-out;
 			}
@@ -434,7 +435,7 @@
 
 		.prog-desc {
 			font-size: 12px;
-			color: #94a3b8;
+			color: $ctp-subtext0;
 			margin: 8px 0 0;
 		}
 	}
@@ -446,8 +447,8 @@
 		flex-wrap: wrap;
 
 		.btn-m-primary {
-			background: linear-gradient(135deg, #f5a623 0%, #d97706 100%);
-			color: #1a1a2e;
+			background: $primary-color;
+			color: $ctp-crust;
 			font-weight: 800;
 			font-size: 14px;
 			padding: 12px 24px;
@@ -457,19 +458,20 @@
 			display: flex;
 			align-items: center;
 			gap: 8px;
-			box-shadow: 0 4px 14px rgba(245, 166, 35, 0.35);
+			box-shadow: $shadow-md;
 			transition: $transition-base;
 
 			&:hover {
 				transform: translateY(-2px);
-				box-shadow: 0 6px 20px rgba(245, 166, 35, 0.45);
+				background: $primary-dark;
+				box-shadow: $shadow-hover;
 			}
 		}
 
 		.btn-m-outline {
-			background: rgba(255, 255, 255, 0.08);
-			border: 1px solid rgba(255, 255, 255, 0.2);
-			color: #ffffff;
+			background: $ctp-surface1;
+			border: 1px solid $border-color;
+			color: $ctp-text;
 			font-weight: 700;
 			font-size: 14px;
 			padding: 12px 20px;
@@ -481,7 +483,7 @@
 			transition: $transition-base;
 
 			&:hover {
-				background: rgba(255, 255, 255, 0.15);
+				background: $ctp-surface2;
 				transform: translateY(-2px);
 			}
 		}
@@ -490,8 +492,8 @@
 
 /* Guest State Banner */
 .guest-callout-box {
-	background: rgba(245, 166, 35, 0.1);
-	border: 1px dashed rgba(245, 166, 35, 0.4);
+	background: rgba(250, 179, 135, 0.1);
+	border: 1px dashed rgba(250, 179, 135, 0.4);
 	border-radius: $radius-lg;
 	padding: 20px;
 	margin-top: 16px;
@@ -505,18 +507,18 @@
 		h4 {
 			margin: 0 0 4px;
 			font-size: 16px;
-			color: #fbbf24;
+			color: $ctp-peach;
 		}
 		p {
 			margin: 0;
 			font-size: 13px;
-			color: #cbd5e1;
+			color: $ctp-subtext0;
 		}
 	}
 
 	.btn-join-now {
-		background: #e51d2a;
-		color: #ffffff;
+		background: $primary-color;
+		color: $ctp-crust;
 		font-weight: 800;
 		font-size: 13px;
 		padding: 10px 20px;
@@ -526,7 +528,7 @@
 		transition: $transition-base;
 
 		&:hover {
-			background: #c81e2b;
+			background: $primary-dark;
 			transform: scale(1.04);
 		}
 	}
@@ -537,10 +539,10 @@
    ========================================================================== */
 .member-store-section {
 	margin-top: 40px;
-	background: #ffffff;
+	background: $ctp-surface0;
 	border-radius: $radius-xl;
 	padding: 40px 32px;
-	box-shadow: $shadow-sm;
+	box-shadow: $shadow-lg;
 	border: 1px solid $border-color;
 
 	@media (max-width: 640px) {
@@ -559,7 +561,7 @@
 			h2 {
 				font-size: 26px;
 				font-weight: 900;
-				color: $primary-color;
+				color: $ctp-text;
 				margin: 0 0 6px;
 				text-transform: uppercase;
 				letter-spacing: -0.5px;
@@ -567,21 +569,21 @@
 			p {
 				margin: 0;
 				font-size: 14px;
-				color: $muted-text;
+				color: $ctp-subtext0;
 			}
 		}
 
 		.store-user-balance {
-			background: #f1f5f9;
-			border: 1px solid #e2e8f0;
+			background: $ctp-mantle;
+			border: 1px solid $border-color;
 			padding: 8px 16px;
 			border-radius: 20px;
 			font-size: 13px;
 			font-weight: 700;
-			color: #334155;
+			color: $ctp-subtext0;
 
 			strong {
-				color: #d97706;
+				color: $ctp-peach;
 				font-size: 16px;
 			}
 		}
@@ -595,9 +597,9 @@
 		flex-wrap: wrap;
 
 		.sf-pill {
-			background: #f8fafc;
-			border: 1px solid #e2e8f0;
-			color: #64748b;
+			background: $ctp-surface1;
+			border: 1px solid $border-color;
+			color: $ctp-subtext0;
 			padding: 8px 18px;
 			border-radius: 20px;
 			font-size: 13px;
@@ -606,15 +608,15 @@
 			transition: $transition-base;
 
 			&:hover {
-				background: #e2e8f0;
-				color: #1e293b;
+				background: $ctp-surface2;
+				color: $ctp-text;
 			}
 
 			&.active {
 				background: $primary-color;
 				border-color: $primary-color;
-				color: #ffffff;
-				box-shadow: 0 4px 10px rgba(1, 81, 152, 0.25);
+				color: $ctp-crust;
+				box-shadow: 0 4px 10px rgba(137, 180, 250, 0.25);
 			}
 		}
 	}
@@ -638,26 +640,26 @@
 }
 
 .reward-card {
-	background: #ffffff;
-	border: 1px solid #e2e8f0;
+	background: $ctp-mantle;
+	border: 1px solid $border-color;
 	border-radius: $radius-lg;
 	overflow: hidden;
 	display: flex;
 	flex-direction: column;
 	transition: $transition-base;
-	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+	box-shadow: $shadow-md;
 
 	&:hover {
 		transform: translateY(-4px);
-		box-shadow: 0 12px 24px -8px rgba(0, 0, 0, 0.12);
-		border-color: #cbd5e1;
+		box-shadow: $shadow-hover;
+		border-color: $primary-color;
 	}
 
 	.rc-thumb {
 		position: relative;
 		height: 140px;
 		overflow: hidden;
-		background: #0f172a;
+		background: $ctp-crust;
 
 		img {
 			width: 100%;
@@ -674,8 +676,8 @@
 			position: absolute;
 			top: 10px;
 			left: 10px;
-			background: #e51d2a;
-			color: #ffffff;
+			background: $ctp-red;
+			color: $ctp-crust;
 			font-size: 10px;
 			font-weight: 800;
 			padding: 3px 8px;
@@ -688,7 +690,7 @@
 			position: absolute;
 			bottom: 10px;
 			right: 10px;
-			background: rgba(0, 0, 0, 0.65);
+			background: rgba(17, 17, 27, 0.75);
 			backdrop-filter: blur(4px);
 			border-radius: 50%;
 			width: 32px;
@@ -710,14 +712,14 @@
 		.rc-title {
 			font-size: 15px;
 			font-weight: 800;
-			color: #1e293b;
+			color: $ctp-text;
 			margin: 0 0 6px;
 			line-height: 1.4;
 		}
 
 		.rc-desc {
 			font-size: 12px;
-			color: #64748b;
+			color: $ctp-subtext0;
 			margin: 0 0 14px;
 			line-height: 1.5;
 			flex: 1;
@@ -728,7 +730,7 @@
 			align-items: center;
 			justify-content: space-between;
 			padding-top: 12px;
-			border-top: 1px dashed #e2e8f0;
+			border-top: 1px dashed $border-color;
 
 			.rc-points {
 				display: flex;
@@ -738,18 +740,18 @@
 				.val {
 					font-size: 20px;
 					font-weight: 900;
-					color: #d97706;
+					color: $ctp-peach;
 				}
 				.unit {
 					font-size: 11px;
 					font-weight: 700;
-					color: #64748b;
+					color: $ctp-subtext0;
 				}
 			}
 
 			.btn-redeem {
-				background: #015198;
-				color: #ffffff;
+				background: $primary-color;
+				color: $ctp-crust;
 				border: none;
 				padding: 8px 14px;
 				border-radius: 6px;
@@ -759,13 +761,13 @@
 				transition: $transition-base;
 
 				&:hover {
-					background: #003d73;
+					background: $primary-dark;
 					transform: scale(1.03);
 				}
 
 				&.disabled {
-					background: #e2e8f0;
-					color: #94a3b8;
+					background: $ctp-surface1;
+					color: $ctp-overlay1;
 					cursor: not-allowed;
 					transform: none;
 				}
@@ -779,10 +781,11 @@
    ========================================================================== */
 .member-calc-section {
 	margin-top: 40px;
-	background: linear-gradient(135deg, #f8fafc 0%, #eff6ff 100%);
-	border: 1px solid #dbeafe;
+	background: $ctp-surface0;
+	border: 1px solid $border-color;
 	border-radius: $radius-xl;
 	padding: 40px 32px;
+	box-shadow: $shadow-lg;
 
 	@media (max-width: 640px) {
 		padding: 24px 16px;
@@ -796,13 +799,13 @@
 		h2 {
 			font-size: 24px;
 			font-weight: 900;
-			color: $primary-color;
+			color: $ctp-text;
 			margin: 0 0 6px;
 			text-transform: uppercase;
 		}
 		p {
 			font-size: 14px;
-			color: $muted-text;
+			color: $ctp-subtext0;
 			margin: 0;
 		}
 	}
@@ -819,22 +822,22 @@
 	}
 
 	.calc-controls {
-		background: #ffffff;
+		background: $ctp-mantle;
 		padding: 24px;
 		border-radius: $radius-lg;
-		box-shadow: $shadow-sm;
-		border: 1px solid #e2e8f0;
+		box-shadow: $shadow-md;
+		border: 1px solid $border-color;
 
 		.control-label {
 			display: flex;
 			justify-content: space-between;
 			font-weight: 700;
 			font-size: 14px;
-			color: #1e293b;
+			color: $ctp-text;
 			margin-bottom: 12px;
 
 			.active-val {
-				color: #015198;
+				color: $primary-color;
 				font-size: 18px;
 				font-weight: 900;
 			}
@@ -844,9 +847,9 @@
 			width: 100%;
 			height: 8px;
 			border-radius: 4px;
-			background: #e2e8f0;
+			background: $ctp-surface1;
 			outline: none;
-			accent-color: #015198;
+			accent-color: $primary-color;
 			cursor: pointer;
 			margin-bottom: 20px;
 		}
@@ -857,31 +860,32 @@
 			flex-wrap: wrap;
 
 			button {
-				background: #f1f5f9;
-				border: 1px solid #cbd5e1;
+				background: $ctp-surface1;
+				border: 1px solid $border-color;
 				padding: 6px 12px;
 				border-radius: 6px;
 				font-size: 12px;
 				font-weight: 600;
-				color: #475569;
+				color: $ctp-subtext1;
 				cursor: pointer;
 				transition: $transition-base;
 
 				&:hover, &.active {
-					background: #015198;
-					color: #ffffff;
-					border-color: #015198;
+					background: $primary-color;
+					color: $ctp-crust;
+					border-color: $primary-color;
 				}
 			}
 		}
 	}
 
 	.calc-results-card {
-		background: linear-gradient(135deg, #091322 0%, #0f2347 100%);
-		color: #ffffff;
+		background: $ctp-mantle;
+		color: $ctp-text;
 		padding: 28px;
 		border-radius: $radius-lg;
-		box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+		box-shadow: $shadow-md;
+		border: 1px solid $border-color;
 
 		.result-tier-badge {
 			display: inline-flex;
@@ -895,16 +899,16 @@
 			margin-bottom: 16px;
 
 			&.tier-standard {
-				background: #475569;
-				color: #f1f5f9;
+				background: $ctp-surface2;
+				color: $ctp-text;
 			}
 			&.tier-vip {
-				background: #d97706;
-				color: #ffffff;
+				background: $ctp-peach;
+				color: $ctp-crust;
 			}
 			&.tier-diamond {
-				background: #2563eb;
-				color: #ffffff;
+				background: $primary-color;
+				color: $ctp-crust;
 			}
 		}
 
@@ -918,22 +922,22 @@
 				.m-lbl {
 					display: block;
 					font-size: 12px;
-					color: #94a3b8;
+					color: $ctp-subtext0;
 					margin-bottom: 2px;
 				}
 				.m-val {
 					font-size: 22px;
 					font-weight: 900;
-					color: #fbbf24;
+					color: $ctp-peach;
 				}
 			}
 		}
 
 		.result-benefits-list {
-			border-top: 1px solid rgba(255, 255, 255, 0.1);
+			border-top: 1px solid $border-color;
 			padding-top: 12px;
 			font-size: 12px;
-			color: #cbd5e1;
+			color: $ctp-subtext1;
 			line-height: 1.6;
 
 			li {
@@ -941,7 +945,7 @@
 				list-style: none;
 				&::before {
 					content: "✔ ";
-					color: #10b981;
+					color: $ctp-green;
 					font-weight: bold;
 				}
 			}
@@ -954,10 +958,10 @@
    ========================================================================== */
 .member-tiers-section {
 	margin-top: 40px;
-	background: #ffffff;
+	background: $ctp-surface0;
 	border-radius: $radius-xl;
 	padding: 40px 32px;
-	box-shadow: $shadow-sm;
+	box-shadow: $shadow-lg;
 	border: 1px solid $border-color;
 
 	@media (max-width: 640px) {
@@ -972,13 +976,13 @@
 		h2 {
 			font-size: 26px;
 			font-weight: 900;
-			color: $primary-color;
+			color: $ctp-text;
 			margin: 0 0 6px;
 			text-transform: uppercase;
 		}
 		p {
 			font-size: 14px;
-			color: $muted-text;
+			color: $ctp-subtext0;
 			margin: 0;
 		}
 	}
@@ -994,30 +998,32 @@
 	}
 
 	.tier-card {
-		background: #ffffff;
-		border: 1px solid #e2e8f0;
+		background: $ctp-mantle;
+		border: 1px solid $border-color;
 		border-radius: $radius-lg;
 		padding: 28px 24px;
 		display: flex;
 		flex-direction: column;
 		position: relative;
 		transition: $transition-base;
+		box-shadow: $shadow-md;
 
 		&:hover {
 			transform: translateY(-4px);
-			box-shadow: 0 12px 28px rgba(0, 0, 0, 0.08);
+			box-shadow: $shadow-hover;
+			border-color: $primary-color;
 		}
 
 		&.featured {
-			border: 2px solid #f5a623;
-			box-shadow: 0 8px 24px rgba(245, 166, 35, 0.15);
+			border: 2px solid $ctp-peach;
+			box-shadow: 0 8px 24px rgba(250, 179, 135, 0.15);
 
 			.tier-ribbon {
 				position: absolute;
 				top: -12px;
 				right: 20px;
-				background: linear-gradient(135deg, #f5a623 0%, #d97706 100%);
-				color: #1a1a2e;
+				background: $ctp-peach;
+				color: $ctp-crust;
 				font-size: 10px;
 				font-weight: 900;
 				padding: 4px 10px;
@@ -1035,20 +1041,20 @@
 		.tc-name {
 			font-size: 20px;
 			font-weight: 900;
-			color: #1e293b;
+			color: $ctp-text;
 			margin: 0 0 4px;
 		}
 
 		.tc-spend {
 			font-size: 13px;
-			color: #64748b;
+			color: $ctp-subtext0;
 			margin-bottom: 20px;
 			padding-bottom: 16px;
-			border-bottom: 1px solid #e2e8f0;
+			border-bottom: 1px solid $border-color;
 		}
 
 		.tc-rate {
-			background: #f8fafc;
+			background: $ctp-surface1;
 			padding: 12px;
 			border-radius: 8px;
 			text-align: center;
@@ -1062,7 +1068,7 @@
 			.rate-lbl {
 				font-size: 11px;
 				font-weight: 700;
-				color: #64748b;
+				color: $ctp-subtext0;
 				display: block;
 			}
 		}
@@ -1075,7 +1081,7 @@
 
 			li {
 				font-size: 13px;
-				color: #334155;
+				color: $ctp-text;
 				margin-bottom: 10px;
 				display: flex;
 				align-items: flex-start;
@@ -1083,15 +1089,15 @@
 
 				&::before {
 					content: "✓";
-					color: #10b981;
+					color: $ctp-green;
 					font-weight: 900;
 				}
 
 				&.muted {
-					color: #94a3b8;
+					color: $ctp-overlay1;
 					&::before {
 						content: "✕";
-						color: #cbd5e1;
+						color: $ctp-overlay1;
 					}
 				}
 			}
@@ -1104,10 +1110,10 @@
    ========================================================================== */
 .member-events-section {
 	margin-top: 40px;
-	background: #ffffff;
+	background: $ctp-surface0;
 	border-radius: $radius-xl;
 	padding: 40px 32px;
-	box-shadow: $shadow-sm;
+	box-shadow: $shadow-lg;
 	border: 1px solid $border-color;
 
 	@media (max-width: 640px) {
@@ -1122,13 +1128,13 @@
 		h2 {
 			font-size: 26px;
 			font-weight: 900;
-			color: $primary-color;
+			color: $ctp-text;
 			margin: 0 0 6px;
 			text-transform: uppercase;
 		}
 		p {
 			font-size: 14px;
-			color: $muted-text;
+			color: $ctp-subtext0;
 			margin: 0;
 		}
 	}
@@ -1143,24 +1149,25 @@
 		}
 
 		.event-card {
-			background: #f8fafc;
-			border: 1px solid #e2e8f0;
+			background: $ctp-mantle;
+			border: 1px solid $border-color;
 			border-radius: $radius-lg;
 			padding: 24px;
 			display: flex;
 			gap: 16px;
 			align-items: flex-start;
 			transition: $transition-base;
+			box-shadow: $shadow-md;
 
 			&:hover {
-				background: #ffffff;
-				box-shadow: $shadow-md;
-				border-color: #cbd5e1;
+				background: $ctp-surface0;
+				box-shadow: $shadow-hover;
+				border-color: $primary-color;
 			}
 
 			.ev-date-box {
-				background: #015198;
-				color: #ffffff;
+				background: $primary-color;
+				color: $ctp-crust;
 				border-radius: 8px;
 				padding: 10px 12px;
 				text-align: center;
@@ -1183,12 +1190,12 @@
 				h3 {
 					font-size: 16px;
 					font-weight: 800;
-					color: #1e293b;
+					color: $ctp-text;
 					margin: 0 0 4px;
 				}
 				p {
 					font-size: 13px;
-					color: #64748b;
+					color: $ctp-subtext0;
 					margin: 0;
 					line-height: 1.5;
 				}
@@ -1202,10 +1209,10 @@
    ========================================================================== */
 .member-faq-section {
 	margin-top: 40px;
-	background: #ffffff;
+	background: $ctp-surface0;
 	border-radius: $radius-xl;
 	padding: 40px 32px;
-	box-shadow: $shadow-sm;
+	box-shadow: $shadow-lg;
 	border: 1px solid $border-color;
 
 	@media (max-width: 640px) {
@@ -1220,13 +1227,13 @@
 		h2 {
 			font-size: 24px;
 			font-weight: 900;
-			color: $primary-color;
+			color: $ctp-text;
 			margin: 0 0 6px;
 			text-transform: uppercase;
 		}
 		p {
 			font-size: 14px;
-			color: $muted-text;
+			color: $ctp-subtext0;
 			margin: 0;
 		}
 	}
@@ -1236,17 +1243,17 @@
 		margin: 0 auto;
 
 		.faq-item {
-			border: 1px solid #e2e8f0;
+			border: 1px solid $border-color;
 			border-radius: 8px;
 			margin-bottom: 12px;
 			overflow: hidden;
 
 			&.open {
-				border-color: #93c5fd;
+				border-color: $primary-color;
 
 				.faq-question {
-					background: #f0f7ff;
-					color: #015198;
+					background: $ctp-surface1;
+					color: $primary-color;
 
 					.faq-arrow {
 						transform: rotate(180deg);
@@ -1261,18 +1268,22 @@
 
 		.faq-question {
 			width: 100%;
-			background: #ffffff;
+			background: $ctp-mantle;
 			border: none;
 			padding: 16px 20px;
 			text-align: left;
 			font-size: 15px;
 			font-weight: 700;
-			color: #1e293b;
+			color: $ctp-text;
 			display: flex;
 			justify-content: space-between;
 			align-items: center;
 			cursor: pointer;
 			transition: $transition-base;
+
+			&:hover {
+				background: $ctp-surface1;
+			}
 
 			.faq-arrow {
 				transition: transform 0.3s ease;
@@ -1283,11 +1294,11 @@
 		.faq-answer {
 			display: none;
 			padding: 16px 20px;
-			background: #ffffff;
+			background: $ctp-mantle;
 			font-size: 14px;
-			color: #475569;
+			color: $ctp-subtext1;
 			line-height: 1.6;
-			border-top: 1px solid #f1f5f9;
+			border-top: 1px solid $border-color;
 		}
 	}
 }
@@ -1296,13 +1307,14 @@
    7. MODALS (POINTS HISTORY & REDEEM CONFIRM)
    ========================================================================== */
 .m-modal-card {
-	background: #ffffff;
+	background: $ctp-surface0;
 	border-radius: $radius-lg;
 	padding: 24px;
 	max-width: 520px;
 	width: 90%;
 	margin: auto;
 	box-shadow: $shadow-lg;
+	border: 1px solid $border-color;
 
 	.mm-head {
 		display: flex;
@@ -1310,19 +1322,19 @@
 		align-items: center;
 		margin-bottom: 18px;
 		padding-bottom: 12px;
-		border-bottom: 1px solid #e2e8f0;
+		border-bottom: 1px solid $border-color;
 
 		h3 {
 			font-size: 18px;
 			font-weight: 800;
-			color: #1e293b;
+			color: $ctp-text;
 			margin: 0;
 		}
 	}
 
 	.mm-body {
 		font-size: 14px;
-		color: #334155;
+		color: $ctp-subtext1;
 		line-height: 1.6;
 	}
 
@@ -1342,20 +1354,21 @@
 		}
 
 		.btn-cancel {
-			background: #f1f5f9;
-			border: 1px solid #cbd5e1;
-			color: #475569;
+			background: $ctp-surface1;
+			border: 1px solid $border-color;
+			color: $ctp-subtext1;
 			&:hover {
-				background: #e2e8f0;
+				background: $ctp-surface2;
+				color: $ctp-text;
 			}
 		}
 
 		.btn-confirm {
-			background: #015198;
+			background: $primary-color;
 			border: none;
-			color: #ffffff;
+			color: $ctp-crust;
 			&:hover {
-				background: #003a6e;
+				background: $primary-dark;
 			}
 		}
 	}
@@ -1374,21 +1387,25 @@
 		th, td {
 			padding: 10px 12px;
 			text-align: left;
-			border-bottom: 1px solid #f1f5f9;
+			border-bottom: 1px solid $border-color;
 		}
 
 		th {
-			background: #f8fafc;
-			color: #64748b;
+			background: $ctp-mantle;
+			color: $ctp-subtext0;
 			font-weight: 700;
 		}
 
+		td {
+			color: $ctp-text;
+		}
+
 		.pt-plus {
-			color: #10b981;
+			color: $ctp-green;
 			font-weight: 800;
 		}
 		.pt-minus {
-			color: #ef4444;
+			color: $ctp-red;
 			font-weight: 800;
 		}
 	}
