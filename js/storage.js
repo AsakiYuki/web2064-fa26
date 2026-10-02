@@ -32,6 +32,7 @@ import {
 	apiGetPromotions,
 	apiGetTicketPricing,
 	apiGetFooter,
+	apiGetMemberRewards,
 	apiResetDatabase,
 	getAuthToken,
 	removeAuthToken,
@@ -57,6 +58,7 @@ export const STORAGE_KEYS = {
 	USERS_LIST: `${STORAGE_PREFIX}users_list`,
 	PENDING_BOOKING: `${STORAGE_PREFIX}pending_booking`,
 	BOOKING_HISTORY: `${STORAGE_PREFIX}booking_history`,
+	MEMBER_REWARDS: `${STORAGE_PREFIX}member_rewards`,
 	INITIALIZED: `${STORAGE_PREFIX}data_initialized`,
 	DATA_VERSION: `${STORAGE_PREFIX}data_version`,
 }
@@ -393,6 +395,17 @@ export async function initializeStorage(force = false) {
 		} else if (!storageHas(STORAGE_KEYS.FOOTER) || force) {
 			const f = await fetch("/data/footer.json").then(r => r.json()).catch(() => null)
 			if (f) storageSet(STORAGE_KEYS.FOOTER, f)
+		}
+
+		// Member Rewards
+		if (!storageHas(STORAGE_KEYS.MEMBER_REWARDS) || force) {
+			const rwRes = await apiGetMemberRewards().catch(() => null)
+			if (rwRes && rwRes.length > 0) {
+				storageSet(STORAGE_KEYS.MEMBER_REWARDS, rwRes)
+			} else {
+				const rw = await fetch("/data/member_rewards.json").then(r => r.json()).catch(() => null)
+				if (rw) storageSet(STORAGE_KEYS.MEMBER_REWARDS, rw)
+			}
 		}
 
 		// Users cache
@@ -1284,6 +1297,100 @@ export function getBanners() {
 
 export function getFooterData() {
 	return storageGet(STORAGE_KEYS.FOOTER, [])
+}
+
+/* ==========================================================================
+   MEMBER REWARDS & POINTS REDEMPTION
+   ========================================================================== */
+
+export function getMemberRewards() {
+	return storageGet(STORAGE_KEYS.MEMBER_REWARDS, [])
+}
+
+export async function redeemMemberReward(rewardId) {
+	const user = getCurrentUser()
+	if (!user) {
+		return { success: false, error: "NOT_LOGGED_IN", message: "Vui lòng đăng nhập để đổi quà thưởng!" }
+	}
+
+	const rewards = getMemberRewards()
+	const reward = rewards.find(r => r.id === rewardId)
+	if (!reward) {
+		return { success: false, error: "REWARD_NOT_FOUND", message: "Phần thưởng không tồn tại!" }
+	}
+
+	const userPoints = Number(user.points) || 0
+	if (userPoints < reward.points) {
+		return {
+			success: false,
+			error: "INSUFFICIENT_POINTS",
+			message: `Bạn hiện có ${userPoints} điểm, còn thiếu ${reward.points - userPoints} điểm để đổi quà này!`
+		}
+	}
+
+	// Trừ điểm của người dùng
+	user.points = userPoints - reward.points
+
+	// Tạo mã voucher vào danh sách vouchers của user
+	const voucherCode = reward.code
+	const newVoucher = {
+		code: voucherCode,
+		name: reward.title,
+		points: reward.points,
+		category: reward.category,
+		discount: reward.description,
+		expiry: "31/12/2026",
+		redeemedAt: new Date().toISOString()
+	}
+
+	if (!user.vouchers) user.vouchers = []
+	user.vouchers.push(newVoucher)
+
+	// Thêm vào lịch sử tích / tiêu điểm
+	if (!user.pointsHistory) user.pointsHistory = []
+	user.pointsHistory.unshift({
+		id: `PH-${Date.now()}`,
+		title: `Đổi quà: ${reward.title}`,
+		points: -reward.points,
+		date: new Date().toISOString(),
+		code: voucherCode,
+		type: "redeem"
+	})
+
+	// Cập nhật database và session
+	await updateUserInDatabase(user)
+
+	return {
+		success: true,
+		reward,
+		remainingPoints: user.points,
+		voucher: newVoucher,
+		message: `Đổi thành công "${reward.title}"! Đã thêm vào Kho ưu đãi của bạn.`
+	}
+}
+
+export function getUserPointsHistory(user) {
+	if (!user) return []
+	if (user.pointsHistory && user.pointsHistory.length > 0) {
+		return user.pointsHistory
+	}
+	// Default demo history if empty
+	return [
+		{
+			id: "PH-101",
+			title: "Tích lũy vé Đơn #BT-842915",
+			points: 45,
+			date: "2026-09-28T14:30:00.000Z",
+			type: "earn"
+		},
+		{
+			id: "PH-100",
+			title: "Thưởng kích hoạt thành viên Beta VIP",
+			points: 50,
+			date: "2026-09-15T09:00:00.000Z",
+			type: "earn"
+		}
+	]
 }
 
 export async function resetStorageSection(sectionKey) {

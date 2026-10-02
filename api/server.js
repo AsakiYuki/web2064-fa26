@@ -82,6 +82,23 @@ server.post('/reset-db', (req, res) => {
 	}
 })
 
+// Explicit route for member_rewards
+server.get('/member_rewards', (req, res) => {
+	try {
+		const rewards = server.db.get('member_rewards').value()
+		if (Array.isArray(rewards) && rewards.length > 0) {
+			return res.json(rewards)
+		}
+		const fallbackPath = path.resolve(process.cwd(), 'public/data/member_rewards.json')
+		if (fs.existsSync(fallbackPath)) {
+			return res.json(JSON.parse(fs.readFileSync(fallbackPath, 'utf8')))
+		}
+		res.json([])
+	} catch {
+		res.json([])
+	}
+})
+
 // json-server-auth
 server.use(auth)
 

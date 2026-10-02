@@ -926,21 +926,13 @@ export async function setupHeaderAndFooter() {
 		updateHeaderAccountUI()
 		initMegaMenuAndMobileDrawer()
 
-		// Wire up pricing & news links in nav
+		// Wire up pricing, news & member links in nav
 		const navPricing = document.getElementById("nav-pricing")
 		const navNews = document.getElementById("nav-news")
 		const navMember = document.getElementById("nav-member")
 		if (navPricing) navPricing.href = "/pricing.html"
 		if (navNews) navNews.href = "/news.html"
-		if (navMember) {
-			navMember.href = getCurrentUser() ? "/profile.html" : "#"
-			navMember.addEventListener("click", e => {
-				if (!getCurrentUser()) {
-					e.preventDefault()
-					openAuthModal("login")
-				}
-			})
-		}
+		if (navMember) navMember.href = "/member.html"
 	} catch (err) {
 		console.warn("Could not load header/footer data:", err)
 	}

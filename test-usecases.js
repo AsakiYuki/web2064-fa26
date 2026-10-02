@@ -345,6 +345,18 @@ async function runAllTests() {
 	const pricing = await pricingRes.json()
 	assert(pricing && Array.isArray(pricing.formats) && pricing.formats.length > 0, 'Tải bảng giá vé thành công')
 
+	/* ------------------------------------------------------------------
+	   USE CASE 8: ĐẶC QUYỀN & ĐỔI ĐIỂM THƯỞNG THÀNH VIÊN (MEMBER REWARDS)
+	   ------------------------------------------------------------------ */
+	console.log('\n--- [USE CASE 8] ĐẶC QUYỀN & ĐỔI ĐIỂM THƯỞNG THÀNH VIÊN ---')
+
+	const rewardsRes = await fetch(`${BACKEND_URL}/member_rewards`)
+	const rewards = await rewardsRes.json()
+	assert(Array.isArray(rewards) && rewards.length >= 8, `Tải danh sách quà đổi điểm thưởng thành công (${rewards.length} phần quà)`)
+
+	const rewardItem = rewards.find(r => r.code === 'BETA10')
+	assert(rewardItem && rewardItem.points === 30, 'Phần thưởng BETA10 có giá quy đổi chính xác 30 điểm')
+
 	console.log('\n======================================================')
 	console.log(`📊 KẾT QUẢ KIỂM THỬ: ${passed} PASS, ${failed} FAIL`)
 	console.log('======================================================\n')

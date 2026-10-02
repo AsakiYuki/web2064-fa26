@@ -1,0 +1,531 @@
+<!doctype html>
+<html lang="vi">
+
+<head>
+	<meta charset="UTF-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<meta name="description"
+		content="Chương trình thành viên Beta Cinemas: Thẻ hội viên điện tử, tích lũy điểm thưởng từ 5% đến 10%, đổi vé xem phim và combo bắp nước miễn phí." />
+	<title>Đặc Quyền Thành Viên & Đổi Điểm Thưởng | Beta Cinemas</title>
+	<link rel="stylesheet" href="/style/main.scss" />
+	<link rel="preconnect" href="https://fonts.googleapis.com" />
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+	<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+</head>
+
+<body class="member-page">
+	<!-- ===================== HEADER ===================== -->
+	<header class="main-header">
+		<div class="header-account-manager">
+			<div class="container">
+				<a href="#" id="btn-login">Đăng nhập</a>
+				<div class="divider"></div>
+				<a href="#" id="btn-register">Đăng ký</a>
+				<span style="font-size: 18px; margin-left: 4px; cursor: pointer" title="English">🇬🇧</span>
+			</div>
+		</div>
+		<div class="header-navigator">
+			<div class="container">
+				<a href="/" class="header-logo" id="logo-link">
+					<img src="/logo.webp" alt="Beta Cinemas Logo" />
+				</a>
+				<div class="cinema-selector-wrap" id="cinema-selector-wrap">
+					<button class="cinema-selector" id="cinema-selector-btn" aria-haspopup="listbox" aria-expanded="false">
+						<span class="cinema-selector-label" id="cinema-selector-label">Beta Thái Nguyên</span>
+						<svg class="cinema-selector-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+							stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+							<polyline points="6 9 12 15 18 9"></polyline>
+						</svg>
+					</button>
+					<div class="cinema-dropdown" id="cinema-dropdown" role="listbox">
+						<ul id="cinema-dropdown-ul"></ul>
+					</div>
+				</div>
+				<nav class="nav-links">
+					<a href="/schedule.html" id="nav-schedule">Lịch Chiếu Theo Rạp</a>
+					<a href="/movies.html" id="nav-movies">Phim</a>
+					<a href="#" id="nav-cinemas">Rạp</a>
+					<a href="/pricing.html" id="nav-pricing">Giá Vé</a>
+					<a href="/news.html" id="nav-news">Tin Mới Và Ưu Đãi</a>
+					<a href="#" id="nav-franchise">Nhượng Quyền</a>
+					<a href="/member.html" id="nav-member" class="active">Thành Viên</a>
+					<a href="/admin.html" id="nav-admin" class="admin-only" style="display: none; color: #fbbf24; font-weight: 700;">⚙️ Quản Trị</a>
+				</nav>
+			</div>
+		</div>
+	</header>
+
+	<!-- ===================== BREADCRUMB BAR ===================== -->
+	<div class="booking-header-bar" style="background:#091322; padding: 14px 0; border-bottom: 1px solid rgba(255,255,255,0.08);">
+		<div class="container">
+			<nav class="booking-breadcrumb" aria-label="Breadcrumb">
+				<a href="/">Trang chủ</a>
+				<span class="bc-separator">/</span>
+				<span class="bc-current" style="color: #fbbf24;">Chương Trình Thành Viên & Đổi Quà</span>
+			</nav>
+		</div>
+	</div>
+
+	<!-- ===================== 1. HERO & DIGITAL MEMBER CARD ===================== -->
+	<section class="member-hero-section">
+		<div class="container">
+			<div class="member-hero-grid">
+				<!-- Left Column: 3D Member Card -->
+				<div class="member-card-wrapper">
+					<div class="digital-member-card tier-vip" id="member-card" title="Bấm để lật thẻ xem mã vạch">
+						<!-- Card Front -->
+						<div class="card-face card-front" id="card-front-face">
+							<div class="card-header-row">
+								<div class="card-brand">
+									<img src="/logo.webp" alt="Beta Cinemas Logo" />
+									<span>Beta Member</span>
+								</div>
+								<div class="card-rank-pill" id="card-rank-pill">
+									<span>👑</span>
+									<span id="card-rank-label">BETA VIP</span>
+								</div>
+							</div>
+
+							<div class="card-chip-row">
+								<div class="emv-chip"></div>
+								<div class="contactless-icon">📶</div>
+							</div>
+
+							<div class="card-number" id="card-number-display">BC-2026-8492-5108</div>
+
+							<div class="card-footer-row">
+								<div class="card-holder">
+									<span class="lbl">Chủ thẻ / Card Holder</span>
+									<span class="val" id="card-holder-name">Nguyễn Hoàng Nam</span>
+								</div>
+								<div class="card-valid">
+									<span class="lbl">Hạn dùng</span>
+									<span class="val" id="card-valid-date">12/2027</span>
+								</div>
+							</div>
+						</div>
+
+						<!-- Card Back (Barcode & QR) -->
+						<div class="card-face card-back" id="card-back-face">
+							<div class="card-magstripe"></div>
+							<div class="card-barcode-wrap">
+								<svg class="barcode-svg" id="card-barcode-svg" viewBox="0 0 240 48" preserveAspectRatio="none">
+									<!-- Dynamic Barcode Lines generated via JS -->
+								</svg>
+								<span class="barcode-num" id="card-barcode-num">8934520268492</span>
+							</div>
+							<p class="card-back-help">
+								Xuất trình mã này cho nhân viên tại quầy vé hoặc quầy bắp nước để tích điểm & áp dụng ưu đãi hội viên.
+							</p>
+						</div>
+					</div>
+
+					<button type="button" class="card-flip-btn" id="btn-flip-card">
+						<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+							<polyline points="23 4 23 10 17 10"></polyline>
+							<path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
+						</svg>
+						<span id="flip-btn-text">Lật Thẻ Xem Mã Vạch Quẹt Quầy</span>
+					</button>
+				</div>
+
+				<!-- Right Column: Member Overview & Status -->
+				<div class="member-hero-details">
+					<div class="m-welcome-tag" id="member-welcome-tag">
+						<span>⭐</span>
+						<span id="welcome-rank-text">Đặc Quyền Thành Viên Beta VIP</span>
+					</div>
+
+					<h1 id="welcome-user-heading">Chào Mừng Hội Viên Beta Cinemas!</h1>
+					<p class="m-sub-text" id="welcome-user-sub">
+						Tích lũy điểm thưởng không giới hạn cho mọi giao dịch xem phim và đồ ăn nhẹ. Đổi ngay vé miễn phí và hàng loạt voucher ưu đãi độc quyền.
+					</p>
+
+					<!-- Stats Grid -->
+					<div class="m-stats-row">
+						<div class="m-stat-box">
+							<span class="lbl">Điểm Thưởng Tích Lũy</span>
+							<span class="val" id="stat-points-val">850</span>
+							<span class="sub" id="stat-points-cash">≈ 850.000đ giá trị quy đổi</span>
+						</div>
+						<div class="m-stat-box">
+							<span class="lbl">Hạng Hội Viên Hiện Tại</span>
+							<span class="val" id="stat-rank-val" style="font-size: 20px;">BETA VIP</span>
+							<span class="sub">Tích 7% cho mọi đơn vé</span>
+						</div>
+						<div class="m-stat-box">
+							<span class="lbl">Chi Tiêu Tích Lũy 2026</span>
+							<span class="val" id="stat-spend-val">4.250.000đ</span>
+							<span class="sub">Xếp hạng cập nhật tự động</span>
+						</div>
+					</div>
+
+					<!-- Rank Progress Bar -->
+					<div class="m-rank-progress-card" id="rank-progress-card">
+						<div class="prog-header">
+							<span class="curr-rank" id="prog-curr-label">Hạng VIP (Đang áp dụng)</span>
+							<span class="next-rank" id="prog-next-label">Cần thêm 150 điểm để lên DIAMOND 💎</span>
+						</div>
+						<div class="prog-track">
+							<div class="prog-fill" id="prog-fill-bar" style="width: 85%;"></div>
+						</div>
+						<p class="prog-desc" id="prog-desc-text">
+							Đạt hạng Beta Diamond để nhận đặc quyền x2 điểm ngày hội thành viên và vé mời Premiere phim chiếu sớm.
+						</p>
+					</div>
+
+					<!-- Actions Buttons -->
+					<div class="m-actions-wrap">
+						<a href="#store-section" class="btn-m-primary" id="btn-scroll-store">
+							<span>🎁</span> Đổi Quà Bằng Điểm Thưởng
+						</a>
+						<button type="button" class="btn-m-outline" id="btn-view-history">
+							<span>📜</span> Lịch Sử Tích & Tiêu Điểm
+						</button>
+						<a href="/profile.html" class="btn-m-outline" id="btn-view-profile">
+							<span>🎟️</span> Xem Vé Đã Mua
+						</a>
+					</div>
+
+					<!-- Guest Callout (if not logged in) -->
+					<div class="guest-callout-box" id="guest-callout-box" style="display: none;">
+						<div class="g-texts">
+							<h4>Bạn chưa đăng nhập tài khoản thành viên?</h4>
+							<p>Đăng ký thành viên Beta Cinemas ngay để nhận 50 điểm thưởng và tận hưởng ưu đãi 5% - 10%!</p>
+						</div>
+						<button type="button" class="btn-join-now" id="btn-guest-register">
+							Đăng Ký Thành Viên Ngay
+						</button>
+					</div>
+				</div>
+			</div>
+		</div>
+	</section>
+
+	<!-- ===================== MAIN CONTENT WRAPPER ===================== -->
+	<main class="container">
+		<!-- ===================== 2. REWARD POINTS REDEMPTION STORE ===================== -->
+		<section class="member-store-section" id="store-section">
+			<div class="store-header">
+				<div class="sh-left">
+					<h2>Gian Hàng Đổi Điểm Thưởng Hội Viên</h2>
+					<p>Sử dụng điểm tích lũy của bạn để đổi ngay mã voucher giảm giá, bắp nước hoặc vé xem phim miễn phí</p>
+				</div>
+				<div class="store-user-balance" id="store-balance-badge">
+					Điểm của bạn: <strong id="store-current-points">850 Điểm</strong>
+				</div>
+			</div>
+
+			<!-- Filter Pills -->
+			<div class="store-filter-pills" role="tablist">
+				<button type="button" class="sf-pill active" data-category="all">Tất Cả Quà Tặng</button>
+				<button type="button" class="sf-pill" data-category="voucher">Mã Giảm Giá</button>
+				<button type="button" class="sf-pill" data-category="concession">Bắp Nước</button>
+				<button type="button" class="sf-pill" data-category="ticket">Vé Xem Phim & Ghế</button>
+			</div>
+
+			<!-- Rewards Cards Grid -->
+			<div class="rewards-cards-grid" id="rewards-cards-container">
+				<!-- Injected dynamically via member-page.js -->
+			</div>
+		</section>
+
+		<!-- ===================== 3. POINTS & SAVINGS CALCULATOR ===================== -->
+		<section class="member-calc-section">
+			<div class="calc-header">
+				<h2>Công Cụ Tính Điểm & Quyền Lợi Dự Kiến</h2>
+				<p>Kéo thanh chi tiêu để xem số điểm tích lũy và số tiền tiết kiệm bạn nhận được mỗi năm cùng Beta Cinemas</p>
+			</div>
+
+			<div class="calc-layout">
+				<div class="calc-controls">
+					<div class="control-label">
+						<span>Mức chi tiêu xem phim hàng tháng:</span>
+						<span class="active-val" id="calc-spend-display">300.000 VNĐ</span>
+					</div>
+					<input type="range" min="100000" max="2000000" step="50000" value="300000" class="spend-slider" id="calc-slider" />
+
+					<div class="preset-buttons">
+						<button type="button" data-val="150000">150.000đ (1-2 vé)</button>
+						<button type="button" data-val="300000" class="active">300.000đ (Vé + Bắp)</button>
+						<button type="button" data-val="600000">600.000đ (Xem đôi)</button>
+						<button type="button" data-val="1200000">1.200.000đ (Gia đình)</button>
+					</div>
+				</div>
+
+				<div class="calc-results-card">
+					<div class="result-tier-badge tier-vip" id="calc-tier-badge">
+						<span>👑</span> <span id="calc-tier-name">Hạng Dự Kiến: BETA VIP</span>
+					</div>
+
+					<div class="result-metrics">
+						<div class="metric-item">
+							<span class="m-lbl">Điểm tích lũy / năm:</span>
+							<span class="m-val" id="calc-points-year">252 Điểm</span>
+						</div>
+						<div class="metric-item">
+							<span class="m-lbl">Tiết kiệm quy đổi:</span>
+							<span class="m-val" id="calc-savings-year">252.000 VNĐ</span>
+						</div>
+					</div>
+
+					<ul class="result-benefits-list" id="calc-benefits-list">
+						<li>Tỷ lệ tích lũy: <strong>7%</strong> giá trị đơn vé và combo</li>
+						<li>Tặng 02 vé xem phim 2D + 01 bắp ngọt dịp sinh nhật</li>
+						<li>Ưu tiên check-in tại quầy vé riêng (Priority Line)</li>
+					</ul>
+				</div>
+			</div>
+		</section>
+
+		<!-- ===================== 4. MEMBERSHIP TIERS COMPARISON ===================== -->
+		<section class="member-tiers-section">
+			<div class="tiers-header">
+				<h2>Bảng So Sánh Quyền Lợi Các Hạng Hội Viên</h2>
+				<p>Hệ thống phân hạng minh bạch, chi tiêu càng nhiều - quyền lợi càng lớn</p>
+			</div>
+
+			<div class="tiers-cards-grid">
+				<!-- Tier 1: Standard -->
+				<div class="tier-card" id="tier-card-standard">
+					<div class="tc-icon">🥉</div>
+					<h3 class="tc-name">Beta Standard</h3>
+					<div class="tc-spend">Đăng ký mới • Miễn phí tham gia</div>
+					<div class="tc-rate">
+						<span class="rate-num">5%</span>
+						<span class="rate-lbl">Tích điểm mọi giao dịch</span>
+					</div>
+					<ul class="tc-features">
+						<li>Tích lũy 5% giá trị vé & bắp nước</li>
+						<li>Tặng 01 vé xem phim 2D sinh nhật</li>
+						<li>Giá vé Happy Tuesday 50.000đ</li>
+						<li>Đổi điểm lấy voucher giảm giá</li>
+						<li class="muted">Nhân đôi điểm Beta Member Day</li>
+						<li class="muted">Quầy ưu tiên Priority Lane</li>
+						<li class="muted">Vé mời Premiere phim bom tấn</li>
+					</ul>
+				</div>
+
+				<!-- Tier 2: VIP (Featured) -->
+				<div class="tier-card featured" id="tier-card-vip">
+					<div class="tier-ribbon">Phổ Biến Nhất</div>
+					<div class="tc-icon">👑</div>
+					<h3 class="tc-name">Beta VIP</h3>
+					<div class="tc-spend">Chi tiêu từ 2.000.000đ / năm</div>
+					<div class="tc-rate">
+						<span class="rate-num" style="color: #d97706;">7%</span>
+						<span class="rate-lbl">Tích điểm mọi giao dịch</span>
+					</div>
+					<ul class="tc-features">
+						<li>Tích lũy 7% giá trị vé & bắp nước</li>
+						<li>Tặng 02 vé 2D + 01 bắp dịp sinh nhật</li>
+						<li>Giá vé Happy Tuesday 50.000đ</li>
+						<li>Quầy soát vé riêng Priority Line</li>
+						<li>Tặng voucher giảm giá mỗi quý</li>
+						<li>Đổi điểm nhận quà cao cấp</li>
+						<li class="muted">Vé mời Premiere phim bom tấn</li>
+					</ul>
+				</div>
+
+				<!-- Tier 3: Diamond -->
+				<div class="tier-card" id="tier-card-diamond">
+					<div class="tc-icon">💎</div>
+					<h3 class="tc-name">Beta Diamond</h3>
+					<div class="tc-spend">Chi tiêu từ 5.000.000đ / năm</div>
+					<div class="tc-rate">
+						<span class="rate-num" style="color: #2563eb;">10%</span>
+						<span class="rate-lbl">Tích điểm tối đa</span>
+					</div>
+					<ul class="tc-features">
+						<li>Tích lũy 10% giá trị vé & bắp nước</li>
+						<li>Nhân đôi điểm (x2) vào ngày 15 hàng tháng</li>
+						<li>Quà sinh nhật đặc biệt từ Ban Giám Đốc</li>
+						<li>Miễn phí nâng hạng VIP / Sweetbox</li>
+						<li>Vé mời Premiere suất chiếu sớm bom tấn</li>
+						<li>Dịch vụ chăm sóc khách hàng VIP riêng</li>
+						<li>Quầy ưu tiên VIP Priority Lane</li>
+					</ul>
+				</div>
+			</div>
+		</section>
+
+		<!-- ===================== 5. MEMBER EVENTS & CALENDAR ===================== -->
+		<section class="member-events-section">
+			<div class="events-header">
+				<h2>Ngày Hội & Sự Kiện Định Kỳ Cho Thành Viên</h2>
+				<p>Đừng bỏ lỡ các ngày ưu đãi đặc biệt trong tuần và trong tháng tại các rạp Beta</p>
+			</div>
+
+			<div class="events-grid">
+				<div class="event-card">
+					<div class="ev-date-box">
+						<div class="day">T3</div>
+						<div class="sub">Hàng Tuần</div>
+					</div>
+					<div class="ev-info">
+						<h3>Happy Tuesday - Đồng Giá 50K</h3>
+						<p>Thành viên Beta Cinemas được mua vé xem phim 2D đồng giá chỉ 50.000đ/vé vào mỗi Thứ Ba hàng tuần.</p>
+					</div>
+				</div>
+
+				<div class="event-card">
+					<div class="ev-date-box" style="background: #e51d2a;">
+						<div class="day">15</div>
+						<div class="sub">Hàng Tháng</div>
+					</div>
+					<div class="ev-info">
+						<h3>Beta Member Day - x2 Điểm Thưởng</h3>
+						<p>Nhân đôi điểm tích lũy cho tất cả các giao dịch mua vé và combo bắp nước trong suốt ngày 15 mỗi tháng.</p>
+					</div>
+				</div>
+
+				<div class="event-card">
+					<div class="ev-date-box" style="background: #10b981;">
+						<div class="day">🎂</div>
+						<div class="sub">Sinh Nhật</div>
+					</div>
+					<div class="ev-info">
+						<h3>Tháng Sinh Nhật Rực Rỡ</h3>
+						<p>Nhận ngay mã vé xem phim 2D miễn phí và quà tặng bắp nước gửi trực tiếp vào ví ưu đãi trong tháng sinh nhật của bạn.</p>
+					</div>
+				</div>
+			</div>
+		</section>
+
+		<!-- ===================== 6. FAQ ACCORDION ===================== -->
+		<section class="member-faq-section">
+			<div class="faq-header">
+				<h2>Câu Hỏi Thường Gặp Về Thẻ Thành Viên</h2>
+				<p>Giải đáp thắc mắc về cách đăng ký, tích điểm, hạn sử dụng và quyền lợi hội viên</p>
+			</div>
+
+			<div class="faq-accordion-list">
+				<div class="faq-item open">
+					<button type="button" class="faq-question">
+						<span>1. Làm thế nào để đăng ký trở thành hội viên Beta Cinemas?</span>
+						<span class="faq-arrow">▼</span>
+					</button>
+					<div class="faq-answer">
+						Bạn chỉ cần bấm nút "Đăng Ký" trên thanh điều hướng hoặc tại trang này, điền Họ tên, Số điện thoại và Email. Quá trình đăng ký hoàn toàn miễn phí và bạn sẽ nhận ngay <strong>50 điểm thưởng chào mừng</strong> vào tài khoản!
+					</div>
+				</div>
+
+				<div class="faq-item">
+					<button type="button" class="faq-question">
+						<span>2. Tỷ lệ quy đổi điểm thưởng được tính như thế nào?</span>
+						<span class="faq-arrow">▼</span>
+					</button>
+					<div class="faq-answer">
+						Mỗi 1.000 VNĐ chi tiêu mua vé hoặc bắp nước sẽ mang lại điểm tích lũy theo hạng thẻ của bạn (5% đối với Hạng Mới, 7% đối với Hạng VIP và 10% đối với Hạng Diamond). Khi đổi quà hoặc trừ tiền, <strong>1 Điểm thưởng = 1.000 VNĐ</strong> giá trị thực tế.
+					</div>
+				</div>
+
+				<div class="faq-item">
+					<button type="button" class="faq-question">
+						<span>3. Điểm thưởng có thời hạn sử dụng trong bao lâu?</span>
+						<span class="faq-arrow">▼</span>
+					</button>
+					<div class="faq-answer">
+						Điểm thưởng tích lũy có giá trị sử dụng trong vòng <strong>12 tháng</strong> kể từ ngày phát sinh giao dịch. Hệ thống sẽ gửi thông báo nhắc nhở trước 30 ngày nếu có điểm sắp hết hạn.
+					</div>
+				</div>
+
+				<div class="faq-item">
+					<button type="button" class="faq-question">
+						<span>4. Làm sao để tích điểm khi mua vé trực tiếp tại quầy rạp?</span>
+						<span class="faq-arrow">▼</span>
+					</button>
+					<div class="faq-answer">
+						Rất đơn giản, bạn chỉ cần mở trang Thành Viên trên điện thoại, bấm "Lật Thẻ" để nhân viên thu ngân quét mã vạch Barcode, hoặc đọc Số điện thoại đăng ký tài khoản cho nhân viên trước khi thanh toán.
+					</div>
+				</div>
+
+				<div class="faq-item">
+					<button type="button" class="faq-question">
+						<span>5. Điểm thưởng sau khi đổi voucher có được hoàn lại không?</span>
+						<span class="faq-arrow">▼</span>
+					</button>
+					<div class="faq-answer">
+						Mã voucher sau khi đổi thành công sẽ được lưu trữ trong mục "Ưu Đãi Của Tôi" trên trang cá nhân và có thời hạn sử dụng từ 30 đến 60 ngày. Điểm thưởng đã đổi không thể quy đổi ngược lại thành điểm hoặc tiền mặt.
+					</div>
+				</div>
+			</div>
+		</section>
+	</main>
+
+	<!-- ===================== MODAL 1: LỊCH SỬ TÍCH & TIÊU ĐIỂM ===================== -->
+	<div class="modal-backdrop" id="modal-points-history" style="display: none;">
+		<div class="m-modal-card">
+			<div class="mm-head">
+				<h3>Nhật Ký Tích & Tiêu Điểm</h3>
+				<button type="button" class="modal-close-btn" id="btn-close-history-modal" aria-label="Đóng">&#x2715;</button>
+			</div>
+			<div class="mm-body">
+				<div class="history-table-wrap">
+					<table>
+						<thead>
+							<tr>
+								<th>Thời Gian</th>
+								<th>Nội Dung Giao Dịch</th>
+								<th style="text-align: right;">Biến Động</th>
+							</tr>
+						</thead>
+						<tbody id="points-history-tbody">
+							<!-- Dynamic history rows -->
+						</tbody>
+					</table>
+				</div>
+			</div>
+			<div class="mm-actions">
+				<button type="button" class="btn-cancel" id="btn-dismiss-history-modal">Đóng</button>
+			</div>
+		</div>
+	</div>
+
+	<!-- ===================== MODAL 2: XÁC NHẬN ĐỔI ĐIỂM ===================== -->
+	<div class="modal-backdrop" id="modal-redeem-confirm" style="display: none;">
+		<div class="m-modal-card" style="max-width: 440px;">
+			<div class="mm-head">
+				<h3>Xác Nhận Đổi Quà Thưởng</h3>
+				<button type="button" class="modal-close-btn" id="btn-close-redeem-modal" aria-label="Đóng">&#x2715;</button>
+			</div>
+			<div class="mm-body">
+				<div style="text-align: center; margin-bottom: 16px;">
+					<div style="font-size: 48px; margin-bottom: 8px;" id="confirm-reward-icon">🎁</div>
+					<h4 style="font-size: 17px; font-weight: 800; color: #1e293b; margin: 0 0 6px;" id="confirm-reward-title">Tên Quà</h4>
+					<p style="font-size: 13px; color: #64748b; margin: 0;" id="confirm-reward-desc">Mô tả chi tiết quà</p>
+				</div>
+
+				<div style="background: #f8fafc; border-radius: 8px; padding: 14px; margin-bottom: 16px; border: 1px solid #e2e8f0; font-size: 13px;">
+					<div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+						<span style="color: #64748b;">Điểm hiện có:</span>
+						<strong id="confirm-user-current-pts" style="color: #1e293b;">850 Điểm</strong>
+					</div>
+					<div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+						<span style="color: #64748b;">Điểm cần đổi:</span>
+						<strong id="confirm-reward-cost-pts" style="color: #ef4444;">-50 Điểm</strong>
+					</div>
+					<div style="display: flex; justify-content: space-between; border-top: 1px dashed #cbd5e1; padding-top: 6px;">
+						<span style="font-weight: 700; color: #334155;">Điểm còn lại:</span>
+						<strong id="confirm-user-remain-pts" style="color: #10b981; font-size: 15px;">800 Điểm</strong>
+					</div>
+				</div>
+				<p style="font-size: 12px; color: #94a3b8; margin: 0; line-height: 1.4;">
+					Sau khi xác nhận, mã quà tặng sẽ được cấp tự động vào Kho Ưu Đãi của bạn và sẵn sàng sử dụng khi đặt vé.
+				</p>
+			</div>
+			<div class="mm-actions">
+				<button type="button" class="btn-cancel" id="btn-cancel-redeem">Hủy Bỏ</button>
+				<button type="button" class="btn-confirm" id="btn-execute-redeem">Xác Nhận Đổi</button>
+			</div>
+		</div>
+	</div>
+
+	<!-- ===================== FOOTER ===================== -->
+	<footer class="main-footer" id="footer-container"></footer>
+
+	<!-- Scripts -->
+	<script type="module" src="/js/member-page.js"></script>
+</body>
+
+</html>

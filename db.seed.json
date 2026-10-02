@@ -2177,5 +2177,103 @@
       "bookingDate": "2026-09-20T13:00:00.000Z",
       "status": "done"
     }
+  ],
+  "member_rewards": [
+    {
+      "id": "rw-beta10",
+      "title": "Voucher Giảm 10% Tổng Đơn",
+      "category": "voucher",
+      "points": 30,
+      "code": "BETA10",
+      "badge": "PHỔ BIẾN",
+      "description": "Áp dụng giảm 10% cho toàn bộ hóa đơn đặt vé xem phim và combo bắp nước online.",
+      "expiryDays": 30,
+      "image": "/promo/promo_deal.jpg",
+      "icon": "🎟️"
+    },
+    {
+      "id": "rw-beta20",
+      "title": "Voucher Giảm 20% Hội Viên VIP",
+      "category": "voucher",
+      "points": 45,
+      "code": "BETA20",
+      "badge": "VIP ONLY",
+      "description": "Đặc quyền hội viên: Giảm ngay 20% cho đơn vé từ 100K tại tất cả cụm rạp Beta.",
+      "expiryDays": 45,
+      "image": "/promo/promo_member.jpg",
+      "icon": "👑"
+    },
+    {
+      "id": "rw-beta50",
+      "title": "Voucher Giảm 50.000đ Bắp Nước",
+      "category": "concession",
+      "points": 50,
+      "code": "BETA50",
+      "badge": "TIẾT KIỆM",
+      "description": "Giảm ngay 50.000đ khi đặt vé xem phim kèm combo bắp nước từ 100.000đ.",
+      "expiryDays": 30,
+      "image": "/promo/promo_student.jpg",
+      "icon": "🍿"
+    },
+    {
+      "id": "rw-freepop",
+      "title": "01 Ly Nước Ngọt Lớn (Size L)",
+      "category": "concession",
+      "points": 25,
+      "code": "FREEPOP",
+      "badge": "ĐỔI NHANH",
+      "description": "Đổi ngay 01 ly nước ngọt Coca/Sprite/Fanta size lớn tại quầy concessions của rạp.",
+      "expiryDays": 15,
+      "image": "/promo/promo_nowzone.jpg",
+      "icon": "🥤"
+    },
+    {
+      "id": "rw-combobeta",
+      "title": "01 Combo Bắp Nước Beta Super",
+      "category": "concession",
+      "points": 65,
+      "code": "COMBOBETA",
+      "badge": "HOT REWARD",
+      "description": "Gồm 01 bắp rang bơ vị ngọt hoặc phô mai lớn + 02 ly nước ngọt có ga tùy chọn.",
+      "expiryDays": 30,
+      "image": "/promo/promo_deal.jpg",
+      "icon": "🍿🥤"
+    },
+    {
+      "id": "rw-ticket2d",
+      "title": "01 Vé Xem Phim 2D Tiêu Chuẩn",
+      "category": "ticket",
+      "points": 80,
+      "code": "TICKET2D",
+      "badge": "ĐẶC BIỆT",
+      "description": "Vé xem phim 2D miễn phí tất cả các khung giờ từ Thứ 2 đến Chủ Nhật tại các cụm rạp Beta.",
+      "expiryDays": 60,
+      "image": "/promo/promo_member.jpg",
+      "icon": "🎬"
+    },
+    {
+      "id": "rw-upgradevip",
+      "title": "Nâng Hạng Ghế VIP / Sweetbox",
+      "category": "ticket",
+      "points": 40,
+      "code": "VIPUPGRADE",
+      "badge": "TRẢI NGHIỆM",
+      "description": "Miễn phí phụ thu ghế VIP hoặc ghế đôi Sweetbox cho 01 suất chiếu bất kỳ.",
+      "expiryDays": 30,
+      "image": "/promo/promo_nowzone.jpg",
+      "icon": "🛋️"
+    },
+    {
+      "id": "rw-happytue",
+      "title": "Voucher Happy Tuesday Giảm 20K",
+      "category": "voucher",
+      "points": 20,
+      "code": "HAPPYTUE",
+      "badge": "THỨ 3 VUI VẺ",
+      "description": "Giảm thêm 20.000đ cho vé xem phim vào ngày Thứ Ba Vui Vẻ hàng tuần.",
+      "expiryDays": 30,
+      "image": "/promo/promo_student.jpg",
+      "icon": "🎉"
+    }
   ]
 }

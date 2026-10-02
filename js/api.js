@@ -337,6 +337,11 @@ export async function apiGetFooter() {
 	return res.ok && Array.isArray(res.data) ? res.data : []
 }
 
+export async function apiGetMemberRewards() {
+	const res = await request("/member_rewards")
+	return res.ok && Array.isArray(res.data) ? res.data : []
+}
+
 export async function apiResetDatabase() {
 	const res = await request("/reset-db", { method: "POST" })
 	return res.ok

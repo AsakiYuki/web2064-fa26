@@ -40,7 +40,7 @@
       "role": "admin",
       "avatarText": "AD",
       "rank": "Super Admin Online",
-      "points": 10147,
+      "points": 9999,
       "gender": "male",
       "birthday": "1990-01-01",
       "city": "Hà Nội",
@@ -48,103 +48,23 @@
       "createdAt": "2026-01-01T00:00:00.000Z"
     },
     {
-      "email": "tester_1790856992098@example.com",
-      "password": "$2a$10$mfBylEZIX7O8f7J/lNtcM.cYzsPaYBZHpzOv3053WE0if8dajdTjK",
+      "email": "tester_1790915054198@example.com",
+      "password": "$2a$10$lD3/MmtSbfG.kS1FkGxLxurfNyr6f00Fb41mFUv27jH3fGkbCdEw6",
       "name": "Tester Automation",
-      "phone": "0953360595",
-      "rank": "Thành viên Beta Mới",
-      "points": 120,
-      "id": 3,
-      "city": "Đà Nẵng"
-    },
-    {
-      "email": "tester_1790857006102@example.com",
-      "password": "$2a$10$JLnzV09vHDFWWshTvk43l.nXCn//zD91zXJ2wZOsvuX6DN9Tc2oI6",
-      "name": "Tester Automation",
-      "phone": "0934775380",
-      "rank": "Thành viên Beta Mới",
-      "points": 120,
-      "id": 4,
-      "city": "Đà Nẵng"
-    },
-    {
-      "email": "tester_1790858329127@example.com",
-      "password": "$2a$10$WfRqBinK9v2M7b6U1c8uLuio4L8MpDD9FEg4cx3qHQtCR5fIM.5OS",
-      "name": "Tester Automation",
-      "phone": "0979645725",
-      "rank": "Thành viên Beta Mới",
-      "points": 120,
-      "id": 5,
-      "city": "Đà Nẵng"
-    },
-    {
-      "email": "tester_1790860242038@example.com",
-      "password": "$2a$10$0M0eS86kINQpsX6Frj/dweTqb6JfGYNxhmfh6pwb0e1ZRYkZg.L6W",
-      "name": "Tester Automation",
-      "phone": "0994631059",
-      "rank": "Thành viên Beta Mới",
-      "points": 120,
-      "id": 6,
-      "city": "Đà Nẵng"
-    },
-    {
-      "email": "tester_1790909858201@example.com",
-      "password": "$2a$10$dnRW93VsX1c9F4.zyoMPDefMBlv2jJ79lxqKFjMMmcNE3wkaTJveS",
-      "name": "Tester Automation",
-      "phone": "0956426993",
+      "phone": "0917823019",
       "rank": "Thành viên Beta Mới",
       "points": 120,
       "id": 1000,
       "city": "Đà Nẵng"
     },
     {
-      "email": "tester_1790910035748@example.com",
-      "password": "$2a$10$H0JzeamuJ26GgdrbyIlQLuPVvAeCy8HKAtVXIFElCM.EtT04uNk3S",
+      "email": "tester_1790938233860@example.com",
+      "password": "$2a$10$NsMbAPcytKaXRClpByiCEuUgKvLWhNkUbgNym1L61WICOVm9emIKq",
       "name": "Tester Automation",
-      "phone": "0921761938",
+      "phone": "0987311445",
       "rank": "Thành viên Beta Mới",
       "points": 120,
       "id": 1001,
-      "city": "Đà Nẵng"
-    },
-    {
-      "email": "tester_1790910286099@example.com",
-      "password": "$2a$10$G/5ZHVMFtmErRhKaZUA.6etgc48ZN989GNHspiHzYQ0fclKrNV3rm",
-      "name": "Tester Automation",
-      "phone": "0960656445",
-      "rank": "Thành viên Beta Mới",
-      "points": 120,
-      "id": 1002,
-      "city": "Đà Nẵng"
-    },
-    {
-      "email": "tester_1790910596105@example.com",
-      "password": "$2a$10$Mw15t.U0eBKSfi6Qjo5al.1CPhBWS6FdJmVrmQwJ6TCX5wtgCU.B.",
-      "name": "Tester Automation",
-      "phone": "0961096774",
-      "rank": "Thành viên Beta Mới",
-      "points": 120,
-      "id": 1003,
-      "city": "Đà Nẵng"
-    },
-    {
-      "email": "tester_1790912392715@example.com",
-      "password": "$2a$10$Ia9xIpSXUc8uE2XI.2iq4Ogsz3HDU9xYkRh0aYCRlJQbf9M6bqE4e",
-      "name": "Tester Automation",
-      "phone": "0924844841",
-      "rank": "Thành viên Beta Mới",
-      "points": 120,
-      "id": 1004,
-      "city": "Đà Nẵng"
-    },
-    {
-      "email": "tester_1790912780653@example.com",
-      "password": "$2a$10$w6n3DBkjyjHpF2UELeEjb.2oQbpMml1valZQ2KMA2tfJww7Wve1vS",
-      "name": "Tester Automation",
-      "phone": "0911935136",
-      "rank": "Thành viên Beta Mới",
-      "points": 120,
-      "id": 1005,
       "city": "Đà Nẵng"
     }
   ],
@@ -911,25 +831,6 @@
               "time": "18:45",
               "price": 80000,
               "availableSeats": 12
-            }
-          ]
-        },
-        {
-          "movieId": "traibuon",
-          "movieTitle": "Trại Buôn Người",
-          "screenId": "Phòng VIP 1",
-          "screenName": "Phòng VIP 1",
-          "format": "IMAX 3D",
-          "slots": [
-            {
-              "time": "14:30",
-              "price": 75000,
-              "availableSeats": 60
-            },
-            {
-              "time": "17:30",
-              "price": 75000,
-              "availableSeats": 60
             }
           ]
         }
@@ -2255,27 +2156,123 @@
   ],
   "bookings": [
     {
-      "id": "BT-484373",
-      "movieId": "vungdat",
-      "movieTitle": "Vùng Đất Quỷ Dữ",
-      "moviePoster": "/poster/poster_vungdat.jpg",
-      "cinemaId": "beta-nowzone",
-      "cinemaName": "Beta Cinemas Nowzone",
-      "screenName": "Phòng 2",
+      "id": "BT-842915",
+      "movieId": "utlan2",
+      "movieTitle": "Út Lan 2: Vùng Đất Mất Tích",
+      "moviePoster": "/poster/poster_utlan2.jpg",
+      "cinemaId": "beta-thainguyen",
+      "cinemaName": "Beta Thái Nguyên",
+      "screenName": "Phòng chiếu 1",
       "formatName": "2D Phụ Đề",
       "date": "2026-09-26",
-      "time": "11:00",
-      "seats": "F13",
-      "concessions": "1x Beta Combo Solo",
-      "total": 148000,
-      "voucherCode": null,
-      "discountAmount": 0,
-      "paymentMethod": "zalopay",
-      "customerName": "Ban Quản Trị Hệ Thống",
-      "customerPhone": "0999999999",
-      "customerEmail": "admin@betacinemas.vn",
-      "bookingDate": "2026-10-02T03:03:09.915Z",
+      "time": "14:30",
+      "seats": "D05, D06",
+      "concessions": "1x Beta Combo Đôi",
+      "total": 255000,
+      "paymentMethod": "momo",
+      "userName": "Nguyễn Hoàng Nam",
+      "userPhone": "0987654321",
+      "userEmail": "nam.nguyen@example.com",
+      "bookingDate": "2026-09-26T07:30:00.000Z",
       "status": "paid"
+    }
+  ],
+  "member_rewards": [
+    {
+      "id": "rw-beta10",
+      "title": "Voucher Giảm 10% Tổng Đơn",
+      "category": "voucher",
+      "points": 30,
+      "code": "BETA10",
+      "badge": "PHỔ BIẾN",
+      "description": "Áp dụng giảm 10% cho toàn bộ hóa đơn đặt vé xem phim và combo bắp nước online.",
+      "expiryDays": 30,
+      "image": "/promo/promo_deal.jpg",
+      "icon": "🎟️"
+    },
+    {
+      "id": "rw-beta20",
+      "title": "Voucher Giảm 20% Hội Viên VIP",
+      "category": "voucher",
+      "points": 45,
+      "code": "BETA20",
+      "badge": "VIP ONLY",
+      "description": "Đặc quyền hội viên: Giảm ngay 20% cho đơn vé từ 100K tại tất cả cụm rạp Beta.",
+      "expiryDays": 45,
+      "image": "/promo/promo_member.jpg",
+      "icon": "👑"
+    },
+    {
+      "id": "rw-beta50",
+      "title": "Voucher Giảm 50.000đ Bắp Nước",
+      "category": "concession",
+      "points": 50,
+      "code": "BETA50",
+      "badge": "TIẾT KIỆM",
+      "description": "Giảm ngay 50.000đ khi đặt vé xem phim kèm combo bắp nước từ 100.000đ.",
+      "expiryDays": 30,
+      "image": "/promo/promo_student.jpg",
+      "icon": "🍿"
+    },
+    {
+      "id": "rw-freepop",
+      "title": "01 Ly Nước Ngọt Lớn (Size L)",
+      "category": "concession",
+      "points": 25,
+      "code": "FREEPOP",
+      "badge": "ĐỔI NHANH",
+      "description": "Đổi ngay 01 ly nước ngọt Coca/Sprite/Fanta size lớn tại quầy concessions của rạp.",
+      "expiryDays": 15,
+      "image": "/promo/promo_nowzone.jpg",
+      "icon": "🥤"
+    },
+    {
+      "id": "rw-combobeta",
+      "title": "01 Combo Bắp Nước Beta Super",
+      "category": "concession",
+      "points": 65,
+      "code": "COMBOBETA",
+      "badge": "HOT REWARD",
+      "description": "Gồm 01 bắp rang bơ vị ngọt hoặc phô mai lớn + 02 ly nước ngọt có ga tùy chọn.",
+      "expiryDays": 30,
+      "image": "/promo/promo_deal.jpg",
+      "icon": "🍿🥤"
+    },
+    {
+      "id": "rw-ticket2d",
+      "title": "01 Vé Xem Phim 2D Tiêu Chuẩn",
+      "category": "ticket",
+      "points": 80,
+      "code": "TICKET2D",
+      "badge": "ĐẶC BIỆT",
+      "description": "Vé xem phim 2D miễn phí tất cả các khung giờ từ Thứ 2 đến Chủ Nhật tại các cụm rạp Beta.",
+      "expiryDays": 60,
+      "image": "/promo/promo_member.jpg",
+      "icon": "🎬"
+    },
+    {
+      "id": "rw-upgradevip",
+      "title": "Nâng Hạng Ghế VIP / Sweetbox",
+      "category": "ticket",
+      "points": 40,
+      "code": "VIPUPGRADE",
+      "badge": "TRẢI NGHIỆM",
+      "description": "Miễn phí phụ thu ghế VIP hoặc ghế đôi Sweetbox cho 01 suất chiếu bất kỳ.",
+      "expiryDays": 30,
+      "image": "/promo/promo_nowzone.jpg",
+      "icon": "🛋️"
+    },
+    {
+      "id": "rw-happytue",
+      "title": "Voucher Happy Tuesday Giảm 20K",
+      "category": "voucher",
+      "points": 20,
+      "code": "HAPPYTUE",
+      "badge": "THỨ 3 VUI VẺ",
+      "description": "Giảm thêm 20.000đ cho vé xem phim vào ngày Thứ Ba Vui Vẻ hàng tuần.",
+      "expiryDays": 30,
+      "image": "/promo/promo_student.jpg",
+      "icon": "🎉"
     }
   ]
 }
