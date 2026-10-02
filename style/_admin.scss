@@ -1,11 +1,12 @@
 /* ============================================
    BETA CINEMAS - ADMIN DASHBOARD SCSS
+   CATPPUCCIN MOCHA THEMED
    ============================================ */
 @use 'variables' as *;
 
 .admin-body {
-	background-color: #0b1120;
-	color: #e2e8f0;
+	background-color: $ctp-crust;
+	color: $ctp-text;
 	font-family: $font-family-base;
 	margin: 0;
 	padding: 0;
@@ -26,8 +27,8 @@
 /* SIDEBAR */
 .admin-sidebar {
 	width: 260px;
-	background: #0f172a;
-	border-right: 1px solid rgba(255, 255, 255, 0.08);
+	background: $ctp-mantle;
+	border-right: 1px solid rgba($ctp-surface2, 0.4);
 	display: flex;
 	flex-direction: column;
 	position: fixed;
@@ -50,7 +51,7 @@
 		display: flex;
 		align-items: center;
 		gap: 12px;
-		border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+		border-bottom: 1px solid rgba($ctp-surface2, 0.4);
 
 		img {
 			height: 38px;
@@ -64,15 +65,15 @@
 			.brand-title {
 				font-size: 17px;
 				font-weight: 900;
-				color: #fff;
+				color: $ctp-text;
 				letter-spacing: 0.5px;
 			}
 
 			.brand-badge {
 				font-size: 10px;
 				font-weight: 800;
-				color: #fbbf24;
-				background: rgba(251, 191, 36, 0.15);
+				color: $ctp-peach;
+				background: rgba($ctp-peach, 0.15);
 				padding: 2px 6px;
 				border-radius: 4px;
 				align-self: flex-start;
@@ -86,21 +87,21 @@
 		display: flex;
 		align-items: center;
 		gap: 12px;
-		background: rgba(255, 255, 255, 0.02);
-		border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+		background: rgba($ctp-surface0, 0.3);
+		border-bottom: 1px solid rgba($ctp-surface2, 0.3);
 
 		.admin-avatar {
 			width: 40px;
 			height: 40px;
 			border-radius: 50%;
-			background: linear-gradient(135deg, #015198 0%, #0284c7 100%);
-			color: #fff;
+			background: linear-gradient(135deg, $primary-color 0%, $primary-dark 100%);
+			color: $ctp-crust;
 			font-weight: 800;
 			display: flex;
 			align-items: center;
 			justify-content: center;
 			font-size: 16px;
-			border: 2px solid rgba(255, 255, 255, 0.2);
+			border: 2px solid rgba($ctp-blue, 0.3);
 		}
 
 		.admin-meta {
@@ -110,12 +111,12 @@
 			.admin-name {
 				font-size: 13px;
 				font-weight: 700;
-				color: #fff;
+				color: $ctp-text;
 			}
 
 			.admin-role {
 				font-size: 11px;
-				color: #10b981;
+				color: $ctp-green;
 				display: flex;
 				align-items: center;
 				gap: 4px;
@@ -125,7 +126,7 @@
 					width: 6px;
 					height: 6px;
 					border-radius: 50%;
-					background: #10b981;
+					background: $ctp-green;
 				}
 			}
 		}
@@ -142,7 +143,7 @@
 		.nav-section-title {
 			font-size: 11px;
 			font-weight: 800;
-			color: #64748b;
+			color: $ctp-overlay0;
 			text-transform: uppercase;
 			padding: 8px 12px 4px;
 			letter-spacing: 0.5px;
@@ -153,7 +154,7 @@
 			align-items: center;
 			gap: 12px;
 			padding: 12px 16px;
-			color: #94a3b8;
+			color: $ctp-subtext0;
 			text-decoration: none;
 			border-radius: $radius-md;
 			font-size: 14px;
@@ -172,24 +173,24 @@
 			}
 
 			&:hover {
-				color: #fff;
-				background: rgba(255, 255, 255, 0.05);
+				color: $ctp-text;
+				background: rgba($ctp-surface1, 0.4);
 			}
 
 			&.active {
-				color: #38bdf8;
-				background: rgba(56, 189, 248, 0.1);
+				color: $primary-color;
+				background: rgba($primary-color, 0.12);
 				font-weight: 700;
 
 				svg {
-					stroke: #38bdf8;
+					stroke: $primary-color;
 				}
 			}
 
 			.nav-count-badge {
 				margin-left: auto;
-				background: #1e293b;
-				color: #cbd5e1;
+				background: $ctp-surface0;
+				color: $ctp-subtext1;
 				font-size: 11px;
 				padding: 2px 8px;
 				border-radius: 10px;
@@ -199,7 +200,7 @@
 
 	.sidebar-footer {
 		padding: 16px 20px;
-		border-top: 1px solid rgba(255, 255, 255, 0.08);
+		border-top: 1px solid rgba($ctp-surface2, 0.4);
 		display: flex;
 		flex-direction: column;
 		gap: 10px;
@@ -209,9 +210,9 @@
 			align-items: center;
 			justify-content: center;
 			gap: 8px;
-			background: rgba(1, 81, 152, 0.3);
-			border: 1px solid rgba(1, 81, 152, 0.6);
-			color: #38bdf8;
+			background: rgba($primary-color, 0.15);
+			border: 1px solid rgba($primary-color, 0.4);
+			color: $primary-color;
 			text-decoration: none;
 			padding: 9px 14px;
 			border-radius: 8px;
@@ -220,20 +221,20 @@
 			transition: all 0.2s;
 
 			&:hover {
-				background: #015198;
-				color: #fff;
+				background: $primary-color;
+				color: $ctp-crust;
 			}
 		}
 
 		.system-status-indicator {
 			font-size: 11px;
-			color: #64748b;
+			color: $ctp-overlay0;
 			display: flex;
 			align-items: center;
 			justify-content: space-between;
 
 			.status-dot {
-				color: #10b981;
+				color: $ctp-green;
 				font-weight: 700;
 			}
 		}
@@ -255,8 +256,8 @@
 
 /* TOPBAR */
 .admin-topbar {
-	background: #0f172a;
-	border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+	background: $ctp-mantle;
+	border-bottom: 1px solid rgba($ctp-surface2, 0.4);
 	height: 68px;
 	padding: 0 28px;
 	display: flex;
@@ -276,7 +277,7 @@
 			display: none;
 			background: none;
 			border: none;
-			color: #fff;
+			color: $ctp-text;
 			font-size: 20px;
 			cursor: pointer;
 			padding: 4px;
@@ -294,12 +295,12 @@
 				margin: 0;
 				font-size: 18px;
 				font-weight: 800;
-				color: #fff;
+				color: $ctp-text;
 			}
 
 			span {
 				font-size: 12px;
-				color: #94a3b8;
+				color: $ctp-subtext0;
 			}
 		}
 	}
@@ -313,9 +314,9 @@
 			display: flex;
 			align-items: center;
 			gap: 6px;
-			background: #1e293b;
-			border: 1px solid rgba(255, 255, 255, 0.12);
-			color: #cbd5e1;
+			background: $ctp-surface0;
+			border: 1px solid rgba($ctp-surface2, 0.4);
+			color: $ctp-text;
 			padding: 8px 14px;
 			border-radius: 8px;
 			font-size: 13px;
@@ -324,19 +325,19 @@
 			transition: all 0.2s;
 
 			&:hover {
-				background: rgba(255, 255, 255, 0.1);
-				color: #fff;
+				background: $ctp-surface1;
+				color: $primary-color;
 			}
 		}
 
 		.btn-reset-data {
-			background: rgba(239, 68, 68, 0.15);
-			border: 1px solid rgba(239, 68, 68, 0.3);
-			color: #f87171;
+			background: rgba($ctp-red, 0.15);
+			border: 1px solid rgba($ctp-red, 0.3);
+			color: $ctp-red;
 
 			&:hover {
-				background: #ef4444;
-				color: #fff;
+				background: $ctp-red;
+				color: $ctp-crust;
 			}
 		}
 	}
@@ -383,9 +384,9 @@
 	margin-bottom: 28px;
 
 	.kpi-card {
-		background: #0f172a;
+		background: $ctp-mantle;
 		border-radius: $radius-lg;
-		border: 1px solid rgba(255, 255, 255, 0.08);
+		border: 1px solid rgba($ctp-surface2, 0.4);
 		padding: 22px;
 		display: flex;
 		flex-direction: column;
@@ -397,7 +398,7 @@
 
 		&:hover {
 			transform: translateY(-2px);
-			border-color: rgba(56, 189, 248, 0.3);
+			border-color: rgba($primary-color, 0.4);
 		}
 
 		.kpi-icon-wrap {
@@ -414,19 +415,19 @@
 		.kpi-label {
 			font-size: 13px;
 			font-weight: 600;
-			color: #94a3b8;
+			color: $ctp-subtext0;
 		}
 
 		.kpi-value {
 			font-size: 26px;
 			font-weight: 900;
-			color: #fff;
+			color: $ctp-text;
 			line-height: 1.1;
 		}
 
 		.kpi-subtext {
 			font-size: 12px;
-			color: #64748b;
+			color: $ctp-overlay0;
 			display: flex;
 			align-items: center;
 			gap: 4px;
@@ -438,8 +439,8 @@
 				border-radius: 4px;
 			}
 			.trend-up {
-				background: rgba(16, 185, 129, 0.2);
-				color: #10b981;
+				background: rgba($ctp-green, 0.15);
+				color: $ctp-green;
 			}
 		}
 	}
@@ -467,8 +468,8 @@
 		display: inline-flex;
 		align-items: center;
 		gap: 8px;
-		background: #015198;
-		color: #fff;
+		background: $primary-color;
+		color: $ctp-crust;
 		border: none;
 		padding: 10px 18px;
 		border-radius: 8px;
@@ -478,9 +479,9 @@
 		transition: all 0.2s;
 
 		&:hover {
-			background: #0284c7;
+			background: $primary-dark;
 			transform: translateY(-1px);
-			box-shadow: 0 6px 16px rgba(1, 81, 152, 0.4);
+			box-shadow: 0 6px 16px rgba($primary-color, 0.4);
 		}
 	}
 
@@ -488,9 +489,9 @@
 		display: inline-flex;
 		align-items: center;
 		gap: 6px;
-		background: #1e293b;
-		color: #cbd5e1;
-		border: 1px solid rgba(255, 255, 255, 0.12);
+		background: $ctp-surface0;
+		color: $ctp-text;
+		border: 1px solid rgba($ctp-surface2, 0.4);
 		padding: 9px 16px;
 		border-radius: 8px;
 		font-size: 13px;
@@ -499,39 +500,39 @@
 		transition: all 0.2s;
 
 		&:hover {
-			background: rgba(255, 255, 255, 0.08);
-			color: #fff;
+			background: $ctp-surface1;
+			color: $primary-color;
 		}
 	}
 
 	.admin-search-input {
-		background: #1e293b;
-		border: 1px solid rgba(255, 255, 255, 0.12);
+		background: $ctp-surface0;
+		border: 1px solid rgba($ctp-surface2, 0.4);
 		border-radius: 8px;
 		padding: 9px 14px;
-		color: #fff;
+		color: $ctp-text;
 		font-size: 13px;
 		width: 240px;
 		transition: border-color 0.2s;
 
 		&:focus {
 			outline: none;
-			border-color: #38bdf8;
+			border-color: $primary-color;
 		}
 	}
 
 	.admin-filter-select {
-		background: #1e293b;
-		border: 1px solid rgba(255, 255, 255, 0.12);
+		background: $ctp-surface0;
+		border: 1px solid rgba($ctp-surface2, 0.4);
 		border-radius: 8px;
 		padding: 9px 14px;
-		color: #fff;
+		color: $ctp-text;
 		font-size: 13px;
 		cursor: pointer;
 
 		&:focus {
 			outline: none;
-			border-color: #38bdf8;
+			border-color: $primary-color;
 		}
 	}
 }
@@ -540,16 +541,16 @@
    ADMIN CARDS & TABLES
    ========================================================================== */
 .admin-card {
-	background: #0f172a;
+	background: $ctp-mantle;
 	border-radius: $radius-xl;
-	border: 1px solid rgba(255, 255, 255, 0.08);
+	border: 1px solid rgba($ctp-surface2, 0.4);
 	box-shadow: 0 12px 32px rgba(0, 0, 0, 0.3);
 	margin-bottom: 28px;
 	overflow: hidden;
 
 	.card-head {
 		padding: 20px 24px;
-		border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+		border-bottom: 1px solid rgba($ctp-surface2, 0.4);
 		display: flex;
 		align-items: center;
 		justify-content: space-between;
@@ -559,7 +560,7 @@
 		h2 {
 			font-size: 17px;
 			font-weight: 800;
-			color: #fff;
+			color: $ctp-text;
 			margin: 0;
 			display: flex;
 			align-items: center;
@@ -568,7 +569,7 @@
 
 		.card-subtitle {
 			font-size: 12px;
-			color: #94a3b8;
+			color: $ctp-subtext0;
 		}
 	}
 
@@ -590,18 +591,18 @@
 	font-size: 13px;
 
 	th {
-		background: rgba(255, 255, 255, 0.02);
+		background: rgba($ctp-surface0, 0.5);
 		padding: 14px 16px;
 		font-weight: 700;
-		color: #94a3b8;
-		border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+		color: $ctp-subtext0;
+		border-bottom: 1px solid rgba($ctp-surface2, 0.4);
 		white-space: nowrap;
 	}
 
 	td {
 		padding: 14px 16px;
-		border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-		color: #cbd5e1;
+		border-bottom: 1px solid rgba($ctp-surface2, 0.25);
+		color: $ctp-text;
 		vertical-align: middle;
 	}
 
@@ -609,7 +610,7 @@
 		transition: background 0.15s;
 
 		&:hover {
-			background: rgba(255, 255, 255, 0.03);
+			background: rgba($ctp-surface0, 0.4);
 		}
 	}
 
@@ -618,18 +619,18 @@
 		height: 68px;
 		border-radius: 6px;
 		object-fit: cover;
-		background: #1e293b;
+		background: $ctp-surface0;
 	}
 
 	.cell-title {
 		font-weight: 700;
-		color: #fff;
+		color: $ctp-text;
 		font-size: 14px;
 	}
 
 	.cell-sub {
 		font-size: 11px;
-		color: #64748b;
+		color: $ctp-overlay0;
 	}
 }
 
@@ -640,9 +641,9 @@
 	gap: 6px;
 
 	.btn-action-icon {
-		background: #1e293b;
-		border: 1px solid rgba(255, 255, 255, 0.1);
-		color: #cbd5e1;
+		background: $ctp-surface0;
+		border: 1px solid rgba($ctp-surface2, 0.4);
+		color: $ctp-text;
 		width: 32px;
 		height: 32px;
 		border-radius: 6px;
@@ -654,14 +655,15 @@
 		font-size: 14px;
 
 		&:hover {
-			background: #015198;
-			color: #fff;
-			border-color: #015198;
+			background: $primary-color;
+			color: $ctp-crust;
+			border-color: $primary-color;
 		}
 
 		&.btn-delete:hover {
-			background: #ef4444;
-			border-color: #ef4444;
+			background: $ctp-red;
+			color: $ctp-crust;
+			border-color: $ctp-red;
 		}
 	}
 }
@@ -676,24 +678,24 @@
 	letter-spacing: 0.3px;
 
 	&.badge-nowshowing {
-		background: rgba(16, 185, 129, 0.2);
-		color: #10b981;
-		border: 1px solid rgba(16, 185, 129, 0.4);
+		background: rgba($ctp-green, 0.15);
+		color: $ctp-green;
+		border: 1px solid rgba($ctp-green, 0.4);
 	}
 	&.badge-upcoming {
-		background: rgba(251, 191, 36, 0.2);
-		color: #fbbf24;
-		border: 1px solid rgba(251, 191, 36, 0.4);
+		background: rgba($ctp-peach, 0.15);
+		color: $ctp-peach;
+		border: 1px solid rgba($ctp-peach, 0.4);
 	}
 	&.badge-special {
-		background: rgba(168, 85, 247, 0.2);
-		color: #c084fc;
-		border: 1px solid rgba(168, 85, 247, 0.4);
+		background: rgba($ctp-mauve, 0.15);
+		color: $ctp-mauve;
+		border: 1px solid rgba($ctp-mauve, 0.4);
 	}
 	&.badge-age {
-		background: rgba(239, 68, 68, 0.2);
-		color: #f87171;
-		border: 1px solid rgba(239, 68, 68, 0.4);
+		background: rgba($ctp-red, 0.15);
+		color: $ctp-red;
+		border: 1px solid rgba($ctp-red, 0.4);
 	}
 }
 
@@ -706,9 +708,9 @@
 	gap: 20px;
 
 	.admin-concession-card {
-		background: #1e293b;
+		background: $ctp-surface0;
 		border-radius: $radius-lg;
-		border: 1px solid rgba(255, 255, 255, 0.08);
+		border: 1px solid rgba($ctp-surface2, 0.4);
 		padding: 16px;
 		display: flex;
 		gap: 16px;
@@ -717,7 +719,7 @@
 
 		&:hover {
 			transform: translateY(-2px);
-			border-color: rgba(56, 189, 248, 0.3);
+			border-color: rgba($primary-color, 0.4);
 		}
 
 		.cc-img-wrap {
@@ -725,7 +727,7 @@
 			height: 80px;
 			border-radius: 8px;
 			overflow: hidden;
-			background: #0f172a;
+			background: $ctp-mantle;
 			flex-shrink: 0;
 
 			img {
@@ -745,13 +747,13 @@
 			.cc-name {
 				font-size: 15px;
 				font-weight: 800;
-				color: #fff;
+				color: $ctp-text;
 				margin: 0;
 			}
 
 			.cc-desc {
 				font-size: 11px;
-				color: #94a3b8;
+				color: $ctp-subtext0;
 				line-height: 1.4;
 				display: -webkit-box;
 				-webkit-line-clamp: 2;
@@ -768,12 +770,12 @@
 				.cc-price {
 					font-size: 16px;
 					font-weight: 900;
-					color: #fbbf24;
+					color: $ctp-peach;
 				}
 
 				.cc-orig-price {
 					font-size: 12px;
-					color: #64748b;
+					color: $ctp-overlay0;
 					text-decoration: line-through;
 				}
 			}
@@ -796,10 +798,10 @@
 	gap: 16px;
 	margin-bottom: 24px;
 	flex-wrap: wrap;
-	background: #0f172a;
+	background: $ctp-mantle;
 	padding: 18px 24px;
 	border-radius: 12px;
-	border: 1px solid rgba(255, 255, 255, 0.08);
+	border: 1px solid rgba($ctp-surface2, 0.4);
 	align-items: center;
 
 	.filter-item {
@@ -810,14 +812,14 @@
 		label {
 			font-size: 12px;
 			font-weight: 700;
-			color: #94a3b8;
+			color: $ctp-subtext0;
 		}
 
 		select,
 		input {
-			background: #1e293b;
-			border: 1px solid rgba(255, 255, 255, 0.15);
-			color: #fff;
+			background: $ctp-surface0;
+			border: 1px solid rgba($ctp-surface2, 0.4);
+			color: $ctp-text;
 			padding: 8px 14px;
 			border-radius: 8px;
 			font-size: 13px;
@@ -826,9 +828,9 @@
 }
 
 .movie-showtime-block {
-	background: #1e293b;
+	background: $ctp-surface0;
 	border-radius: 12px;
-	border: 1px solid rgba(255, 255, 255, 0.08);
+	border: 1px solid rgba($ctp-surface2, 0.4);
 	padding: 20px;
 	margin-bottom: 18px;
 
@@ -837,7 +839,7 @@
 		align-items: center;
 		justify-content: space-between;
 		padding-bottom: 14px;
-		border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+		border-bottom: 1px solid rgba($ctp-surface2, 0.4);
 		margin-bottom: 16px;
 		flex-wrap: wrap;
 		gap: 12px;
@@ -845,7 +847,7 @@
 		.ms-movie-title {
 			font-size: 16px;
 			font-weight: 800;
-			color: #fff;
+			color: $ctp-text;
 			display: flex;
 			align-items: center;
 			gap: 10px;
@@ -853,8 +855,8 @@
 
 		.ms-format-tag {
 			font-size: 12px;
-			color: #38bdf8;
-			background: rgba(56, 189, 248, 0.15);
+			color: $primary-color;
+			background: rgba($primary-color, 0.15);
 			padding: 3px 8px;
 			border-radius: 4px;
 			font-weight: 700;
@@ -867,8 +869,8 @@
 		flex-wrap: wrap;
 
 		.slot-chip {
-			background: #0f172a;
-			border: 1px solid rgba(255, 255, 255, 0.12);
+			background: $ctp-mantle;
+			border: 1px solid rgba($ctp-surface2, 0.4);
 			border-radius: 8px;
 			padding: 10px 14px;
 			display: flex;
@@ -877,23 +879,23 @@
 			transition: all 0.2s;
 
 			&:hover {
-				border-color: #0284c7;
+				border-color: $primary-color;
 			}
 
 			.slot-time {
 				font-size: 16px;
 				font-weight: 900;
-				color: #fff;
+				color: $ctp-text;
 			}
 
 			.slot-meta {
 				display: flex;
 				flex-direction: column;
 				font-size: 11px;
-				color: #94a3b8;
+				color: $ctp-subtext0;
 
 				.slot-price {
-					color: #fbbf24;
+					color: $ctp-peach;
 					font-weight: 700;
 				}
 			}
@@ -905,16 +907,16 @@
 				button {
 					background: none;
 					border: none;
-					color: #64748b;
+					color: $ctp-overlay0;
 					cursor: pointer;
 					padding: 2px 4px;
 					font-size: 12px;
 
 					&:hover {
-						color: #fff;
+						color: $ctp-text;
 					}
 					&.btn-del-slot:hover {
-						color: #ef4444;
+						color: $ctp-red;
 					}
 				}
 			}
@@ -945,9 +947,9 @@
 	}
 
 	.admin-modal-card {
-		background: #0f172a;
+		background: $ctp-mantle;
 		border-radius: $radius-xl;
-		border: 1px solid rgba(255, 255, 255, 0.12);
+		border: 1px solid rgba($ctp-surface2, 0.4);
 		box-shadow: 0 24px 60px rgba(0, 0, 0, 0.6);
 		width: 100%;
 		max-width: 680px;
@@ -959,7 +961,7 @@
 
 		.modal-card-header {
 			padding: 20px 24px;
-			border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+			border-bottom: 1px solid rgba($ctp-surface2, 0.4);
 			display: flex;
 			align-items: center;
 			justify-content: space-between;
@@ -967,21 +969,21 @@
 			h3 {
 				font-size: 18px;
 				font-weight: 800;
-				color: #fff;
+				color: $ctp-text;
 				margin: 0;
 			}
 
 			.btn-close-modal {
 				background: none;
 				border: none;
-				color: #94a3b8;
+				color: $ctp-subtext0;
 				font-size: 20px;
 				cursor: pointer;
 				padding: 4px;
 				line-height: 1;
 
 				&:hover {
-					color: #fff;
+					color: $ctp-text;
 				}
 			}
 		}
@@ -994,7 +996,7 @@
 
 		.modal-card-footer {
 			padding: 16px 24px;
-			border-top: 1px solid rgba(255, 255, 255, 0.08);
+			border-top: 1px solid rgba($ctp-surface2, 0.4);
 			display: flex;
 			align-items: center;
 			justify-content: flex-end;
@@ -1036,24 +1038,24 @@
 		label {
 			font-size: 13px;
 			font-weight: 700;
-			color: #cbd5e1;
+			color: $ctp-text;
 		}
 
 		input,
 		select,
 		textarea {
-			background: #1e293b;
-			border: 1px solid rgba(255, 255, 255, 0.12);
+			background: $ctp-surface0;
+			border: 1px solid rgba($ctp-surface2, 0.4);
 			border-radius: 8px;
 			padding: 10px 14px;
-			color: #fff;
+			color: $ctp-text;
 			font-size: 13px;
 			font-family: inherit;
 			transition: border-color 0.2s;
 
 			&:focus {
 				outline: none;
-				border-color: #38bdf8;
+				border-color: $primary-color;
 			}
 		}
 
@@ -1074,19 +1076,19 @@
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	background: radial-gradient(circle at 50% 25%, #1e293b 0%, #0b1120 100%);
+	background: radial-gradient(circle at 50% 25%, $ctp-surface0 0%, $ctp-crust 100%);
 	padding: 24px;
 	overflow-y: auto;
 
 	.auth-gate-card {
 		width: 100%;
 		max-width: 480px;
-		background: rgba(15, 23, 42, 0.92);
+		background: rgba($ctp-mantle, 0.95);
 		backdrop-filter: blur(20px);
-		border: 1px solid rgba(255, 255, 255, 0.12);
+		border: 1px solid rgba($ctp-surface2, 0.4);
 		border-radius: 20px;
 		padding: 36px 32px;
-		box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7), 0 0 40px rgba(56, 189, 248, 0.08);
+		box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7), 0 0 40px rgba($primary-color, 0.08);
 		display: flex;
 		flex-direction: column;
 		align-items: center;
@@ -1113,15 +1115,15 @@
 			.brand-title {
 				font-size: 16px;
 				font-weight: 800;
-				color: #fff;
+				color: $ctp-text;
 				letter-spacing: -0.3px;
 			}
 
 			.brand-badge {
 				font-size: 9px;
 				font-weight: 800;
-				color: #38bdf8;
-				background: rgba(56, 189, 248, 0.15);
+				color: $primary-color;
+				background: rgba($primary-color, 0.15);
 				padding: 2px 6px;
 				border-radius: 4px;
 				letter-spacing: 0.5px;
@@ -1133,38 +1135,38 @@
 		width: 68px;
 		height: 68px;
 		border-radius: 50%;
-		background: linear-gradient(135deg, rgba(2, 132, 199, 0.25), rgba(56, 189, 248, 0.1));
-		border: 1px solid rgba(56, 189, 248, 0.3);
+		background: linear-gradient(135deg, rgba($primary-dark, 0.25), rgba($primary-color, 0.1));
+		border: 1px solid rgba($primary-color, 0.3);
 		display: flex;
 		align-items: center;
 		justify-content: center;
 		font-size: 32px;
 		margin-bottom: 16px;
-		box-shadow: 0 0 24px rgba(56, 189, 248, 0.2);
+		box-shadow: 0 0 24px rgba($primary-color, 0.2);
 	}
 
 	.auth-gate-title {
 		font-size: 22px;
 		font-weight: 800;
-		color: #fff;
+		color: $ctp-text;
 		margin: 0 0 8px;
 	}
 
 	.auth-gate-desc {
 		font-size: 13px;
-		color: #94a3b8;
+		color: $ctp-subtext0;
 		line-height: 1.5;
 		margin: 0 0 20px;
 
 		strong {
-			color: #38bdf8;
+			color: $primary-color;
 		}
 	}
 
 	.auth-gate-alert {
 		width: 100%;
-		background: rgba(245, 158, 11, 0.12);
-		border: 1px solid rgba(245, 158, 11, 0.3);
+		background: rgba($ctp-peach, 0.12);
+		border: 1px solid rgba($ctp-peach, 0.3);
 		border-radius: 10px;
 		padding: 12px 14px;
 		margin-bottom: 18px;
@@ -1180,11 +1182,11 @@
 
 		.alert-text {
 			font-size: 12px;
-			color: #fbbf24;
+			color: $ctp-peach;
 			line-height: 1.4;
 
 			strong {
-				color: #fff;
+				color: $ctp-text;
 			}
 		}
 	}
@@ -1204,10 +1206,10 @@
 			label {
 				font-size: 12px;
 				font-weight: 700;
-				color: #cbd5e1;
+				color: $ctp-text;
 
 				.req {
-					color: #ef4444;
+					color: $ctp-red;
 				}
 			}
 
@@ -1220,26 +1222,26 @@
 					position: absolute;
 					left: 12px;
 					font-size: 15px;
-					color: #64748b;
+					color: $ctp-overlay0;
 					pointer-events: none;
 				}
 
 				input {
 					width: 100%;
-					background: #1e293b;
-					border: 1px solid rgba(255, 255, 255, 0.14);
+					background: $ctp-surface0;
+					border: 1px solid rgba($ctp-surface2, 0.4);
 					border-radius: 10px;
 					padding: 11px 40px 11px 38px;
-					color: #fff;
+					color: $ctp-text;
 					font-size: 14px;
 					font-family: inherit;
 					transition: all 0.2s;
 
 					&:focus {
 						outline: none;
-						border-color: #38bdf8;
-						box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.2);
-						background: #0f172a;
+						border-color: $primary-color;
+						box-shadow: 0 0 0 3px rgba($primary-color, 0.2);
+						background: $ctp-mantle;
 					}
 				}
 
@@ -1250,23 +1252,23 @@
 					border: none;
 					cursor: pointer;
 					font-size: 16px;
-					color: #94a3b8;
+					color: $ctp-subtext0;
 					padding: 0;
 					display: flex;
 					align-items: center;
 					justify-content: center;
 
 					&:hover {
-						color: #fff;
+						color: $ctp-text;
 					}
 				}
 			}
 		}
 
 		.auth-gate-error {
-			background: rgba(239, 68, 68, 0.15);
-			border: 1px solid rgba(239, 68, 68, 0.4);
-			color: #fca5a5;
+			background: rgba($ctp-red, 0.15);
+			border: 1px solid rgba($ctp-red, 0.4);
+			color: $ctp-red;
 			border-radius: 8px;
 			padding: 10px 12px;
 			font-size: 12px;
@@ -1276,8 +1278,8 @@
 
 		.btn-auth-gate-submit {
 			margin-top: 4px;
-			background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
-			color: #fff;
+			background: linear-gradient(135deg, $primary-color 0%, $primary-dark 100%);
+			color: $ctp-crust;
 			border: none;
 			border-radius: 10px;
 			padding: 12px 18px;
@@ -1289,12 +1291,12 @@
 			justify-content: center;
 			gap: 8px;
 			transition: all 0.2s;
-			box-shadow: 0 4px 14px rgba(2, 132, 199, 0.35);
+			box-shadow: 0 4px 14px rgba($primary-color, 0.35);
 
 			&:hover {
-				background: linear-gradient(135deg, #0369a1 0%, #0284c7 100%);
+				background: linear-gradient(135deg, $primary-dark 0%, $primary-color 100%);
 				transform: translateY(-1px);
-				box-shadow: 0 6px 20px rgba(2, 132, 199, 0.5);
+				box-shadow: 0 6px 20px rgba($primary-color, 0.5);
 			}
 
 			&:active {
@@ -1307,31 +1309,31 @@
 		width: 100%;
 		margin-top: 24px;
 		padding-top: 18px;
-		border-top: 1px solid rgba(255, 255, 255, 0.08);
+		border-top: 1px solid rgba($ctp-surface2, 0.4);
 		display: flex;
 		flex-direction: column;
 		align-items: center;
 		gap: 12px;
 
 		.btn-back-home {
-			color: #94a3b8;
+			color: $ctp-subtext0;
 			font-size: 13px;
 			text-decoration: none;
 			transition: color 0.2s;
 
 			&:hover {
-				color: #fff;
+				color: $primary-color;
 				text-decoration: underline;
 			}
 		}
 
 		.auth-hint {
 			font-size: 12px;
-			color: #64748b;
+			color: $ctp-overlay0;
 
 			code {
-				background: rgba(255, 255, 255, 0.08);
-				color: #38bdf8;
+				background: rgba($primary-color, 0.1);
+				color: $primary-color;
 				padding: 2px 6px;
 				border-radius: 4px;
 				font-size: 11px;
@@ -1352,14 +1354,14 @@
 }
 
 .btn-logout-admin {
-	background: rgba(239, 68, 68, 0.15) !important;
-	color: #f87171 !important;
-	border: 1px solid rgba(239, 68, 68, 0.3) !important;
+	background: rgba($ctp-red, 0.15) !important;
+	color: $ctp-red !important;
+	border: 1px solid rgba($ctp-red, 0.3) !important;
 
 	&:hover {
-		background: rgba(239, 68, 68, 0.25) !important;
-		color: #fff !important;
-		border-color: rgba(239, 68, 68, 0.5) !important;
+		background: rgba($ctp-red, 0.25) !important;
+		color: $ctp-crust !important;
+		border-color: rgba($ctp-red, 0.5) !important;
 	}
 }
 
@@ -1370,9 +1372,9 @@
 	align-items: center;
 	justify-content: center;
 	gap: 8px;
-	background: rgba(239, 68, 68, 0.12);
-	color: #f87171;
-	border: 1px solid rgba(239, 68, 68, 0.25);
+	background: rgba($ctp-red, 0.12);
+	color: $ctp-red;
+	border: 1px solid rgba($ctp-red, 0.25);
 	padding: 10px 14px;
 	border-radius: 8px;
 	cursor: pointer;
@@ -1381,10 +1383,8 @@
 	transition: all 0.2s;
 
 	&:hover {
-		background: rgba(239, 68, 68, 0.22);
-		color: #fff;
-		border-color: rgba(239, 68, 68, 0.45);
+		background: rgba($ctp-red, 0.22);
+		color: $ctp-crust;
+		border-color: rgba($ctp-red, 0.45);
 	}
 }
-
-
