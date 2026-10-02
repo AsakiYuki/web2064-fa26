@@ -1,5 +1,6 @@
 /* ============================================
    BETA CINEMAS - AUTH MODAL (LOGIN / REGISTER)
+   CATPPUCCIN MOCHA THEMED
    ============================================ */
 @use 'sass:color';
 @use 'variables' as *;
@@ -7,18 +8,18 @@
 .auth-modal-content {
 	max-width: 480px;
 	border-radius: $radius-xl;
-	background: #0f172a;
-	color: #f8fafc;
+	background: $ctp-mantle;
+	color: $ctp-text;
 	overflow: hidden;
 	box-shadow: 0 25px 60px rgba(0, 0, 0, 0.7);
-	border: 1px solid rgba(255, 255, 255, 0.12);
+	border: 1px solid rgba($ctp-surface2, 0.5);
 	padding: 0;
 
 	.auth-header-tabs {
 		display: grid;
 		grid-template-columns: 1fr 1fr;
-		background: #1e293b;
-		border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+		background: $ctp-surface0;
+		border-bottom: 1px solid rgba($ctp-surface2, 0.4);
 
 		.auth-tab-btn {
 			background: none;
@@ -26,7 +27,7 @@
 			padding: 16px 20px;
 			font-size: 15px;
 			font-weight: 800;
-			color: #94a3b8;
+			color: $ctp-subtext0;
 			cursor: pointer;
 			transition: all 0.2s;
 			border-bottom: 3px solid transparent;
@@ -34,13 +35,13 @@
 			letter-spacing: 0.5px;
 
 			&:hover {
-				color: #fff;
+				color: $ctp-text;
 			}
 
 			&.active {
-				color: #38bdf8;
-				border-bottom-color: #38bdf8;
-				background: rgba(56, 189, 248, 0.06);
+				color: $primary-color;
+				border-bottom-color: $primary-color;
+				background: rgba($primary-color, 0.1);
 			}
 		}
 	}
@@ -55,13 +56,13 @@
 			h3 {
 				font-size: 20px;
 				font-weight: 800;
-				color: #fff;
+				color: $ctp-text;
 				margin: 0 0 6px;
 			}
 
 			p {
 				font-size: 13px;
-				color: #94a3b8;
+				color: $ctp-subtext0;
 				margin: 0;
 			}
 		}
@@ -74,9 +75,9 @@
 			margin-bottom: 20px;
 
 			.btn-social {
-				background: #1e293b;
-				border: 1px solid rgba(255, 255, 255, 0.12);
-				color: #fff;
+				background: $ctp-surface0;
+				border: 1px solid rgba($ctp-surface2, 0.4);
+				color: $ctp-text;
 				padding: 10px 14px;
 				border-radius: $radius-md;
 				font-size: 13px;
@@ -89,16 +90,16 @@
 				transition: all 0.2s;
 
 				&:hover {
-					background: #334155;
-					border-color: rgba(255, 255, 255, 0.25);
+					background: $ctp-surface1;
+					border-color: rgba($primary-color, 0.4);
 				}
 
 				&.btn-google {
-					color: #f1f5f9;
+					color: $ctp-text;
 				}
 
 				&.btn-facebook {
-					color: #60a5fa;
+					color: $primary-light;
 				}
 			}
 		}
@@ -108,7 +109,7 @@
 			align-items: center;
 			gap: 12px;
 			margin: 20px 0;
-			color: #64748b;
+			color: $ctp-overlay0;
 			font-size: 12px;
 			font-weight: 600;
 			text-transform: uppercase;
@@ -118,7 +119,7 @@
 				content: '';
 				flex: 1;
 				height: 1px;
-				background: rgba(255, 255, 255, 0.1);
+				background: rgba($ctp-surface2, 0.4);
 			}
 		}
 
@@ -137,7 +138,7 @@
 				label {
 					font-size: 13px;
 					font-weight: 700;
-					color: #cbd5e1;
+					color: $ctp-text;
 				}
 
 				.input-icon-wrap {
@@ -145,22 +146,22 @@
 
 					input {
 						width: 100%;
-						background: #1e293b;
-						border: 1.5px solid rgba(255, 255, 255, 0.12);
+						background: $ctp-surface0;
+						border: 1.5px solid rgba($ctp-surface2, 0.4);
 						border-radius: $radius-md;
 						padding: 11px 40px 11px 14px;
-						color: #fff;
+						color: $ctp-text;
 						font-size: 14px;
 						outline: none;
 						transition: all 0.2s;
 
 						&:focus {
-							border-color: #38bdf8;
-							box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.15);
+							border-color: $primary-color;
+							box-shadow: 0 0 0 3px rgba($primary-color, 0.2);
 						}
 
 						&::placeholder {
-							color: #64748b;
+							color: $ctp-overlay0;
 						}
 					}
 
@@ -171,21 +172,21 @@
 						transform: translateY(-50%);
 						background: none;
 						border: none;
-						color: #94a3b8;
+						color: $ctp-subtext0;
 						cursor: pointer;
 						font-size: 16px;
 						padding: 4px;
 						line-height: 1;
 
 						&:hover {
-							color: #fff;
+							color: $ctp-text;
 						}
 					}
 				}
 
 				.field-error-msg {
 					font-size: 11px;
-					color: #ef4444;
+					color: $ctp-red;
 					margin: 2px 0 0;
 					display: none;
 				}
@@ -196,7 +197,7 @@
 				align-items: center;
 				justify-content: space-between;
 				font-size: 13px;
-				color: #94a3b8;
+				color: $ctp-subtext0;
 
 				label {
 					display: flex;
@@ -207,7 +208,7 @@
 				}
 
 				.forgot-pwd-link {
-					color: #38bdf8;
+					color: $primary-color;
 					text-decoration: none;
 					font-weight: 600;
 
@@ -218,8 +219,8 @@
 			}
 
 			.btn-submit-auth {
-				background: linear-gradient(135deg, $primary-color 0%, #0066cc 100%);
-				color: #fff;
+				background: linear-gradient(135deg, $primary-color 0%, $primary-dark 100%);
+				color: $ctp-crust;
 				border: none;
 				padding: 13px;
 				border-radius: $radius-md;
@@ -229,13 +230,13 @@
 				text-transform: uppercase;
 				letter-spacing: 0.5px;
 				transition: all 0.2s;
-				box-shadow: 0 4px 16px rgba(1, 81, 152, 0.4);
+				box-shadow: 0 4px 16px rgba($primary-color, 0.35);
 				margin-top: 4px;
 
 				&:hover {
-					background: linear-gradient(135deg, #0066cc 0%, #015198 100%);
+					background: linear-gradient(135deg, $primary-dark 0%, $primary-color 100%);
 					transform: translateY(-1px);
-					box-shadow: 0 6px 20px rgba(1, 81, 152, 0.6);
+					box-shadow: 0 6px 20px rgba($primary-color, 0.5);
 				}
 			}
 		}
@@ -244,10 +245,10 @@
 			text-align: center;
 			margin-top: 20px;
 			font-size: 13px;
-			color: #94a3b8;
+			color: $ctp-subtext0;
 
 			a {
-				color: #38bdf8;
+				color: $primary-color;
 				font-weight: 700;
 				cursor: pointer;
 				&:hover {
