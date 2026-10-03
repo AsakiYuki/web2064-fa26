@@ -378,6 +378,258 @@
 		}
 	}
 
+	// --- Home Page Center & Banners ---
+	.home-main {
+		background: $latte-base;
+	}
+
+	.movie-tabs {
+		background: #ffffff;
+		border-bottom: 2px solid $latte-surface2;
+
+		.movie-tab {
+			color: $latte-subtext0;
+
+			&:hover {
+				color: $latte-blue;
+			}
+
+			&.active {
+				color: $latte-blue;
+				border-bottom-color: $latte-blue;
+			}
+		}
+	}
+
+	.side-banner .side-banner-card {
+		background: linear-gradient(180deg, #ffffff 0%, $latte-mantle 100%);
+		border: 1px solid $latte-surface2;
+
+		.sb-logo img {
+			filter: none;
+		}
+
+		.sb-badge {
+			background: $latte-blue;
+			color: #ffffff;
+		}
+
+		.sb-discount {
+			color: $latte-peach;
+			text-shadow: none;
+		}
+
+		.sb-sub {
+			color: $latte-subtext1;
+		}
+
+		.sb-price-old {
+			color: $latte-overlay1;
+		}
+
+		.sb-price-new {
+			color: $latte-peach;
+		}
+
+		.sb-cta {
+			background: $latte-blue;
+			color: #ffffff;
+
+			&:hover {
+				background: $latte-sapphire;
+			}
+		}
+	}
+
+	// Home Page Movie Cards (.mc)
+	.mc {
+		background: #ffffff;
+		border-color: $latte-surface2;
+		box-shadow: 0 4px 14px rgba(76, 79, 105, 0.08);
+
+		&:hover {
+			border-color: $latte-blue;
+			box-shadow: 0 10px 24px rgba(30, 102, 245, 0.15);
+		}
+
+		.mc-poster-wrap::after {
+			background: rgba(76, 79, 105, 0.35);
+		}
+
+		.mc-play-btn {
+			background: rgba(255, 255, 255, 0.92);
+			border-color: $latte-surface2;
+			box-shadow: 0 4px 16px rgba(76, 79, 105, 0.2);
+
+			svg {
+				fill: $latte-blue;
+			}
+		}
+
+		.mc-special-tag {
+			background: $latte-mantle;
+			color: $latte-text;
+			border-color: $latte-surface2;
+		}
+
+		.mc-title {
+			color: $latte-text;
+		}
+
+		.mc-meta {
+			color: $latte-subtext0;
+		}
+
+		.mc-label {
+			color: $latte-subtext1;
+		}
+
+		.mc-btn {
+			background: $latte-blue;
+			color: #ffffff;
+
+			&:hover {
+				background: $latte-sapphire;
+			}
+
+			&--outline {
+				background: transparent;
+				color: $latte-blue;
+				border-color: $latte-blue;
+
+				&:hover {
+					background: $latte-blue;
+					color: #ffffff;
+				}
+			}
+		}
+	}
+
+	.back-to-top {
+		background: $latte-blue;
+		color: #ffffff;
+
+		&:hover {
+			background: $latte-sapphire;
+		}
+	}
+
+	// --- Movies List Page ---
+	.movies-page {
+		background-color: $latte-base;
+	}
+
+	.movies-page-header {
+		background: linear-gradient(135deg, $latte-crust 0%, $latte-mantle 50%, #ffffff 100%);
+		border-bottom-color: $latte-surface2;
+
+		.page-title {
+			color: $latte-text;
+		}
+
+		.page-subtitle {
+			color: $latte-subtext0;
+		}
+
+		.breadcrumb a {
+			color: $latte-subtext1;
+
+			&:hover {
+				color: $latte-blue;
+			}
+		}
+
+		.breadcrumb .bc-current {
+			color: $latte-blue;
+		}
+	}
+
+	.movies-nav-tabs {
+		background: #ffffff;
+		border-bottom: 2px solid $latte-surface2;
+
+		.tab-btn {
+			color: $latte-subtext0;
+
+			&:hover {
+				color: $latte-blue;
+			}
+
+			&.active {
+				color: $latte-blue;
+				border-bottom-color: $latte-blue;
+
+				.tab-count {
+					background: $latte-blue;
+					color: #ffffff;
+				}
+			}
+
+			.tab-count {
+				background: $latte-mantle;
+				color: $latte-text;
+			}
+		}
+	}
+
+	.movies-filter-bar {
+		background: #ffffff;
+		border-color: $latte-surface2;
+		box-shadow: 0 4px 16px rgba(76, 79, 105, 0.08);
+
+		.search-input-wrap input {
+			background: #ffffff;
+			border-color: $latte-surface2;
+			color: $latte-text;
+
+			&::placeholder {
+				color: $latte-overlay1;
+			}
+
+			&:focus {
+				border-color: $latte-blue;
+				box-shadow: 0 0 0 3px rgba(30, 102, 245, 0.18);
+			}
+		}
+
+		.filter-select-wrap select {
+			background: #ffffff;
+			border-color: $latte-surface2;
+			color: $latte-text;
+		}
+
+		.reset-filter-btn {
+			background: $latte-mantle;
+			border-color: $latte-surface2;
+			color: $latte-text;
+
+			&:hover {
+				background: $latte-surface0;
+				color: $latte-blue;
+			}
+		}
+
+		.genre-pills-bar {
+			border-top-color: $latte-surface2;
+
+			.genre-pill {
+				background: $latte-mantle;
+				color: $latte-subtext1;
+
+				&:hover {
+					background: $latte-surface0;
+					color: $latte-text;
+				}
+
+				&.active {
+					background: $latte-blue;
+					color: #ffffff;
+					border-color: $latte-blue;
+				}
+			}
+		}
+	}
+
 	// Movie Cards & Grids
 	.movie-card {
 		background-color: #ffffff;
@@ -389,10 +641,12 @@
 			box-shadow: 0 10px 28px rgba(30, 102, 245, 0.15);
 		}
 
-		.movie-info {
+		.movie-info,
+		.movie-card-body {
 			background-color: #ffffff;
 		}
 
+		.movie-title,
 		.movie-title a {
 			color: $latte-text;
 
@@ -402,8 +656,291 @@
 		}
 
 		.movie-genre,
-		.movie-duration {
+		.movie-genre-list,
+		.movie-duration,
+		.movie-meta {
 			color: $latte-subtext0;
+		}
+
+		.btn-buy-ticket {
+			background-color: $latte-blue;
+			color: #ffffff;
+
+			&:hover {
+				background-color: $latte-sapphire;
+			}
+		}
+	}
+
+	// --- Cinemas Page ---
+	.cinemas-page {
+		background-color: $latte-base;
+		color: $latte-text;
+	}
+
+	.cinemas-hero {
+		background: linear-gradient(135deg, $latte-crust 0%, $latte-mantle 60%, $latte-base 100%);
+		border-bottom-color: $latte-surface2;
+
+		.cinemas-hero-badge {
+			background: rgba($latte-blue, 0.12);
+			border-color: rgba($latte-blue, 0.35);
+			color: $latte-blue;
+		}
+
+		.cinemas-hero-title {
+			color: $latte-text;
+		}
+
+		.cinemas-hero-desc {
+			color: $latte-subtext0;
+		}
+	}
+
+	.stat-item {
+		background: #ffffff;
+		border-color: $latte-surface2;
+
+		&:hover {
+			border-color: $latte-blue;
+		}
+
+		.stat-num {
+			color: $latte-text;
+
+			.highlight {
+				color: $latte-blue;
+			}
+		}
+
+		.stat-label {
+			color: $latte-subtext0;
+		}
+	}
+
+	.cinemas-toolbar {
+		background: #ffffff;
+		border-color: $latte-surface2;
+
+		.city-filter-chip {
+			background: $latte-mantle;
+			border-color: $latte-surface2;
+			color: $latte-text;
+
+			&:hover {
+				background: $latte-surface0;
+				color: $latte-blue;
+			}
+
+			&.active {
+				background: $latte-blue;
+				color: #ffffff;
+				border-color: $latte-blue;
+			}
+		}
+
+		.view-mode-btn {
+			background: $latte-mantle;
+			border-color: $latte-surface2;
+			color: $latte-text;
+
+			&.active {
+				background: $latte-blue;
+				color: #ffffff;
+			}
+		}
+	}
+
+	.cinemas-results-card {
+		background: #ffffff;
+		border-color: $latte-surface2;
+	}
+
+	// --- Showtimes & Schedules ---
+	.showtimes-section {
+		background: #ffffff;
+		border-color: $latte-surface2;
+		box-shadow: 0 4px 18px rgba(76, 79, 105, 0.08);
+
+		.showtimes-header {
+			border-bottom-color: $latte-surface2;
+
+			.title-wrap h2 {
+				color: $latte-blue;
+			}
+
+			.title-wrap p {
+				color: $latte-subtext0;
+			}
+		}
+
+		.st-cinema-card {
+			background: $latte-base;
+			border-color: $latte-surface2;
+
+			.st-cinema-header {
+				background: $latte-mantle;
+				border-bottom-color: $latte-surface2;
+				color: $latte-text;
+			}
+		}
+	}
+
+	// --- Pricing Page ---
+	.pricing-page {
+		background-color: $latte-base;
+	}
+
+	.pricing-section-container {
+		background: #ffffff;
+		border-color: $latte-surface2;
+		box-shadow: 0 4px 18px rgba(76, 79, 105, 0.08);
+
+		.pricing-header-wrap h2 {
+			color: $latte-blue;
+		}
+
+		.pricing-header-wrap p {
+			color: $latte-subtext0;
+		}
+
+		.format-switch-tabs .fmt-tab-btn {
+			background: $latte-mantle;
+			color: $latte-text;
+			border: 1px solid $latte-surface2;
+
+			&.active {
+				background: $latte-blue;
+				color: #ffffff;
+				border-color: $latte-blue;
+			}
+		}
+	}
+
+	// --- Movie Detail Page ---
+	.movie-detail-page {
+		background-color: $latte-base;
+		color: $latte-text;
+	}
+
+	.detail-hero {
+		background: $latte-mantle;
+
+		.hero-gradient-overlay {
+			background: linear-gradient(
+				to bottom,
+				rgba(230, 233, 239, 0.4) 0%,
+				rgba(230, 233, 239, 0.85) 60%,
+				$latte-base 100%
+			);
+		}
+
+		.breadcrumb a {
+			color: $latte-subtext1;
+
+			&:hover {
+				color: $latte-blue;
+			}
+		}
+
+		.detail-title {
+			color: $latte-text;
+		}
+
+		.detail-tagline {
+			color: $latte-subtext0;
+		}
+
+		.detail-meta-item {
+			color: $latte-subtext1;
+
+			strong {
+				color: $latte-text;
+			}
+		}
+
+		.detail-rating-score {
+			color: $latte-peach;
+		}
+	}
+
+	.detail-card {
+		background: #ffffff;
+		border-color: $latte-surface2;
+	}
+
+	.detail-tabs-bar {
+		background: #ffffff;
+		border-bottom-color: $latte-surface2;
+
+		.d-tab-btn {
+			color: $latte-subtext0;
+
+			&.active {
+				color: $latte-blue;
+				border-bottom-color: $latte-blue;
+			}
+		}
+	}
+
+	// --- Profile Page ---
+	.profile-page {
+		background-color: $latte-base;
+		color: $latte-text;
+	}
+
+	.profile-hero-banner {
+		background: linear-gradient(135deg, $latte-crust 0%, $latte-mantle 50%, #ffffff 100%);
+		border-bottom: 1px solid $latte-surface2;
+
+		.user-texts h1 {
+			color: $latte-text;
+		}
+
+		.user-texts p {
+			color: $latte-subtext0;
+		}
+
+		.user-stats-pill {
+			background: #ffffff;
+			border-color: $latte-surface2;
+
+			.points-lbl {
+				color: $latte-subtext0;
+			}
+
+			.points-val {
+				color: $latte-peach;
+			}
+		}
+	}
+
+	.profile-nav-tabs {
+		background: #ffffff;
+		border-bottom: 2px solid $latte-surface2;
+
+		.p-tab-btn {
+			color: $latte-subtext0;
+
+			&:hover {
+				color: $latte-blue;
+			}
+
+			&.active {
+				color: $latte-blue;
+				border-bottom-color: $latte-blue;
+			}
+		}
+	}
+
+	.profile-card {
+		background: #ffffff;
+		border-color: $latte-surface2;
+
+		.card-header {
+			background: $latte-mantle;
+			border-bottom-color: $latte-surface2;
+			color: $latte-text;
 		}
 	}
 
@@ -425,50 +962,10 @@
 		}
 	}
 
-	// Movie Detail Page
 	.detail-hero-section,
 	.detail-content-wrap {
 		background-color: #ffffff;
 		border-color: $latte-surface2;
-	}
-
-	.detail-title {
-		color: $latte-text;
-	}
-
-	.detail-meta-item {
-		color: $latte-subtext1;
-	}
-
-	.showtime-date-picker .date-tab,
-	.schedule-date-nav .date-nav-btn {
-		background-color: #ffffff;
-		border-color: $latte-surface2;
-		color: $latte-text;
-
-		&:hover {
-			border-color: $latte-blue;
-			color: $latte-blue;
-		}
-
-		&.active {
-			background-color: $latte-blue;
-			border-color: $latte-blue;
-			color: #ffffff;
-		}
-	}
-
-	.showtime-chip,
-	.st-item {
-		background-color: #ffffff;
-		border-color: $latte-surface2;
-		color: $latte-text;
-
-		&:hover {
-			border-color: $latte-blue;
-			color: $latte-blue;
-			background-color: rgba($latte-blue, 0.08);
-		}
 	}
 
 	// Cinema Cards & Sections
