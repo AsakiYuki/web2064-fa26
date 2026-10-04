@@ -46,6 +46,107 @@
       "city": "Hà Nội",
       "cinemaFavorite": "beta-thainguyen",
       "createdAt": "2026-01-01T00:00:00.000Z"
+    },
+    {
+      "email": "tester_1791088358464@example.com",
+      "password": "$2a$10$nJJ7W12tBtAd.0BZ1mtjcuGouW8O5.X9Y/5q6sifRoVmJI7Ee28.a",
+      "name": "Tester Automation",
+      "phone": "0994474998",
+      "rank": "Thành viên Beta Mới",
+      "points": 120,
+      "id": 1000,
+      "city": "Đà Nẵng"
+    },
+    {
+      "email": "tester@example.com",
+      "password": "$2a$10$BWJH2Vql5VNQWAQkAGjxCuR7Fg4v/ke1PQY.h/HBHCLAQoc94bc1G",
+      "name": "Tester",
+      "phone": "0919483954",
+      "rank": "Thành viên Beta Mới",
+      "points": 70,
+      "id": 1001,
+      "city": "Đà Nẵng",
+      "vouchers": [
+        {
+          "code": "BETA10",
+          "name": "Voucher Giảm 10% Tổng Đơn",
+          "points": 30,
+          "category": "voucher",
+          "discount": "Áp dụng giảm 10% cho toàn bộ hóa đơn đặt vé xem phim và combo bắp nước online.",
+          "expiry": "31/12/2026",
+          "redeemedAt": "2026-10-04T09:58:09.344Z"
+        }
+      ],
+      "pointsHistory": [
+        {
+          "id": "PH-1791107889344",
+          "title": "Đổi quà: Voucher Giảm 10% Tổng Đơn",
+          "points": -30,
+          "date": "2026-10-04T09:58:09.344Z",
+          "code": "BETA10",
+          "type": "redeem"
+        }
+      ]
+    },
+    {
+      "email": "tester_1791091196177@example.com",
+      "password": "$2a$10$ayQ0Ag0KaHXugGTRwuu29O3NgB50mKSH4OcqgUTUIcjfQAho8iBPe",
+      "name": "Tester Automation",
+      "phone": "0996897978",
+      "rank": "Thành viên Beta Mới",
+      "points": 120,
+      "id": 1002,
+      "city": "Đà Nẵng"
+    },
+    {
+      "email": "tester_1791094893992@example.com",
+      "password": "$2a$10$02138mBe0Oq5km6uGCD6fuW1ColAsqjvjQy.gEM1fd6.Eclknmt/i",
+      "name": "Tester Automation",
+      "phone": "0985875278",
+      "rank": "Thành viên Beta Mới",
+      "points": 120,
+      "id": 1003,
+      "city": "Đà Nẵng"
+    },
+    {
+      "email": "tester_1791094911005@example.com",
+      "password": "$2a$10$tBy4S9WGYWOgXd87qczN3O4fGppxVfWZ6Ko4rWXJ72.cjqkzvsNRu",
+      "name": "Tester Automation",
+      "phone": "0938164528",
+      "rank": "Thành viên Beta Mới",
+      "points": 120,
+      "id": 1004,
+      "city": "Đà Nẵng"
+    },
+    {
+      "email": "tester_1791104010838@example.com",
+      "password": "$2a$10$87MPHUUeuBU4aq05mvM4F./y0EQb9hbS/oWC4AgM8B.egX4xZdxmK",
+      "name": "Tester Automation",
+      "phone": "0949356739",
+      "rank": "Thành viên Beta Mới",
+      "points": 120,
+      "id": 1005,
+      "city": "Đà Nẵng"
+    },
+    {
+      "email": "tester_1791104429391@example.com",
+      "password": "$2a$10$9I.OK8nsKqPCGegR/MBF8.sQaEcVxlUmvWWwBE8AqqOEWKQJDkMLq",
+      "name": "Tester Automation",
+      "phone": "0983397524",
+      "rank": "Thành viên Beta Mới",
+      "points": 120,
+      "id": 1006,
+      "city": "Đà Nẵng"
+    },
+    {
+      "email": "tester_1791107888900@example.com",
+      "password": "$2a$10$X4rHtDHHTwmaTqLnPpUSbOXNbIsNQ1JnQIBPirWfYZQy4k4ZVnJZC",
+      "name": "Tester Automation",
+      "phone": "0960362877",
+      "rank": "Thành viên Beta Mới",
+      "points": 120,
+      "id": 1007,
+      "city": "Đà Nẵng"
     }
   ],
   "movies": [
@@ -2259,27 +2360,6 @@
       "userEmail": "nam.nguyen@example.com",
       "bookingDate": "2026-09-26T07:30:00.000Z",
       "status": "paid"
-    },
-    {
-      "id": "BT-718320",
-      "movieId": "bongma",
-      "movieTitle": "Bóng Ma Nhà Hát",
-      "moviePoster": "/poster/poster_bongma.jpg",
-      "cinemaId": "beta-thanhxuan",
-      "cinemaName": "Beta Thanh Xuân (Hà Nội)",
-      "screenName": "Phòng chiếu VIP 2",
-      "formatName": "2D Lồng Tiếng",
-      "date": "2026-09-20",
-      "time": "20:00",
-      "seats": "F07, F08",
-      "concessions": "Không kèm bắp nước",
-      "total": 160000,
-      "paymentMethod": "vnpay",
-      "userName": "Nguyễn Văn An",
-      "userPhone": "0912345678",
-      "userEmail": "nguyen.an@gmail.com",
-      "bookingDate": "2026-09-20T13:00:00.000Z",
-      "status": "done"
     }
   ],
   "member_rewards": [

@@ -3,7 +3,7 @@
  * Render trang chi tiết phim động dựa trên tham số ID / Slug trên URL từ LocalStorage
  * Tích hợp xem trailer video YouTube qua modal & inline player
  */
-import { setupHeaderAndFooter, openTrailerModal, getYouTubeEmbedUrl, showToast } from "./common.js"
+import { setupHeaderAndFooter, openTrailerModal, getYouTubeEmbedUrl, showToast, translateDom, getSavedLang } from "./common.js"
 import { ShowtimePicker } from "./showtimes-picker.js"
 import { initializeStorage, getMovieById, getMovieBySlug, getMoviesData } from "./storage.js"
 
@@ -64,6 +64,14 @@ document.addEventListener("DOMContentLoaded", async () => {
 			document.getElementById("movie-showtimes-container")?.scrollIntoView({ behavior: "smooth" })
 		}, 350)
 	}
+
+	// Lắng nghe sự kiện chuyển đổi ngôn ngữ
+	window.addEventListener("betaLangChange", () => {
+		if (currentMovie) {
+			renderMovieDetails(currentMovie)
+		}
+		translateDom(getSavedLang())
+	})
 })
 
 /**
@@ -255,4 +263,6 @@ function renderMovieDetails(movie) {
 				"Phim được phép phổ biến rộng rãi đến người xem ở mọi lứa tuổi (P). Thích hợp cho cả gia đình cùng thưởng thức."
 		}
 	}
+
+	translateDom(getSavedLang())
 }

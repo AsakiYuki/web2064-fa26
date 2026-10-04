@@ -207,6 +207,16 @@
 			}
 		}
 	}
+
+	.pricing-policy-card {
+		background: $ctp-surface0;
+		border: 1px solid rgba(88, 91, 112, 0.4);
+		color: $ctp-text;
+
+		strong {
+			color: $ctp-text;
+		}
+	}
 }
 
 /* ---- SECTION 2: PROMOTIONS & NEWS SECTION ---- */

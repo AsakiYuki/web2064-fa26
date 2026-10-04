@@ -1,9 +1,21 @@
-/**
- * Beta Cinemas - User Profile & Booking History Logic
- */
-import { setupHeaderAndFooter, formatCurrency, formatDateVN, showToast, getCurrentUser, saveUserSession } from "./common.js"
-import { getBookingHistory, updateUserInDatabase, VOUCHER_LIST } from "./storage.js"
+import { setupHeaderAndFooter, formatCurrency, formatDateVN, showToast, getCurrentUser, saveUserSession, translateDom, getSavedLang } from "./common.js"
+import { getBookingHistory, updateUserInDatabase, cancelBookingTicket, VOUCHER_LIST } from "./storage.js"
 import { generateQRCodeSVG } from "./qrcode.js"
+
+const DEFAULT_PROFILE = {
+	name: "Nguyễn Hoàng Nam",
+	email: "nam.nguyen@example.com",
+	phone: "0987 654 321",
+	points: 850,
+	rank: "Thành viên Beta VIP",
+	avatarText: "N",
+	birthday: "1998-05-15",
+	gender: "male",
+	cinemaFavorite: "Beta Thái Nguyên",
+}
+
+let currentHistoryFilter = "all"
+let currentSearchKeyword = ""
 
 document.addEventListener("DOMContentLoaded", async () => {
 	await setupHeaderAndFooter()
@@ -11,14 +23,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 	// 1. Load User Session from LocalStorage
 	let user = getCurrentUser()
 	if (!user) {
-		user = {
-			name: "Nguyễn Hoàng Nam",
-			email: "nam.nguyen@example.com",
-			phone: "0987 654 321",
-			points: 850,
-			rank: "Thành viên Beta VIP",
-			avatarText: "N",
-		}
+		user = { ...DEFAULT_PROFILE }
 		saveUserSession(user)
 	} else {
 		// Merge any missing fields with defaults
@@ -254,6 +259,8 @@ document.addEventListener("DOMContentLoaded", async () => {
 		if (pfBirthday && u.birthday) pfBirthday.value = u.birthday
 		if (pfGender && u.gender) pfGender.value = u.gender
 		if (pfFav && u.cinemaFavorite) pfFav.value = u.cinemaFavorite
+
+		translateDom(getSavedLang())
 	}
 
 	function renderBookingHistory() {
@@ -265,7 +272,19 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 		if (badge) badge.textContent = history.length
 
-		if (history.length === 0) {
+		let filtered = history
+		if (currentHistoryFilter !== "all") {
+			filtered = filtered.filter(t => t.status === currentHistoryFilter)
+		}
+		if (currentSearchKeyword) {
+			filtered = filtered.filter(
+				t =>
+					(t.movieTitle && t.movieTitle.toLowerCase().includes(currentSearchKeyword)) ||
+					(t.id && t.id.toLowerCase().includes(currentSearchKeyword)),
+			)
+		}
+
+		if (filtered.length === 0) {
 			container.innerHTML = `
 				<div style="text-align: center; padding: 48px 20px; color: #a6adc8;">
 					<span style="font-size: 48px; display: block; margin-bottom: 12px;">🎟️</span>
@@ -274,10 +293,11 @@ document.addEventListener("DOMContentLoaded", async () => {
 					<a href="/movies.html" style="background: #89b4fa; color: #11111b; padding: 10px 24px; border-radius: 6px; text-decoration: none; font-weight: 700; font-size: 14px; display: inline-block;">Xem Danh Sách Phim</a>
 				</div>
 			`
+			translateDom(getSavedLang())
 			return
 		}
 
-		container.innerHTML = history
+		container.innerHTML = filtered
 			.map((t, idx) => {
 				const isPaid = t.status === "paid"
 				const isCancelled = t.status === "cancelled"
@@ -344,7 +364,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 		container.querySelectorAll(".btn-view-eticket").forEach(btn => {
 			btn.addEventListener("click", () => {
 				const ticketId = btn.dataset.ticketId
-				const targetTicket = userTickets.find(t => t.id === ticketId)
+				const targetTicket = history.find(t => t.id === ticketId)
 				if (targetTicket) openProfileTicketModal(targetTicket)
 			})
 		})
@@ -360,6 +380,8 @@ document.addEventListener("DOMContentLoaded", async () => {
 				}
 			})
 		})
+
+		translateDom(getSavedLang())
 	}
 
 	function openProfileTicketModal(t) {
@@ -456,5 +478,15 @@ document.addEventListener("DOMContentLoaded", async () => {
 		document.getElementById("btn-print-profile-ticket")?.addEventListener("click", () => {
 			window.print()
 		})
+
+		translateDom(getSavedLang())
 	}
+
+	// Listen for universal language toggle events
+	window.addEventListener("betaLangChange", () => {
+		const currentUser = getCurrentUser() || user
+		renderUserInfo(currentUser)
+		renderBookingHistory()
+		translateDom(getSavedLang())
+	})
 })

@@ -2,7 +2,7 @@
  * Beta Cinemas - Movies List Page Logic
  * Render danh sách phim từ LocalStorage, tìm kiếm & bộ lọc nâng cao
  */
-import { setupHeaderAndFooter, openTrailerModal, showToast } from "./common.js"
+import { setupHeaderAndFooter, openTrailerModal, showToast, translateDom, getSavedLang } from "./common.js"
 import { getMoviesData, getGenres, filterMovies } from "./storage.js"
 
 document.addEventListener("DOMContentLoaded", async () => {
@@ -321,6 +321,8 @@ document.addEventListener("DOMContentLoaded", async () => {
 				showToast(`🔔 Đã đăng ký nhận thông báo khi có lịch chiếu cho phim "${title}"!`, "success")
 			})
 		})
+
+		translateDom(getSavedLang())
 	}
 
 	// ===== HELPER: Update result count =====
@@ -353,4 +355,9 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 	// ===== INITIAL RENDER =====
 	renderFilteredMovies()
+
+	// ===== LANGUAGE CHANGE LISTENER =====
+	window.addEventListener("betaLangChange", () => {
+		renderFilteredMovies()
+	})
 })

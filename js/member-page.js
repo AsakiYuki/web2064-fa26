@@ -10,6 +10,8 @@ import {
 	showToast,
 	getCurrentUser,
 	openAuthModal,
+	translateDom,
+	getSavedLang,
 } from "./common.js"
 
 import {
@@ -39,6 +41,12 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 	// Listen for auth state changes (login / register / logout)
 	window.addEventListener("beta_auth_changed", () => {
+		setupMemberHeroUI()
+		renderRewardsStore()
+	})
+
+	// Listen for global language switch events
+	window.addEventListener("betaLangChange", () => {
 		setupMemberHeroUI()
 		renderRewardsStore()
 	})
@@ -298,6 +306,8 @@ function renderRewardsStore() {
 			handleRedeemClick(rewardId)
 		})
 	})
+
+	translateDom(getSavedLang())
 }
 
 function setupStoreFilters() {

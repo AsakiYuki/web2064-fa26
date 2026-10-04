@@ -3,6 +3,33 @@
  * Authentication, Mega Menu, Mobile Drawer, Modals & Toast notifications
  */
 import { initializeStorage, storageGet, STORAGE_KEYS, getCinemas, getFooterData } from "./storage.js"
+import {
+	LANG_KEY,
+	TRANSLATIONS,
+	getSavedLang,
+	t,
+	translateDom,
+	updateLangButtons,
+	renderLangToggleButtonHtml,
+	applyLang,
+	toggleLang,
+	bindLangToggleEvents,
+	initI18nObserver,
+} from "./i18n.js"
+
+export {
+	LANG_KEY,
+	TRANSLATIONS,
+	getSavedLang,
+	t,
+	translateDom,
+	updateLangButtons,
+	renderLangToggleButtonHtml,
+	applyLang,
+	toggleLang,
+	bindLangToggleEvents,
+	initI18nObserver,
+}
 
 /** Format currency VND */
 export function formatCurrency(amount) {
@@ -61,6 +88,10 @@ export function showToast(message, type = "info", duration = 3500) {
 	setTimeout(removeToast, duration)
 }
 
+if (typeof window !== "undefined") {
+	window.__showToast = showToast
+}
+
 /* ==========================================================================
    THEME MANAGER (CATPPUCCIN MOCHA / CATPPUCCIN LATTE)
    ========================================================================== */
@@ -71,6 +102,45 @@ export function getSavedTheme() {
 	return localStorage.getItem(THEME_KEY) || "mocha"
 }
 
+export const THEME_SWITCH_INNER_HTML = `
+	<span class="theme-toggle-track">
+		<span class="theme-track-icon theme-track-icon-sun" aria-hidden="true">
+			<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+				<circle cx="12" cy="12" r="5" fill="currentColor"></circle>
+				<line x1="12" y1="1" x2="12" y2="3"></line>
+				<line x1="12" y1="21" x2="12" y2="23"></line>
+				<line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+				<line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+				<line x1="1" y1="12" x2="3" y2="12"></line>
+				<line x1="21" y1="12" x2="23" y2="12"></line>
+				<line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+				<line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+			</svg>
+		</span>
+		<span class="theme-track-icon theme-track-icon-moon" aria-hidden="true">
+			<svg viewBox="0 0 24 24" fill="currentColor" stroke="none">
+				<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+			</svg>
+		</span>
+		<span class="theme-toggle-thumb">
+			<svg class="theme-thumb-icon theme-thumb-moon" viewBox="0 0 24 24" fill="currentColor" stroke="none" aria-hidden="true">
+				<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+			</svg>
+			<svg class="theme-thumb-icon theme-thumb-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+				<circle cx="12" cy="12" r="5" fill="currentColor"></circle>
+				<line x1="12" y1="1" x2="12" y2="3"></line>
+				<line x1="12" y1="21" x2="12" y2="23"></line>
+				<line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+				<line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+				<line x1="1" y1="12" x2="3" y2="12"></line>
+				<line x1="21" y1="12" x2="23" y2="12"></line>
+				<line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+				<line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+			</svg>
+		</span>
+	</span>
+`
+
 export function applyTheme(theme, notify = false) {
 	const validTheme = theme === "latte" ? "latte" : "mocha"
 	if (typeof document !== "undefined") {
@@ -79,10 +149,8 @@ export function applyTheme(theme, notify = false) {
 
 		// Update all toggle buttons currently on page
 		document.querySelectorAll(".theme-toggle-btn").forEach(btn => {
-			const iconEl = btn.querySelector(".theme-toggle-icon")
-			const textEl = btn.querySelector(".theme-toggle-text")
-			if (iconEl) iconEl.textContent = validTheme === "latte" ? "☀️" : "🌙"
-			if (textEl) textEl.textContent = validTheme === "latte" ? "Sáng" : "Tối"
+			btn.setAttribute("role", "switch")
+			btn.setAttribute("aria-checked", validTheme === "mocha" ? "true" : "false")
 			btn.setAttribute(
 				"title",
 				validTheme === "latte"
@@ -90,6 +158,10 @@ export function applyTheme(theme, notify = false) {
 					: "Giao diện: Tối (Catppuccin Mocha) - Nhấp để chuyển sang Sáng (Catppuccin Latte)",
 			)
 			btn.setAttribute("aria-label", `Giao diện hiện tại: ${validTheme === "latte" ? "Sáng" : "Tối"}. Nhấp để đổi.`)
+
+			if (!btn.querySelector(".theme-toggle-track")) {
+				btn.innerHTML = THEME_SWITCH_INNER_HTML
+			}
 		})
 	}
 
@@ -123,10 +195,11 @@ export function renderThemeToggleButtonHtml(extraClasses = "") {
 	const isLatte = theme === "latte"
 	return `
 		<button type="button" class="theme-toggle-btn ${extraClasses}" id="theme-toggle-btn"
+			role="switch"
+			aria-checked="${isLatte ? "false" : "true"}"
 			title="${isLatte ? "Giao diện: Sáng (Catppuccin Latte) - Nhấp để chuyển sang Tối (Catppuccin Mocha)" : "Giao diện: Tối (Catppuccin Mocha) - Nhấp để chuyển sang Sáng (Catppuccin Latte)"}"
 			aria-label="Chuyển chế độ Giao diện Sáng / Tối">
-			<span class="theme-toggle-icon">${isLatte ? "☀️" : "🌙"}</span>
-			<span class="theme-toggle-text">${isLatte ? "Sáng" : "Tối"}</span>
+			${THEME_SWITCH_INNER_HTML}
 		</button>
 	`
 }
@@ -144,13 +217,20 @@ export function bindThemeToggleEvents() {
 	})
 }
 
-// Auto initialize theme on module execution
+// Auto initialize theme & language on module execution
 if (typeof document !== "undefined") {
 	applyTheme(getSavedTheme(), false)
-	if (document.readyState === "loading") {
-		document.addEventListener("DOMContentLoaded", () => bindThemeToggleEvents())
-	} else {
+	applyLang(getSavedLang(), false)
+	const initToggles = () => {
 		bindThemeToggleEvents()
+		bindLangToggleEvents()
+		initI18nObserver()
+		translateDom(getSavedLang())
+	}
+	if (document.readyState === "loading") {
+		document.addEventListener("DOMContentLoaded", initToggles)
+	} else {
+		initToggles()
 	}
 }
 
@@ -254,7 +334,7 @@ export function updateHeaderAccountUI() {
 			<div class="divider"></div>
 			${renderThemeToggleButtonHtml()}
 			<div class="divider"></div>
-			<span style="font-size: 18px; margin-left: 2px; cursor: pointer" title="English">🇬🇧</span>
+			${renderLangToggleButtonHtml()}
 		`
 
 		const menuBtn = document.getElementById("header-user-menu-btn")
@@ -269,13 +349,13 @@ export function updateHeaderAccountUI() {
 		})
 	} else {
 		accountContainer.innerHTML = `
-			<a href="#" id="btn-login">Đăng nhập</a>
+			<a href="#" id="btn-login">${t("login", "Đăng nhập")}</a>
 			<div class="divider"></div>
-			<a href="#" id="btn-register">Đăng ký</a>
+			<a href="#" id="btn-register">${t("register", "Đăng ký")}</a>
 			<div class="divider"></div>
 			${renderThemeToggleButtonHtml()}
 			<div class="divider"></div>
-			<span style="font-size: 18px; margin-left: 2px; cursor: pointer" title="English">🇬🇧</span>
+			${renderLangToggleButtonHtml()}
 		`
 		document.getElementById("btn-login")?.addEventListener("click", e => {
 			e.preventDefault()
@@ -288,6 +368,8 @@ export function updateHeaderAccountUI() {
 	}
 
 	bindThemeToggleEvents()
+	bindLangToggleEvents()
+	translateDom(getSavedLang())
 
 	// Đồng bộ hiển thị nút quản trị trên thanh menu chính
 	updateNavAdminVisibility()
@@ -968,8 +1050,12 @@ function updateDrawerAccountUI() {
 				<a href="/admin.html" style="background:#fab387; color:#11111b; text-align:center; padding:8px; border-radius:6px; font-size:12px; font-weight:700; text-decoration:none;">⚙️ Trang Quản Trị (Admin)</a>
 				` : ""}
 				<div class="drawer-theme-toggle-row" style="display: flex; align-items: center; justify-content: space-between; padding: 6px 10px; background: rgba(137, 180, 250, 0.08); border: 1px solid rgba(137, 180, 250, 0.2); border-radius: 6px; margin-top: 4px;">
-					<span style="font-size: 12px; font-weight: 600;">Giao diện:</span>
+					<span style="font-size: 12px; font-weight: 600;">${t("theme_label", "Giao diện:")}</span>
 					${renderThemeToggleButtonHtml()}
+				</div>
+				<div class="drawer-lang-toggle-row" style="display: flex; align-items: center; justify-content: space-between; padding: 6px 10px; background: rgba(137, 180, 250, 0.08); border: 1px solid rgba(137, 180, 250, 0.2); border-radius: 6px; margin-top: 6px;">
+					<span style="font-size: 12px; font-weight: 600;">${t("lang_label", "Ngôn ngữ:")}</span>
+					${renderLangToggleButtonHtml()}
 				</div>
 			</div>
 		`
@@ -979,11 +1065,15 @@ function updateDrawerAccountUI() {
 	} else {
 		box.innerHTML = `
 			<button type="button" class="btn-drawer-auth" id="btn-drawer-login-trigger">
-				Đăng nhập / Đăng ký thành viên
+				${t("auth_drawer_btn", "Đăng nhập / Đăng ký thành viên")}
 			</button>
 			<div class="drawer-theme-toggle-row" style="display: flex; align-items: center; justify-content: space-between; padding: 6px 10px; background: rgba(137, 180, 250, 0.08); border: 1px solid rgba(137, 180, 250, 0.2); border-radius: 6px; margin-top: 10px;">
-				<span style="font-size: 12px; font-weight: 600;">Giao diện:</span>
+				<span style="font-size: 12px; font-weight: 600;">${t("theme_label", "Giao diện:")}</span>
 				${renderThemeToggleButtonHtml()}
+			</div>
+			<div class="drawer-lang-toggle-row" style="display: flex; align-items: center; justify-content: space-between; padding: 6px 10px; background: rgba(137, 180, 250, 0.08); border: 1px solid rgba(137, 180, 250, 0.2); border-radius: 6px; margin-top: 6px;">
+				<span style="font-size: 12px; font-weight: 600;">${t("lang_label", "Ngôn ngữ:")}</span>
+				${renderLangToggleButtonHtml()}
 			</div>
 		`
 		document.getElementById("btn-drawer-login-trigger")?.addEventListener("click", () => {
@@ -995,11 +1085,90 @@ function updateDrawerAccountUI() {
 		})
 	}
 	bindThemeToggleEvents()
+	bindLangToggleEvents()
 }
 
 /* ==========================================================================
    RENDER HEADER CINEMA SELECTOR & SETUP DROPDOWN
    ========================================================================== */
+export function getStandardFooterHtml() {
+	return `
+		<div class="container">
+			<div class="footer-inner">
+				<div class="footer-brand">
+					<img src="/logo.webp" alt="Beta Cinemas" />
+					<ul class="footer-links-list">
+						<li><a href="#" id="footer-recruit">Tuyển dụng</a></li>
+						<li><a href="#" id="footer-about">Giới thiệu</a></li>
+						<li><a href="#" id="footer-contact">Liên hệ</a></li>
+						<li><a href="#" id="footer-faq">F.A.Q</a></li>
+						<li><a href="#" id="footer-social">Hoạt động xã hội</a></li>
+						<li><a href="#" id="footer-tos">Điều khoản sử dụng</a></li>
+						<li><a href="#" id="footer-payment-policy">Chính sách thanh toán, đổi trả - hoàn vé</a></li>
+						<li><a href="#" id="footer-ads">Liên hệ quảng cáo</a></li>
+						<li><a href="#" id="footer-privacy">Điều khoản bảo mật</a></li>
+						<li><a href="#" id="footer-guide">Hướng dẫn đặt vé online</a></li>
+					</ul>
+					<div class="footer-download-title">Tải Ứng Dụng</div>
+					<ul class="footer-links-list">
+						<li><a href="#" id="footer-ios">Beta Cinemas cho iOS</a></li>
+						<li><a href="#" id="footer-android">Beta Cinemas cho Android</a></li>
+					</ul>
+				</div>
+				<div class="footer-cinema-cluster">
+					<h3>Cụm Rạp Beta</h3>
+					<ul class="cinema-cluster-list" id="cinema-cluster-ul">
+						<!-- Dynamically populated from getFooterData -->
+					</ul>
+				</div>
+				<div class="footer-contact">
+					<h3>Liên Hệ</h3>
+					<p class="company-name">CÔNG TY CỔ PHẦN BETA MEDIA</p>
+					<p>
+						Giấy chứng nhận ĐKKD số: 0106633482 - Đăng ký lần đầu ngày 08/09/2014 tại Sở Kế hoạch và Đầu tư
+						Thành phố Hà Nội
+					</p>
+					<p>Địa chỉ: Tầng 3, số 595, đường Giải Phóng, Phường Tương Mai, Hà Nội</p>
+					<div class="contact-group">
+						<p class="contact-group-title">LIÊN HỆ CHĂM SÓC KHÁCH HÀNG:</p>
+						<p>Hotline: <strong>1900 636807</strong></p>
+						<p>
+							Email:
+							<a href="mailto:mkt@betacinemas.vn" style="color: rgba(255, 255, 255, 0.82)">mkt@betacinemas.vn</a>
+						</p>
+					</div>
+					<div class="contact-group">
+						<p class="contact-group-title">LIÊN HỆ QUẢNG CÁO:</p>
+						<p>Hotline: <strong>0934 632 682</strong></p>
+						<p>
+							Email: <a href="mailto:ad@betagroup.vn" style="color: rgba(255, 255, 255, 0.82)">ad@betagroup.vn</a>
+						</p>
+					</div>
+					<p class="contact-group-title" style="margin-top: 16px">KẾT NỐI VỚI CHÚNG TÔI</p>
+					<div class="social-icons">
+						<a href="#" class="social-icon" id="social-fb" aria-label="Facebook">f</a>
+						<a href="#" class="social-icon" id="social-yt" aria-label="YouTube">▶</a>
+						<a href="#" class="social-icon" id="social-tt" aria-label="TikTok">♪</a>
+						<a href="#" class="social-icon" id="social-ig" aria-label="Instagram">📷</a>
+					</div>
+					<div class="bct-badge">
+						<span style="font-size: 28px">✅</span>
+						<div>
+							<p class="bct-badge-text">ĐÃ THÔNG BÁO</p>
+							<p class="bct-badge-sub">BỘ CÔNG THƯƠNG</p>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="footer-bottom">
+			<div class="container">
+				<p>© 2026 Beta Cinemas. All rights reserved. Thiết kế bởi Beta Media.</p>
+			</div>
+		</div>
+	`
+}
+
 export async function setupHeaderAndFooter() {
 	try {
 		// Khởi tạo dữ liệu mẫu vào LocalStorage khi chạy lần đầu
@@ -1008,6 +1177,12 @@ export async function setupHeaderAndFooter() {
 		// Đọc dữ liệu từ LocalStorage thay vì fetch trực tiếp
 		const cinemas = getCinemas()
 		const footerCinemas = getFooterData()
+
+		// Auto-populate empty footer containers
+		const footerContainer = document.getElementById("footer-container")
+		if (footerContainer && !footerContainer.firstElementChild) {
+			footerContainer.innerHTML = getStandardFooterHtml()
+		}
 
 		// Cinema Dropdown
 		const ul = document.getElementById("cinema-dropdown-ul")
@@ -1050,6 +1225,9 @@ export async function setupHeaderAndFooter() {
 		if (navNews) navNews.href = "/news.html"
 		if (navMember) navMember.href = "/member.html"
 		if (navCinemas) navCinemas.href = "/cinemas.html"
+
+		// Final pass to ensure all injected header/footer elements match current language
+		translateDom(getSavedLang())
 	} catch (err) {
 		console.warn("Could not load header/footer data:", err)
 	}

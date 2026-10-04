@@ -2,7 +2,7 @@
  * Beta Cinemas - Homepage Dynamic Rendering & Interactivity
  * Modular data loading via domain-specific JSON files.
  */
-import { openTrailerModal, setupHeaderAndFooter } from "./common.js"
+import { openTrailerModal, setupHeaderAndFooter, translateDom, getSavedLang } from "./common.js"
 import { initializeStorage, getMoviesData, getBanners } from "./storage.js"
 
 document.addEventListener("DOMContentLoaded", async () => {
@@ -30,9 +30,15 @@ document.addEventListener("DOMContentLoaded", async () => {
 		initHeroSliderEvents()
 		initMovieTabEvents()
 		initBackToTopEvent()
+
+		translateDom(getSavedLang())
 	} catch (err) {
 		console.error("Failed to load homepage data:", err)
 	}
+
+	window.addEventListener("betaLangChange", () => {
+		translateDom(getSavedLang())
+	})
 })
 
 /* ==========================================================================

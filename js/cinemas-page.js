@@ -4,7 +4,7 @@
  * modal details preview, and default cinema setting.
  */
 
-import { setupHeaderAndFooter, showToast } from "./common.js"
+import { setupHeaderAndFooter, showToast, translateDom, getSavedLang } from "./common.js"
 import { apiGetCinemas } from "./api.js"
 import { getCinemas, getCurrentCinemaId, setCurrentCinemaId } from "./storage.js"
 
@@ -23,6 +23,12 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 	// Listen for global cinema switch events
 	window.addEventListener("cinemaChanged", e => {
+		updateCurrentCinemaBanner()
+		renderCinemas()
+	})
+
+	// Listen for global language switch events
+	window.addEventListener("betaLangChange", () => {
 		updateCurrentCinemaBanner()
 		renderCinemas()
 	})
@@ -290,6 +296,7 @@ function renderCinemas() {
 		.join("")
 
 	bindCardEvents()
+	translateDom(getSavedLang())
 }
 
 /**

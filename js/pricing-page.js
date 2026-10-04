@@ -1,7 +1,7 @@
 /**
  * Beta Cinemas - Ticket Pricing Logic (pricing.html)
  */
-import { setupHeaderAndFooter, formatCurrency } from "./common.js"
+import { setupHeaderAndFooter, formatCurrency, translateDom, getSavedLang } from "./common.js"
 import { getTicketPricing } from "./storage.js"
 
 document.addEventListener("DOMContentLoaded", async () => {
@@ -63,6 +63,9 @@ document.addEventListener("DOMContentLoaded", async () => {
 		`
 			)
 			.join("")
+
+		// Translate newly rendered rows according to current active language
+		translateDom(getSavedLang())
 	}
 
 	renderPricingTable(currentFormat)
@@ -81,5 +84,10 @@ document.addEventListener("DOMContentLoaded", async () => {
 			currentFormat = btn.dataset.format
 			renderPricingTable(currentFormat)
 		})
+	})
+
+	// Listen for universal language toggle events
+	window.addEventListener("betaLangChange", () => {
+		renderPricingTable(currentFormat)
 	})
 })

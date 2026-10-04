@@ -10,7 +10,8 @@
 	<link rel="stylesheet" href="/style/main.scss" />
 	<link rel="preconnect" href="https://fonts.googleapis.com" />
 	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-	<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+	<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"
+		rel="stylesheet" />
 	<script>
 		(function () {
 			const t = localStorage.getItem("beta_theme") || "mocha";
@@ -29,12 +30,56 @@
 				<div class="divider"></div>
 				<a href="#" id="btn-register">Đăng ký</a>
 				<div class="divider"></div>
-				<button type="button" class="theme-toggle-btn" id="theme-toggle-btn" aria-label="Chuyển chế độ Giao diện Sáng / Tối" title="Chuyển chế độ Giao diện Sáng (Latte) / Tối (Mocha)">
-					<span class="theme-toggle-icon">🌙</span>
-					<span class="theme-toggle-text">Tối</span>
+				<button type="button" class="theme-toggle-btn" id="theme-toggle-btn" role="switch" aria-checked="true"
+					aria-label="Chuyển chế độ Giao diện Sáng / Tối"
+					title="Chuyển chế độ Giao diện Sáng (Latte) / Tối (Mocha)">
+					<span class="theme-toggle-track">
+						<span class="theme-track-icon theme-track-icon-sun" aria-hidden="true">
+							<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+								stroke-linecap="round" stroke-linejoin="round">
+								<circle cx="12" cy="12" r="5" fill="currentColor"></circle>
+								<line x1="12" y1="1" x2="12" y2="3"></line>
+								<line x1="12" y1="21" x2="12" y2="23"></line>
+								<line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+								<line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+								<line x1="1" y1="12" x2="3" y2="12"></line>
+								<line x1="21" y1="12" x2="23" y2="12"></line>
+								<line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+								<line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+							</svg>
+						</span>
+						<span class="theme-track-icon theme-track-icon-moon" aria-hidden="true">
+							<svg viewBox="0 0 24 24" fill="currentColor" stroke="none">
+								<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+							</svg>
+						</span>
+						<span class="theme-toggle-thumb">
+							<svg class="theme-thumb-icon theme-thumb-moon" viewBox="0 0 24 24" fill="currentColor"
+								stroke="none" aria-hidden="true">
+								<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+							</svg>
+							<svg class="theme-thumb-icon theme-thumb-sun" viewBox="0 0 24 24" fill="none"
+								stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"
+								aria-hidden="true">
+								<circle cx="12" cy="12" r="5" fill="currentColor"></circle>
+								<line x1="12" y1="1" x2="12" y2="3"></line>
+								<line x1="12" y1="21" x2="12" y2="23"></line>
+								<line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+								<line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+								<line x1="1" y1="12" x2="3" y2="12"></line>
+								<line x1="21" y1="12" x2="23" y2="12"></line>
+								<line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+								<line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+							</svg>
+						</span>
+					</span>
 				</button>
 				<div class="divider"></div>
-				<span style="font-size: 18px; margin-left: 2px; cursor: pointer" title="English">🇬🇧</span>
+				<button type="button" class="lang-toggle-btn" id="lang-toggle-btn" title="Chuyển sang English"
+					aria-label="Chuyển sang English">
+					<span class="lang-flag">🇬🇧</span>
+					<span class="lang-code">EN</span>
+				</button>
 			</div>
 		</div>
 		<div class="header-navigator">
@@ -43,7 +88,8 @@
 					<img src="/logo.webp" alt="Beta Cinemas Logo" />
 				</a>
 				<div class="cinema-selector-wrap" id="cinema-selector-wrap">
-					<button class="cinema-selector" id="cinema-selector-btn" aria-haspopup="listbox" aria-expanded="false">
+					<button class="cinema-selector" id="cinema-selector-btn" aria-haspopup="listbox"
+						aria-expanded="false">
 						<span class="cinema-selector-label" id="cinema-selector-label">Beta Thái Nguyên</span>
 						<svg class="cinema-selector-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor"
 							stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
@@ -62,14 +108,15 @@
 					<a href="/news.html" id="nav-news">Tin Mới Và Ưu Đãi</a>
 					<a href="#" id="nav-franchise">Nhượng Quyền</a>
 					<a href="/member.html" id="nav-member">Thành Viên</a>
-					<a href="/admin.html" id="nav-admin" class="admin-only" style="display: none; color: #fab387; font-weight: 700;">⚙️ Quản Trị</a>
+					<a href="/admin.html" id="nav-admin" class="admin-only"
+						style="display: none; color: #fab387; font-weight: 700;">⚙️ Quản Trị</a>
 				</nav>
 			</div>
 		</div>
 	</header>
 
 	<!-- ===================== BREADCRUMB BAR ===================== -->
-	<div class="booking-header-bar" style="background: #181825; padding: 14px 0;">
+	<div class="booking-header-bar" style="padding: 14px 0;">
 		<div class="container">
 			<nav class="booking-breadcrumb" aria-label="Breadcrumb">
 				<a href="/">Trang chủ</a>
@@ -85,7 +132,8 @@
 		<section class="pricing-section-container" id="ticket-pricing">
 			<div class="pricing-header-wrap">
 				<h2>Bảng Giá Vé Xem Phim Hệ Thống Beta Cinemas</h2>
-				<p>Giá vé tiêu chuẩn áp dụng tại các cụm rạp Beta Cinemas trên toàn quốc. Đã bao gồm thuế GTGT. Áp dụng cho các định dạng chiếu 2D, 3D và IMAX Laser hiện đại.</p>
+				<p>Giá vé tiêu chuẩn áp dụng tại các cụm rạp Beta Cinemas trên toàn quốc. Đã bao gồm thuế GTGT. Áp dụng
+					cho các định dạng chiếu 2D, 3D và IMAX Laser hiện đại.</p>
 			</div>
 
 			<!-- Format Switch Tabs -->
@@ -123,21 +171,24 @@
 				<div class="discount-card">
 					<div class="dc-icon">🎓</div>
 					<h3 class="dc-title">Học Sinh - Sinh Viên & U22</h3>
-					<p class="dc-desc">Đồng giá vé 2D chỉ <strong>50.000đ</strong> áp dụng từ Thứ 2 đến Thứ 6 trước 17h00. Vui lòng xuất trình thẻ HSSV hoặc CCCD dưới 22 tuổi khi soát vé.</p>
+					<p class="dc-desc">Đồng giá vé 2D chỉ <strong>50.000đ</strong> áp dụng từ Thứ 2 đến Thứ 6 trước
+						17h00. Vui lòng xuất trình thẻ HSSV hoặc CCCD dưới 22 tuổi khi soát vé.</p>
 					<span class="dc-tag">ĐỒNG GIÁ 50.000 ₫</span>
 				</div>
 
 				<div class="discount-card">
 					<div class="dc-icon">👑</div>
 					<h3 class="dc-title">Đặc Quyền Thành Viên Beta</h3>
-					<p class="dc-desc">Tích lũy từ 5% đến 10% điểm thưởng cho mọi giao dịch mua vé và bắp nước. Đổi vé xem phim miễn phí vào ngày hội thành viên hàng tháng.</p>
+					<p class="dc-desc">Tích lũy từ 5% đến 10% điểm thưởng cho mọi giao dịch mua vé và bắp nước. Đổi vé
+						xem phim miễn phí vào ngày hội thành viên hàng tháng.</p>
 					<span class="dc-tag">TÍCH ĐIỂM ĐẾN 10%</span>
 				</div>
 
 				<div class="discount-card">
 					<div class="dc-icon">🎉</div>
 					<h3 class="dc-title">Thứ Ba Vui Vẻ (Happy Tuesday)</h3>
-					<p class="dc-desc">Mọi suất chiếu vào Thứ 3 hàng tuần chỉ từ <strong>50.000đ</strong> cho tất cả khách hàng. Không giới hạn số lượng vé mua online hoặc tại rạp.</p>
+					<p class="dc-desc">Mọi suất chiếu vào Thứ 3 hàng tuần chỉ từ <strong>50.000đ</strong> cho tất cả
+						khách hàng. Không giới hạn số lượng vé mua online hoặc tại rạp.</p>
 					<span class="dc-tag">ĐỒNG GIÁ THỨ 3</span>
 				</div>
 			</div>
@@ -146,31 +197,46 @@
 		<!-- PRICING POLICIES & REGULATIONS -->
 		<section class="pricing-section-container" style="margin-top: 28px;">
 			<div class="pricing-header-wrap" style="text-align: left; max-width: 100%; margin-bottom: 20px;">
-				<h3 style="font-size: 20px; font-weight: 800; color: #89b4fa; margin: 0 0 8px;">Quy Định & Phụ Thu Giá Vé</h3>
-				<p style="font-size: 14px; color: #a6adc8;">Một số lưu ý quan trọng khi mua vé xem phim tại các cụm rạp Beta Cinemas:</p>
+				<h3 style="font-size: 20px; font-weight: 800; color: #89b4fa; margin: 0 0 8px;">Quy Định & Phụ Thu Giá
+					Vé</h3>
+				<p style="font-size: 14px; color: #a6adc8;">Một số lưu ý quan trọng khi mua vé xem phim tại các cụm rạp
+					Beta Cinemas:</p>
 			</div>
-			<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; font-size: 13.5px; line-height: 1.6; color: #cdd6f4;">
-				<div style="background: #313244; border: 1px solid rgba(88, 91, 112, 0.4); border-left: 4px solid #89b4fa; padding: 14px 18px; border-radius: 6px;">
-					<strong style="color: #cdd6f4; display: block; margin-bottom: 4px;">📅 Phụ Thu Ngày Lễ & Tết:</strong>
+			<div
+				style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; font-size: 13.5px; line-height: 1.6;">
+				<div class="pricing-policy-card"
+					style="border-left: 4px solid #89b4fa; padding: 14px 18px; border-radius: 6px;">
+					<strong style="display: block; margin-bottom: 4px;">📅 Phụ Thu Ngày Lễ &
+						Tết:</strong>
 					Áp dụng biểu giá Thứ 7 - Chủ Nhật cho tất cả các ngày nghỉ lễ, Tết theo quy định của Nhà nước.
 				</div>
-				<div style="background: #313244; border: 1px solid rgba(88, 91, 112, 0.4); border-left: 4px solid #a6e3a1; padding: 14px 18px; border-radius: 6px;">
-					<strong style="color: #cdd6f4; display: block; margin-bottom: 4px;">👓 Kính 3D & Phòng Chiếu Laser:</strong>
-					Giá vé 3D đã bao gồm mượn kính 3D tiêu chuẩn. Vui lòng hoàn trả kính nguyên vẹn sau khi kết thúc suất chiếu.
+				<div class="pricing-policy-card"
+					style="border-left: 4px solid #a6e3a1; padding: 14px 18px; border-radius: 6px;">
+					<strong style="display: block; margin-bottom: 4px;">👓 Kính 3D & Phòng Chiếu
+						Laser:</strong>
+					Giá vé 3D đã bao gồm mượn kính 3D tiêu chuẩn. Vui lòng hoàn trả kính nguyên vẹn sau khi kết thúc
+					suất chiếu.
 				</div>
-				<div style="background: #313244; border: 1px solid rgba(88, 91, 112, 0.4); border-left: 4px solid #fab387; padding: 14px 18px; border-radius: 6px;">
-					<strong style="color: #cdd6f4; display: block; margin-bottom: 4px;">👶 Trẻ Em & Người Cao Tuổi:</strong>
-					Trẻ em dưới 0.7m được miễn phí vé khi ngồi cùng ghế với người lớn. Người cao tuổi trên 55 tuổi áp dụng đồng giá 50.000đ (kèm CCCD).
+				<div class="pricing-policy-card"
+					style="border-left: 4px solid #fab387; padding: 14px 18px; border-radius: 6px;">
+					<strong style="display: block; margin-bottom: 4px;">👶 Trẻ Em & Người Cao
+						Tuổi:</strong>
+					Trẻ em dưới 0.7m được miễn phí vé khi ngồi cùng ghế với người lớn. Người cao tuổi trên 55 tuổi áp
+					dụng đồng giá 50.000đ (kèm CCCD).
 				</div>
 			</div>
 
 			<!-- Banner to News & Promotions Page -->
-			<div style="margin-top: 28px; background: linear-gradient(135deg, #89b4fa 0%, #74c7ec 100%); border-radius: 12px; padding: 24px; color: #11111b; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px;">
+			<div
+				style="margin-top: 28px; background: linear-gradient(135deg, #89b4fa 0%, #74c7ec 100%); border-radius: 12px; padding: 24px; color: #11111b; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px;">
 				<div>
-					<h4 style="font-size: 18px; font-weight: 800; margin: 0 0 6px; color: #11111b;">🎁 Bạn đang tìm kiếm chương trình khuyến mãi & mã giảm giá?</h4>
-					<p style="font-size: 14px; opacity: 0.9; margin: 0; color: #181825;">Khám phá ngay các ưu đãi vé phim hot nhất, mã voucher bắp nước tại trang Tin Mới & Ưu Đãi.</p>
+					<h4 style="font-size: 18px; font-weight: 800; margin: 0 0 6px; color: #11111b;">🎁 Bạn đang tìm kiếm
+						chương trình khuyến mãi & mã giảm giá?</h4>
+					<p style="font-size: 14px; opacity: 0.9; margin: 0; color: #181825;">Khám phá ngay các ưu đãi vé
+						phim hot nhất, mã voucher bắp nước tại trang Tin Mới & Ưu Đãi.</p>
 				</div>
-				<a href="/news.html" style="background: #181825; color: #89b4fa; border: 1px solid rgba(137, 180, 250, 0.4); font-weight: 800; font-size: 14px; padding: 12px 24px; border-radius: 8px; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.25);">
+				<a href="/news.html"
+					style="background: #181825; color: #89b4fa; border: 1px solid rgba(137, 180, 250, 0.4); font-weight: 800; font-size: 14px; padding: 12px 24px; border-radius: 8px; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.25);">
 					Xem Tin Mới & Ưu Đãi →
 				</a>
 			</div>

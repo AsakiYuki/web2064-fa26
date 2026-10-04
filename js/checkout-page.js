@@ -1,7 +1,7 @@
 /**
  * Beta Cinemas - Checkout & E-Ticket QR Code Logic
  */
-import { setupHeaderAndFooter, formatCurrency, formatDateVN, showToast, getCurrentUser } from "./common.js"
+import { setupHeaderAndFooter, formatCurrency, formatDateVN, showToast, getCurrentUser, translateDom, getSavedLang } from "./common.js"
 import {
 	getMoviesData,
 	getCinemas,
@@ -101,6 +101,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 	// 3. Render Order Review in Sidebar
 	renderSidebarDetails()
 	initVoucherSection()
+	translateDom(getSavedLang())
 
 	function renderSidebarDetails() {
 		const sPoster = document.getElementById("co-poster-img")
@@ -387,5 +388,12 @@ document.addEventListener("DOMContentLoaded", async () => {
 		document.getElementById("btn-download-ticket")?.addEventListener("click", () => {
 			window.print()
 		})
+
+		translateDom(getSavedLang())
 	}
+
+	// Listen for global language switch events
+	window.addEventListener("betaLangChange", () => {
+		translateDom(getSavedLang())
+	})
 })

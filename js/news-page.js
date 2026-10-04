@@ -1,7 +1,7 @@
 /**
  * Beta Cinemas - News & Promotions Logic (news.html)
  */
-import { setupHeaderAndFooter, showToast } from "./common.js"
+import { setupHeaderAndFooter, showToast, translateDom, getSavedLang } from "./common.js"
 import { getPromotions } from "./storage.js"
 
 document.addEventListener("DOMContentLoaded", async () => {
@@ -91,6 +91,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 			pill.classList.add("active")
 			currentCategory = pill.dataset.category
 			renderPromotions(currentCategory)
+		translateDom(getSavedLang())
 		})
 	})
 
@@ -160,6 +161,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 		modal.classList.add("active")
 		document.body.style.overflow = "hidden"
+		translateDom(getSavedLang())
 	}
 
 	function closePromoModal() {
@@ -177,4 +179,8 @@ document.addEventListener("DOMContentLoaded", async () => {
 			openPromoModal(targetPromo)
 		}
 	}
+	// Listen for global language switch events
+	window.addEventListener("betaLangChange", () => {
+		renderPromotions(currentCategory)
+	})
 })

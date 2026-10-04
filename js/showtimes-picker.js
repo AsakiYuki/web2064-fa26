@@ -3,7 +3,7 @@
  * Chức năng chọn rạp, chọn ngày và lọc suất chiếu tương ứng
  * CHỈ hiển thị các khu vực/rạp phim thực sự CÓ suất chiếu, ẩn các khu vực/rạp không có suất chiếu
  */
-import { formatCurrency, showToast, formatDateVN } from "./common.js"
+import { formatCurrency, showToast, formatDateVN, translateDom, getSavedLang } from "./common.js"
 import {
 	getCinemas,
 	getMoviesData,
@@ -85,6 +85,10 @@ export class ShowtimePicker {
 
 			this.render()
 			this.initSeatModal()
+
+			window.addEventListener("betaLangChange", () => {
+				this.render()
+			})
 		} catch (err) {
 			console.error("Failed to initialize ShowtimePicker:", err)
 		}
@@ -256,6 +260,7 @@ export class ShowtimePicker {
 		`
 
 		this.attachEvents()
+		translateDom(getSavedLang())
 	}
 
 	renderCinemaAndResults(availableCities, availableCinemas) {
@@ -710,6 +715,7 @@ export class ShowtimePicker {
 
 		this.attachSeatModalEvents(slotData)
 		this.startModalHoldTimer()
+		translateDom(getSavedLang())
 	}
 
 	attachSeatModalEvents(slotData) {

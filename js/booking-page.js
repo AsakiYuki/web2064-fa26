@@ -1,7 +1,7 @@
 /**
  * Beta Cinemas - Seat Selection & Concessions Booking Logic
  */
-import { setupHeaderAndFooter, formatCurrency, formatDateVN, showToast } from "./common.js"
+import { setupHeaderAndFooter, formatCurrency, formatDateVN, showToast, translateDom, getSavedLang } from "./common.js"
 import { getMoviesData, getCinemas, getConcessions, getTicketPricing, getShowtimeSeats, updateShowtimeSeats, calculateVoucherDiscount, savePendingBooking, getPendingBooking } from "./storage.js"
 
 document.addEventListener("DOMContentLoaded", async () => {
@@ -114,6 +114,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 	initCouponCode()
 	initCheckoutModal()
 	initHoldTimer()
+	translateDom(getSavedLang())
 
 	/* ==========================================================================
 	   1. INITIALIZE MOVIE & CINEMA DETAILS IN HEADER / SUMMARY
@@ -971,4 +972,9 @@ document.addEventListener("DOMContentLoaded", async () => {
 	function initHoldTimer() {
 		startHoldCountdown()
 	}
+
+	// Listen for global language switch events
+	window.addEventListener("betaLangChange", () => {
+		translateDom(getSavedLang())
+	})
 })
