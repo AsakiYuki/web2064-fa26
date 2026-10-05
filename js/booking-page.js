@@ -2,7 +2,7 @@
  * Beta Cinemas - Seat Selection & Concessions Booking Logic
  */
 import { setupHeaderAndFooter, formatCurrency, formatDateVN, showToast, translateDom, getSavedLang } from "./common.js"
-import { getMoviesData, getCinemas, getConcessions, getTicketPricing, getShowtimeSeats, updateShowtimeSeats, calculateVoucherDiscount, savePendingBooking, getPendingBooking, saveBookingTicket, clearPendingBooking } from "./storage.js"
+import { getMoviesData, getCinemas, getConcessions, getTicketPricing, getShowtimeSeats, updateShowtimeSeats, isSeatSold, calculateVoucherDiscount, savePendingBooking, getPendingBooking, saveBookingTicket, clearPendingBooking } from "./storage.js"
 
 document.addEventListener("DOMContentLoaded", async () => {
 	await setupHeaderAndFooter()
@@ -234,9 +234,12 @@ document.addEventListener("DOMContentLoaded", async () => {
 	}
 
 	function handleSeatToggle(seatEl) {
-		if (seatEl.classList.contains("seat-sold")) return
-
 		const id = seatEl.dataset.seatId
+		if (seatEl.classList.contains("seat-sold") || isSeatSold(currentCinema.id, currentMovie.id, dateStr, timeSlot, id)) {
+			showToast(`Ghế ${id} đã có người đặt, vui lòng chọn ghế khác.`, "warning", 2500)
+			return
+		}
+
 		const row = seatEl.dataset.row
 		const col = +seatEl.dataset.col
 		const type = seatEl.dataset.type
