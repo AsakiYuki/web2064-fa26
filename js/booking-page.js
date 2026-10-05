@@ -17,6 +17,12 @@ import {
 	areSeatsContiguous,
 	isSeatAvailable,
 	checkSeatsAvailability,
+	getOrCreateHoldSessionId,
+	holdSeats,
+	releaseSeatHold,
+	getHeldSeats,
+	getSeatHold,
+	getSeatStatus,
 } from "./storage.js"
 
 document.addEventListener("DOMContentLoaded", async () => {
@@ -76,6 +82,10 @@ document.addEventListener("DOMContentLoaded", async () => {
 	const baseVipPrice = baseStandardPrice + 10000
 	const baseSweetboxPrice = baseStandardPrice * 2 + 15000
 
+	// Hold session identifier (each tab/window gets a distinct holdId, or inherited from URL)
+	const holdIdFromUrl = urlParams.get("holdId")
+	const holdSessionId = holdIdFromUrl || getOrCreateHoldSessionId()
+
 	// Hold timer variables (defined early to prevent TDZ access)
 	let holdTimerInterval = null
 	let holdSecondsRemaining = 300 // 5 phút = 300 giây
@@ -119,6 +129,16 @@ document.addEventListener("DOMContentLoaded", async () => {
 				}
 			}
 		})
+		if (bookingState.selectedSeats.length > 0) {
+			holdSeats(
+				currentCinema.id,
+				currentMovie.id,
+				dateStr,
+				timeSlot,
+				bookingState.selectedSeats.map(s => s.id),
+				holdSessionId,
+			)
+		}
 	}
 
 	initBookingInfoDisplay()
@@ -130,6 +150,13 @@ document.addEventListener("DOMContentLoaded", async () => {
 	initCheckoutModal()
 	initHoldTimer()
 	translateDom(getSavedLang())
+
+	// Lắng nghe thay đổi ghế giữ từ các tab khác theo thời gian thực
+	window.addEventListener("storage", e => {
+		if (e.key === "beta_seat_holds" || e.key === "beta_bookings") {
+			renderSeatMap()
+		}
+	})
 
 	/* ==========================================================================
 	   1. INITIALIZE MOVIE & CINEMA DETAILS IN HEADER / SUMMARY
@@ -178,6 +205,8 @@ document.addEventListener("DOMContentLoaded", async () => {
 			basePrice: baseStandardPrice,
 		})
 
+		const heldByOthers = getHeldSeats(currentCinema.id, currentMovie.id, dateStr, timeSlot, holdSessionId)
+
 		let rowsHTML = ""
 		seatLayout.forEach(rowBlock => {
 			const isSweetbox = rowBlock.type === "sweetbox"
@@ -185,20 +214,24 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 			rowBlock.seats.forEach(seat => {
 				const isSold = seat.status === "sold"
+				const isHeld = !isSold && heldByOthers.includes(seat.id)
 				const isSelected = bookingState.selectedSeats.some(s => s.id === seat.id)
+				const statusClass = isSold ? "seat-sold" : isHeld ? "seat-holding" : isSelected ? "seat-selected" : ""
+				const statusData = isSold ? "sold" : isHeld ? "holding" : isSelected ? "selected" : "available"
 
 				if (isSweetbox) {
 					rowSeatsHTML += `
-						<div class="seat-unit seat-sweetbox ${isSold ? "seat-sold" : ""} ${isSelected ? "seat-selected" : ""}"
+						<div class="seat-unit seat-sweetbox ${statusClass}"
 							data-seat-id="${seat.id}"
 							data-row="${seat.row}"
 							data-col="${seat.col}"
 							data-type="${seat.type}"
 							data-price="${seat.price}"
-							title="${seat.id} (Ghế đôi Sweetbox: ${formatCurrency(seat.price)})"
+							data-status="${statusData}"
+							title="${seat.id} (${isSold ? "Đã bán" : isHeld ? "Khách khác đang giữ tạm 5 phút" : `Ghế đôi Sweetbox: ${formatCurrency(seat.price)}`})"
 							role="checkbox"
 							aria-checked="${isSelected ? "true" : "false"}"
-							tabindex="${isSold ? "-1" : "0"}">
+							tabindex="${isSold || isHeld ? "-1" : "0"}">
 							<span class="swb-icon">👫</span> ${seat.id}
 						</div>
 					`
@@ -209,16 +242,17 @@ document.addEventListener("DOMContentLoaded", async () => {
 					}
 
 					rowSeatsHTML += `
-						<div class="seat-unit seat-${seat.type} ${isSold ? "seat-sold" : ""} ${isSelected ? "seat-selected" : ""}"
+						<div class="seat-unit seat-${seat.type} ${statusClass}"
 							data-seat-id="${seat.id}"
 							data-row="${seat.row}"
 							data-col="${seat.col}"
 							data-type="${seat.type}"
 							data-price="${seat.price}"
-							title="${seat.id} (${seat.type === "vip" ? "VIP" : "Thường"}: ${formatCurrency(seat.price)})"
+							data-status="${statusData}"
+							title="${seat.id} (${isSold ? "Đã bán" : isHeld ? "Khách khác đang giữ tạm 5 phút" : `${seat.type === "vip" ? "VIP" : "Thường"}: ${formatCurrency(seat.price)}`})"
 							role="checkbox"
 							aria-checked="${isSelected ? "true" : "false"}"
-							tabindex="${isSold ? "-1" : "0"}">
+							tabindex="${isSold || isHeld ? "-1" : "0"}">
 							${seat.col}
 						</div>
 					`
@@ -236,7 +270,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 		container.innerHTML = rowsHTML
 
-		// Gán sự kiện click và bàn phím cho tất cả các ghế (kể cả ghế đã bán để phản hồi)
+		// Gán sự kiện click và bàn phím cho tất cả các ghế (kể cả ghế đã bán/đang giữ để phản hồi)
 		container.querySelectorAll(".seat-unit").forEach(seat => {
 			seat.addEventListener("click", () => handleSeatToggle(seat))
 			seat.addEventListener("keydown", e => {
@@ -256,14 +290,23 @@ document.addEventListener("DOMContentLoaded", async () => {
 		const price = +seatEl.dataset.price
 		const isSold = seatEl.classList.contains("seat-sold") || seatEl.dataset.status === "sold"
 
-		// 1. Kiểm tra ghế đã bán từ thuộc tính DOM hoặc trạng thái kho dữ liệu
-		const available = isSeatAvailable(currentCinema.id, currentMovie.id, dateStr, timeSlot, id)
-		if (isSold || !available) {
-			seatEl.classList.add("seat-sold")
-			seatEl.dataset.status = "sold"
+		// 1. Kiểm tra ghế đã bán
+		if (isSold) {
 			seatEl.classList.add("seat-shake")
 			setTimeout(() => seatEl.classList.remove("seat-shake"), 400)
 			showToast(`⚠️ Ghế ${id} đã được người khác đặt trước, không thể chọn! Vui lòng chọn ghế còn trống khác.`, "warning")
+			return
+		}
+
+		// 2. Kiểm tra ghế đang được người khác giữ trong 5 phút
+		const heldByOthers = getHeldSeats(currentCinema.id, currentMovie.id, dateStr, timeSlot, holdSessionId)
+		const isHeld = seatEl.classList.contains("seat-holding") || seatEl.dataset.status === "holding" || heldByOthers.includes(id)
+		if (isHeld) {
+			seatEl.classList.add("seat-holding")
+			seatEl.dataset.status = "holding"
+			seatEl.classList.add("seat-shake")
+			setTimeout(() => seatEl.classList.remove("seat-shake"), 400)
+			showToast(`⏳ Ghế ${id} đang được khách hàng khác giữ tạm thời trong phiên đặt vé (5 phút). Vui lòng chọn ghế khác!`, "warning")
 			return
 		}
 
@@ -282,12 +325,21 @@ document.addEventListener("DOMContentLoaded", async () => {
 			bookingState.selectedSeats.splice(existingIdx, 1)
 			seatEl.classList.remove("seat-selected")
 			seatEl.setAttribute("aria-checked", "false")
-			showToast(`Đã bỏ chọn ghế ${id}`, "info", 1500)
+
+			if (bookingState.selectedSeats.length === 0) {
+				releaseSeatHold(holdSessionId)
+				stopHoldCountdown()
+				showToast(`Đã bỏ chọn ghế ${id}. Đã hủy giữ ghế.`, "info", 1500)
+			} else {
+				const seatIds = bookingState.selectedSeats.map(s => s.id)
+				holdSeats(currentCinema.id, currentMovie.id, dateStr, timeSlot, seatIds, holdSessionId)
+				showToast(`Đã bỏ chọn ghế ${id}`, "info", 1200)
+			}
 		} else {
 			const targetSeat = { id, row, col, type, price, status: "available" }
 
 			// Kiểm tra chọn ghế sát nhau & liền kề
-			const check = canSelectSeat(bookingState.selectedSeats, targetSeat)
+			const check = canSelectSeat(bookingState.selectedSeats, targetSeat, holdSessionId)
 			if (!check.allowed) {
 				seatEl.classList.add("seat-shake")
 				setTimeout(() => seatEl.classList.remove("seat-shake"), 400)
@@ -295,10 +347,32 @@ document.addEventListener("DOMContentLoaded", async () => {
 				return
 			}
 
-			// Chọn ghế mới: Thêm vào danh sách và đổi sang màu xanh ngọc nổi bật
+			// Thêm ghế vào danh sách
 			bookingState.selectedSeats.push(targetSeat)
 			seatEl.classList.add("seat-selected")
 			seatEl.setAttribute("aria-checked", "true")
+
+			// Ghi nhận giữ ghế vào hệ thống
+			const seatIds = bookingState.selectedSeats.map(s => s.id)
+			const holdRes = holdSeats(currentCinema.id, currentMovie.id, dateStr, timeSlot, seatIds, holdSessionId)
+			if (!holdRes.success) {
+				bookingState.selectedSeats.pop()
+				seatEl.classList.remove("seat-selected")
+				seatEl.setAttribute("aria-checked", "false")
+				seatEl.classList.add("seat-shake")
+				setTimeout(() => seatEl.classList.remove("seat-shake"), 400)
+				showToast(holdRes.message || "Không thể giữ ghế này!", "warning")
+				renderSeatMap()
+				return
+			}
+
+			// Nếu đây là ghế đầu tiên, bắt đầu đếm ngược 5 phút
+			if (bookingState.selectedSeats.length === 1) {
+				startHoldCountdown(holdRes.remainingSeconds || 300)
+				showToast(`Đã chọn ghế ${id}. Hệ thống bắt đầu giữ ghế trong 5 phút!`, "info", 2000)
+			} else {
+				showToast(`Đã chọn ghế ${id}.`, "info", 1200)
+			}
 
 			if (bookingState.selectedSeats.length === 8) {
 				showToast(`Bạn đã chọn đủ tối đa 8 ghế.`, "info", 2000)
@@ -661,6 +735,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 			voucherCode: bookingState.appliedCoupon,
 			discountAmount: bookingState.discountAmount,
 			grandTotal: finalTotal,
+			holdId: holdSessionId,
 			holdExpiresAt: Date.now() + (holdSecondsRemaining * 1000),
 		}
 
@@ -714,16 +789,18 @@ document.addEventListener("DOMContentLoaded", async () => {
 				showToast("⚠️ Vui lòng chọn các ghế ngồi sát nhau trong cùng một hàng, không được để trống ghế ở giữa!", "warning")
 				return false
 			}
-			// Kiểm tra tất cả ghế đã chọn có còn trống không
+			// Kiểm tra tất cả ghế đã chọn có còn trống không (bỏ qua hold của chính mình)
 			const seatIds = bookingState.selectedSeats.map(s => s.id)
-			const availCheck = checkSeatsAvailability(currentCinema.id, currentMovie.id, dateStr, timeSlot, seatIds)
+			const availCheck = checkSeatsAvailability(currentCinema.id, currentMovie.id, dateStr, timeSlot, seatIds, holdSessionId)
 			if (!availCheck.allAvailable) {
-				showToast(`⚠️ Ghế [${availCheck.unavailableSeats.join(", ")}] đã có người đặt trước! Vui lòng chọn lại ghế trống khác.`, "warning", 4000)
+				showToast(`⚠️ Ghế [${availCheck.unavailableSeats.join(", ")}] đã không còn khả dụng hoặc đã hết thời gian giữ ghế! Vui lòng chọn lại.`, "warning", 4000)
 				bookingState.selectedSeats = bookingState.selectedSeats.filter(s => !availCheck.unavailableSeats.includes(s.id))
 				renderSeatMap()
 				updateSummarySidebar()
 				return false
 			}
+			// Gia hạn / làm mới hold cho các ghế này
+			holdSeats(currentCinema.id, currentMovie.id, dateStr, timeSlot, seatIds, holdSessionId)
 			return true
 		}
 
@@ -761,7 +838,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 				syncPendingBookingToStorage(seatsTotal, concessionsTotal, finalTotal)
 
-				const checkoutUrl = `/checkout.html?movieId=${encodeURIComponent(currentMovie.id)}&cinemaId=${encodeURIComponent(currentCinema.id)}&date=${encodeURIComponent(dateStr)}&time=${encodeURIComponent(timeSlot)}&screen=${encodeURIComponent(screenName)}&format=${encodeURIComponent(formatName)}&seats=${encodeURIComponent(seatNames)}&concessions=${encodeURIComponent(concessionsStr)}&voucher=${encodeURIComponent(bookingState.appliedCoupon || "")}&discount=${bookingState.discountAmount}&total=${finalTotal}`
+				const checkoutUrl = `/checkout.html?movieId=${encodeURIComponent(currentMovie.id)}&cinemaId=${encodeURIComponent(currentCinema.id)}&date=${encodeURIComponent(dateStr)}&time=${encodeURIComponent(timeSlot)}&screen=${encodeURIComponent(screenName)}&format=${encodeURIComponent(formatName)}&seats=${encodeURIComponent(seatNames)}&concessions=${encodeURIComponent(concessionsStr)}&voucher=${encodeURIComponent(bookingState.appliedCoupon || "")}&discount=${bookingState.discountAmount}&total=${finalTotal}&holdId=${encodeURIComponent(holdSessionId)}`
 
 				window.location.href = checkoutUrl
 			}
@@ -956,20 +1033,41 @@ document.addEventListener("DOMContentLoaded", async () => {
 		return `${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`
 	}
 
-	function updateHoldTimerUI(secs) {
+	function updateHoldTimerUI(secs, isActive = true) {
 		const formatted = formatTimeDigits(secs)
 		const sidebarTimerEl = document.getElementById("booking-timer-countdown")
 		const hallTimerEl = document.getElementById("hall-timer-digits")
 		const sidebarBadge = document.getElementById("booking-timer-badge")
 		const hallTag = document.getElementById("hall-countdown-tag")
+		const timerSubtext = sidebarBadge?.querySelector(".timer-subtext")
 
 		if (sidebarTimerEl) sidebarTimerEl.textContent = formatted
 		if (hallTimerEl) hallTimerEl.textContent = formatted
 
+		// Trạng thái nghỉ (chưa chọn ghế nào)
+		if (!isActive || bookingState.selectedSeats.length === 0) {
+			if (sidebarBadge) {
+				sidebarBadge.classList.remove("timer-danger", "timer-active")
+			}
+			if (hallTag) {
+				hallTag.classList.remove("timer-danger", "timer-active")
+			}
+			if (timerSubtext) timerSubtext.textContent = "Chưa chọn ghế"
+			return
+		}
+
+		if (timerSubtext) timerSubtext.textContent = "Thời gian giữ ghế"
+
 		// Cảnh báo đỏ nhấp nháy khi còn dưới 60 giây
 		const isDanger = secs <= 60
-		if (sidebarBadge) sidebarBadge.classList.toggle("timer-danger", isDanger)
-		if (hallTag) hallTag.classList.toggle("timer-danger", isDanger)
+		if (sidebarBadge) {
+			sidebarBadge.classList.add("timer-active")
+			sidebarBadge.classList.toggle("timer-danger", isDanger)
+		}
+		if (hallTag) {
+			hallTag.classList.add("timer-active")
+			hallTag.classList.toggle("timer-danger", isDanger)
+		}
 
 		if (secs === 60 && !hasNotifiedOneMinute) {
 			hasNotifiedOneMinute = true
@@ -978,8 +1076,8 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 		// Tự động hủy khi hết giờ (00:00)
 		if (secs <= 0) {
-			clearInterval(holdTimerInterval)
-			holdTimerInterval = null
+			stopHoldCountdown()
+			releaseSeatHold(holdSessionId)
 
 			if (bookingState.selectedSeats.length > 0) {
 				const cancelCount = bookingState.selectedSeats.length
@@ -994,38 +1092,56 @@ document.addEventListener("DOMContentLoaded", async () => {
 					})
 				}
 
+				// Nếu đang ở bước combo bắp nước, tự động chuyển về bước chọn ghế
+				if (bookingState.currentStep === 2) {
+					const tabSeats = document.getElementById("tab-view-seats")
+					tabSeats?.click()
+				}
+
 				updateSummarySidebar()
 
 				showToast(
-					`⏰ Đã hết thời gian giữ ghế 5 phút! Hệ thống đã tự động hủy ${cancelCount} ghế bạn chọn để nhường cho khách hàng khác. Vui lòng chọn lại ghế.`,
+					`⏰ Đã hết thời gian giữ ghế 5 phút! Hệ thống đã tự động giải phóng ${cancelCount} ghế bạn chọn để nhường cho khách hàng khác. Vui lòng chọn lại ghế.`,
 					"warning",
 					8000,
 				)
-			} else {
-				showToast("⏰ Đã hết thời gian giữ ghế 5 phút! Vui lòng chọn lại ghế ngồi.", "info", 5000)
 			}
-
-			// Khởi động lại đợt giữ ghế mới sau 1 giây
-			setTimeout(() => {
-				startHoldCountdown()
-			}, 1000)
+			updateHoldTimerUI(300, false)
 		}
 	}
 
-	function startHoldCountdown() {
+	function startHoldCountdown(initialSeconds = 300) {
 		if (holdTimerInterval) clearInterval(holdTimerInterval)
-		holdSecondsRemaining = 300
+		holdSecondsRemaining = initialSeconds
 		hasNotifiedOneMinute = false
-		updateHoldTimerUI(holdSecondsRemaining)
+		updateHoldTimerUI(holdSecondsRemaining, true)
 
 		holdTimerInterval = setInterval(() => {
 			holdSecondsRemaining--
-			updateHoldTimerUI(holdSecondsRemaining)
+			updateHoldTimerUI(holdSecondsRemaining, true)
 		}, 1000)
 	}
 
+	function stopHoldCountdown() {
+		if (holdTimerInterval) {
+			clearInterval(holdTimerInterval)
+			holdTimerInterval = null
+		}
+		holdSecondsRemaining = 300
+		hasNotifiedOneMinute = false
+		updateHoldTimerUI(300, false)
+	}
+
 	function initHoldTimer() {
-		startHoldCountdown()
+		if (bookingState.selectedSeats.length > 0) {
+			const existingHold = getSeatHold(holdSessionId)
+			const secs = existingHold
+				? Math.max(0, Math.ceil((existingHold.expiresAt - Date.now()) / 1000))
+				: 300
+			startHoldCountdown(secs || 300)
+		} else {
+			stopHoldCountdown()
+		}
 	}
 
 	// Listen for global language switch events

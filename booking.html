@@ -10,7 +10,8 @@
 	<link rel="stylesheet" href="/style/main.scss" />
 	<link rel="preconnect" href="https://fonts.googleapis.com" />
 	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-	<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+	<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"
+		rel="stylesheet" />
 	<script>
 		(function () {
 			const t = localStorage.getItem("beta_theme") || "mocha";
@@ -29,10 +30,13 @@
 				<div class="divider"></div>
 				<a href="#" id="btn-register">Đăng ký</a>
 				<div class="divider"></div>
-				<button type="button" class="theme-toggle-btn" id="theme-toggle-btn" role="switch" aria-checked="true" aria-label="Chuyển chế độ Giao diện Sáng / Tối" title="Chuyển chế độ Giao diện Sáng (Latte) / Tối (Mocha)">
+				<button type="button" class="theme-toggle-btn" id="theme-toggle-btn" role="switch" aria-checked="true"
+					aria-label="Chuyển chế độ Giao diện Sáng / Tối"
+					title="Chuyển chế độ Giao diện Sáng (Latte) / Tối (Mocha)">
 					<span class="theme-toggle-track">
 						<span class="theme-track-icon theme-track-icon-sun" aria-hidden="true">
-							<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+							<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+								stroke-linecap="round" stroke-linejoin="round">
 								<circle cx="12" cy="12" r="5" fill="currentColor"></circle>
 								<line x1="12" y1="1" x2="12" y2="3"></line>
 								<line x1="12" y1="21" x2="12" y2="23"></line>
@@ -50,10 +54,13 @@
 							</svg>
 						</span>
 						<span class="theme-toggle-thumb">
-							<svg class="theme-thumb-icon theme-thumb-moon" viewBox="0 0 24 24" fill="currentColor" stroke="none" aria-hidden="true">
+							<svg class="theme-thumb-icon theme-thumb-moon" viewBox="0 0 24 24" fill="currentColor"
+								stroke="none" aria-hidden="true">
 								<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
 							</svg>
-							<svg class="theme-thumb-icon theme-thumb-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+							<svg class="theme-thumb-icon theme-thumb-sun" viewBox="0 0 24 24" fill="none"
+								stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"
+								aria-hidden="true">
 								<circle cx="12" cy="12" r="5" fill="currentColor"></circle>
 								<line x1="12" y1="1" x2="12" y2="3"></line>
 								<line x1="12" y1="21" x2="12" y2="23"></line>
@@ -68,7 +75,8 @@
 					</span>
 				</button>
 				<div class="divider"></div>
-				<button type="button" class="lang-toggle-btn" id="lang-toggle-btn" title="Chuyển sang English" aria-label="Chuyển sang English">
+				<button type="button" class="lang-toggle-btn" id="lang-toggle-btn" title="Chuyển sang English"
+					aria-label="Chuyển sang English">
 					<span class="lang-flag">🇬🇧</span>
 					<span class="lang-code">EN</span>
 				</button>
@@ -80,7 +88,8 @@
 					<img src="/logo.webp" alt="Beta Cinemas Logo" />
 				</a>
 				<div class="cinema-selector-wrap" id="cinema-selector-wrap">
-					<button class="cinema-selector" id="cinema-selector-btn" aria-haspopup="listbox" aria-expanded="false">
+					<button class="cinema-selector" id="cinema-selector-btn" aria-haspopup="listbox"
+						aria-expanded="false">
 						<span class="cinema-selector-label" id="cinema-selector-label">Beta Thái Nguyên</span>
 						<svg class="cinema-selector-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor"
 							stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
@@ -97,9 +106,10 @@
 					<a href="/cinemas.html" id="nav-cinemas">Rạp</a>
 					<a href="/pricing.html" id="nav-pricing">Giá Vé</a>
 					<a href="/news.html" id="nav-news">Tin Mới Và Ưu Đãi</a>
-					<a href="#" id="nav-franchise">Nhượng Quyền</a>
+
 					<a href="/member.html" id="nav-member">Thành Viên</a>
-					<a href="/admin.html" id="nav-admin" class="admin-only" style="display: none; color: #fab387; font-weight: 700;">⚙️ Quản Trị</a>
+					<a href="/admin.html" id="nav-admin" class="admin-only"
+						style="display: none; color: #fab387; font-weight: 700;">⚙️ Quản Trị</a>
 				</nav>
 			</div>
 		</div>
@@ -148,16 +158,19 @@
 				<div class="booking-main-content">
 					<!-- Navigation Tabs between Seats & Combos -->
 					<div class="booking-view-tabs" role="tablist">
-						<button type="button" class="view-tab-btn active" id="tab-view-seats" role="tab" aria-selected="true">
+						<button type="button" class="view-tab-btn active" id="tab-view-seats" role="tab"
+							aria-selected="true">
 							<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
 								<path d="M4 18v3M20 18v3M2 11h20M4 11V7a2 2 0 012-2h12a2 2 0 012 2v4M6 18h12"></path>
 							</svg>
 							<span>1. SƠ ĐỒ CHỌN GHẾ</span>
 							<span class="tab-badge" id="tab-badge-seats">0</span>
 						</button>
-						<button type="button" class="view-tab-btn" id="tab-view-combos" role="tab" aria-selected="false">
+						<button type="button" class="view-tab-btn" id="tab-view-combos" role="tab"
+							aria-selected="false">
 							<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-								<path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4zM3 6h18M16 10a4 4 0 01-8 0"></path>
+								<path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4zM3 6h18M16 10a4 4 0 01-8 0">
+								</path>
 							</svg>
 							<span>2. COMBO BẮP NƯỚC & ĐỒ ĂN</span>
 							<span class="tab-badge" id="tab-badge-combos">0</span>
@@ -165,7 +178,8 @@
 					</div>
 
 					<!-- SECTION 1: SEAT SELECTION -->
-					<section class="seat-selection-card" id="section-seat-selection" aria-label="Sơ đồ ghế ngồi xem phim">
+					<section class="seat-selection-card" id="section-seat-selection"
+						aria-label="Sơ đồ ghế ngồi xem phim">
 						<div class="hall-header-info">
 							<div class="hall-title-wrap">
 								<h2 id="hall-movie-title">Tên Phim</h2>
@@ -174,7 +188,8 @@
 							<div class="hall-tags-wrap">
 								<span class="ht-tag">Màn Hình Lớn</span>
 								<span class="ht-tag">Dolby 7.1</span>
-								<div class="hall-countdown-tag" id="hall-countdown-tag" title="Thời gian giữ ghế 5 phút">
+								<div class="hall-countdown-tag" id="hall-countdown-tag"
+									title="Thời gian giữ ghế 5 phút">
 									<span class="pulse-dot"></span>
 									<span>Giữ ghế: <strong id="hall-timer-digits">05:00</strong></span>
 								</div>
@@ -226,6 +241,13 @@
 								</div>
 							</div>
 							<div class="legend-cell">
+								<div class="sample-box sample-holding"></div>
+								<div class="legend-text">
+									<span class="legend-name">Đang Giữ Chỗ</span>
+									<span class="legend-price">Khách khác giữ (5p)</span>
+								</div>
+							</div>
+							<div class="legend-cell">
 								<div class="sample-box sample-selected"></div>
 								<div class="legend-text">
 									<span class="legend-name">Đang Chọn</span>
@@ -238,7 +260,8 @@
 						<div class="seat-action-next-wrap">
 							<button type="button" class="btn-goto-concessions" id="btn-goto-concessions" disabled>
 								<span>TIẾP TỤC CHỌN BẮP NƯỚC</span>
-								<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:18px;height:18px;">
+								<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+									style="width:18px;height:18px;">
 									<polyline points="9 18 15 12 9 6"></polyline>
 								</svg>
 							</button>
@@ -246,10 +269,12 @@
 					</section>
 
 					<!-- SECTION 2: CONCESSIONS & FOOD/DRINKS -->
-					<section class="concessions-selection-card" id="section-concessions-selection" style="display: none;" aria-label="Chọn bắp nước và đồ ăn kèm">
+					<section class="concessions-selection-card" id="section-concessions-selection"
+						style="display: none;" aria-label="Chọn bắp nước và đồ ăn kèm">
 						<div class="concessions-header-bar">
 							<h2>🍿 QUẦY BẮP NƯỚC & COMBO ƯU ĐÃI</h2>
-							<p>Thưởng thức bắp rang bơ nóng hổi thơm giòn cùng nước giải khát mát lạnh xem phim trọn vẹn hơn!</p>
+							<p>Thưởng thức bắp rang bơ nóng hổi thơm giòn cùng nước giải khát mát lạnh xem phim trọn vẹn
+								hơn!</p>
 						</div>
 
 						<!-- Category Filter Tabs -->
@@ -265,7 +290,8 @@
 						<!-- Concessions Navigation -->
 						<div class="concession-nav-buttons">
 							<button type="button" class="btn-back-to-seats" id="btn-back-to-seats">
-								<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:16px;height:16px;">
+								<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+									style="width:16px;height:16px;">
 									<polyline points="15 18 9 12 15 6"></polyline>
 								</svg>
 								<span>Quay lại chọn Ghế</span>
@@ -278,8 +304,11 @@
 				<aside class="order-summary-sidebar" aria-label="Tóm tắt đơn hàng">
 					<div class="summary-header">
 						<h3>
-							<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:20px;height:20px;color:#f5a623;">
-								<path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+							<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+								style="width:20px;height:20px;color:#f5a623;">
+								<path
+									d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z">
+								</path>
 							</svg>
 							TÓM TẮT ĐƠN HÀNG
 						</h3>
@@ -326,7 +355,8 @@
 					<!-- Voucher / Coupon Code -->
 					<div class="summary-coupon-box">
 						<div class="coupon-input-group">
-							<input type="text" id="coupon-input" placeholder="Mã giảm giá (Thử BETA10 hoặc BETA50)" aria-label="Mã giảm giá" />
+							<input type="text" id="coupon-input" placeholder="Mã giảm giá (Thử BETA10 hoặc BETA50)"
+								aria-label="Mã giảm giá" />
 							<button type="button" id="btn-apply-coupon">Áp dụng</button>
 						</div>
 						<div class="coupon-applied-msg" id="coupon-msg"></div>
@@ -372,7 +402,8 @@
 				<div class="footer-contact">
 					<h3>Liên Hệ</h3>
 					<p class="company-name">CÔNG TY CỔ PHẦN BETA MEDIA</p>
-					<p>Hotline: <strong>1900 636807</strong> | Email: <a href="mailto:mkt@betacinemas.vn" style="color: rgba(255, 255, 255, 0.82)">mkt@betacinemas.vn</a></p>
+					<p>Hotline: <strong>1900 636807</strong> | Email: <a href="mailto:mkt@betacinemas.vn"
+							style="color: rgba(255, 255, 255, 0.82)">mkt@betacinemas.vn</a></p>
 					<p>© 2026 Beta Cinemas. All rights reserved.</p>
 				</div>
 			</div>
