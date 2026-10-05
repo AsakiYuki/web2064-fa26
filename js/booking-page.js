@@ -66,6 +66,24 @@ document.addEventListener("DOMContentLoaded", async () => {
 	let holdSecondsRemaining = 300 // 5 phút = 300 giây
 	let hasNotifiedOneMinute = false
 
+	// Restore state from pending booking if available for the same showtime
+	const pending = getPendingBooking()
+	const isSameShowtime = pending &&
+		pending.movieId === currentMovie.id &&
+		pending.cinemaId === currentCinema.id &&
+		pending.date === dateStr &&
+		pending.time === timeSlot
+
+	let initialStep = 1
+	if (urlParams.get("step") === "2" || window.location.hash === "#combos" || window.location.hash === "#concessions" || (isSameShowtime && pending.currentStep === 2)) {
+		initialStep = 2
+	}
+
+	// Restore hold timer from pending booking if not expired
+	if (isSameShowtime && pending.holdExpiresAt && pending.holdExpiresAt > Date.now()) {
+		holdSecondsRemaining = Math.max(10, Math.floor((pending.holdExpiresAt - Date.now()) / 1000))
+	}
+
 	// Booking State
 	const bookingState = {
 		movie: currentMovie,
@@ -77,12 +95,12 @@ document.addEventListener("DOMContentLoaded", async () => {
 		selectedSeats: [], // { id, row, col, type, price }
 		selectedConcessions: new Map(), // concessionId -> { item, qty }
 		discountAmount: 0,
-		appliedCoupon: null,
-		currentStep: 1, // 1: Seats, 2: Concessions
+		appliedCoupon: (isSameShowtime && pending.voucherCode) ? pending.voucherCode : null,
+		currentStep: initialStep, // 1: Seats, 2: Concessions
 	}
 
-	// Pre-populate selected seats from URL if provided (e.g. from modal or direct link)
-	const seatsParam = urlParams.get("seats")
+	// Pre-populate selected seats from URL or pending booking
+	const seatsParam = urlParams.get("seats") || (isSameShowtime ? pending.seatsString : null)
 	if (seatsParam) {
 		const seatIds = seatsParam.split(",").map(s => s.trim()).filter(Boolean)
 		const seatLayout = getShowtimeSeats(currentCinema.id, currentMovie.id, dateStr, timeSlot, {
@@ -102,6 +120,17 @@ document.addEventListener("DOMContentLoaded", async () => {
 					})
 					break
 				}
+			}
+		})
+	}
+
+	// Pre-populate selected concessions from pending booking
+	if (isSameShowtime && Array.isArray(pending.selectedConcessions)) {
+		const concessionsList = concessionsData?.items || []
+		pending.selectedConcessions.forEach(c => {
+			const foundItem = concessionsList.find(it => it.id === c.id) || { id: c.id, name: c.name, price: c.price }
+			if (c.qty > 0) {
+				bookingState.selectedConcessions.set(c.id, { item: foundItem, qty: c.qty })
 			}
 		})
 	}
@@ -619,6 +648,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 			formatName,
 			date: dateStr,
 			time: timeSlot,
+			currentStep: bookingState.currentStep,
 			selectedSeats: bookingState.selectedSeats,
 			seatsString: seatNames,
 			selectedConcessions: comboList,
@@ -652,21 +682,34 @@ document.addEventListener("DOMContentLoaded", async () => {
 		function switchToStep(step) {
 			bookingState.currentStep = step
 			if (step === 1) {
-				seatSection.style.display = "block"
-				comboSection.style.display = "none"
+				if (seatSection) seatSection.style.display = "block"
+				if (comboSection) comboSection.style.display = "none"
 				tabSeats?.classList.add("active")
 				tabCombos?.classList.remove("active")
 				stepItemSeats?.classList.add("active")
 				stepItemSeats?.classList.remove("completed")
 				stepItemCombos?.classList.remove("active")
+				try {
+					const url = new URL(window.location)
+					url.searchParams.set("step", "1")
+					window.history.replaceState({}, "", url)
+				} catch (e) {}
 			} else {
-				seatSection.style.display = "none"
-				comboSection.style.display = "block"
+				if (seatSection) seatSection.style.display = "none"
+				if (comboSection) comboSection.style.display = "block"
 				tabSeats?.classList.remove("active")
 				tabCombos?.classList.add("active")
 				stepItemSeats?.classList.remove("active")
 				stepItemSeats?.classList.add("completed")
 				stepItemCombos?.classList.add("active")
+				try {
+					const url = new URL(window.location)
+					url.searchParams.set("step", "2")
+					if (bookingState.selectedSeats.length > 0) {
+						url.searchParams.set("seats", bookingState.selectedSeats.map(s => s.id).join(","))
+					}
+					window.history.replaceState({}, "", url)
+				} catch (e) {}
 				window.scrollTo({ top: 120, behavior: "smooth" })
 			}
 			updateSummarySidebar()
@@ -714,6 +757,13 @@ document.addEventListener("DOMContentLoaded", async () => {
 				window.location.href = checkoutUrl
 			}
 		})
+
+		// Auto restore step 2 if returning or reloading on concessions step
+		if (bookingState.currentStep === 2 && bookingState.selectedSeats.length > 0) {
+			switchToStep(2)
+		} else {
+			switchToStep(1)
+		}
 	}
 
 	/* ==========================================================================
@@ -725,6 +775,10 @@ document.addEventListener("DOMContentLoaded", async () => {
 		const msg = document.getElementById("coupon-msg")
 
 		if (!applyBtn || !input) return
+
+		if (bookingState.appliedCoupon) {
+			input.value = bookingState.appliedCoupon
+		}
 
 		applyBtn.addEventListener("click", () => {
 			const code = input.value.trim().toUpperCase()
@@ -993,9 +1047,11 @@ document.addEventListener("DOMContentLoaded", async () => {
 		}
 	}
 
-	function startHoldCountdown() {
+	function startHoldCountdown(resetToMax = false) {
 		if (holdTimerInterval) clearInterval(holdTimerInterval)
-		holdSecondsRemaining = 300
+		if (resetToMax || !holdSecondsRemaining || holdSecondsRemaining <= 0) {
+			holdSecondsRemaining = 300
+		}
 		hasNotifiedOneMinute = false
 		updateHoldTimerUI(holdSecondsRemaining)
 
@@ -1006,7 +1062,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 	}
 
 	function initHoldTimer() {
-		startHoldCountdown()
+		startHoldCountdown(false)
 	}
 
 	// Listen for global language switch events
