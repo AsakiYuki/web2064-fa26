@@ -986,9 +986,22 @@ export function getBookingHistory() {
 
 export async function saveBookingTicket(ticket) {
 	const history = getBookingHistory()
+	const cName = ticket.customerName || ticket.userName || "Khách Hàng"
+	const cPhone = ticket.customerPhone || ticket.userPhone || ""
+	const cEmail = ticket.customerEmail || ticket.userEmail || ""
+	const pMethod = ticket.paymentMethod || "momo"
+
 	const newTicket = {
 		...ticket,
 		id: ticket.id || "BT-" + Math.floor(100000 + Math.random() * 900000),
+		customerName: cName,
+		customerPhone: cPhone,
+		customerEmail: cEmail,
+		userName: cName,
+		userPhone: cPhone,
+		userEmail: cEmail,
+		paymentMethod: pMethod,
+		paymentStatus: "paid",
 		bookingDate: ticket.bookingDate || new Date().toISOString(),
 		status: ticket.status || "paid",
 	}
