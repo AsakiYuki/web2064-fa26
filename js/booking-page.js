@@ -2,7 +2,7 @@
  * Beta Cinemas - Seat Selection & Concessions Booking Logic
  */
 import { setupHeaderAndFooter, formatCurrency, formatDateVN, showToast, translateDom, getSavedLang } from "./common.js"
-import { getMoviesData, getCinemas, getConcessions, getTicketPricing, getShowtimeSeats, updateShowtimeSeats, calculateVoucherDiscount, savePendingBooking, getPendingBooking } from "./storage.js"
+import { getMoviesData, getCinemas, getConcessions, getTicketPricing, getShowtimeSeats, updateShowtimeSeats, calculateVoucherDiscount, savePendingBooking, getPendingBooking, saveBookingTicket, clearPendingBooking } from "./storage.js"
 
 document.addEventListener("DOMContentLoaded", async () => {
 	await setupHeaderAndFooter()
@@ -877,6 +877,39 @@ document.addEventListener("DOMContentLoaded", async () => {
 				<a href="/movies.html" class="btn-ticket-done">Quay Về Trang Phim</a>
 			</div>
 		`
+
+		// 1. Permanently update seats to 'sold' in LocalStorage
+		const seatList = bookingState.selectedSeats.map(s => s.id)
+		updateShowtimeSeats(currentCinema.id, currentMovie.id, dateStr, timeSlot, seatList, "sold")
+
+		// 2. Save ticket to booking history
+		const newTicket = {
+			id: bookingCode,
+			movieId: currentMovie.id,
+			movieTitle: currentMovie.title,
+			moviePoster: currentMovie.poster,
+			cinemaId: currentCinema.id,
+			cinemaName: currentCinema.name,
+			screenName,
+			formatName,
+			date: dateStr,
+			time: timeSlot,
+			seats: seatNames,
+			concessions: comboList.map(c => `${c.qty}x ${c.name}`).join(", ") || "Không kèm bắp nước",
+			total: finalTotal,
+			voucherCode: bookingState.appliedCoupon || null,
+			discountAmount: bookingState.discountAmount || 0,
+			paymentMethod: "counter",
+			bookingDate: new Date().toISOString(),
+			status: "paid",
+		}
+		saveBookingTicket(newTicket)
+		clearPendingBooking()
+
+		// 3. Clear selected seats and re-render seat map so booked seats immediately show as sold
+		bookingState.selectedSeats = []
+		renderSeatMap()
+		updateSummarySidebar()
 
 		modal.classList.add("active")
 		document.body.style.overflow = "hidden"
