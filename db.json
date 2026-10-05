@@ -2360,6 +2360,29 @@
       "userEmail": "nam.nguyen@example.com",
       "bookingDate": "2026-09-26T07:30:00.000Z",
       "status": "paid"
+    },
+    {
+      "id": "BT-691759",
+      "movieId": "bongma",
+      "movieTitle": "Bóng Ma Nhà Hát",
+      "moviePoster": "/poster/poster_bongma.jpg",
+      "cinemaId": "beta-xuanthuy",
+      "cinemaName": "Beta Cinemas Xuân Thủy",
+      "screenName": "Phòng 2",
+      "formatName": "2D Phụ Đề",
+      "date": "2026-09-26",
+      "time": "17:00",
+      "seats": "F10, F11, L11-L12",
+      "concessions": "1x Beta Combo Đôi",
+      "total": 410000,
+      "voucherCode": null,
+      "discountAmount": 0,
+      "paymentMethod": "momo",
+      "customerName": "ss",
+      "customerPhone": "0912345678",
+      "customerEmail": "s@gmail.com",
+      "bookingDate": "2026-10-05T02:36:18.613Z",
+      "status": "paid"
     }
   ],
   "member_rewards": [
