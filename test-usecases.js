@@ -7,7 +7,7 @@
  */
 
 import { apiRegister, apiLogin, apiUpdateUser, apiGetMovies, apiCreateMovie, apiUpdateMovie, apiDeleteMovie, apiGetShowtimes, apiGetConcessions, apiCreateConcession, apiUpdateConcession, apiDeleteConcession, apiGetBookings, apiCreateBooking, apiUpdateBooking, apiDeleteBooking, apiGetCinemas, apiGetGenres, apiGetTicketPricing } from './js/api.js'
-import { calculateVoucherDiscount, savePendingBooking, isPendingBookingExpired, clearPendingBooking, redeemMemberReward, saveUserSession, logoutUser, initializeStorage, canSelectSeat, canDeselectSeat, areSeatsContiguous } from './js/storage.js'
+import { calculateVoucherDiscount, savePendingBooking, isPendingBookingExpired, clearPendingBooking, redeemMemberReward, saveUserSession, logoutUser, initializeStorage, canSelectSeat, canDeselectSeat, areSeatsContiguous, isSeatAvailable, checkSeatsAvailability, updateShowtimeSeats } from './js/storage.js'
 
 const BACKEND_URL = 'http://localhost:3000'
 
@@ -399,6 +399,13 @@ async function runAllTests() {
 	assert(!canDeselectSeat([s1, s2Valid, s2Gap], 'E09').allowed, 'Không cho phép bỏ chọn ghế ở giữa làm tách rời ghế')
 	assert(canDeselectSeat([s1, s2Valid, s2Gap], 'E10').allowed, 'Bỏ chọn ghế ở đầu ngoài hợp lệ')
 	assert(areSeatsContiguous([s1, s2Valid]), 'Kiểm tra toàn bộ danh sách ghế sát nhau hợp lệ')
+
+	// 5.8 Kiểm tra trạng thái ghế còn trống hay đã được đặt (Seat availability check)
+	updateShowtimeSeats('beta-thainguyen', 'utlan2', '2026-09-26', '14:30', ['A01', 'A02'], 'sold')
+	assert(!isSeatAvailable('beta-thainguyen', 'utlan2', '2026-09-26', '14:30', 'A01'), 'Ghế A01 đã đặt được nhận diện chính xác là không còn trống')
+	assert(!canSelectSeat([], { id: 'A01', row: 'A', col: 1, type: 'standard', status: 'sold' }).allowed, 'Không được phép đặt ghế đã có người đặt trước (status sold bị từ chối)')
+	const multiCheck = checkSeatsAvailability('beta-thainguyen', 'utlan2', '2026-09-26', '14:30', ['A01', 'A03'])
+	assert(!multiCheck.allAvailable && multiCheck.unavailableSeats.includes('A01'), 'Kiểm tra danh sách ghế phát hiện chính xác ghế đã bán')
 
 	/* ------------------------------------------------------------------
 	   USE CASE 6: VOUCHER VALIDATION BUSINESS LOGIC

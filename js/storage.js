@@ -1181,10 +1181,47 @@ export function getShowtimeStorageKey(cinemaId, movieId, date, time) {
 	return `${STORAGE_PREFIX}seats_${safeCinema}_${safeMovie}_${safeDate}_${safeTime}`
 }
 
+function syncSoldSeatsFromBookings(seatLayout, cinemaId, movieId, date, time) {
+	if (!Array.isArray(seatLayout)) return seatLayout
+	try {
+		const history = getBookingHistory()
+		if (Array.isArray(history)) {
+			history.forEach(b => {
+				if (b.status === "cancelled") return
+				const matchCinema = !b.cinemaId || b.cinemaId === cinemaId
+				const matchMovie = !b.movieId || b.movieId === movieId
+				const matchDate = !b.date || b.date === date
+				const matchTime = !b.time || b.time === time
+				if (matchCinema && matchMovie && matchDate && matchTime && b.seats) {
+					const bookedSeatIds = Array.isArray(b.seats)
+						? b.seats.map(s => (typeof s === "string" ? s : s.id))
+						: typeof b.seats === "string"
+							? b.seats.split(",").map(s => s.trim())
+							: []
+					bookedSeatIds.forEach(seatId => {
+						for (const rowBlock of seatLayout) {
+							const seatObj = rowBlock.seats.find(s => s.id === seatId)
+							if (seatObj) {
+								seatObj.status = "sold"
+								break
+							}
+						}
+					})
+				}
+			})
+		}
+	} catch (e) {
+		console.warn("[Storage] Error syncing sold seats:", e)
+	}
+	return seatLayout
+}
+
 export function getShowtimeSeats(cinemaId, movieId, date, time, options = {}) {
 	const key = getShowtimeStorageKey(cinemaId, movieId, date, time)
 	const cached = storageGet(key)
 	if (cached && Array.isArray(cached) && cached.length >= 12) {
+		syncSoldSeatsFromBookings(cached, cinemaId, movieId, date, time)
+		storageSet(key, cached)
 		return cached
 	}
 
@@ -1258,8 +1295,51 @@ export function getShowtimeSeats(cinemaId, movieId, date, time, options = {}) {
 		}
 	})
 
+	syncSoldSeatsFromBookings(seatLayout, cinemaId, movieId, date, time)
 	storageSet(key, seatLayout)
 	return seatLayout
+}
+
+/**
+ * Kiểm tra xem một ghế cụ thể có còn trống (available) không.
+ * Nếu ghế đã bán hoặc không tồn tại -> return false.
+ */
+export function isSeatAvailable(cinemaId, movieId, date, time, seatId) {
+	if (!seatId) return false
+	const layout = getShowtimeSeats(cinemaId, movieId, date, time)
+	if (!layout) return false
+
+	for (const rowBlock of layout) {
+		const found = rowBlock.seats.find(s => s.id === seatId)
+		if (found) {
+			return found.status !== "sold"
+		}
+	}
+	return false
+}
+
+/**
+ * Kiểm tra danh sách ghế xem tất cả có còn trống không.
+ * Trả về { allAvailable: boolean, unavailableSeats: string[] }
+ */
+export function checkSeatsAvailability(cinemaId, movieId, date, time, seatIds = []) {
+	const list = Array.isArray(seatIds)
+		? seatIds
+		: typeof seatIds === "string"
+			? seatIds.split(",").map(s => s.trim())
+			: []
+
+	const unavailableSeats = []
+	for (const sId of list) {
+		if (!isSeatAvailable(cinemaId, movieId, date, time, sId)) {
+			unavailableSeats.push(sId)
+		}
+	}
+
+	return {
+		allAvailable: unavailableSeats.length === 0,
+		unavailableSeats,
+	}
 }
 
 export function updateShowtimeSeats(cinemaId, movieId, date, time, seatIds, status = "sold") {

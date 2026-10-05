@@ -10,6 +10,7 @@ import {
 	saveBookingTicket,
 	updateShowtimeSeats,
 	calculateVoucherDiscount,
+	checkSeatsAvailability,
 } from "./storage.js"
 import { generateQRCodeSVG } from "./qrcode.js"
 
@@ -260,6 +261,17 @@ document.addEventListener("DOMContentLoaded", async () => {
 			return
 		}
 
+		// Kiểm tra lại tính khả dụng của ghế trước khi thanh toán
+		const seatList = seatsParam.split(",").map(s => s.trim()).filter(Boolean)
+		const availCheck = checkSeatsAvailability(currentCinema.id, currentMovie.id, dateStr, timeSlot, seatList)
+		if (!availCheck.allAvailable) {
+			showToast(`⚠️ Rất tiếc, ghế [${availCheck.unavailableSeats.join(", ")}] đã có người đặt trước! Vui lòng chọn lại ghế trống.`, "error", 4500)
+			setTimeout(() => {
+				window.location.href = `/booking.html?movieId=${encodeURIComponent(currentMovie.id)}&cinemaId=${encodeURIComponent(currentCinema.id)}&date=${encodeURIComponent(dateStr)}&time=${encodeURIComponent(timeSlot)}`
+			}, 1800)
+			return
+		}
+
 		// Disable submit button during transaction
 		const submitBtn = document.getElementById("btn-submit-payment")
 		if (submitBtn) submitBtn.disabled = true
@@ -294,7 +306,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 		clearInterval(timerInterval)
 
 		// 8. UPDATE SEAT STATUS TO 'SOLD' IN LOCALSTORAGE
-		const seatList = seatsParam.split(",").map(s => s.trim()).filter(Boolean)
 		updateShowtimeSeats(currentCinema.id, currentMovie.id, dateStr, timeSlot, seatList, "sold")
 
 		// 9. GENERATE RANDOM UNIQUE BOOKING CODE

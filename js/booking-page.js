@@ -15,6 +15,8 @@ import {
 	canSelectSeat,
 	canDeselectSeat,
 	areSeatsContiguous,
+	isSeatAvailable,
+	checkSeatsAvailability,
 } from "./storage.js"
 
 document.addEventListener("DOMContentLoaded", async () => {
@@ -254,10 +256,14 @@ document.addEventListener("DOMContentLoaded", async () => {
 		const price = +seatEl.dataset.price
 		const isSold = seatEl.classList.contains("seat-sold") || seatEl.dataset.status === "sold"
 
-		if (isSold) {
+		// 1. Kiểm tra ghế đã bán từ thuộc tính DOM hoặc trạng thái kho dữ liệu
+		const available = isSeatAvailable(currentCinema.id, currentMovie.id, dateStr, timeSlot, id)
+		if (isSold || !available) {
+			seatEl.classList.add("seat-sold")
+			seatEl.dataset.status = "sold"
 			seatEl.classList.add("seat-shake")
 			setTimeout(() => seatEl.classList.remove("seat-shake"), 400)
-			showToast(`⚠️ Ghế ${id} đã có người đặt, vui lòng chọn ghế còn trống khác!`, "warning")
+			showToast(`⚠️ Ghế ${id} đã được người khác đặt trước, không thể chọn! Vui lòng chọn ghế còn trống khác.`, "warning")
 			return
 		}
 
@@ -706,6 +712,16 @@ document.addEventListener("DOMContentLoaded", async () => {
 			}
 			if (!areSeatsContiguous(bookingState.selectedSeats)) {
 				showToast("⚠️ Vui lòng chọn các ghế ngồi sát nhau trong cùng một hàng, không được để trống ghế ở giữa!", "warning")
+				return false
+			}
+			// Kiểm tra tất cả ghế đã chọn có còn trống không
+			const seatIds = bookingState.selectedSeats.map(s => s.id)
+			const availCheck = checkSeatsAvailability(currentCinema.id, currentMovie.id, dateStr, timeSlot, seatIds)
+			if (!availCheck.allAvailable) {
+				showToast(`⚠️ Ghế [${availCheck.unavailableSeats.join(", ")}] đã có người đặt trước! Vui lòng chọn lại ghế trống khác.`, "warning", 4000)
+				bookingState.selectedSeats = bookingState.selectedSeats.filter(s => !availCheck.unavailableSeats.includes(s.id))
+				renderSeatMap()
+				updateSummarySidebar()
 				return false
 			}
 			return true

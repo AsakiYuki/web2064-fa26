@@ -14,6 +14,8 @@ import {
 	canSelectSeat,
 	canDeselectSeat,
 	areSeatsContiguous,
+	isSeatAvailable,
+	checkSeatsAvailability,
 } from "./storage.js"
 
 export class ShowtimePicker {
@@ -728,7 +730,7 @@ export class ShowtimePicker {
 		if (!modalBody) return
 
 		modalBody.querySelectorAll(".seat-item").forEach(seatEl => {
-			seatEl.addEventListener("click", () => this.toggleSeat(seatEl))
+			seatEl.addEventListener("click", () => this.toggleSeat(seatEl, slotData))
 		})
 
 		const proceedBtn = document.getElementById("btn-modal-proceed")
@@ -743,7 +745,15 @@ export class ShowtimePicker {
 				return
 			}
 
-			const seatNames = this.currentBooking.selectedSeats.map(s => s.id).join(", ")
+			const seatIds = this.currentBooking.selectedSeats.map(s => s.id)
+			const availCheck = checkSeatsAvailability(slotData.cinemaId, slotData.movieId, slotData.date, slotData.time, seatIds)
+			if (!availCheck.allAvailable) {
+				showToast(`⚠️ Ghế [${availCheck.unavailableSeats.join(", ")}] đã có người đặt trước! Vui lòng chọn lại ghế trống khác.`, "warning")
+				this.openSeatModal(slotData)
+				return
+			}
+
+			const seatNames = seatIds.join(", ")
 			const totalAmount = this.currentBooking.selectedSeats.reduce((sum, s) => sum + s.price, 0)
 
 			this.closeSeatModal()
@@ -755,7 +765,7 @@ export class ShowtimePicker {
 		})
 	}
 
-	toggleSeat(seatEl) {
+	toggleSeat(seatEl, slotData) {
 		const seatId = seatEl.dataset.seatId
 		const seatType = seatEl.dataset.seatType
 		const seatRow = seatEl.dataset.seatRow || seatId.charAt(0)
@@ -763,7 +773,10 @@ export class ShowtimePicker {
 		const seatPrice = +seatEl.dataset.price
 		const isSold = seatEl.classList.contains("seat-sold") || seatEl.dataset.status === "sold"
 
-		if (isSold) {
+		const available = slotData ? isSeatAvailable(slotData.cinemaId, slotData.movieId, slotData.date, slotData.time, seatId) : !isSold
+		if (isSold || !available) {
+			seatEl.classList.add("seat-sold")
+			seatEl.dataset.status = "sold"
 			seatEl.classList.add("seat-shake")
 			setTimeout(() => seatEl.classList.remove("seat-shake"), 400)
 			showToast(`⚠️ Ghế ${seatId} đã có người đặt, vui lòng chọn ghế còn trống khác!`, "warning")
