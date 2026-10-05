@@ -204,7 +204,7 @@
 
 			&:hover {
 				color: $primary-color;
-				background-color: rgba($primary-color, 0.12);
+				background-color: transparent;
 
 				&::after {
 					transform: scaleX(1);
@@ -213,6 +213,7 @@
 
 			&.active {
 				color: $primary-color;
+				background-color: transparent;
 
 				&::after {
 					transform: scaleX(1);

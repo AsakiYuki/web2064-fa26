@@ -74,15 +74,15 @@
           "category": "voucher",
           "discount": "Áp dụng giảm 10% cho toàn bộ hóa đơn đặt vé xem phim và combo bắp nước online.",
           "expiry": "31/12/2026",
-          "redeemedAt": "2026-10-04T09:58:09.344Z"
+          "redeemedAt": "2026-10-05T02:44:40.747Z"
         }
       ],
       "pointsHistory": [
         {
-          "id": "PH-1791107889344",
+          "id": "PH-1791168280747",
           "title": "Đổi quà: Voucher Giảm 10% Tổng Đơn",
           "points": -30,
-          "date": "2026-10-04T09:58:09.344Z",
+          "date": "2026-10-05T02:44:40.747Z",
           "code": "BETA10",
           "type": "redeem"
         }
@@ -146,6 +146,16 @@
       "rank": "Thành viên Beta Mới",
       "points": 120,
       "id": 1007,
+      "city": "Đà Nẵng"
+    },
+    {
+      "email": "tester_1791168280030@example.com",
+      "password": "$2a$10$8x9iZcKlj/nYrAfjMaUYOOhssJel5biADu7gVyEyaH8kNh0dRtmxa",
+      "name": "Tester Automation",
+      "phone": "0979871339",
+      "rank": "Thành viên Beta Mới",
+      "points": 120,
+      "id": 1008,
       "city": "Đà Nẵng"
     }
   ],

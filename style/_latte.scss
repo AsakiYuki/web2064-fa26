@@ -75,10 +75,18 @@
 			.nav-links a {
 				color: $latte-text;
 
+				&::after {
+					background: $latte-blue;
+				}
+
 				&:hover,
 				&.active {
 					color: $latte-blue;
-					background-color: rgba($latte-blue, 0.08);
+					background-color: transparent;
+
+					&::after {
+						transform: scaleX(1);
+					}
 				}
 			}
 		}
@@ -234,26 +242,123 @@
 		}
 	}
 
-	// Mega Menu
-	.megamenu-panel {
-		background: #ffffff;
-		border-color: $latte-surface2;
-		box-shadow: 0 16px 40px rgba(76, 79, 105, 0.16);
+	// Mega Menu Desktop (Movies & Cinemas)
+	.mega-menu-container {
+		background: #ffffff !important;
+		border: 1px solid $latte-surface2 !important;
+		box-shadow: 0 16px 40px rgba(76, 79, 105, 0.16) !important;
+		color: $latte-text !important;
 
-		.megamenu-column {
-			border-right-color: rgba($latte-surface2, 0.35);
+		&.mega-menu-movies {
+			.mega-cats-list {
+				border-right: 1px solid $latte-surface2 !important;
+
+				.mega-cat-link {
+					color: $latte-text !important;
+
+					&:hover {
+						background: rgba($latte-blue, 0.08) !important;
+						color: $latte-blue !important;
+					}
+				}
+			}
+
+			.mega-movies-grid {
+				.mm-card {
+					.mm-thumb {
+						background: $latte-mantle !important;
+						box-shadow: 0 4px 12px rgba(76, 79, 105, 0.1) !important;
+					}
+
+					.mm-title {
+						color: $latte-text !important;
+					}
+
+					&:hover .mm-title {
+						color: $latte-blue !important;
+					}
+				}
+			}
 		}
 
-		.megamenu-title {
-			color: $latte-blue;
+		&.mega-menu-cinemas {
+			.mega-cinema-region {
+				.region-heading {
+					color: $latte-blue !important;
+					border-bottom-color: rgba($latte-blue, 0.3) !important;
+				}
+
+				.cinema-quick-link {
+					color: $latte-subtext1 !important;
+
+					&:hover {
+						background: rgba($latte-blue, 0.08) !important;
+						color: $latte-blue !important;
+					}
+				}
+			}
+
+			.mega-cinema-footer {
+				border-top: 1px solid $latte-surface2 !important;
+
+				.btn-all-cinemas {
+					background: $latte-mantle !important;
+					border-color: $latte-surface2 !important;
+					color: $latte-text !important;
+
+					&:hover {
+						background: $latte-surface0 !important;
+						color: $latte-blue !important;
+					}
+				}
+			}
+		}
+	}
+
+	// User Profile Dropdown in Header
+	.user-profile-dropdown {
+		background: #ffffff !important;
+		border: 1px solid $latte-surface2 !important;
+		box-shadow: 0 12px 36px rgba(76, 79, 105, 0.15) !important;
+
+		.up-header {
+			border-bottom: 1px solid $latte-surface2 !important;
+
+			.up-rank {
+				color: $latte-peach !important;
+			}
+			.up-points {
+				color: $latte-subtext0 !important;
+			}
 		}
 
-		.megamenu-link {
-			color: $latte-text;
+		.up-item {
+			color: $latte-text !important;
+
+			svg {
+				color: $latte-subtext0 !important;
+			}
 
 			&:hover {
-				color: $latte-blue;
-				background: rgba($latte-blue, 0.08);
+				background: rgba($latte-blue, 0.08) !important;
+				color: $latte-blue !important;
+
+				svg {
+					color: $latte-blue !important;
+				}
+			}
+
+			&.up-logout {
+				color: $latte-red !important;
+				border-top: 1px solid $latte-surface2 !important;
+
+				svg {
+					color: $latte-red !important;
+				}
+
+				&:hover {
+					background: rgba($latte-red, 0.08) !important;
+				}
 			}
 		}
 	}
