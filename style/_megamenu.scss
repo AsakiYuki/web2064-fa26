@@ -136,6 +136,8 @@
 /* ---- DESKTOP MEGA MENU ON NAV LINKS ---- */
 .nav-item-has-mega {
 	position: relative;
+	display: inline-flex;
+	align-items: center;
 
 	&:hover .mega-menu-container {
 		opacity: 1;
@@ -146,8 +148,7 @@
 
 .mega-menu-container {
 	position: absolute;
-	top: 100%;
-	left: -120px;
+	top: calc(100% + 4px);
 	width: 640px;
 	background: $ctp-surface0;
 	border-radius: $radius-lg;
@@ -157,16 +158,25 @@
 	z-index: 1200;
 	opacity: 0;
 	visibility: hidden;
-	transform: translateY(10px);
+	transform: translateY(8px);
 	transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 	pointer-events: auto;
+
+	&::before {
+		content: '';
+		position: absolute;
+		top: -12px;
+		left: 0;
+		right: 0;
+		height: 12px;
+	}
 
 	&.mega-menu-movies {
 		display: grid;
 		grid-template-columns: 190px 1fr;
 		gap: 20px;
 		width: 720px;
-		left: -160px;
+		left: -200px;
 		align-items: stretch;
 
 		.mega-cats-list {
