@@ -329,18 +329,8 @@ document.addEventListener("DOMContentLoaded", async () => {
 		if (bookingCodeEl) bookingCodeEl.textContent = bookingCode
 		if (transferMsgEl) transferMsgEl.textContent = transferContent
 
-		// Create standard dynamic payment QR data
-		const paymentQrData = JSON.stringify({
-			type: "BETACINEMAS_TRANSFER_PAYMENT",
-			bookingCode: bookingCode,
-			amount: checkoutState.finalTotal,
-			cinema: currentCinema.name,
-			movie: currentMovie.title,
-			showtime: `${timeSlot} ${dateStr}`,
-			seats: seatsParam,
-			beneficiary: "BETA MEDIA CINEMAS JSC",
-			content: transferContent,
-		})
+		// Create standard dynamic payment QR data (compact and fast to scan)
+		const paymentQrData = `BETAPAY|${bookingCode}|${checkoutState.finalTotal}|${transferContent}`
 
 		if (qrRenderBox) {
 			qrRenderBox.innerHTML = generateQRCodeSVG(paymentQrData, {
@@ -468,14 +458,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 		// Generate Real Scannable Vector QR Code using qrcode.js
 		if (qrCodeBox) {
-			const qrData = JSON.stringify({
-				ticket: ticket.id,
-				movie: ticket.movieTitle,
-				cinema: ticket.cinemaName,
-				time: `${ticket.time} ${ticket.date}`,
-				seats: ticket.seats,
-				status: "VALID_PAID",
-			})
+			const qrData = `BETATICKET|${ticket.id}|${ticket.time} ${ticket.date}|${ticket.seats}`
 			qrCodeBox.innerHTML = generateQRCodeSVG(qrData, {
 				size: 180,
 				darkColor: "#11111b",
