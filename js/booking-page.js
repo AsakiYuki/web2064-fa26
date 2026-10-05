@@ -2,7 +2,20 @@
  * Beta Cinemas - Seat Selection & Concessions Booking Logic
  */
 import { setupHeaderAndFooter, formatCurrency, formatDateVN, showToast, translateDom, getSavedLang } from "./common.js"
-import { getMoviesData, getCinemas, getConcessions, getTicketPricing, getShowtimeSeats, updateShowtimeSeats, calculateVoucherDiscount, savePendingBooking, getPendingBooking } from "./storage.js"
+import {
+	getMoviesData,
+	getCinemas,
+	getConcessions,
+	getTicketPricing,
+	getShowtimeSeats,
+	updateShowtimeSeats,
+	calculateVoucherDiscount,
+	savePendingBooking,
+	getPendingBooking,
+	canSelectSeat,
+	canDeselectSeat,
+	areSeatsContiguous,
+} from "./storage.js"
 
 document.addEventListener("DOMContentLoaded", async () => {
 	await setupHeaderAndFooter()
@@ -221,8 +234,8 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 		container.innerHTML = rowsHTML
 
-		// Gán sự kiện click và bàn phím cho các ghế còn trống
-		container.querySelectorAll(".seat-unit:not(.seat-sold)").forEach(seat => {
+		// Gán sự kiện click và bàn phím cho tất cả các ghế (kể cả ghế đã bán để phản hồi)
+		container.querySelectorAll(".seat-unit").forEach(seat => {
 			seat.addEventListener("click", () => handleSeatToggle(seat))
 			seat.addEventListener("keydown", e => {
 				if (e.key === "Enter" || e.key === " ") {
@@ -234,38 +247,55 @@ document.addEventListener("DOMContentLoaded", async () => {
 	}
 
 	function handleSeatToggle(seatEl) {
-		if (seatEl.classList.contains("seat-sold")) return
-
 		const id = seatEl.dataset.seatId
 		const row = seatEl.dataset.row
 		const col = +seatEl.dataset.col
 		const type = seatEl.dataset.type
 		const price = +seatEl.dataset.price
+		const isSold = seatEl.classList.contains("seat-sold") || seatEl.dataset.status === "sold"
+
+		if (isSold) {
+			seatEl.classList.add("seat-shake")
+			setTimeout(() => seatEl.classList.remove("seat-shake"), 400)
+			showToast(`⚠️ Ghế ${id} đã có người đặt, vui lòng chọn ghế còn trống khác!`, "warning")
+			return
+		}
 
 		const existingIdx = bookingState.selectedSeats.findIndex(s => s.id === id)
 
 		if (existingIdx > -1) {
-			// Bỏ chọn ghế: Xóa khỏi danh sách, phục hồi màu ban đầu theo loại ghế
+			// Bỏ chọn ghế: Kiểm tra xem các ghế còn lại có bị tách rời không
+			const check = canDeselectSeat(bookingState.selectedSeats, id)
+			if (!check.allowed) {
+				seatEl.classList.add("seat-shake")
+				setTimeout(() => seatEl.classList.remove("seat-shake"), 400)
+				showToast(check.message, "warning")
+				return
+			}
+
 			bookingState.selectedSeats.splice(existingIdx, 1)
 			seatEl.classList.remove("seat-selected")
 			seatEl.setAttribute("aria-checked", "false")
 			showToast(`Đã bỏ chọn ghế ${id}`, "info", 1500)
 		} else {
-			// Giới hạn số lượng ghế tối đa là 8 ghế
-			const MAX_SEATS = 8
-			if (bookingState.selectedSeats.length >= MAX_SEATS) {
+			const targetSeat = { id, row, col, type, price, status: "available" }
+
+			// Kiểm tra chọn ghế sát nhau & liền kề
+			const check = canSelectSeat(bookingState.selectedSeats, targetSeat)
+			if (!check.allowed) {
 				seatEl.classList.add("seat-shake")
 				setTimeout(() => seatEl.classList.remove("seat-shake"), 400)
-				showToast(`⚠️ Bạn chỉ có thể chọn tối đa ${MAX_SEATS} ghế trong 1 lần đặt.`, "warning")
+				showToast(check.message, "warning")
 				return
 			}
+
 			// Chọn ghế mới: Thêm vào danh sách và đổi sang màu xanh ngọc nổi bật
-			bookingState.selectedSeats.push({ id, row, col, type, price })
+			bookingState.selectedSeats.push(targetSeat)
 			seatEl.classList.add("seat-selected")
 			seatEl.setAttribute("aria-checked", "true")
 
-			if (bookingState.selectedSeats.length === MAX_SEATS) {
-				showToast(`Bạn đã chọn đủ tối đa ${MAX_SEATS} ghế.`, "info", 2000)
+			if (bookingState.selectedSeats.length === 8) {
+				showToast(`Bạn đã chọn đủ tối đa 8 ghế.`, "info", 2000)
 			}
 		}
 
@@ -669,23 +699,32 @@ document.addEventListener("DOMContentLoaded", async () => {
 			updateSummarySidebar()
 		}
 
+		function validateSeatsBeforeProceed() {
+			if (bookingState.selectedSeats.length === 0) {
+				showToast("Vui lòng chọn ghế ngồi xem phim trước khi tiếp tục.", "warning")
+				return false
+			}
+			if (!areSeatsContiguous(bookingState.selectedSeats)) {
+				showToast("⚠️ Vui lòng chọn các ghế ngồi sát nhau trong cùng một hàng, không được để trống ghế ở giữa!", "warning")
+				return false
+			}
+			return true
+		}
+
 		tabSeats?.addEventListener("click", () => switchToStep(1))
 		tabCombos?.addEventListener("click", () => {
-			if (bookingState.selectedSeats.length === 0) {
-				showToast("Vui lòng chọn ít nhất 1 ghế trước khi chọn bắp nước.", "info")
-				return
-			}
+			if (!validateSeatsBeforeProceed()) return
 			switchToStep(2)
 		})
 
-		step2Btn?.addEventListener("click", () => switchToStep(2))
+		step2Btn?.addEventListener("click", () => {
+			if (!validateSeatsBeforeProceed()) return
+			switchToStep(2)
+		})
 		backBtn?.addEventListener("click", () => switchToStep(1))
 
 		checkoutBtn?.addEventListener("click", () => {
-			if (bookingState.selectedSeats.length === 0) {
-				showToast("Vui lòng chọn ghế ngồi xem phim.", "warning")
-				return
-			}
+			if (!validateSeatsBeforeProceed()) return
 			if (bookingState.currentStep === 1) {
 				switchToStep(2)
 			} else {

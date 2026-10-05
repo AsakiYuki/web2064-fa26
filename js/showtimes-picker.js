@@ -11,6 +11,9 @@ import {
 	getTicketPricing,
 	getShowtimeSeats,
 	updateShowtimeSeats,
+	canSelectSeat,
+	canDeselectSeat,
+	areSeatsContiguous,
 } from "./storage.js"
 
 export class ShowtimePicker {
@@ -639,10 +642,12 @@ export class ShowtimePicker {
 				seatsInRow += `
 					<div class="seat-item seat-${seat.type} ${isSold ? "seat-sold" : ""}"
 						data-seat-id="${seat.id}"
+						data-seat-row="${seat.row}"
+						data-seat-col="${seat.col}"
 						data-seat-type="${seat.type}"
 						data-price="${seat.price}"
 						data-status="${seat.status}"
-						title="${seat.id} (${seat.type === "vip" ? "Ghế VIP" : seat.type === "sweetbox" ? "Ghế Đôi Sweetbox" : "Ghế Thường"}: ${formatCurrency(seat.price)})"
+						title="${seat.id} (${isSold ? "Đã bán" : seat.type === "vip" ? "Ghế VIP" : seat.type === "sweetbox" ? "Ghế Đôi Sweetbox" : "Ghế Thường"}: ${formatCurrency(seat.price)})"
 						role="checkbox"
 						aria-checked="false"
 						tabindex="${isSold ? "-1" : "0"}">
@@ -722,7 +727,7 @@ export class ShowtimePicker {
 		const modalBody = document.getElementById("seat-modal-body")
 		if (!modalBody) return
 
-		modalBody.querySelectorAll(".seat-item:not(.seat-sold)").forEach(seatEl => {
+		modalBody.querySelectorAll(".seat-item").forEach(seatEl => {
 			seatEl.addEventListener("click", () => this.toggleSeat(seatEl))
 		})
 
@@ -730,6 +735,11 @@ export class ShowtimePicker {
 		proceedBtn?.addEventListener("click", () => {
 			if (!this.currentBooking.selectedSeats.length) {
 				showToast("Vui lòng chọn ít nhất 1 ghế để tiếp tục.", "warning")
+				return
+			}
+
+			if (!areSeatsContiguous(this.currentBooking.selectedSeats)) {
+				showToast("⚠️ Vui lòng chọn các ghế ngồi sát nhau trong cùng một hàng, không được để trống ghế ở giữa!", "warning")
 				return
 			}
 
@@ -748,24 +758,49 @@ export class ShowtimePicker {
 	toggleSeat(seatEl) {
 		const seatId = seatEl.dataset.seatId
 		const seatType = seatEl.dataset.seatType
+		const seatRow = seatEl.dataset.seatRow || seatId.charAt(0)
+		const seatCol = +seatEl.dataset.seatCol || +seatId.replace(/^[A-Z]/, "")
 		const seatPrice = +seatEl.dataset.price
+		const isSold = seatEl.classList.contains("seat-sold") || seatEl.dataset.status === "sold"
+
+		if (isSold) {
+			seatEl.classList.add("seat-shake")
+			setTimeout(() => seatEl.classList.remove("seat-shake"), 400)
+			showToast(`⚠️ Ghế ${seatId} đã có người đặt, vui lòng chọn ghế còn trống khác!`, "warning")
+			return
+		}
 
 		const existingIdx = this.currentBooking.selectedSeats.findIndex(s => s.id === seatId)
 
 		if (existingIdx > -1) {
+			const check = canDeselectSeat(this.currentBooking.selectedSeats, seatId)
+			if (!check.allowed) {
+				seatEl.classList.add("seat-shake")
+				setTimeout(() => seatEl.classList.remove("seat-shake"), 400)
+				showToast(check.message, "warning")
+				return
+			}
 			this.currentBooking.selectedSeats.splice(existingIdx, 1)
 			seatEl.classList.remove("seat-selected")
 			seatEl.setAttribute("aria-checked", "false")
 		} else {
-			if (this.currentBooking.selectedSeats.length >= 8) {
-				showToast("Bạn chỉ có thể chọn tối đa 8 ghế trong 1 lượt đặt.", "warning")
-				return
-			}
-			this.currentBooking.selectedSeats.push({
+			const targetSeat = {
 				id: seatId,
+				row: seatRow,
+				col: seatCol,
 				type: seatType,
 				price: seatPrice,
-			})
+				status: "available",
+			}
+			const check = canSelectSeat(this.currentBooking.selectedSeats, targetSeat)
+			if (!check.allowed) {
+				seatEl.classList.add("seat-shake")
+				setTimeout(() => seatEl.classList.remove("seat-shake"), 400)
+				showToast(check.message, "warning")
+				return
+			}
+
+			this.currentBooking.selectedSeats.push(targetSeat)
 			seatEl.classList.add("seat-selected")
 			seatEl.setAttribute("aria-checked", "true")
 		}

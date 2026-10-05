@@ -1289,6 +1289,139 @@ export function updateShowtimeSeats(cinemaId, movieId, date, time, seatIds, stat
 	return changed
 }
 
+/**
+ * Kiểm tra xem ghế targetSeat có thể được chọn dựa trên các ghế đang chọn không.
+ * Quy tắc:
+ * 1. Không chọn ghế đã bán (status === 'sold')
+ * 2. Tối đa 8 ghế trong 1 đơn đặt
+ * 3. Nếu chưa chọn ghế nào -> chọn bất kỳ ghế trống nào
+ * 4. Nếu đã có ghế -> ghế mới PHẢI CÙNG HÀNG (same row)
+ * 5. Ghế mới PHẢI SÁT NHAU / LIỀN KỀ (contiguous, không để trống ghế ở giữa)
+ * 6. Không được chọn ghế băng qua lối đi (aisle giữa cột 3-4 và 11-12)
+ */
+export function canSelectSeat(currentSeats = [], targetSeat) {
+	if (!targetSeat) return { allowed: false, message: "Ghế không hợp lệ." }
+
+	if (targetSeat.status === "sold") {
+		return {
+			allowed: false,
+			reason: "sold",
+			message: "Ghế này đã có người đặt, vui lòng chọn ghế còn trống khác!",
+		}
+	}
+
+	if (currentSeats.length >= 8) {
+		return {
+			allowed: false,
+			reason: "max",
+			message: "Bạn chỉ có thể chọn tối đa 8 ghế trong 1 lần đặt.",
+		}
+	}
+
+	if (currentSeats.length === 0) {
+		return { allowed: true }
+	}
+
+	// 1. Phải cùng hàng ghế
+	const firstSeat = currentSeats[0]
+	if (targetSeat.row !== firstSeat.row) {
+		return {
+			allowed: false,
+			reason: "different_row",
+			message: "Vui lòng chọn các ghế ngồi sát nhau trong cùng một hàng!",
+		}
+	}
+
+	// 2. Không trộn ghế Sweetbox đôi với ghế đơn
+	const isTargetSwb = targetSeat.type === "sweetbox"
+	const isCurrentSwb = firstSeat.type === "sweetbox"
+	if (isTargetSwb !== isCurrentSwb) {
+		return {
+			allowed: false,
+			reason: "different_type",
+			message: "Vui lòng chọn các ghế cùng loại ngồi liền kề nhau!",
+		}
+	}
+
+	// 3. Kiểm tra tính liền kề (sát nhau, không để khoảng trống)
+	const newCols = [...currentSeats.map(s => +s.col), +targetSeat.col].sort((a, b) => a - b)
+	for (let i = 1; i < newCols.length; i++) {
+		if (newCols[i] !== newCols[i - 1] + 1) {
+			return {
+				allowed: false,
+				reason: "gap",
+				message: "Vui lòng chọn các ghế ngồi sát nhau, không được để trống ghế ở giữa!",
+			}
+		}
+	}
+
+	// 4. Không băng qua lối đi (với ghế đơn thông thường)
+	if (!isTargetSwb) {
+		for (let i = 1; i < newCols.length; i++) {
+			const prev = newCols[i - 1]
+			const curr = newCols[i]
+			if ((prev === 3 && curr === 4) || (prev === 11 && curr === 12)) {
+				return {
+					allowed: false,
+					reason: "aisle",
+					message: "Không thể chọn ghế qua lối đi, vui lòng chọn các ghế ngồi liền nhau!",
+				}
+			}
+		}
+	}
+
+	return { allowed: true }
+}
+
+/**
+ * Kiểm tra xem việc bỏ chọn một ghế có làm các ghế còn lại bị tách rời không.
+ */
+export function canDeselectSeat(currentSeats = [], seatIdToRemove) {
+	if (!Array.isArray(currentSeats) || currentSeats.length <= 2) {
+		return { allowed: true }
+	}
+
+	const remaining = currentSeats.filter(s => s.id !== seatIdToRemove)
+	if (remaining.length <= 1) return { allowed: true }
+
+	const cols = remaining.map(s => +s.col).sort((a, b) => a - b)
+	for (let i = 1; i < cols.length; i++) {
+		if (cols[i] !== cols[i - 1] + 1) {
+			return {
+				allowed: false,
+				reason: "split",
+				message: "Không thể bỏ chọn ghế ở giữa vì các ghế còn lại sẽ bị cách xa nhau. Vui lòng bỏ chọn từ hai đầu ngoài!",
+			}
+		}
+	}
+
+	return { allowed: true }
+}
+
+/**
+ * Kiểm tra toàn bộ danh sách ghế có đảm bảo tính liền kề, sát nhau và cùng hàng không.
+ */
+export function areSeatsContiguous(seatsList = []) {
+	if (!Array.isArray(seatsList) || seatsList.length <= 1) return true
+
+	const row = seatsList[0].row
+	if (seatsList.some(s => s.row !== row)) return false
+
+	const isSwb = seatsList[0].type === "sweetbox"
+	const cols = seatsList.map(s => +s.col).sort((a, b) => a - b)
+
+	for (let i = 1; i < cols.length; i++) {
+		if (cols[i] !== cols[i - 1] + 1) return false
+		if (!isSwb) {
+			const prev = cols[i - 1]
+			const curr = cols[i]
+			if ((prev === 3 && curr === 4) || (prev === 11 && curr === 12)) return false
+		}
+	}
+
+	return true
+}
+
 /* ==========================================================================
    ANCILLARY GETTERS & DATABASE RESET
    ========================================================================== */

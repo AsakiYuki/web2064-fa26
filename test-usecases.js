@@ -7,7 +7,7 @@
  */
 
 import { apiRegister, apiLogin, apiUpdateUser, apiGetMovies, apiCreateMovie, apiUpdateMovie, apiDeleteMovie, apiGetShowtimes, apiGetConcessions, apiCreateConcession, apiUpdateConcession, apiDeleteConcession, apiGetBookings, apiCreateBooking, apiUpdateBooking, apiDeleteBooking, apiGetCinemas, apiGetGenres, apiGetTicketPricing } from './js/api.js'
-import { calculateVoucherDiscount, savePendingBooking, isPendingBookingExpired, clearPendingBooking, redeemMemberReward, saveUserSession, logoutUser, initializeStorage } from './js/storage.js'
+import { calculateVoucherDiscount, savePendingBooking, isPendingBookingExpired, clearPendingBooking, redeemMemberReward, saveUserSession, logoutUser, initializeStorage, canSelectSeat, canDeselectSeat, areSeatsContiguous } from './js/storage.js'
 
 const BACKEND_URL = 'http://localhost:3000'
 
@@ -382,6 +382,23 @@ async function runAllTests() {
 	savePendingBooking({ cinemaId: 'beta-thainguyen', seats: ['E05'], holdExpiresAt: Date.now() - 1000 })
 	assert(isPendingBookingExpired(), 'Phiên giữ ghế quá hạn được tự động nhận diện để giải phóng ghế')
 	clearPendingBooking()
+
+	// 5.7 Kiểm tra chọn ghế sát nhau & liền kề (Contiguous seats)
+	const s1 = { id: 'E08', row: 'E', col: 8, type: 'vip', price: 80000, status: 'available' }
+	const s2Valid = { id: 'E09', row: 'E', col: 9, type: 'vip', price: 80000, status: 'available' }
+	const s2Gap = { id: 'E10', row: 'E', col: 10, type: 'vip', price: 80000, status: 'available' }
+	const s2DiffRow = { id: 'F08', row: 'F', col: 8, type: 'vip', price: 80000, status: 'available' }
+	const sAcrossAisle = { id: 'E04', row: 'E', col: 4, type: 'vip', price: 80000, status: 'available' }
+	const sAisleEdge = { id: 'E03', row: 'E', col: 3, type: 'vip', price: 80000, status: 'available' }
+
+	assert(canSelectSeat([], s1).allowed, 'Ghế chọn đầu tiên bất kỳ hợp lệ')
+	assert(canSelectSeat([s1], s2Valid).allowed, 'Chọn ghế sát nhau liền kề (E08 và E09) thành công')
+	assert(!canSelectSeat([s1], s2Gap).allowed, 'Không cho phép chọn ghế cách xa nhau để trống ghế ở giữa (E08 và E10 bị từ chối)')
+	assert(!canSelectSeat([s1], s2DiffRow).allowed, 'Không cho phép chọn ghế khác hàng (E08 và F08 bị từ chối)')
+	assert(!canSelectSeat([sAisleEdge], sAcrossAisle).allowed, 'Không cho phép chọn ghế qua lối đi (E03 và E04 bị từ chối)')
+	assert(!canDeselectSeat([s1, s2Valid, s2Gap], 'E09').allowed, 'Không cho phép bỏ chọn ghế ở giữa làm tách rời ghế')
+	assert(canDeselectSeat([s1, s2Valid, s2Gap], 'E10').allowed, 'Bỏ chọn ghế ở đầu ngoài hợp lệ')
+	assert(areSeatsContiguous([s1, s2Valid]), 'Kiểm tra toàn bộ danh sách ghế sát nhau hợp lệ')
 
 	/* ------------------------------------------------------------------
 	   USE CASE 6: VOUCHER VALIDATION BUSINESS LOGIC
