@@ -1262,31 +1262,74 @@ export function getShowtimeSeats(cinemaId, movieId, date, time, options = {}) {
 	return seatLayout
 }
 
+export function decrementShowtimeAvailableSeats(cinemaId, movieId, date, time, seatCount = 1) {
+	try {
+		const allShowtimes = getShowtimes()
+		if (!Array.isArray(allShowtimes)) return false
+
+		const dayCinema = allShowtimes.find(st => st.date === date && st.cinemaId === cinemaId)
+		if (!dayCinema || !Array.isArray(dayCinema.schedules)) return false
+
+		const schedule = dayCinema.schedules.find(sc => sc.movieId === movieId)
+		if (!schedule || !Array.isArray(schedule.slots)) return false
+
+		const slot = schedule.slots.find(s => s.time === time)
+		if (slot && typeof slot.availableSeats === "number") {
+			slot.availableSeats = Math.max(0, slot.availableSeats - seatCount)
+			storageSet(STORAGE_KEYS.SHOWTIMES, allShowtimes)
+			return true
+		}
+		return false
+	} catch (err) {
+		console.warn("[Storage] Lỗi khi trừ số lượng ghế khả dụng:", err)
+		return false
+	}
+}
+
 export function updateShowtimeSeats(cinemaId, movieId, date, time, seatIds, status = "sold") {
 	const key = getShowtimeStorageKey(cinemaId, movieId, date, time)
 	const layout = getShowtimeSeats(cinemaId, movieId, date, time)
 	if (!layout) return false
 
-	const targetList = Array.isArray(seatIds)
+	const rawList = Array.isArray(seatIds)
 		? seatIds
 		: typeof seatIds === "string"
 			? seatIds.split(",").map(s => s.trim())
 			: []
 
-	let changed = false
+	const targetList = rawList.map(s => String(s).trim().toUpperCase()).filter(Boolean)
+	if (targetList.length === 0) return false
+
+	let changedCount = 0
 	layout.forEach(rowBlock => {
 		rowBlock.seats.forEach(s => {
-			if (targetList.includes(s.id)) {
+			const cleanId = String(s.id).trim().toUpperCase()
+			if (targetList.includes(cleanId)) {
 				s.status = status
-				changed = true
+				changedCount++
 			}
 		})
 	})
 
-	if (changed) {
+	if (changedCount > 0) {
 		storageSet(key, layout)
+		if (status === "sold") {
+			decrementShowtimeAvailableSeats(cinemaId, movieId, date, time, changedCount)
+		}
+		return true
 	}
-	return changed
+	return false
+}
+
+export function isSeatSold(cinemaId, movieId, date, time, seatId) {
+	const layout = getShowtimeSeats(cinemaId, movieId, date, time)
+	if (!layout) return false
+	const cleanTarget = String(seatId).trim().toUpperCase()
+	for (const rowBlock of layout) {
+		const found = rowBlock.seats.find(s => String(s.id).trim().toUpperCase() === cleanTarget)
+		if (found) return found.status === "sold"
+	}
+	return false
 }
 
 /* ==========================================================================
