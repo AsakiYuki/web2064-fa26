@@ -326,7 +326,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 			status: "paid",
 		}
 
-		saveBookingTicket(newTicket)
+		await saveBookingTicket(newTicket)
 		clearPendingBooking()
 
 		// 11. SWITCH TO E-TICKET SUCCESS VIEW WITH SCANNABLE QR CODE
