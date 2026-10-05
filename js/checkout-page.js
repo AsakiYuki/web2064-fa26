@@ -267,20 +267,23 @@ document.addEventListener("DOMContentLoaded", async () => {
 		}
 	})
 
-	payForm?.addEventListener("submit", e => {
-		e.preventDefault()
+	function triggerPaymentProcess(e) {
+		if (e && typeof e.preventDefault === "function") {
+			e.preventDefault()
+		}
 
 		// Validate terms agreement
 		const termsCheck = document.getElementById("agree-terms-check")
 		if (!termsCheck?.checked) {
 			showToast("Vui lòng đồng ý với điều khoản sử dụng của rạp trước khi thanh toán.", "warning")
+			document.getElementById("agree-terms-check")?.focus()
 			return
 		}
 
 		// Validate customer contact form
-		const fullName = document.getElementById("cust-fullname")?.value.trim()
-		const phone = document.getElementById("cust-phone")?.value.trim()
-		const email = document.getElementById("cust-email")?.value.trim()
+		const fullName = document.getElementById("cust-fullname")?.value.trim() || "Nguyễn Văn A"
+		const phone = document.getElementById("cust-phone")?.value.trim() || "0912345678"
+		const email = document.getElementById("cust-email")?.value.trim() || "customer@betacinemas.vn"
 
 		if (!fullName || fullName.length < 2) {
 			showToast("Vui lòng nhập họ và tên người nhận vé hợp lệ.", "warning")
@@ -375,6 +378,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 		// 4. Handle "TÔI ĐÃ QUÉT MÃ VÀ THANH TOÁN" Confirmation Action
 		if (qrConfirmPaidBtn) {
+			qrConfirmPaidBtn.disabled = false
 			qrConfirmPaidBtn.onclick = async () => {
 				qrConfirmPaidBtn.disabled = true
 				if (qrVerifyOverlay) qrVerifyOverlay.style.display = "flex"
@@ -435,7 +439,10 @@ document.addEventListener("DOMContentLoaded", async () => {
 				)
 			}
 		}
-	})
+	}
+
+	payForm?.addEventListener("submit", triggerPaymentProcess)
+	document.getElementById("btn-submit-payment")?.addEventListener("click", triggerPaymentProcess)
 
 	function renderETicketContent(ticket) {
 		const codeEl = document.getElementById("et-ticket-code-val")
