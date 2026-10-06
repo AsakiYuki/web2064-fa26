@@ -102,6 +102,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 	let holdTimerInterval = null
 	let holdSecondsRemaining = 300 // 5 phút = 300 giây
 	let hasNotifiedOneMinute = false
+	let isProceedingToCheckout = false
 
 	// Booking State
 	const bookingState = {
@@ -262,6 +263,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 	initCouponCode()
 	initCheckoutModal()
 	initHoldTimer()
+	initExitConfirmation()
 	translateDom(getSavedLang())
 
 	// Lắng nghe thay đổi ghế giữ từ các tab khác theo thời gian thực
@@ -992,6 +994,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 				const checkoutUrl = `/checkout.html?movieId=${encodeURIComponent(currentMovie.id)}&cinemaId=${encodeURIComponent(currentCinema.id)}&date=${encodeURIComponent(dateStr)}&time=${encodeURIComponent(timeSlot)}&screen=${encodeURIComponent(screenName)}&format=${encodeURIComponent(formatName)}&seats=${encodeURIComponent(seatNames)}&concessions=${encodeURIComponent(concessionsStr)}&voucher=${encodeURIComponent(bookingState.appliedCoupon || "")}&discount=${bookingState.discountAmount}&total=${finalTotal}&holdId=${encodeURIComponent(holdSessionId)}`
 
+				isProceedingToCheckout = true
 				window.location.href = checkoutUrl
 			}
 		})
@@ -1304,6 +1307,129 @@ document.addEventListener("DOMContentLoaded", async () => {
 		} else {
 			stopHoldCountdown()
 		}
+	}
+
+	/* ==========================================================================
+	   9. BẢO VỆ PHIÊN ĐẶT VÉ: XÁC NHẬN KHI RỜI KHỎI TRANG & CLEAR GIỮ GHẾ
+	   ========================================================================== */
+	function initExitConfirmation() {
+		let isLeavingConfirmed = false
+		let isReloadKey = false
+
+		// Bắt phím F5 / Ctrl+R / Cmd+R để không kích hoạt beforeunload khi người dùng chủ động làm mới trang
+		window.addEventListener("keydown", e => {
+			if (e.key === "F5" || ((e.ctrlKey || e.metaKey) && (e.key === "r" || e.key === "R"))) {
+				isReloadKey = true
+			}
+		})
+
+		window.addEventListener("keyup", () => {
+			setTimeout(() => {
+				isReloadKey = false
+			}, 1500)
+		})
+
+		function getExitConfirmMessage() {
+			const isEn = getSavedLang() === "en"
+			return isEn
+				? "Are you sure you want to leave the booking page?\n\nIf you leave, your selected seats and concessions will be cancelled."
+				: "⚠️ Bạn có chắc chắn muốn rời khỏi trang đặt vé?\n\nNếu bạn rời đi, các ghế và bắp nước đang giữ của bạn sẽ bị hủy để nhường cho khách hàng khác."
+		}
+
+		// 1. Chặn và hỏi người dùng khi click bất kỳ liên kết nào rời khỏi trang đặt vé (Logo, Trang chủ, Phim, Lịch chiếu, v.v.)
+		document.addEventListener(
+			"click",
+			e => {
+				// Chỉ can thiệp nếu người dùng đã chọn ghế hoặc đang giữ ghế
+				if (bookingState.selectedSeats.length === 0 || isProceedingToCheckout) return
+
+				const anchor = e.target.closest("a")
+				if (!anchor) return
+
+				const href = anchor.getAttribute("href")
+				if (!href) return
+
+				// Bỏ qua các liên kết nội bộ, modal, hành động javascript: hoặc mở tab mới
+				if (
+					href === "#" ||
+					href.startsWith("#") ||
+					href.startsWith("javascript:") ||
+					anchor.target === "_blank"
+				) {
+					return
+				}
+
+				// Bỏ qua nếu là liên kết chuyển tiếp tới trang thanh toán
+				if (href.includes("checkout.html")) {
+					isProceedingToCheckout = true
+					return
+				}
+
+				// Phân tích URL đích
+				try {
+					const destUrl = new URL(anchor.href, window.location.href)
+					const currentUrl = new URL(window.location.href)
+
+					// Nếu là cùng trang booking hiện tại (chỉ khác hash)
+					if (
+						destUrl.origin === currentUrl.origin &&
+						destUrl.pathname === currentUrl.pathname &&
+						destUrl.search === currentUrl.search
+					) {
+						return
+					}
+
+					// Người dùng đang muốn rời khỏi trang đặt vé (quay về trang chủ hoặc trang khác)
+					e.preventDefault()
+					e.stopPropagation()
+
+					const confirmLeave = window.confirm(getExitConfirmMessage())
+					if (confirmLeave) {
+						isLeavingConfirmed = true
+						// Giải phóng ghế đang giữ và xóa đơn tạm
+						releaseSeatHold(holdSessionId)
+						clearPendingBooking()
+						window.location.href = anchor.href
+					}
+				} catch (err) {
+					// URL không hợp lệ
+				}
+			},
+			true,
+		)
+
+		// 2. Xử lý nút Back/Forward của trình duyệt (History Popstate)
+		window.addEventListener("popstate", () => {
+			if (bookingState.selectedSeats.length > 0 && !isLeavingConfirmed && !isProceedingToCheckout) {
+				const confirmLeave = window.confirm(getExitConfirmMessage())
+				if (confirmLeave) {
+					isLeavingConfirmed = true
+					releaseSeatHold(holdSessionId)
+					clearPendingBooking()
+					window.history.back()
+				} else {
+					// Giữ người dùng ở lại trang đặt vé
+					window.history.pushState(null, "", window.location.href)
+				}
+			}
+		})
+
+		// 3. Thông báo của trình duyệt khi đóng tab / đóng cửa sổ (beforeunload)
+		window.addEventListener("beforeunload", e => {
+			if (
+				isProceedingToCheckout ||
+				isLeavingConfirmed ||
+				isReloadKey ||
+				bookingState.selectedSeats.length === 0
+			) {
+				return
+			}
+
+			const msg = getExitConfirmMessage()
+			e.preventDefault()
+			e.returnValue = msg
+			return msg
+		})
 	}
 
 	// Listen for global language switch events
