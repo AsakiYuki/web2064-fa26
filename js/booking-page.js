@@ -12,6 +12,8 @@ import {
 	calculateVoucherDiscount,
 	savePendingBooking,
 	getPendingBooking,
+	clearPendingBooking,
+	isPendingBookingExpired,
 	canSelectSeat,
 	canDeselectSeat,
 	areSeatsContiguous,
@@ -82,9 +84,19 @@ document.addEventListener("DOMContentLoaded", async () => {
 	const baseVipPrice = baseStandardPrice + 10000
 	const baseSweetboxPrice = baseStandardPrice * 2 + 15000
 
-	// Hold session identifier (each tab/window gets a distinct holdId, or inherited from URL)
+	// Kiểm tra và khôi phục dữ liệu đã chọn khi người dùng F5 / reload trang
+	const pending = getPendingBooking()
+	const isMatchingShowtime = Boolean(
+		pending &&
+		pending.movieId === currentMovie.id &&
+		pending.cinemaId === currentCinema.id &&
+		pending.date === dateStr &&
+		pending.time === timeSlot,
+	)
+
+	// Hold session identifier (ưu tiên kế thừa holdId từ pending booking hoặc URL để giữ nguyên phiên khi F5)
 	const holdIdFromUrl = urlParams.get("holdId")
-	const holdSessionId = holdIdFromUrl || getOrCreateHoldSessionId()
+	let holdSessionId = holdIdFromUrl || (isMatchingShowtime && pending?.holdId) || getOrCreateHoldSessionId()
 
 	// Hold timer variables (defined early to prevent TDZ access)
 	let holdTimerInterval = null
@@ -106,9 +118,102 @@ document.addEventListener("DOMContentLoaded", async () => {
 		currentStep: 1, // 1: Seats, 2: Concessions
 	}
 
-	// Pre-populate selected seats from URL if provided (e.g. from modal or direct link)
+	// 1. Tự động khôi phục dữ liệu đã chọn khi người dùng F5 / reload trang
+	let restoredSeatsCount = 0
+	let restoredConcessionsCount = 0
+
+	if (isMatchingShowtime) {
+		const now = Date.now()
+		const isExpired = pending.holdExpiresAt ? now >= pending.holdExpiresAt : false
+
+		if (isExpired) {
+			// Phiên giữ ghế đã quá 5 phút trong lúc người dùng rời trang / reload muộn
+			clearPendingBooking()
+			if (pending.holdId) {
+				releaseSeatHold(pending.holdId)
+			}
+			showToast("⏰ Phiên giữ ghế trước đó của bạn đã hết thời gian (5 phút). Vui lòng chọn lại ghế.", "warning", 6000)
+		} else {
+			// Phiên giữ ghế vẫn còn hiệu lực -> Khôi phục chính xác thời gian còn lại
+			if (pending.holdExpiresAt) {
+				holdSecondsRemaining = Math.max(5, Math.ceil((pending.holdExpiresAt - now) / 1000))
+			}
+
+			// Khôi phục danh sách ghế đã chọn
+			const rawSeats = Array.isArray(pending.selectedSeats) ? pending.selectedSeats : []
+			const seatIds = rawSeats.map(s => (typeof s === "string" ? s : s.id)).filter(Boolean)
+
+			if (seatIds.length > 0) {
+				const avail = checkSeatsAvailability(currentCinema.id, currentMovie.id, dateStr, timeSlot, seatIds, holdSessionId)
+				const validSeatIds = seatIds.filter(id => !avail.unavailableSeats.includes(id))
+
+				if (validSeatIds.length > 0) {
+					// Gia hạn / xác nhận lại phiên giữ ghế với các ghế hợp lệ
+					holdSeats(currentCinema.id, currentMovie.id, dateStr, timeSlot, validSeatIds, holdSessionId)
+
+					const seatLayout = getShowtimeSeats(currentCinema.id, currentMovie.id, dateStr, timeSlot, {
+						isIMAX,
+						basePrice: baseStandardPrice,
+					})
+
+					validSeatIds.forEach(id => {
+						for (const row of seatLayout) {
+							const foundSeat = row.seats.find(s => s.id === id)
+							if (foundSeat && foundSeat.status !== "sold") {
+								bookingState.selectedSeats.push({
+									id: foundSeat.id,
+									row: foundSeat.row,
+									col: foundSeat.col,
+									type: foundSeat.type,
+									price: foundSeat.price,
+								})
+								break
+							}
+						}
+					})
+					restoredSeatsCount = bookingState.selectedSeats.length
+				}
+			}
+
+			// Khôi phục danh sách bắp nước & combo đã chọn
+			if (Array.isArray(pending.selectedConcessions)) {
+				pending.selectedConcessions.forEach(c => {
+					if (!c || !c.id || !c.qty || c.qty <= 0) return
+					const fullItem = concessionsData?.items?.find(it => it.id === c.id) || {
+						id: c.id,
+						name: c.name || "Món ăn kèm",
+						price: c.price || 0,
+						image: c.image || "/promo/promo_deal.jpg",
+						description: c.description || "",
+					}
+					const validQty = Math.min(10, Math.max(1, c.qty))
+					bookingState.selectedConcessions.set(c.id, {
+						item: fullItem,
+						qty: validQty,
+					})
+					restoredConcessionsCount += validQty
+				})
+			}
+
+			// Khôi phục mã giảm giá
+			if (pending.voucherCode) {
+				bookingState.appliedCoupon = pending.voucherCode
+				bookingState.discountAmount = pending.discountAmount || 0
+			}
+
+			// Khôi phục bước hiện tại (nếu trước khi F5 đang ở bước chọn bắp nước)
+			const requestedStep = +(urlParams.get("step") || pending.currentStep || 1)
+			if (requestedStep === 2 && bookingState.selectedSeats.length > 0) {
+				bookingState.currentStep = 2
+			} else {
+				bookingState.currentStep = 1
+			}
+		}
+	}
+
+	// 2. Pre-populate selected seats from URL if provided (e.g. from modal or direct link) và chưa có ghế từ pending
 	const seatsParam = urlParams.get("seats")
-	if (seatsParam) {
+	if (seatsParam && bookingState.selectedSeats.length === 0) {
 		const seatIds = seatsParam.split(",").map(s => s.trim()).filter(Boolean)
 		const seatLayout = getShowtimeSeats(currentCinema.id, currentMovie.id, dateStr, timeSlot, {
 			isIMAX,
@@ -138,7 +243,15 @@ document.addEventListener("DOMContentLoaded", async () => {
 				bookingState.selectedSeats.map(s => s.id),
 				holdSessionId,
 			)
+			restoredSeatsCount = bookingState.selectedSeats.length
 		}
+	}
+
+	if (restoredSeatsCount > 0 || restoredConcessionsCount > 0) {
+		const parts = []
+		if (restoredSeatsCount > 0) parts.push(`${restoredSeatsCount} ghế (${bookingState.selectedSeats.map(s => s.id).join(", ")})`)
+		if (restoredConcessionsCount > 0) parts.push(`${restoredConcessionsCount} phần bắp nước`)
+		showToast(`✨ Đã tự động khôi phục ${parts.join(" & ")} bạn đã chọn!`, "info", 3500)
 	}
 
 	initBookingInfoDisplay()
@@ -707,14 +820,48 @@ document.addEventListener("DOMContentLoaded", async () => {
 		}
 	}
 
+	function updateBookingUrl() {
+		try {
+			const u = new URL(window.location.href)
+			if (bookingState.selectedSeats.length > 0) {
+				u.searchParams.set("seats", bookingState.selectedSeats.map(s => s.id).join(","))
+			} else {
+				u.searchParams.delete("seats")
+			}
+			if (holdSessionId) {
+				u.searchParams.set("holdId", holdSessionId)
+			}
+			if (bookingState.currentStep === 2) {
+				u.searchParams.set("step", "2")
+			} else {
+				u.searchParams.delete("step")
+			}
+			window.history.replaceState(null, "", u.toString())
+		} catch (e) {}
+	}
+
 	function syncPendingBookingToStorage(seatsTotal, concessionsTotal, finalTotal) {
-		if (bookingState.selectedSeats.length === 0) return
+		if (bookingState.selectedSeats.length === 0) {
+			clearPendingBooking()
+			updateBookingUrl()
+			return
+		}
 
 		const seatNames = bookingState.selectedSeats.map(s => s.id).join(", ")
 		const comboList = []
 		bookingState.selectedConcessions.forEach(({ item, qty }) => {
-			comboList.push({ id: item.id, name: item.name, price: item.price, qty })
+			comboList.push({
+				id: item.id,
+				name: item.name,
+				price: item.price,
+				qty,
+				image: item.image,
+				description: item.description,
+			})
 		})
+
+		const currentHold = getSeatHold(holdSessionId)
+		const holdExpiresAt = currentHold?.expiresAt || Date.now() + holdSecondsRemaining * 1000
 
 		const pendingPayload = {
 			movieId: currentMovie.id,
@@ -736,10 +883,12 @@ document.addEventListener("DOMContentLoaded", async () => {
 			discountAmount: bookingState.discountAmount,
 			grandTotal: finalTotal,
 			holdId: holdSessionId,
-			holdExpiresAt: Date.now() + (holdSecondsRemaining * 1000),
+			holdExpiresAt,
+			currentStep: bookingState.currentStep,
 		}
 
 		savePendingBooking(pendingPayload)
+		updateBookingUrl()
 	}
 
 	/* ==========================================================================
@@ -757,7 +906,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 		const stepItemSeats = document.getElementById("step-indicator-seats")
 		const stepItemCombos = document.getElementById("step-indicator-combos")
 
-		function switchToStep(step) {
+		function switchToStep(step, smoothScroll = true) {
 			bookingState.currentStep = step
 			if (step === 1) {
 				seatSection.style.display = "block"
@@ -775,8 +924,11 @@ document.addEventListener("DOMContentLoaded", async () => {
 				stepItemSeats?.classList.remove("active")
 				stepItemSeats?.classList.add("completed")
 				stepItemCombos?.classList.add("active")
-				window.scrollTo({ top: 120, behavior: "smooth" })
+				if (smoothScroll) {
+					window.scrollTo({ top: 120, behavior: "smooth" })
+				}
 			}
+			updateBookingUrl()
 			updateSummarySidebar()
 		}
 
@@ -843,6 +995,11 @@ document.addEventListener("DOMContentLoaded", async () => {
 				window.location.href = checkoutUrl
 			}
 		})
+
+		// Khôi phục trạng thái tab/bước nếu người dùng đang ở bước 2 trước khi reload
+		if (bookingState.currentStep === 2 && bookingState.selectedSeats.length > 0) {
+			switchToStep(2, false)
+		}
 	}
 
 	/* ==========================================================================
@@ -854,6 +1011,11 @@ document.addEventListener("DOMContentLoaded", async () => {
 		const msg = document.getElementById("coupon-msg")
 
 		if (!applyBtn || !input) return
+
+		// Điền sẵn mã voucher nếu được khôi phục từ phiên trước
+		if (bookingState.appliedCoupon) {
+			input.value = bookingState.appliedCoupon
+		}
 
 		applyBtn.addEventListener("click", () => {
 			const code = input.value.trim().toUpperCase()
@@ -1137,8 +1299,8 @@ document.addEventListener("DOMContentLoaded", async () => {
 			const existingHold = getSeatHold(holdSessionId)
 			const secs = existingHold
 				? Math.max(0, Math.ceil((existingHold.expiresAt - Date.now()) / 1000))
-				: 300
-			startHoldCountdown(secs || 300)
+				: holdSecondsRemaining
+			startHoldCountdown(secs || holdSecondsRemaining || 300)
 		} else {
 			stopHoldCountdown()
 		}
