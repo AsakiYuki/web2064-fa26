@@ -10,7 +10,8 @@
 	<link rel="stylesheet" href="/style/main.scss" />
 	<link rel="preconnect" href="https://fonts.googleapis.com" />
 	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-	<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+	<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"
+		rel="stylesheet" />
 	<script>
 		(function () {
 			const t = localStorage.getItem("beta_theme") || "mocha";
@@ -29,10 +30,13 @@
 				<div class="divider"></div>
 				<a href="#" id="btn-register">Đăng ký</a>
 				<div class="divider"></div>
-				<button type="button" class="theme-toggle-btn" id="theme-toggle-btn" role="switch" aria-checked="true" aria-label="Chuyển chế độ Giao diện Sáng / Tối" title="Chuyển chế độ Giao diện Sáng (Latte) / Tối (Mocha)">
+				<button type="button" class="theme-toggle-btn" id="theme-toggle-btn" role="switch" aria-checked="true"
+					aria-label="Chuyển chế độ Giao diện Sáng / Tối"
+					title="Chuyển chế độ Giao diện Sáng (Latte) / Tối (Mocha)">
 					<span class="theme-toggle-track">
 						<span class="theme-track-icon theme-track-icon-sun" aria-hidden="true">
-							<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+							<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+								stroke-linecap="round" stroke-linejoin="round">
 								<circle cx="12" cy="12" r="5" fill="currentColor"></circle>
 								<line x1="12" y1="1" x2="12" y2="3"></line>
 								<line x1="12" y1="21" x2="12" y2="23"></line>
@@ -50,10 +54,13 @@
 							</svg>
 						</span>
 						<span class="theme-toggle-thumb">
-							<svg class="theme-thumb-icon theme-thumb-moon" viewBox="0 0 24 24" fill="currentColor" stroke="none" aria-hidden="true">
+							<svg class="theme-thumb-icon theme-thumb-moon" viewBox="0 0 24 24" fill="currentColor"
+								stroke="none" aria-hidden="true">
 								<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
 							</svg>
-							<svg class="theme-thumb-icon theme-thumb-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+							<svg class="theme-thumb-icon theme-thumb-sun" viewBox="0 0 24 24" fill="none"
+								stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"
+								aria-hidden="true">
 								<circle cx="12" cy="12" r="5" fill="currentColor"></circle>
 								<line x1="12" y1="1" x2="12" y2="3"></line>
 								<line x1="12" y1="21" x2="12" y2="23"></line>
@@ -68,7 +75,8 @@
 					</span>
 				</button>
 				<div class="divider"></div>
-				<button type="button" class="lang-toggle-btn" id="lang-toggle-btn" title="Chuyển sang English" aria-label="Chuyển sang English">
+				<button type="button" class="lang-toggle-btn" id="lang-toggle-btn" title="Chuyển sang English"
+					aria-label="Chuyển sang English">
 					<span class="lang-flag">🇬🇧</span>
 					<span class="lang-code">EN</span>
 				</button>
@@ -80,7 +88,8 @@
 					<img src="/logo.webp" alt="Beta Cinemas Logo" />
 				</a>
 				<div class="cinema-selector-wrap" id="cinema-selector-wrap">
-					<button class="cinema-selector" id="cinema-selector-btn" aria-haspopup="listbox" aria-expanded="false">
+					<button class="cinema-selector" id="cinema-selector-btn" aria-haspopup="listbox"
+						aria-expanded="false">
 						<span class="cinema-selector-label" id="cinema-selector-label">Beta Thái Nguyên</span>
 						<svg class="cinema-selector-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor"
 							stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
@@ -97,9 +106,10 @@
 					<a href="/cinemas.html" id="nav-cinemas">Rạp</a>
 					<a href="/pricing.html" id="nav-pricing">Giá Vé</a>
 					<a href="/news.html" id="nav-news">Tin Mới Và Ưu Đãi</a>
-					<a href="#" id="nav-franchise">Nhượng Quyền</a>
+
 					<a href="/member.html" id="nav-member">Thành Viên</a>
-					<a href="/admin.html" id="nav-admin" class="admin-only" style="display: none; color: #fab387; font-weight: 700;">⚙️ Quản Trị</a>
+					<a href="/admin.html" id="nav-admin" class="admin-only"
+						style="display: none; color: #fab387; font-weight: 700;">⚙️ Quản Trị</a>
 				</nav>
 			</div>
 		</div>
@@ -126,9 +136,12 @@
 					<div class="detail-poster-wrap">
 						<img src="/poster/poster_utlan2.jpg" alt="Poster phim" id="detail-poster-img" />
 						<span class="poster-badge badge-t18" id="detail-poster-badge">T18</span>
-						<button type="button" class="btn-play-trailer-overlay" id="btn-play-trailer-poster" aria-label="Xem trailer">
+						<button type="button" class="btn-play-trailer-overlay" id="btn-play-trailer-poster"
+							aria-label="Xem trailer">
 							<div class="play-icon-circle">
-								<svg viewBox="0 0 24 24"><polygon points="5,3 19,12 5,21" /></svg>
+								<svg viewBox="0 0 24 24">
+									<polygon points="5,3 19,12 5,21" />
+								</svg>
 							</div>
 							<span>Xem Trailer</span>
 						</button>
@@ -178,12 +191,15 @@
 						<div class="detail-actions-bar">
 							<button type="button" class="btn-book-now" id="btn-book-now">
 								<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
-									<path d="M15 5v2M15 11v2M15 17v2M5 5h14a2 2 0 010 4H5a2 2 0 010-4zM5 13h14a2 2 0 010 4H5a2 2 0 010-4z" />
+									<path
+										d="M15 5v2M15 11v2M15 17v2M5 5h14a2 2 0 010 4H5a2 2 0 010-4zM5 13h14a2 2 0 010 4H5a2 2 0 010-4z" />
 								</svg>
 								ĐẶT VÉ NGAY
 							</button>
 							<button type="button" class="btn-watch-trailer-hero" id="btn-watch-trailer-hero">
-								<svg viewBox="0 0 24 24"><polygon points="5,3 19,12 5,21" /></svg>
+								<svg viewBox="0 0 24 24">
+									<polygon points="5,3 19,12 5,21" />
+								</svg>
 								Xem Trailer
 							</button>
 						</div>
@@ -208,7 +224,8 @@
 					<div class="age-advisory-box" id="age-advisory-box">
 						<div class="advisory-badge" id="advisory-badge">T18</div>
 						<p class="advisory-text" id="advisory-text">
-							Phim chỉ dành cho khán giả từ đủ 18 tuổi trở lên. Khán giả vui lòng xuất trình giấy tờ tùy thân có hình ảnh xác minh độ tuổi tại quầy soát vé rạp.
+							Phim chỉ dành cho khán giả từ đủ 18 tuổi trở lên. Khán giả vui lòng xuất trình giấy tờ tùy
+							thân có hình ảnh xác minh độ tuổi tại quầy soát vé rạp.
 						</p>
 					</div>
 				</section>
@@ -221,7 +238,8 @@
 					</div>
 					<div class="trailer-player-wrap">
 						<div class="player-iframe-aspect">
-							<iframe id="detail-trailer-iframe" allowfullscreen allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"></iframe>
+							<iframe id="detail-trailer-iframe" allowfullscreen
+								allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"></iframe>
 						</div>
 					</div>
 				</section>
@@ -278,12 +296,14 @@
 				<div class="footer-contact">
 					<h3>Liên Hệ</h3>
 					<p class="company-name">CÔNG TY CỔ PHẦN BETA MEDIA</p>
-					<p>Giấy chứng nhận ĐKKD số: 0106633482 - Đăng ký lần đầu ngày 08/09/2014 tại Sở Kế hoạch và Đầu tư TP. Hà Nội</p>
+					<p>Giấy chứng nhận ĐKKD số: 0106633482 - Đăng ký lần đầu ngày 08/09/2014 tại Sở Kế hoạch và Đầu tư
+						TP. Hà Nội</p>
 					<p>Địa chỉ: Tầng 3, số 595, đường Giải Phóng, Phường Tương Mai, Hà Nội</p>
 					<div class="contact-group">
 						<p class="contact-group-title">LIÊN HỆ CHĂM SÓC KHÁCH HÀNG:</p>
 						<p>Hotline: <strong>1900 636807</strong></p>
-						<p>Email: <a href="mailto:mkt@betacinemas.vn" style="color: rgba(255, 255, 255, 0.82)">mkt@betacinemas.vn</a></p>
+						<p>Email: <a href="mailto:mkt@betacinemas.vn"
+								style="color: rgba(255, 255, 255, 0.82)">mkt@betacinemas.vn</a></p>
 					</div>
 					<div class="social-icons">
 						<a href="#" class="social-icon" id="social-fb" aria-label="Facebook">f</a>

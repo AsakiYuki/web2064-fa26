@@ -10,7 +10,8 @@
 	<link rel="stylesheet" href="/style/main.scss" />
 	<link rel="preconnect" href="https://fonts.googleapis.com" />
 	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-	<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+	<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"
+		rel="stylesheet" />
 	<script>
 		(function () {
 			const t = localStorage.getItem("beta_theme") || "mocha";
@@ -29,10 +30,13 @@
 				<div class="divider"></div>
 				<a href="#" id="btn-register">Đăng ký</a>
 				<div class="divider"></div>
-				<button type="button" class="theme-toggle-btn" id="theme-toggle-btn" role="switch" aria-checked="true" aria-label="Chuyển chế độ Giao diện Sáng / Tối" title="Chuyển chế độ Giao diện Sáng (Latte) / Tối (Mocha)">
+				<button type="button" class="theme-toggle-btn" id="theme-toggle-btn" role="switch" aria-checked="true"
+					aria-label="Chuyển chế độ Giao diện Sáng / Tối"
+					title="Chuyển chế độ Giao diện Sáng (Latte) / Tối (Mocha)">
 					<span class="theme-toggle-track">
 						<span class="theme-track-icon theme-track-icon-sun" aria-hidden="true">
-							<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+							<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+								stroke-linecap="round" stroke-linejoin="round">
 								<circle cx="12" cy="12" r="5" fill="currentColor"></circle>
 								<line x1="12" y1="1" x2="12" y2="3"></line>
 								<line x1="12" y1="21" x2="12" y2="23"></line>
@@ -50,10 +54,13 @@
 							</svg>
 						</span>
 						<span class="theme-toggle-thumb">
-							<svg class="theme-thumb-icon theme-thumb-moon" viewBox="0 0 24 24" fill="currentColor" stroke="none" aria-hidden="true">
+							<svg class="theme-thumb-icon theme-thumb-moon" viewBox="0 0 24 24" fill="currentColor"
+								stroke="none" aria-hidden="true">
 								<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
 							</svg>
-							<svg class="theme-thumb-icon theme-thumb-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+							<svg class="theme-thumb-icon theme-thumb-sun" viewBox="0 0 24 24" fill="none"
+								stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"
+								aria-hidden="true">
 								<circle cx="12" cy="12" r="5" fill="currentColor"></circle>
 								<line x1="12" y1="1" x2="12" y2="3"></line>
 								<line x1="12" y1="21" x2="12" y2="23"></line>
@@ -68,7 +75,8 @@
 					</span>
 				</button>
 				<div class="divider"></div>
-				<button type="button" class="lang-toggle-btn" id="lang-toggle-btn" title="Chuyển sang English" aria-label="Chuyển sang English">
+				<button type="button" class="lang-toggle-btn" id="lang-toggle-btn" title="Chuyển sang English"
+					aria-label="Chuyển sang English">
 					<span class="lang-flag">🇬🇧</span>
 					<span class="lang-code">EN</span>
 				</button>
@@ -80,7 +88,8 @@
 					<img src="/logo.webp" alt="Beta Cinemas Logo" />
 				</a>
 				<div class="cinema-selector-wrap" id="cinema-selector-wrap">
-					<button class="cinema-selector" id="cinema-selector-btn" aria-haspopup="listbox" aria-expanded="false">
+					<button class="cinema-selector" id="cinema-selector-btn" aria-haspopup="listbox"
+						aria-expanded="false">
 						<span class="cinema-selector-label" id="cinema-selector-label">Beta Thái Nguyên</span>
 						<svg class="cinema-selector-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor"
 							stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
@@ -97,9 +106,10 @@
 					<a href="/cinemas.html" id="nav-cinemas">Rạp</a>
 					<a href="/pricing.html" id="nav-pricing">Giá Vé</a>
 					<a href="/news.html" id="nav-news">Tin Mới Và Ưu Đãi</a>
-					<a href="#" id="nav-franchise">Nhượng Quyền</a>
+
 					<a href="/member.html" id="nav-member">Thành Viên</a>
-					<a href="/admin.html" id="nav-admin" class="admin-only" style="display: none; color: #fab387; font-weight: 700;">⚙️ Quản Trị</a>
+					<a href="/admin.html" id="nav-admin" class="admin-only"
+						style="display: none; color: #fab387; font-weight: 700;">⚙️ Quản Trị</a>
 				</nav>
 			</div>
 		</div>
@@ -157,7 +167,8 @@
 					<section class="checkout-card">
 						<div class="card-title-row">
 							<h2>
-								<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+								<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+									stroke-width="2">
 									<path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
 									<circle cx="12" cy="7" r="4"></circle>
 								</svg>
@@ -177,7 +188,8 @@
 							<div class="form-field field-full">
 								<label for="cust-email">Địa chỉ Email nhận vé điện tử <span class="req">*</span></label>
 								<input type="email" id="cust-email" placeholder="example@gmail.com" required />
-								<small style="color: #a6adc8; font-size: 11px; margin-top: 4px;">Vé điện tử & mã QR sẽ được gửi trực tiếp đến địa chỉ email này sau khi hoàn tất giao dịch.</small>
+								<small style="color: #a6adc8; font-size: 11px; margin-top: 4px;">Vé điện tử & mã QR sẽ
+									được gửi trực tiếp đến địa chỉ email này sau khi hoàn tất giao dịch.</small>
 							</div>
 						</div>
 					</section>
@@ -186,7 +198,8 @@
 					<section class="checkout-card">
 						<div class="card-title-row">
 							<h2>
-								<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+								<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+									stroke-width="2">
 									<rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect>
 									<line x1="1" y1="10" x2="23" y2="10"></line>
 								</svg>
@@ -199,7 +212,9 @@
 							<div class="payment-option-card active" data-method="momo">
 								<div class="po-left">
 									<div class="po-radio"></div>
-									<div class="po-logo" style="background:#a50064; color:#fff; font-weight:900; font-size:13px;">MOMO</div>
+									<div class="po-logo"
+										style="background:#a50064; color:#fff; font-weight:900; font-size:13px;">MOMO
+									</div>
 									<div class="po-text">
 										<span class="po-title">Ví Điện Tử MoMo</span>
 										<span class="po-desc">Quét mã QR qua ứng dụng MoMo siêu tốc</span>
@@ -212,20 +227,27 @@
 							<div class="payment-option-card" data-method="zalopay">
 								<div class="po-left">
 									<div class="po-radio"></div>
-									<div class="po-logo" style="background:#0068ff; color:#fff; font-weight:900; font-size:12px;">Zalo</div>
+									<div class="po-logo"
+										style="background:#0068ff; color:#fff; font-weight:900; font-size:12px;">Zalo
+									</div>
 									<div class="po-text">
 										<span class="po-title">Ví Điện Tử ZaloPay</span>
-										<span class="po-desc">Thanh toán liền mạch trong Zalo hoặc ứng dụng ZaloPay</span>
+										<span class="po-desc">Thanh toán liền mạch trong Zalo hoặc ứng dụng
+											ZaloPay</span>
 									</div>
 								</div>
-								<span class="po-badge" style="background:rgba(137,180,250,0.15); color:#89b4fa; border-color:rgba(137,180,250,0.3)">Ưu đãi</span>
+								<span class="po-badge"
+									style="background:rgba(137,180,250,0.15); color:#89b4fa; border-color:rgba(137,180,250,0.3)">Ưu
+									đãi</span>
 							</div>
 
 							<!-- VNPay -->
 							<div class="payment-option-card" data-method="vnpay">
 								<div class="po-left">
 									<div class="po-radio"></div>
-									<div class="po-logo" style="background:#004b91; color:#fff; font-weight:900; font-size:11px;">VNPAY</div>
+									<div class="po-logo"
+										style="background:#004b91; color:#fff; font-weight:900; font-size:11px;">VNPAY
+									</div>
 									<div class="po-text">
 										<span class="po-title">VNPAY-QR</span>
 										<span class="po-desc">Hỗ trợ 40+ ứng dụng Ngân hàng & ví điện tử</span>
@@ -237,7 +259,9 @@
 							<div class="payment-option-card" data-method="visa">
 								<div class="po-left">
 									<div class="po-radio"></div>
-									<div class="po-logo" style="background:#313244; color:#fab387; font-weight:900; font-size:13px;">CARD</div>
+									<div class="po-logo"
+										style="background:#313244; color:#fab387; font-weight:900; font-size:13px;">CARD
+									</div>
 									<div class="po-text">
 										<span class="po-title">Thẻ Quốc Tế (Visa, Master, JCB)</span>
 										<span class="po-desc">Cổng thanh toán bảo mật 3D Secure</span>
@@ -249,7 +273,9 @@
 							<div class="payment-option-card" data-method="atm">
 								<div class="po-left">
 									<div class="po-radio"></div>
-									<div class="po-logo" style="background:#181825; color:#a6e3a1; font-weight:900; font-size:12px;">ATM</div>
+									<div class="po-logo"
+										style="background:#181825; color:#a6e3a1; font-weight:900; font-size:12px;">ATM
+									</div>
 									<div class="po-text">
 										<span class="po-title">Thẻ ATM Nội Địa / Internet Banking</span>
 										<span class="po-desc">Vietcombank, Techcombank, MB, BIDV, v.v.</span>
@@ -262,7 +288,8 @@
 						<div class="checkout-terms-box">
 							<input type="checkbox" id="agree-terms-check" checked />
 							<label for="agree-terms-check">
-								Tôi xác nhận thông tin trên là chính xác và đồng ý với <a href="#">Điều khoản sử dụng</a> cũng như <a href="#">Chính sách hoàn/đổi vé</a> của Beta Cinemas.
+								Tôi xác nhận thông tin trên là chính xác và đồng ý với <a href="#">Điều khoản sử
+									dụng</a> cũng như <a href="#">Chính sách hoàn/đổi vé</a> của Beta Cinemas.
 							</label>
 						</div>
 					</section>
@@ -308,17 +335,24 @@
 					</div>
 					<div class="sd-item" id="co-discount-row" style="display: none;">
 						<span class="sd-label" style="color: #a6e3a1;">Giảm giá voucher</span>
-						<span class="sd-value" id="co-discount-val" style="color: #a6e3a1; font-weight: 800;">-0 ₫</span>
+						<span class="sd-value" id="co-discount-val" style="color: #a6e3a1; font-weight: 800;">-0
+							₫</span>
 					</div>
 				</div>
 
 				<!-- Voucher Coupon Box -->
-				<div class="summary-coupon-box" style="margin-top: 14px; padding-top: 14px; border-top: 1px solid rgba(88, 91, 112, 0.4);">
+				<div class="summary-coupon-box"
+					style="margin-top: 14px; padding-top: 14px; border-top: 1px solid rgba(88, 91, 112, 0.4);">
 					<div class="coupon-input-group" style="display: flex; gap: 8px;">
-						<input type="text" id="co-coupon-input" placeholder="Mã giảm giá (VD: BETA10)" aria-label="Mã giảm giá" style="flex: 1; background: #313244; border: 1.5px solid rgba(88, 91, 112, 0.4); border-radius: 6px; padding: 8px 12px; color: #cdd6f4; font-size: 13px; text-transform: uppercase;" />
-						<button type="button" id="btn-co-apply-coupon" style="background: #89b4fa; color: #11111b; border: none; padding: 8px 14px; border-radius: 6px; font-weight: 700; font-size: 12px; cursor: pointer; white-space: nowrap;">Áp dụng</button>
+						<input type="text" id="co-coupon-input" placeholder="Mã giảm giá (VD: BETA10)"
+							aria-label="Mã giảm giá"
+							style="flex: 1; background: #313244; border: 1.5px solid rgba(88, 91, 112, 0.4); border-radius: 6px; padding: 8px 12px; color: #cdd6f4; font-size: 13px; text-transform: uppercase;" />
+						<button type="button" id="btn-co-apply-coupon"
+							style="background: #89b4fa; color: #11111b; border: none; padding: 8px 14px; border-radius: 6px; font-weight: 700; font-size: 12px; cursor: pointer; white-space: nowrap;">Áp
+							dụng</button>
 					</div>
-					<div class="coupon-applied-msg" id="co-coupon-msg" style="display: none; font-size: 12px; margin-top: 6px;"></div>
+					<div class="coupon-applied-msg" id="co-coupon-msg"
+						style="display: none; font-size: 12px; margin-top: 6px;"></div>
 				</div>
 
 				<!-- Total Price Summary -->
@@ -331,7 +365,8 @@
 
 				<!-- Submit payment button -->
 				<button type="submit" form="form-checkout-payment" class="btn-pay-now" id="btn-submit-payment">
-					<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+					<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+						stroke-width="2.5">
 						<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
 					</svg>
 					XÁC NHẬN THANH TOÁN
@@ -341,10 +376,15 @@
 
 		<!-- Simulated Payment Processing Modal -->
 		<div class="modal-backdrop" id="payment-processing-modal">
-			<div class="modal-content auth-modal-content" style="max-width: 420px; text-align: center; padding: 36px 28px;">
-				<div class="processing-spinner" style="width: 54px; height: 54px; border: 4px solid rgba(137,180,250,0.2); border-top-color: #89b4fa; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 20px;"></div>
-				<h3 style="font-size: 20px; font-weight: 800; color: #cdd6f4; margin: 0 0 8px;" id="proc-title">Đang Xử Lý Giao Dịch</h3>
-				<p style="font-size: 13px; color: #a6adc8; margin: 0;" id="proc-desc">Vui lòng không đóng trình duyệt trong khi hệ thống kết nối với cổng thanh toán bảo mật...</p>
+			<div class="modal-content auth-modal-content"
+				style="max-width: 420px; text-align: center; padding: 36px 28px;">
+				<div class="processing-spinner"
+					style="width: 54px; height: 54px; border: 4px solid rgba(137,180,250,0.2); border-top-color: #89b4fa; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 20px;">
+				</div>
+				<h3 style="font-size: 20px; font-weight: 800; color: #cdd6f4; margin: 0 0 8px;" id="proc-title">Đang Xử
+					Lý Giao Dịch</h3>
+				<p style="font-size: 13px; color: #a6adc8; margin: 0;" id="proc-desc">Vui lòng không đóng trình duyệt
+					trong khi hệ thống kết nối với cổng thanh toán bảo mật...</p>
 			</div>
 		</div>
 
@@ -400,7 +440,8 @@
 							<span class="et-lbl">Bắp Nước Đi Kèm</span>
 							<span class="et-val" id="et-combos-val">1x Beta Combo Đôi</span>
 						</div>
-						<div class="et-info-item" style="grid-column: 1 / -1; border-top: 1px dashed rgba(255,255,255,0.15); padding-top: 10px;">
+						<div class="et-info-item"
+							style="grid-column: 1 / -1; border-top: 1px dashed rgba(255,255,255,0.15); padding-top: 10px;">
 							<span class="et-lbl">Tổng Tiền Đã Thanh Toán</span>
 							<span class="et-val val-gold" id="et-total-val" style="font-size: 20px;">255.000 ₫</span>
 						</div>
@@ -416,7 +457,8 @@
 				<!-- Actions -->
 				<div class="eticket-bottom-actions">
 					<button type="button" class="btn-et-action btn-save-ticket" id="btn-download-ticket">
-						<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+						<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+							stroke-width="2">
 							<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
 							<polyline points="7 10 12 15 17 10"></polyline>
 							<line x1="12" y1="15" x2="12" y2="3"></line>
@@ -424,7 +466,8 @@
 						Lưu Vé / In Vé
 					</button>
 					<a href="/profile.html" class="btn-et-action btn-home-back">
-						<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+						<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+							stroke-width="2">
 							<circle cx="12" cy="12" r="10"></circle>
 							<polyline points="12 6 12 12 16 14"></polyline>
 						</svg>
