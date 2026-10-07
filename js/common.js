@@ -880,8 +880,11 @@ export function closeTrailerModal() {
 function initMegaMenuAndMobileDrawer() {
 	// 1. Movies Mega Menu on Desktop
 	const navMovies = document.getElementById("nav-movies")
-	if (navMovies && !navMovies.parentElement.classList.contains("nav-item-has-mega")) {
-		navMovies.parentElement.classList.add("nav-item-has-mega")
+	if (navMovies && !navMovies.closest(".nav-item-has-mega")) {
+		const wrapMovies = document.createElement("div")
+		wrapMovies.className = "nav-item-has-mega"
+		navMovies.parentNode.insertBefore(wrapMovies, navMovies)
+		wrapMovies.appendChild(navMovies)
 
 		const megaEl = document.createElement("div")
 		megaEl.className = "mega-menu-container mega-menu-movies"
@@ -924,15 +927,18 @@ function initMegaMenuAndMobileDrawer() {
 				</a>
 			</div>
 		`
-		navMovies.parentElement.appendChild(megaEl)
+		wrapMovies.appendChild(megaEl)
 	}
 
 	// 2. Cinemas Mega Menu on Desktop
 	const navCinemas = document.getElementById("nav-cinemas")
 	if (navCinemas) {
 		navCinemas.href = "/cinemas.html"
-		if (!navCinemas.parentElement.classList.contains("nav-item-has-mega")) {
-			navCinemas.parentElement.classList.add("nav-item-has-mega")
+		if (!navCinemas.closest(".nav-item-has-mega")) {
+			const wrapCinemas = document.createElement("div")
+			wrapCinemas.className = "nav-item-has-mega"
+			navCinemas.parentNode.insertBefore(wrapCinemas, navCinemas)
+			wrapCinemas.appendChild(navCinemas)
 
 			const megaCinemas = document.createElement("div")
 			megaCinemas.className = "mega-menu-container mega-menu-cinemas"
@@ -958,7 +964,7 @@ function initMegaMenuAndMobileDrawer() {
 					<a href="/cinemas.html" class="btn-all-cinemas">Khám phá toàn bộ 10 cụm rạp Beta Cinemas & Tiện ích →</a>
 				</div>
 			`
-			navCinemas.parentElement.appendChild(megaCinemas)
+			wrapCinemas.appendChild(megaCinemas)
 		}
 	}
 

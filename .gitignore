@@ -33,4 +33,4 @@ dist-ssr
 # Office lock and backup files
 .~lock.*
 *.bak
-
+/slides

@@ -790,6 +790,58 @@ export const PHRASE_PAIRS = [
 	["Cụm Rạp Beta", "Beta Cinema Locations"],
 	["Cụm rạp Beta", "Beta Cinema Locations"],
 
+	// --- Member Page & Digital Card ---
+	["Điểm Thưởng Tích Lũy", "Accumulated Reward Points"],
+	["Hạng Hội Viên Hiện Tại", "Current Membership Tier"],
+	["Chi Tiêu Tích Lũy 2026", "Accumulated Spending 2026"],
+	["giá trị quy đổi", "redemption value"],
+	["Tích 7% cho mọi đơn vé", "Earn 7% on all ticket orders"],
+	["Tích 10% cho mọi đơn vé", "Earn 10% on all ticket orders"],
+	["Tích 5% cho mọi đơn vé", "Earn 5% on all ticket orders"],
+	["Xếp hạng cập nhật tự động", "Tier updated automatically"],
+	["Đặc Quyền Thành Viên Beta VIP", "Beta VIP Member Privileges"],
+	["Đặc Quyền Thành Viên BETA VIP", "BETA VIP Member Privileges"],
+	["Đặc Quyền Thành Viên BETA DIAMOND", "BETA DIAMOND Member Privileges"],
+	["Đặc Quyền Thành Viên BETA STANDARD", "BETA STANDARD Member Privileges"],
+	["Đặc Quyền Thành Viên", "Member Privileges"],
+	["Đặc Quyền VVIP Tối Đa", "Maximum VVIP Privileges"],
+	["Hạng Cao Cấp Nhất: DIAMOND", "Highest Tier: DIAMOND"],
+	["Chào Mừng Hội Viên Beta Cinemas!", "Welcome Beta Cinemas Member!"],
+	["Xin Chào", "Welcome"],
+	["Quý Hội Viên", "Valued Member"],
+	["Hạng thẻ của bạn đang được áp dụng tỷ lệ tích lũy", "Your card tier applies an accumulation rate of"],
+	["cho tất cả các giao dịch vé và bắp nước tại mọi cụm rạp Beta toàn quốc.", "for all ticket and concession transactions at all Beta cinemas nationwide."],
+	["Hạng VIP (Đang áp dụng)", "VIP Tier (Current)"],
+	["Cần thêm 150 điểm để lên DIAMOND", "Need 150 more points for DIAMOND"],
+	["Đổi Quà Bằng Điểm Thưởng", "Redeem Rewards with Points"],
+	["Lịch Sử Tích & Tiêu Điểm", "Points History"],
+	["Xem Vé Đã Mua", "View Purchased Tickets"],
+	["Lật Thẻ Xem Mã Vạch Quẹt Quầy", "Flip Card to View Barcode"],
+	["Bấm để lật thẻ xem mã vạch", "Click to flip card and view barcode"],
+	["Chủ thẻ / Card Holder", "Card Holder"],
+	["Hạn dùng", "Valid Thru"],
+	["Xuất trình mã này cho nhân viên tại quầy vé hoặc quầy bắp nước để tích điểm & áp dụng ưu đãi hội viên.", "Present this code to staff at the box office or concession counter to earn points and apply member discounts."],
+	["Đạt hạng Beta Diamond để nhận đặc quyền x2 điểm ngày hội thành viên và vé mời Premiere phim chiếu sớm.", "Reach Beta Diamond to receive 2x points on Member Day and Premiere invitations for early screenings."],
+	["Tích lũy điểm thưởng không giới hạn cho mọi giao dịch xem phim và đồ ăn nhẹ. Đổi ngay vé miễn phí và hàng loạt voucher ưu đãi độc quyền.", "Earn unlimited reward points for every movie and snack transaction. Instantly redeem free tickets and exclusive vouchers."],
+	["Bạn đang sở hữu hạng thành viên cao nhất với tỷ lệ tích lũy tối đa 10% và miễn phí nâng hạng ghế!", "You hold the highest membership tier with up to 10% points earning and free seat upgrades!"],
+	["Hạng Standard", "Standard Tier"],
+	["Hạng VIP", "VIP Tier"],
+	["Cần thêm", "Need more"],
+	["điểm để lên VIP", "points for VIP"],
+	["điểm để lên DIAMOND", "points for DIAMOND"],
+	["Tích lũy thêm điểm để nâng tỷ lệ tích lũy lên 7% và nhận quà sinh nhật 2 vé 2D + 1 combo.", "Earn more points to upgrade accumulation rate to 7% and receive birthday gifts: 2 2D tickets + 1 combo."],
+	["Lên hạng Diamond để được nhân đôi điểm vào ngày hội thành viên (15 hàng tháng) và vé mời Premiere.", "Upgrade to Diamond for 2x points on Member Day (15th monthly) and Premiere invitations."],
+	["Chương Trình Khách Hàng Thân Thiết", "Loyalty Rewards Program"],
+	["Đăng Ký Thành Viên Beta Cinemas", "Register for Beta Cinemas Membership"],
+	["Hạng Thẻ", "Membership Tier"],
+	["Thẻ Thành Viên", "Member Card"],
+	["THÀNH VIÊN BETA", "BETA MEMBER"],
+	["KHÁCH HÀNG THÂN THIẾT", "LOYAL CUSTOMER"],
+	["Tất cả danh mục", "All categories"],
+	["Vé Xem Phim Miễn Phí", "Free Movie Tickets"],
+	["Combo Bắp Nước", "Concession Combos"],
+	["Quà Lưu Niệm Phim", "Movie Souvenirs"],
+
 	// --- Auth Modal & User Prompts ---
 	["ĐĂNG NHẬP THÀNH VIÊN", "MEMBER LOGIN"],
 	["ĐĂNG KÝ THÀNH VIÊN", "MEMBER REGISTRATION"],
@@ -813,14 +865,19 @@ function escapeRegex(str) {
 	return str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
 }
 
-// Global Exact Map & Precompiled Regexes
+// Global Maps & Precompiled Regexes
 const EXACT_MAP = new Map()
+const REVERSE_EXACT_MAP = new Map()
 const COMPILED_REGEXES = []
+const COMPILED_REGEXES_EN_TO_VI = []
 
 function initPhraseIndices() {
 	EXACT_MAP.clear()
+	REVERSE_EXACT_MAP.clear()
 	COMPILED_REGEXES.length = 0
+	COMPILED_REGEXES_EN_TO_VI.length = 0
 
+	// 1. Vietnamese -> English forward mapping
 	for (const [vi, en] of PHRASE_PAIRS) {
 		const norm = vi.trim().replace(/\s+/g, " ")
 		if (!EXACT_MAP.has(norm)) {
@@ -855,6 +912,66 @@ function initPhraseIndices() {
 			console.warn("Could not compile regex for:", vi, e)
 		}
 	}
+
+	// 2. English -> Vietnamese reverse mapping
+	// Create extended pair list including emoji-stripped versions
+	const reversePairs = [...PHRASE_PAIRS]
+	for (const [vi, en] of PHRASE_PAIRS) {
+		const cleanVi = vi.replace(/^[\p{Emoji}\p{Extended_Pictographic}\s\uFE0F\u200D]+/u, "").trim()
+		const cleanEn = en.replace(/^[\p{Emoji}\p{Extended_Pictographic}\s\uFE0F\u200D]+/u, "").trim()
+		if (cleanVi && cleanEn && (cleanVi !== vi || cleanEn !== en)) {
+			reversePairs.push([cleanVi, cleanEn])
+		}
+	}
+
+	// Sort descending by English phrase length so longer phrases match first
+	reversePairs.sort((a, b) => b[1].length - a[1].length)
+
+	const SKIP_WORDS = new Set([
+		"in", "to", "at", "by", "or", "on", "as", "is", "it", "no", "ok", "id", "en", "vi",
+		"the", "a", "an", "of", "and", "hot", "new", "all", "vip", "imax", "2d", "3d", "4d", "per"
+	])
+
+	for (const [vi, en] of reversePairs) {
+		const normEn = en.trim().replace(/\s+/g, " ")
+		const normVi = vi.trim().replace(/\s+/g, " ")
+		if (!normEn || !normVi) continue
+
+		if (!REVERSE_EXACT_MAP.has(normEn)) {
+			REVERSE_EXACT_MAP.set(normEn, normVi)
+		}
+		const lowerEn = normEn.toLowerCase()
+		if (!REVERSE_EXACT_MAP.has(lowerEn)) {
+			REVERSE_EXACT_MAP.set(lowerEn, normVi)
+		}
+
+		// Skip short single words or common prepositions for substring regex
+		if (!normEn.includes(" ") && (normEn.length < 3 || SKIP_WORDS.has(lowerEn))) {
+			continue
+		}
+
+		const tokens = normEn.split(" ").map(escapeRegex)
+		const first = tokens[0]
+		const last = tokens[tokens.length - 1]
+
+		let pattern = tokens.join("\\s+")
+		if (/^[\p{L}\p{N}]/u.test(first)) {
+			pattern = `(?<![\\p{L}\\p{N}])${pattern}`
+		}
+		if (/[\p{L}\p{N}]$/u.test(last)) {
+			pattern = `${pattern}(?![\\p{L}\\p{N}])`
+		}
+
+		try {
+			COMPILED_REGEXES_EN_TO_VI.push({
+				en: normEn,
+				vi: normVi,
+				regex: new RegExp(pattern, "giu"),
+			})
+		} catch (e) {
+			console.warn("Could not compile reverse regex for:", en, e)
+		}
+	}
 }
 
 initPhraseIndices()
@@ -872,15 +989,58 @@ export function getSavedLang() {
 	return val === "en" ? "en" : "vi"
 }
 
-/** Translate single text string */
+/** Translate single text string bi-directionally */
 export function translateString(text, targetLang = getSavedLang()) {
 	if (!text || typeof text !== "string") return text
-	if (targetLang === "vi") return text // Vietnamese is native in HTML
 
 	const trimmed = text.trim()
 	if (!trimmed) return text
 
-	// Normalize spaces & newlines for matching
+	// Target: Vietnamese (translate English -> Vietnamese)
+	if (targetLang === "vi") {
+		// Fast exit: if text has no ASCII letters, it is not English
+		if (!/[a-zA-Z]/.test(text)) return text
+
+		const norm = trimmed.replace(/\s+/g, " ")
+
+		// 1. Direct Exact Match O(1)
+		if (REVERSE_EXACT_MAP.has(norm)) {
+			const vi = REVERSE_EXACT_MAP.get(norm)
+			const lead = text.match(/^\s*/)[0]
+			const trail = text.match(/\s*$/)[0]
+			return lead + vi + trail
+		}
+
+		// 2. Direct Case-Insensitive Exact Match
+		const normLower = norm.toLowerCase()
+		if (REVERSE_EXACT_MAP.has(normLower)) {
+			let vi = REVERSE_EXACT_MAP.get(normLower)
+			if (norm === norm.toUpperCase() && /[A-Z]/.test(norm)) {
+				vi = vi.toUpperCase()
+			}
+			const lead = text.match(/^\s*/)[0]
+			const trail = text.match(/\s*$/)[0]
+			return lead + vi + trail
+		}
+
+		// 3. Substring replacement for multi-phrase or mixed sentence nodes
+		let result = text
+		for (const item of COMPILED_REGEXES_EN_TO_VI) {
+			item.regex.lastIndex = 0
+			if (item.regex.test(result)) {
+				item.regex.lastIndex = 0
+				result = result.replace(item.regex, match => {
+					if (match === match.toUpperCase() && /[A-Z]/.test(match)) {
+						return item.vi.toUpperCase()
+					}
+					return item.vi
+				})
+			}
+		}
+		return result
+	}
+
+	// Target: English (translate Vietnamese -> English)
 	const norm = trimmed.replace(/\s+/g, " ")
 
 	// 1. Direct Exact Match O(1)
@@ -923,7 +1083,13 @@ export function translateString(text, targetLang = getSavedLang()) {
 /** Translate single key */
 export function t(key, defaultVal = "") {
 	const lang = getSavedLang()
-	if (lang === "vi") return defaultVal || key
+	if (lang === "vi") {
+		if (!key) return defaultVal || ""
+		const norm = key.trim().replace(/\s+/g, " ")
+		if (REVERSE_EXACT_MAP.has(norm)) return REVERSE_EXACT_MAP.get(norm)
+		if (REVERSE_EXACT_MAP.has(norm.toLowerCase())) return REVERSE_EXACT_MAP.get(norm.toLowerCase())
+		return translateString(key, "vi") || defaultVal || key
+	}
 	const norm = (key || "").trim().replace(/\s+/g, " ")
 	if (EXACT_MAP.has(norm)) return EXACT_MAP.get(norm)
 	if (EXACT_MAP.has(norm.toLowerCase())) return EXACT_MAP.get(norm.toLowerCase())
@@ -945,15 +1111,18 @@ export function translateDom(lang = getSavedLang()) {
 		const isEn = lang === "en"
 
 		// 1. Document Title
-		if (document.__origTitle === undefined) {
-			document.__origTitle = document.title
-		}
 		if (isEn) {
+			if (document.__origTitle === undefined) {
+				document.__origTitle = document.title
+			}
 			document.title = translateString(document.__origTitle, "en")
 		} else {
-			if (document.__origTitle !== undefined) {
-				document.title = document.__origTitle
+			let vi = document.__origTitle
+			if (!vi || (/[a-zA-Z]/.test(vi) && translateString(vi, "vi") !== vi)) {
+				vi = translateString(document.title || "", "vi")
 			}
+			document.title = vi
+			document.__origTitle = vi
 		}
 
 		// 2. Process Text Nodes
@@ -981,7 +1150,9 @@ export function translateDom(lang = getSavedLang()) {
 		while (currentNode) {
 			if (isEn) {
 				if (currentNode.__origText === undefined) {
-					currentNode.__origText = currentNode.nodeValue
+					// Guard against nodeValue already being in English: resolve original vi
+					const maybeVi = translateString(currentNode.nodeValue, "vi")
+					currentNode.__origText = maybeVi !== currentNode.nodeValue ? maybeVi : currentNode.nodeValue
 				}
 				const orig = currentNode.__origText
 				const translated = translateString(orig, "en")
@@ -989,9 +1160,15 @@ export function translateDom(lang = getSavedLang()) {
 					currentNode.nodeValue = translated
 				}
 			} else {
-				if (currentNode.__origText !== undefined) {
-					currentNode.nodeValue = currentNode.__origText
+				// Switching to VI
+				let vi = currentNode.__origText
+				if (!vi || (/[a-zA-Z]/.test(vi) && translateString(vi, "vi") !== vi)) {
+					vi = translateString(currentNode.nodeValue, "vi")
 				}
+				if (vi !== currentNode.nodeValue) {
+					currentNode.nodeValue = vi
+				}
+				currentNode.__origText = vi
 			}
 			currentNode = walker.nextNode()
 		}
@@ -1000,15 +1177,24 @@ export function translateDom(lang = getSavedLang()) {
 		document.querySelectorAll("input, textarea").forEach(el => {
 			if (isEn) {
 				if (el.__origPlaceholder === undefined) {
-					el.__origPlaceholder = el.placeholder || ""
+					const maybeVi = translateString(el.placeholder || "", "vi")
+					el.__origPlaceholder = maybeVi
 				}
 				if (el.__origPlaceholder) {
-					el.placeholder = translateString(el.__origPlaceholder, "en")
+					const translated = translateString(el.__origPlaceholder, "en")
+					if (translated !== el.placeholder) {
+						el.placeholder = translated
+					}
 				}
 			} else {
-				if (el.__origPlaceholder !== undefined) {
-					el.placeholder = el.__origPlaceholder
+				let vi = el.__origPlaceholder
+				if (!vi || (/[a-zA-Z]/.test(vi) && translateString(vi, "vi") !== vi)) {
+					vi = translateString(el.placeholder || "", "vi")
 				}
+				if (vi !== el.placeholder) {
+					el.placeholder = vi
+				}
+				el.__origPlaceholder = vi
 			}
 		})
 
@@ -1018,15 +1204,24 @@ export function translateDom(lang = getSavedLang()) {
 
 			if (isEn) {
 				if (el.__origTitle === undefined) {
-					el.__origTitle = el.title || ""
+					const maybeVi = translateString(el.title || "", "vi")
+					el.__origTitle = maybeVi
 				}
 				if (el.__origTitle) {
-					el.title = translateString(el.__origTitle, "en")
+					const translated = translateString(el.__origTitle, "en")
+					if (translated !== el.title) {
+						el.title = translated
+					}
 				}
 			} else {
-				if (el.__origTitle !== undefined) {
-					el.title = el.__origTitle
+				let vi = el.__origTitle
+				if (!vi || (/[a-zA-Z]/.test(vi) && translateString(vi, "vi") !== vi)) {
+					vi = translateString(el.title || "", "vi")
 				}
+				if (vi !== el.title) {
+					el.title = vi
+				}
+				el.__origTitle = vi
 			}
 		})
 
@@ -1034,17 +1229,27 @@ export function translateDom(lang = getSavedLang()) {
 		document.querySelectorAll("[aria-label]").forEach(el => {
 			if (el.classList.contains("theme-toggle-btn") || el.classList.contains("lang-toggle-btn")) return
 
+			const current = el.getAttribute("aria-label") || ""
 			if (isEn) {
 				if (el.__origAriaLabel === undefined) {
-					el.__origAriaLabel = el.getAttribute("aria-label") || ""
+					const maybeVi = translateString(current, "vi")
+					el.__origAriaLabel = maybeVi
 				}
 				if (el.__origAriaLabel) {
-					el.setAttribute("aria-label", translateString(el.__origAriaLabel, "en"))
+					const translated = translateString(el.__origAriaLabel, "en")
+					if (translated !== current) {
+						el.setAttribute("aria-label", translated)
+					}
 				}
 			} else {
-				if (el.__origAriaLabel !== undefined) {
-					el.setAttribute("aria-label", el.__origAriaLabel)
+				let vi = el.__origAriaLabel
+				if (!vi || (/[a-zA-Z]/.test(vi) && translateString(vi, "vi") !== vi)) {
+					vi = translateString(current, "vi")
 				}
+				if (vi !== current) {
+					el.setAttribute("aria-label", vi)
+				}
+				el.__origAriaLabel = vi
 			}
 		})
 
@@ -1052,15 +1257,24 @@ export function translateDom(lang = getSavedLang()) {
 		document.querySelectorAll("select option").forEach(opt => {
 			if (isEn) {
 				if (opt.__origText === undefined) {
-					opt.__origText = opt.textContent || ""
+					const maybeVi = translateString(opt.textContent || "", "vi")
+					opt.__origText = maybeVi
 				}
 				if (opt.__origText) {
-					opt.textContent = translateString(opt.__origText, "en")
+					const translated = translateString(opt.__origText, "en")
+					if (translated !== opt.textContent) {
+						opt.textContent = translated
+					}
 				}
 			} else {
-				if (opt.__origText !== undefined) {
-					opt.textContent = opt.__origText
+				let vi = opt.__origText
+				if (!vi || (/[a-zA-Z]/.test(vi) && translateString(vi, "vi") !== vi)) {
+					vi = translateString(opt.textContent || "", "vi")
 				}
+				if (vi !== opt.textContent) {
+					opt.textContent = vi
+				}
+				opt.__origText = vi
 			}
 		})
 
@@ -1120,7 +1334,6 @@ export function applyLang(lang, notify = false) {
 	const validLang = lang === "en" ? "en" : "vi"
 	if (typeof document !== "undefined") {
 		document.documentElement.setAttribute("lang", validLang)
-		translateDom(validLang)
 	}
 
 	try {
@@ -1131,8 +1344,23 @@ export function applyLang(lang, notify = false) {
 		console.warn("Could not save language to localStorage:", e)
 	}
 
+	// 1. Immediately translate current DOM
+	if (typeof document !== "undefined") {
+		translateDom(validLang)
+	}
+
+	// 2. Dispatch event to notify components so they re-render
 	if (typeof window !== "undefined") {
 		window.dispatchEvent(new CustomEvent("betaLangChange", { detail: { lang: validLang } }))
+	}
+
+	// 3. Immediately re-translate DOM to catch any synchronous component re-renders
+	if (typeof document !== "undefined") {
+		translateDom(validLang)
+		// And schedule a requestAnimationFrame to catch microtasks/render queues
+		requestAnimationFrame(() => {
+			translateDom(validLang)
+		})
 	}
 
 	if (notify && typeof window !== "undefined" && typeof window.__showToast === "function") {
@@ -1174,13 +1402,22 @@ export function initI18nObserver() {
 	window.__i18nObserverActive = true
 
 	const observer = new MutationObserver(mutations => {
-		if (getSavedLang() !== "en" || isTranslating) return
+		if (isTranslating) return
 
 		let hasChanges = false
 		for (const m of mutations) {
 			if (m.type === "childList" && m.addedNodes.length > 0) {
-				hasChanges = true
-				break
+				for (const node of m.addedNodes) {
+					if (node.nodeType === Node.ELEMENT_NODE) {
+						if (node.id === "toast-container" || node.classList?.contains("toast")) continue
+						hasChanges = true
+						break
+					} else if (node.nodeType === Node.TEXT_NODE && node.nodeValue && node.nodeValue.trim()) {
+						hasChanges = true
+						break
+					}
+				}
+				if (hasChanges) break
 			}
 			if (m.type === "characterData") {
 				hasChanges = true
@@ -1191,7 +1428,7 @@ export function initI18nObserver() {
 		if (hasChanges) {
 			if (debounceTimer) cancelAnimationFrame(debounceTimer)
 			debounceTimer = requestAnimationFrame(() => {
-				translateDom("en")
+				translateDom(getSavedLang())
 			})
 		}
 	})

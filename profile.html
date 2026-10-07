@@ -10,7 +10,8 @@
 	<link rel="stylesheet" href="/style/main.scss" />
 	<link rel="preconnect" href="https://fonts.googleapis.com" />
 	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-	<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+	<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"
+		rel="stylesheet" />
 	<script>
 		(function () {
 			const t = localStorage.getItem("beta_theme") || "mocha";
@@ -29,10 +30,13 @@
 				<div class="divider"></div>
 				<a href="#" id="btn-register">Đăng ký</a>
 				<div class="divider"></div>
-				<button type="button" class="theme-toggle-btn" id="theme-toggle-btn" role="switch" aria-checked="true" aria-label="Chuyển chế độ Giao diện Sáng / Tối" title="Chuyển chế độ Giao diện Sáng (Latte) / Tối (Mocha)">
+				<button type="button" class="theme-toggle-btn" id="theme-toggle-btn" role="switch" aria-checked="true"
+					aria-label="Chuyển chế độ Giao diện Sáng / Tối"
+					title="Chuyển chế độ Giao diện Sáng (Latte) / Tối (Mocha)">
 					<span class="theme-toggle-track">
 						<span class="theme-track-icon theme-track-icon-sun" aria-hidden="true">
-							<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+							<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+								stroke-linecap="round" stroke-linejoin="round">
 								<circle cx="12" cy="12" r="5" fill="currentColor"></circle>
 								<line x1="12" y1="1" x2="12" y2="3"></line>
 								<line x1="12" y1="21" x2="12" y2="23"></line>
@@ -50,10 +54,13 @@
 							</svg>
 						</span>
 						<span class="theme-toggle-thumb">
-							<svg class="theme-thumb-icon theme-thumb-moon" viewBox="0 0 24 24" fill="currentColor" stroke="none" aria-hidden="true">
+							<svg class="theme-thumb-icon theme-thumb-moon" viewBox="0 0 24 24" fill="currentColor"
+								stroke="none" aria-hidden="true">
 								<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
 							</svg>
-							<svg class="theme-thumb-icon theme-thumb-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+							<svg class="theme-thumb-icon theme-thumb-sun" viewBox="0 0 24 24" fill="none"
+								stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"
+								aria-hidden="true">
 								<circle cx="12" cy="12" r="5" fill="currentColor"></circle>
 								<line x1="12" y1="1" x2="12" y2="3"></line>
 								<line x1="12" y1="21" x2="12" y2="23"></line>
@@ -68,7 +75,8 @@
 					</span>
 				</button>
 				<div class="divider"></div>
-				<button type="button" class="lang-toggle-btn" id="lang-toggle-btn" title="Chuyển sang English" aria-label="Chuyển sang English">
+				<button type="button" class="lang-toggle-btn" id="lang-toggle-btn" title="Chuyển sang English"
+					aria-label="Chuyển sang English">
 					<span class="lang-flag">🇬🇧</span>
 					<span class="lang-code">EN</span>
 				</button>
@@ -80,7 +88,8 @@
 					<img src="/logo.webp" alt="Beta Cinemas Logo" />
 				</a>
 				<div class="cinema-selector-wrap" id="cinema-selector-wrap">
-					<button class="cinema-selector" id="cinema-selector-btn" aria-haspopup="listbox" aria-expanded="false">
+					<button class="cinema-selector" id="cinema-selector-btn" aria-haspopup="listbox"
+						aria-expanded="false">
 						<span class="cinema-selector-label" id="cinema-selector-label">Beta Thái Nguyên</span>
 						<svg class="cinema-selector-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor"
 							stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
@@ -97,9 +106,10 @@
 					<a href="/cinemas.html" id="nav-cinemas">Rạp</a>
 					<a href="/pricing.html" id="nav-pricing">Giá Vé</a>
 					<a href="/news.html" id="nav-news">Tin Mới Và Ưu Đãi</a>
-					<a href="#" id="nav-franchise">Nhượng Quyền</a>
+
 					<a href="/member.html" id="nav-member" class="active">Thành Viên</a>
-					<a href="/admin.html" id="nav-admin" class="admin-only" style="display: none; color: #fab387; font-weight: 700;">⚙️ Quản Trị</a>
+					<a href="/admin.html" id="nav-admin" class="admin-only"
+						style="display: none; color: #fab387; font-weight: 700;">⚙️ Quản Trị</a>
 				</nav>
 			</div>
 		</div>
@@ -183,18 +193,29 @@
 				<div class="section-head" style="flex-wrap: wrap; gap: 14px;">
 					<div>
 						<h2>Lịch Sử Đặt Vé Xem Phim</h2>
-						<span style="font-size: 13px; color: #a6adc8;">Danh sách vé đã đặt và mã vé điện tử QR Code của bạn</span>
+						<span style="font-size: 13px; color: #a6adc8;">Danh sách vé đã đặt và mã vé điện tử QR Code của
+							bạn</span>
 					</div>
-					<div class="history-filter-bar" style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center;">
+					<div class="history-filter-bar"
+						style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center;">
 						<div class="history-search-wrap" style="position: relative;">
-							<input type="text" id="history-search-input" placeholder="Tìm theo tên phim hoặc mã vé..." 
+							<input type="text" id="history-search-input" placeholder="Tìm theo tên phim hoặc mã vé..."
 								style="background: #313244; border: 1px solid rgba(88, 91, 112, 0.4); border-radius: 8px; padding: 6px 12px; font-size: 13px; color: #cdd6f4; width: 230px;" />
 						</div>
-						<div class="history-status-filters" id="history-status-filters" style="display: flex; gap: 6px;">
-							<button type="button" class="btn-filter-status active" data-status="all" style="background: #89b4fa; border: none; color: #11111b; padding: 6px 12px; border-radius: 6px; font-size: 12px; font-weight: 700; cursor: pointer;">Tất cả</button>
-							<button type="button" class="btn-filter-status" data-status="paid" style="background: #313244; border: 1px solid rgba(88, 91, 112, 0.4); color: #a6adc8; padding: 6px 12px; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer;">Đã thanh toán</button>
-							<button type="button" class="btn-filter-status" data-status="done" style="background: #313244; border: 1px solid rgba(88, 91, 112, 0.4); color: #a6adc8; padding: 6px 12px; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer;">Đã sử dụng</button>
-							<button type="button" class="btn-filter-status" data-status="cancelled" style="background: #313244; border: 1px solid rgba(88, 91, 112, 0.4); color: #a6adc8; padding: 6px 12px; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer;">Đã hủy</button>
+						<div class="history-status-filters" id="history-status-filters"
+							style="display: flex; gap: 6px;">
+							<button type="button" class="btn-filter-status active" data-status="all"
+								style="background: #89b4fa; border: none; color: #11111b; padding: 6px 12px; border-radius: 6px; font-size: 12px; font-weight: 700; cursor: pointer;">Tất
+								cả</button>
+							<button type="button" class="btn-filter-status" data-status="paid"
+								style="background: #313244; border: 1px solid rgba(88, 91, 112, 0.4); color: #a6adc8; padding: 6px 12px; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer;">Đã
+								thanh toán</button>
+							<button type="button" class="btn-filter-status" data-status="done"
+								style="background: #313244; border: 1px solid rgba(88, 91, 112, 0.4); color: #a6adc8; padding: 6px 12px; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer;">Đã
+								sử dụng</button>
+							<button type="button" class="btn-filter-status" data-status="cancelled"
+								style="background: #313244; border: 1px solid rgba(88, 91, 112, 0.4); color: #a6adc8; padding: 6px 12px; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer;">Đã
+								hủy</button>
 						</div>
 					</div>
 				</div>
@@ -211,26 +232,38 @@
 				<div class="section-head">
 					<div>
 						<h2>Thông Tin Cá Nhân</h2>
-						<span style="font-size: 13px; color: #a6adc8;">Cập nhật thông tin tài khoản được lưu trữ an toàn trong LocalStorage</span>
+						<span style="font-size: 13px; color: #a6adc8;">Cập nhật thông tin tài khoản được lưu trữ an toàn
+							trong LocalStorage</span>
 					</div>
-					<span style="font-size: 12px; background: rgba(166, 227, 161, 0.15); color: #a6e3a1; border: 1px solid rgba(166, 227, 161, 0.3); padding: 4px 10px; border-radius: 12px; font-weight: 700;">
+					<span
+						style="font-size: 12px; background: rgba(166, 227, 161, 0.15); color: #a6e3a1; border: 1px solid rgba(166, 227, 161, 0.3); padding: 4px 10px; border-radius: 12px; font-weight: 700;">
 						● Đã đồng bộ LocalStorage
 					</span>
 				</div>
 
 				<form id="form-profile-info" class="profile-form-grid">
-					<div class="pf-field pf-full" style="display: flex; align-items: center; gap: 20px; padding: 16px; background: #313244; border-radius: 12px; border: 1px solid rgba(88, 91, 112, 0.4);">
-						<div class="user-avatar-lg" id="pf-avatar-preview" style="width: 64px; height: 64px; border-radius: 50%; background: linear-gradient(135deg, #fab387 0%, #eba0ac 100%); color: #11111b; font-size: 26px; font-weight: 900; display: flex; align-items: center; justify-content: center;">N</div>
+					<div class="pf-field pf-full"
+						style="display: flex; align-items: center; gap: 20px; padding: 16px; background: #313244; border-radius: 12px; border: 1px solid rgba(88, 91, 112, 0.4);">
+						<div class="user-avatar-lg" id="pf-avatar-preview"
+							style="width: 64px; height: 64px; border-radius: 50%; background: linear-gradient(135deg, #fab387 0%, #eba0ac 100%); color: #11111b; font-size: 26px; font-weight: 900; display: flex; align-items: center; justify-content: center;">
+							N</div>
 						<div style="flex: 1;">
-							<label style="margin-bottom: 4px; font-size: 13px; font-weight: 700; color: #cdd6f4;">Ảnh đại diện / Ký tự đại diện</label>
-							<div style="display: flex; gap: 10px; align-items: center; margin-top: 6px; flex-wrap: wrap;">
-								<input type="text" id="pf-avatar-input" maxlength="2" placeholder="N" style="width: 50px; text-align: center; text-transform: uppercase; font-weight: 800; font-size: 16px; padding: 6px; background: #181825; border: 1px solid rgba(88, 91, 112, 0.4); border-radius: 6px; color: #fab387;" />
+							<label style="margin-bottom: 4px; font-size: 13px; font-weight: 700; color: #cdd6f4;">Ảnh
+								đại diện / Ký tự đại diện</label>
+							<div
+								style="display: flex; gap: 10px; align-items: center; margin-top: 6px; flex-wrap: wrap;">
+								<input type="text" id="pf-avatar-input" maxlength="2" placeholder="N"
+									style="width: 50px; text-align: center; text-transform: uppercase; font-weight: 800; font-size: 16px; padding: 6px; background: #181825; border: 1px solid rgba(88, 91, 112, 0.4); border-radius: 6px; color: #fab387;" />
 								<span style="font-size: 12px; color: #a6adc8;">Nhập 1-2 ký tự viết tắt làm Avatar</span>
 								<div class="avatar-color-presets" style="display: flex; gap: 6px; margin-left: 10px;">
-									<button type="button" class="color-preset-btn active" data-color="gold" style="width: 20px; height: 20px; border-radius: 50%; background: #fab387; border: 2px solid #cdd6f4; cursor: pointer;"></button>
-									<button type="button" class="color-preset-btn" data-color="blue" style="width: 20px; height: 20px; border-radius: 50%; background: #89b4fa; border: 2px solid transparent; cursor: pointer;"></button>
-									<button type="button" class="color-preset-btn" data-color="purple" style="width: 20px; height: 20px; border-radius: 50%; background: #cba6f7; border: 2px solid transparent; cursor: pointer;"></button>
-									<button type="button" class="color-preset-btn" data-color="emerald" style="width: 20px; height: 20px; border-radius: 50%; background: #a6e3a1; border: 2px solid transparent; cursor: pointer;"></button>
+									<button type="button" class="color-preset-btn active" data-color="gold"
+										style="width: 20px; height: 20px; border-radius: 50%; background: #fab387; border: 2px solid #cdd6f4; cursor: pointer;"></button>
+									<button type="button" class="color-preset-btn" data-color="blue"
+										style="width: 20px; height: 20px; border-radius: 50%; background: #89b4fa; border: 2px solid transparent; cursor: pointer;"></button>
+									<button type="button" class="color-preset-btn" data-color="purple"
+										style="width: 20px; height: 20px; border-radius: 50%; background: #cba6f7; border: 2px solid transparent; cursor: pointer;"></button>
+									<button type="button" class="color-preset-btn" data-color="emerald"
+										style="width: 20px; height: 20px; border-radius: 50%; background: #a6e3a1; border: 2px solid transparent; cursor: pointer;"></button>
 								</div>
 							</div>
 						</div>
@@ -281,7 +314,8 @@
 					</div>
 					<div class="pf-actions" style="display: flex; gap: 12px; align-items: center;">
 						<button type="submit" class="btn-save-profile">💾 Lưu Thay Đổi Vào LocalStorage</button>
-						<button type="button" id="btn-reset-profile" style="background: #45475a; border: 1px solid rgba(88, 91, 112, 0.4); color: #cdd6f4; padding: 12px 20px; border-radius: 8px; font-weight: 700; cursor: pointer;">
+						<button type="button" id="btn-reset-profile"
+							style="background: #45475a; border: 1px solid rgba(88, 91, 112, 0.4); color: #cdd6f4; padding: 12px 20px; border-radius: 8px; font-weight: 700; cursor: pointer;">
 							Đặt Lại Mặc Định
 						</button>
 					</div>
@@ -362,8 +396,10 @@
 
 	<!-- ===================== MODAL XEM VÉ ĐIỆN TỬ ===================== -->
 	<div class="modal-backdrop" id="profile-ticket-modal">
-		<div class="modal-content eticket-modal-content" style="max-width: 560px; padding: 0; background: transparent; border: none; overflow: visible;">
-			<button class="modal-close-btn" id="profile-ticket-modal-close" style="top: 14px; right: 14px; z-index: 10;" aria-label="Đóng">&#x2715;</button>
+		<div class="modal-content eticket-modal-content"
+			style="max-width: 560px; padding: 0; background: transparent; border: none; overflow: visible;">
+			<button class="modal-close-btn" id="profile-ticket-modal-close" style="top: 14px; right: 14px; z-index: 10;"
+				aria-label="Đóng">&#x2715;</button>
 			<div id="profile-ticket-modal-body"></div>
 		</div>
 	</div>

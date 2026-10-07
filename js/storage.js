@@ -59,6 +59,7 @@ export const STORAGE_KEYS = {
 	USERS_LIST: `${STORAGE_PREFIX}users_list`,
 	PENDING_BOOKING: `${STORAGE_PREFIX}pending_booking`,
 	BOOKING_HISTORY: `${STORAGE_PREFIX}booking_history`,
+	SEAT_HOLDS: `${STORAGE_PREFIX}seat_holds`,
 	MEMBER_REWARDS: `${STORAGE_PREFIX}member_rewards`,
 	INITIALIZED: `${STORAGE_PREFIX}data_initialized`,
 	DATA_VERSION: `${STORAGE_PREFIX}data_version`,
@@ -1194,10 +1195,47 @@ export function getShowtimeStorageKey(cinemaId, movieId, date, time) {
 	return `${STORAGE_PREFIX}seats_${safeCinema}_${safeMovie}_${safeDate}_${safeTime}`
 }
 
+function syncSoldSeatsFromBookings(seatLayout, cinemaId, movieId, date, time) {
+	if (!Array.isArray(seatLayout)) return seatLayout
+	try {
+		const history = getBookingHistory()
+		if (Array.isArray(history)) {
+			history.forEach(b => {
+				if (b.status === "cancelled") return
+				const matchCinema = !b.cinemaId || b.cinemaId === cinemaId
+				const matchMovie = !b.movieId || b.movieId === movieId
+				const matchDate = !b.date || b.date === date
+				const matchTime = !b.time || b.time === time
+				if (matchCinema && matchMovie && matchDate && matchTime && b.seats) {
+					const bookedSeatIds = Array.isArray(b.seats)
+						? b.seats.map(s => (typeof s === "string" ? s : s.id))
+						: typeof b.seats === "string"
+							? b.seats.split(",").map(s => s.trim())
+							: []
+					bookedSeatIds.forEach(seatId => {
+						for (const rowBlock of seatLayout) {
+							const seatObj = rowBlock.seats.find(s => s.id === seatId)
+							if (seatObj) {
+								seatObj.status = "sold"
+								break
+							}
+						}
+					})
+				}
+			})
+		}
+	} catch (e) {
+		console.warn("[Storage] Error syncing sold seats:", e)
+	}
+	return seatLayout
+}
+
 export function getShowtimeSeats(cinemaId, movieId, date, time, options = {}) {
 	const key = getShowtimeStorageKey(cinemaId, movieId, date, time)
 	const cached = storageGet(key)
 	if (cached && Array.isArray(cached) && cached.length >= 12) {
+		syncSoldSeatsFromBookings(cached, cinemaId, movieId, date, time)
+		storageSet(key, cached)
 		return cached
 	}
 
@@ -1271,6 +1309,7 @@ export function getShowtimeSeats(cinemaId, movieId, date, time, options = {}) {
 		}
 	})
 
+	syncSoldSeatsFromBookings(seatLayout, cinemaId, movieId, date, time)
 	storageSet(key, seatLayout)
 	return seatLayout
 }
@@ -1296,6 +1335,272 @@ export function decrementShowtimeAvailableSeats(cinemaId, movieId, date, time, s
 	} catch (err) {
 		console.warn("[Storage] Lỗi khi trừ số lượng ghế khả dụng:", err)
 		return false
+  }
+}
+/* ==========================================================================
+   SEAT HOLD MANAGEMENT (GIỮ GHẾ TRONG PHIÊN 5 PHÚT)
+   ========================================================================== */
+
+/**
+ * Tạo hoặc lấy ID phiên giữ ghế (mỗi tab/cửa sổ có một mã riêng)
+ */
+export function getOrCreateHoldSessionId() {
+	if (typeof window !== "undefined" && window.sessionStorage) {
+		try {
+			let sId = sessionStorage.getItem("beta_hold_session_id")
+			if (!sId) {
+				sId = "hld_" + Math.random().toString(36).substring(2, 9) + "_" + Date.now().toString(36)
+				sessionStorage.setItem("beta_hold_session_id", sId)
+			}
+			return sId
+		} catch (e) {}
+	}
+	return "hld_" + Math.random().toString(36).substring(2, 9) + "_" + Date.now().toString(36)
+}
+
+/**
+ * Tự động quét và giải phóng các ghế đã quá thời gian giữ ghế (5 phút)
+ */
+export function cleanExpiredSeatHolds() {
+	const allHolds = storageGet(STORAGE_KEYS.SEAT_HOLDS, [])
+	if (!Array.isArray(allHolds)) return []
+	const now = Date.now()
+	const active = allHolds.filter(h => h && typeof h.expiresAt === "number" && h.expiresAt > now)
+	if (active.length !== allHolds.length) {
+		storageSet(STORAGE_KEYS.SEAT_HOLDS, active)
+	}
+	return active
+}
+
+/**
+ * Lấy danh sách các phiên giữ ghế đang còn hiệu lực cho suất chiếu cụ thể
+ */
+export function getActiveSeatHolds(cinemaId, movieId, date, time) {
+	const active = cleanExpiredSeatHolds()
+	return active.filter(
+		h => h.cinemaId === cinemaId && h.movieId === movieId && h.date === date && h.time === time,
+	)
+}
+
+/**
+ * Lấy danh sách các mã ghế đang được giữ bởi NGƯỜI KHÁC (loại trừ phiên hiện tại)
+ */
+export function getHeldSeats(cinemaId, movieId, date, time, excludeHoldId = null) {
+	const holds = getActiveSeatHolds(cinemaId, movieId, date, time)
+	const heldSeatIds = new Set()
+	holds.forEach(h => {
+		if (excludeHoldId && h.holdId === excludeHoldId) return
+		if (Array.isArray(h.seats)) {
+			h.seats.forEach(s => heldSeatIds.add(s))
+		}
+	})
+	return Array.from(heldSeatIds)
+}
+
+/**
+ * Lấy thông tin chi tiết một phiên giữ ghế
+ */
+export function getSeatHold(holdId) {
+	if (!holdId) return null
+	const active = cleanExpiredSeatHolds()
+	return active.find(h => h.holdId === holdId) || null
+}
+
+/**
+ * Đăng ký giữ ghế cho người dùng trong thời gian quy định (mặc định 5 phút = 300.000ms)
+ * Trả về { success: boolean, holdId: string, expiresAt: number, remainingSeconds: number, message?: string }
+ */
+export function holdSeats(cinemaId, movieId, date, time, seatIds = [], holdId = null, durationMs = 300000) {
+	const sId = holdId || getOrCreateHoldSessionId()
+	const cleanSeats = Array.isArray(seatIds)
+		? seatIds
+		: typeof seatIds === "string"
+			? seatIds.split(",").map(s => s.trim()).filter(Boolean)
+			: []
+
+	if (cleanSeats.length === 0) {
+		releaseSeatHold(sId)
+		return { success: true, holdId: sId, seats: [], expiresAt: 0, remainingSeconds: 0 }
+	}
+
+	const active = cleanExpiredSeatHolds()
+
+	// 1. Kiểm tra xem có ghế nào đã bán hẳn không
+	const layout = getShowtimeSeats(cinemaId, movieId, date, time)
+	const soldSeats = []
+	if (layout) {
+		layout.forEach(row => {
+			row.seats.forEach(s => {
+				if (cleanSeats.includes(s.id) && s.status === "sold") {
+					soldSeats.push(s.id)
+				}
+			})
+		})
+	}
+	if (soldSeats.length > 0) {
+		return {
+			success: false,
+			conflictSeats: soldSeats,
+			reason: "sold",
+			message: `Ghế [${soldSeats.join(", ")}] đã có người đặt trước, không thể giữ chỗ!`,
+		}
+	}
+
+	// 2. Kiểm tra xem có ghế nào đang bị giữ bởi người khác không
+	const otherHeldSeats = []
+	active.forEach(h => {
+		if (
+			h.holdId !== sId &&
+			h.cinemaId === cinemaId &&
+			h.movieId === movieId &&
+			h.date === date &&
+			h.time === time &&
+			Array.isArray(h.seats)
+		) {
+			h.seats.forEach(s => {
+				if (cleanSeats.includes(s)) otherHeldSeats.push(s)
+			})
+		}
+	})
+
+	if (otherHeldSeats.length > 0) {
+		return {
+			success: false,
+			conflictSeats: otherHeldSeats,
+			reason: "held_by_other",
+			message: `Ghế [${otherHeldSeats.join(", ")}] đang được khách hàng khác giữ tạm thời trong 5 phút!`,
+		}
+	}
+
+	// 3. Cập nhật hoặc tạo mới phiên giữ ghế
+	const now = Date.now()
+	const existingIdx = active.findIndex(h => h.holdId === sId)
+	let expiresAt = now + durationMs
+
+	if (existingIdx > -1) {
+		const existing = active[existingIdx]
+		// Giữ nguyên mốc thời gian còn lại nếu chưa hết hạn
+		if (existing.expiresAt > now + 15000) {
+			expiresAt = existing.expiresAt
+		}
+		active[existingIdx] = {
+			...existing,
+			cinemaId,
+			movieId,
+			date,
+			time,
+			seats: cleanSeats,
+			expiresAt,
+			updatedAt: now,
+		}
+	} else {
+		active.push({
+			holdId: sId,
+			cinemaId,
+			movieId,
+			date,
+			time,
+			seats: cleanSeats,
+			createdAt: now,
+			expiresAt,
+			updatedAt: now,
+		})
+	}
+
+	storageSet(STORAGE_KEYS.SEAT_HOLDS, active)
+
+	return {
+		success: true,
+		holdId: sId,
+		seats: cleanSeats,
+		expiresAt,
+		remainingSeconds: Math.max(0, Math.ceil((expiresAt - now) / 1000)),
+	}
+}
+
+/**
+ * Giải phóng ghế ngay lập tức (khi người dùng bỏ chọn hết ghế hoặc hủy/hết giờ)
+ */
+export function releaseSeatHold(holdId) {
+	if (!holdId) return false
+	const allHolds = storageGet(STORAGE_KEYS.SEAT_HOLDS, [])
+	if (!Array.isArray(allHolds)) return false
+	const filtered = allHolds.filter(h => h && h.holdId !== holdId)
+	if (filtered.length !== allHolds.length) {
+		storageSet(STORAGE_KEYS.SEAT_HOLDS, filtered)
+		return true
+	}
+	return false
+}
+
+/**
+ * Kiểm tra xem một ghế cụ thể có còn trống (available) không.
+ * Nếu ghế đã bán hoặc đang được người khác giữ -> return false.
+ */
+export function isSeatAvailable(cinemaId, movieId, date, time, seatId, currentHoldId = null) {
+	if (!seatId) return false
+	const layout = getShowtimeSeats(cinemaId, movieId, date, time)
+	if (!layout) return false
+
+	for (const rowBlock of layout) {
+		const found = rowBlock.seats.find(s => s.id === seatId)
+		if (found) {
+			if (found.status === "sold") return false
+			break
+		}
+	}
+
+	// Kiểm tra xem có ai khác đang giữ tạm ghế này không
+	const heldByOthers = getHeldSeats(cinemaId, movieId, date, time, currentHoldId)
+	if (heldByOthers.includes(seatId)) {
+		return false
+	}
+
+	return true
+}
+
+/**
+ * Lấy trạng thái chi tiết của ghế: 'sold' | 'holding' | 'available'
+ */
+export function getSeatStatus(cinemaId, movieId, date, time, seatId, currentHoldId = null) {
+	if (!seatId) return "unknown"
+	const layout = getShowtimeSeats(cinemaId, movieId, date, time)
+	if (layout) {
+		for (const rowBlock of layout) {
+			const found = rowBlock.seats.find(s => s.id === seatId)
+			if (found && found.status === "sold") return "sold"
+		}
+	}
+	const heldByOthers = getHeldSeats(cinemaId, movieId, date, time, currentHoldId)
+	if (heldByOthers.includes(seatId)) return "holding"
+	return "available"
+}
+
+/**
+ * Kiểm tra danh sách ghế xem tất cả có còn trống không (không bị bán, không bị người khác giữ).
+ * Trả về { allAvailable: boolean, unavailableSeats: string[], reasons: Object }
+ */
+export function checkSeatsAvailability(cinemaId, movieId, date, time, seatIds = [], currentHoldId = null) {
+	const list = Array.isArray(seatIds)
+		? seatIds
+		: typeof seatIds === "string"
+			? seatIds.split(",").map(s => s.trim()).filter(Boolean)
+			: []
+
+	const unavailableSeats = []
+	const reasons = {}
+
+	for (const sId of list) {
+		if (!isSeatAvailable(cinemaId, movieId, date, time, sId, currentHoldId)) {
+			unavailableSeats.push(sId)
+			reasons[sId] = getSeatStatus(cinemaId, movieId, date, time, sId, currentHoldId)
+		}
+	}
+
+	return {
+		allAvailable: unavailableSeats.length === 0,
+		unavailableSeats,
+		reasons,
 	}
 }
 
@@ -1343,6 +1648,147 @@ export function isSeatSold(cinemaId, movieId, date, time, seatId) {
 		if (found) return found.status === "sold"
 	}
 	return false
+}
+
+/**
+ * Kiểm tra xem ghế targetSeat có thể được chọn dựa trên các ghế đang chọn không.
+ * Quy tắc:
+ * 1. Không chọn ghế đã bán (status === 'sold')
+ * 2. Tối đa 8 ghế trong 1 đơn đặt
+ * 3. Nếu chưa chọn ghế nào -> chọn bất kỳ ghế trống nào
+ * 4. Nếu đã có ghế -> ghế mới PHẢI CÙNG HÀNG (same row)
+ * 5. Ghế mới PHẢI SÁT NHAU / LIỀN KỀ (contiguous, không để trống ghế ở giữa)
+ * 6. Không được chọn ghế băng qua lối đi (aisle giữa cột 3-4 và 11-12)
+ */
+export function canSelectSeat(currentSeats = [], targetSeat, currentHoldId = null) {
+	if (!targetSeat) return { allowed: false, message: "Ghế không hợp lệ." }
+
+	if (targetSeat.status === "sold") {
+		return {
+			allowed: false,
+			reason: "sold",
+			message: "Ghế này đã có người đặt, vui lòng chọn ghế còn trống khác!",
+		}
+	}
+
+	if (targetSeat.status === "holding" || targetSeat.status === "held") {
+		return {
+			allowed: false,
+			reason: "holding",
+			message: "Ghế này đang được khách hàng khác giữ tạm thời trong 5 phút. Vui lòng chọn ghế còn trống khác!",
+		}
+	}
+
+	if (currentSeats.length >= 8) {
+		return {
+			allowed: false,
+			reason: "max",
+			message: "Bạn chỉ có thể chọn tối đa 8 ghế trong 1 lần đặt.",
+		}
+	}
+
+	if (currentSeats.length === 0) {
+		return { allowed: true }
+	}
+
+	// 1. Phải cùng hàng ghế
+	const firstSeat = currentSeats[0]
+	if (targetSeat.row !== firstSeat.row) {
+		return {
+			allowed: false,
+			reason: "different_row",
+			message: "Vui lòng chọn các ghế ngồi sát nhau trong cùng một hàng!",
+		}
+	}
+
+	// 2. Không trộn ghế Sweetbox đôi với ghế đơn
+	const isTargetSwb = targetSeat.type === "sweetbox"
+	const isCurrentSwb = firstSeat.type === "sweetbox"
+	if (isTargetSwb !== isCurrentSwb) {
+		return {
+			allowed: false,
+			reason: "different_type",
+			message: "Vui lòng chọn các ghế cùng loại ngồi liền kề nhau!",
+		}
+	}
+
+	// 3. Kiểm tra tính liền kề (sát nhau, không để khoảng trống)
+	const newCols = [...currentSeats.map(s => +s.col), +targetSeat.col].sort((a, b) => a - b)
+	for (let i = 1; i < newCols.length; i++) {
+		if (newCols[i] !== newCols[i - 1] + 1) {
+			return {
+				allowed: false,
+				reason: "gap",
+				message: "Vui lòng chọn các ghế ngồi sát nhau, không được để trống ghế ở giữa!",
+			}
+		}
+	}
+
+	// 4. Không băng qua lối đi (với ghế đơn thông thường)
+	if (!isTargetSwb) {
+		for (let i = 1; i < newCols.length; i++) {
+			const prev = newCols[i - 1]
+			const curr = newCols[i]
+			if ((prev === 3 && curr === 4) || (prev === 11 && curr === 12)) {
+				return {
+					allowed: false,
+					reason: "aisle",
+					message: "Không thể chọn ghế qua lối đi, vui lòng chọn các ghế ngồi liền nhau!",
+				}
+			}
+		}
+	}
+
+	return { allowed: true }
+}
+
+/**
+ * Kiểm tra xem việc bỏ chọn một ghế có làm các ghế còn lại bị tách rời không.
+ */
+export function canDeselectSeat(currentSeats = [], seatIdToRemove) {
+	if (!Array.isArray(currentSeats) || currentSeats.length <= 2) {
+		return { allowed: true }
+	}
+
+	const remaining = currentSeats.filter(s => s.id !== seatIdToRemove)
+	if (remaining.length <= 1) return { allowed: true }
+
+	const cols = remaining.map(s => +s.col).sort((a, b) => a - b)
+	for (let i = 1; i < cols.length; i++) {
+		if (cols[i] !== cols[i - 1] + 1) {
+			return {
+				allowed: false,
+				reason: "split",
+				message: "Không thể bỏ chọn ghế ở giữa vì các ghế còn lại sẽ bị cách xa nhau. Vui lòng bỏ chọn từ hai đầu ngoài!",
+			}
+		}
+	}
+
+	return { allowed: true }
+}
+
+/**
+ * Kiểm tra toàn bộ danh sách ghế có đảm bảo tính liền kề, sát nhau và cùng hàng không.
+ */
+export function areSeatsContiguous(seatsList = []) {
+	if (!Array.isArray(seatsList) || seatsList.length <= 1) return true
+
+	const row = seatsList[0].row
+	if (seatsList.some(s => s.row !== row)) return false
+
+	const isSwb = seatsList[0].type === "sweetbox"
+	const cols = seatsList.map(s => +s.col).sort((a, b) => a - b)
+
+	for (let i = 1; i < cols.length; i++) {
+		if (cols[i] !== cols[i - 1] + 1) return false
+		if (!isSwb) {
+			const prev = cols[i - 1]
+			const curr = cols[i]
+			if ((prev === 3 && curr === 4) || (prev === 11 && curr === 12)) return false
+		}
+	}
+
+	return true
 }
 
 /* ==========================================================================

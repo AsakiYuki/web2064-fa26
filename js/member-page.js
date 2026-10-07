@@ -190,6 +190,8 @@ function setupMemberHeroUI() {
 			btnGuestReg.onclick = () => openAuthModal("register")
 		}
 	}
+
+	translateDom(getSavedLang())
 }
 
 /* ==========================================================================

@@ -194,20 +194,13 @@
 				</div>
 
 				<div class="topbar-right">
-					<button type="button" class="btn-topbar-action" id="btn-quick-add">
-						<span>➕ Thêm Nhanh</span>
-					</button>
-					<button type="button" class="btn-topbar-action btn-reset-data" id="btn-global-reset"
-						title="Khôi phục toàn bộ dữ liệu mẫu ban đầu">
-						<span>🔄 Reset Dữ Liệu</span>
-					</button>
 					<button type="button" class="theme-toggle-btn admin-theme-toggle" id="theme-toggle-btn"
-						role="switch" aria-checked="true"
-						title="Chuyển chế độ Giao diện Sáng (Latte) / Tối (Mocha)"
+						role="switch" aria-checked="true" title="Chuyển chế độ Giao diện Sáng (Latte) / Tối (Mocha)"
 						aria-label="Chuyển chế độ Giao diện Sáng / Tối">
 						<span class="theme-toggle-track">
 							<span class="theme-track-icon theme-track-icon-sun" aria-hidden="true">
-								<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+								<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+									stroke-linecap="round" stroke-linejoin="round">
 									<circle cx="12" cy="12" r="5" fill="currentColor"></circle>
 									<line x1="12" y1="1" x2="12" y2="3"></line>
 									<line x1="12" y1="21" x2="12" y2="23"></line>
@@ -225,10 +218,13 @@
 								</svg>
 							</span>
 							<span class="theme-toggle-thumb">
-								<svg class="theme-thumb-icon theme-thumb-moon" viewBox="0 0 24 24" fill="currentColor" stroke="none" aria-hidden="true">
+								<svg class="theme-thumb-icon theme-thumb-moon" viewBox="0 0 24 24" fill="currentColor"
+									stroke="none" aria-hidden="true">
 									<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
 								</svg>
-								<svg class="theme-thumb-icon theme-thumb-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+								<svg class="theme-thumb-icon theme-thumb-sun" viewBox="0 0 24 24" fill="none"
+									stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+									stroke-linejoin="round" aria-hidden="true">
 									<circle cx="12" cy="12" r="5" fill="currentColor"></circle>
 									<line x1="12" y1="1" x2="12" y2="3"></line>
 									<line x1="12" y1="21" x2="12" y2="23"></line>
@@ -276,7 +272,8 @@
 						</div>
 
 						<div class="kpi-card" style="border-left: 4px solid #a6e3a1;">
-							<div class="kpi-icon-wrap" style="background: rgba(166, 227, 161, 0.15); color: #a6e3a1;">🎟️
+							<div class="kpi-icon-wrap" style="background: rgba(166, 227, 161, 0.15); color: #a6e3a1;">
+								🎟️
 							</div>
 							<span class="kpi-label">Số Vé Bán Ra</span>
 							<span class="kpi-value" id="kpi-tickets-count">0 vé</span>
@@ -413,10 +410,6 @@
 								<option value="upcoming">Phim sắp chiếu (upcoming)</option>
 								<option value="special">Suất chiếu đặc biệt (special)</option>
 							</select>
-							<button type="button" class="btn-admin-secondary" id="btn-reset-movies-data"
-								title="Khôi phục danh sách phim ban đầu từ file JSON">
-								🔄 Khôi phục phim gốc
-							</button>
 						</div>
 
 						<div class="actions-group">
@@ -470,10 +463,6 @@
 							<button type="button" class="btn-admin-primary" id="btn-open-add-showtime-modal">
 								➕ Thêm Suất Chiếu Mới
 							</button>
-							<button type="button" class="btn-admin-secondary" id="btn-reset-showtimes-data"
-								title="Khôi phục toàn bộ lịch chiếu gốc từ JSON">
-								🔄 Khôi phục lịch chiếu
-							</button>
 						</div>
 					</div>
 
@@ -497,9 +486,6 @@
 								<option value="beverages">Nước Uống</option>
 								<option value="snacks">Đồ Ăn Kèm</option>
 							</select>
-							<button type="button" class="btn-admin-secondary" id="btn-reset-concessions-data">
-								🔄 Khôi phục mặc định
-							</button>
 						</div>
 						<div class="actions-group">
 							<input type="text" class="admin-search-input" id="search-concessions-input"

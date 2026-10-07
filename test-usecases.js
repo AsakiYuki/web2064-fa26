@@ -7,7 +7,7 @@
  */
 
 import { apiRegister, apiLogin, apiUpdateUser, apiGetMovies, apiCreateMovie, apiUpdateMovie, apiDeleteMovie, apiGetShowtimes, apiGetConcessions, apiCreateConcession, apiUpdateConcession, apiDeleteConcession, apiGetBookings, apiCreateBooking, apiUpdateBooking, apiDeleteBooking, apiGetCinemas, apiGetGenres, apiGetTicketPricing } from './js/api.js'
-import { calculateVoucherDiscount, savePendingBooking, isPendingBookingExpired, clearPendingBooking, redeemMemberReward, saveUserSession, logoutUser, initializeStorage } from './js/storage.js'
+import { calculateVoucherDiscount, savePendingBooking, isPendingBookingExpired, clearPendingBooking, redeemMemberReward, saveUserSession, logoutUser, initializeStorage, canSelectSeat, canDeselectSeat, areSeatsContiguous, isSeatAvailable, checkSeatsAvailability, updateShowtimeSeats, holdSeats, releaseSeatHold, getHeldSeats, getSeatStatus } from './js/storage.js'
 
 const BACKEND_URL = 'http://localhost:3000'
 
@@ -382,6 +382,40 @@ async function runAllTests() {
 	savePendingBooking({ cinemaId: 'beta-thainguyen', seats: ['E05'], holdExpiresAt: Date.now() - 1000 })
 	assert(isPendingBookingExpired(), 'Phiên giữ ghế quá hạn được tự động nhận diện để giải phóng ghế')
 	clearPendingBooking()
+
+	// 5.7 Kiểm tra chọn ghế sát nhau & liền kề (Contiguous seats)
+	const s1 = { id: 'E08', row: 'E', col: 8, type: 'vip', price: 80000, status: 'available' }
+	const s2Valid = { id: 'E09', row: 'E', col: 9, type: 'vip', price: 80000, status: 'available' }
+	const s2Gap = { id: 'E10', row: 'E', col: 10, type: 'vip', price: 80000, status: 'available' }
+	const s2DiffRow = { id: 'F08', row: 'F', col: 8, type: 'vip', price: 80000, status: 'available' }
+	const sAcrossAisle = { id: 'E04', row: 'E', col: 4, type: 'vip', price: 80000, status: 'available' }
+	const sAisleEdge = { id: 'E03', row: 'E', col: 3, type: 'vip', price: 80000, status: 'available' }
+
+	assert(canSelectSeat([], s1).allowed, 'Ghế chọn đầu tiên bất kỳ hợp lệ')
+	assert(canSelectSeat([s1], s2Valid).allowed, 'Chọn ghế sát nhau liền kề (E08 và E09) thành công')
+	assert(!canSelectSeat([s1], s2Gap).allowed, 'Không cho phép chọn ghế cách xa nhau để trống ghế ở giữa (E08 và E10 bị từ chối)')
+	assert(!canSelectSeat([s1], s2DiffRow).allowed, 'Không cho phép chọn ghế khác hàng (E08 và F08 bị từ chối)')
+	assert(!canSelectSeat([sAisleEdge], sAcrossAisle).allowed, 'Không cho phép chọn ghế qua lối đi (E03 và E04 bị từ chối)')
+	assert(!canDeselectSeat([s1, s2Valid, s2Gap], 'E09').allowed, 'Không cho phép bỏ chọn ghế ở giữa làm tách rời ghế')
+	assert(canDeselectSeat([s1, s2Valid, s2Gap], 'E10').allowed, 'Bỏ chọn ghế ở đầu ngoài hợp lệ')
+	assert(areSeatsContiguous([s1, s2Valid]), 'Kiểm tra toàn bộ danh sách ghế sát nhau hợp lệ')
+
+	// 5.8 Kiểm tra trạng thái ghế còn trống hay đã được đặt (Seat availability check)
+	updateShowtimeSeats('beta-thainguyen', 'utlan2', '2026-09-26', '14:30', ['A01', 'A02'], 'sold')
+	assert(!isSeatAvailable('beta-thainguyen', 'utlan2', '2026-09-26', '14:30', 'A01'), 'Ghế A01 đã đặt được nhận diện chính xác là không còn trống')
+	assert(!canSelectSeat([], { id: 'A01', row: 'A', col: 1, type: 'standard', status: 'sold' }).allowed, 'Không được phép đặt ghế đã có người đặt trước (status sold bị từ chối)')
+	const multiCheck = checkSeatsAvailability('beta-thainguyen', 'utlan2', '2026-09-26', '14:30', ['A01', 'A03'])
+	assert(!multiCheck.allAvailable && multiCheck.unavailableSeats.includes('A01'), 'Kiểm tra danh sách ghế phát hiện chính xác ghế đã bán')
+
+	// 5.9 Kiểm tra tính năng giữ ghế chủ động & kiểm soát đồng thời (Active Seat Hold)
+	const hold1 = holdSeats('beta-thainguyen', 'utlan2', '2026-09-26', '14:30', ['C05', 'C06'], 'user_session_A', 300000)
+	assert(hold1.success, 'Phiên A giữ ghế C05, C06 thành công trong 5 phút')
+	assert(!isSeatAvailable('beta-thainguyen', 'utlan2', '2026-09-26', '14:30', 'C05', 'user_session_B'), 'Phiên B kiểm tra ghế C05 thấy không còn trống (đang bị phiên A giữ)')
+	const conflictHold = holdSeats('beta-thainguyen', 'utlan2', '2026-09-26', '14:30', ['C05'], 'user_session_B')
+	assert(!conflictHold.success && conflictHold.reason === 'held_by_other', 'Phiên B không được phép giữ ghế C05 mà phiên A đang giữ')
+	assert(!canSelectSeat([], { id: 'C05', row: 'C', col: 5, type: 'standard', status: 'holding' }, 'user_session_B').allowed, 'canSelectSeat từ chối chọn ghế có status holding của khách khác')
+	releaseSeatHold('user_session_A')
+	assert(isSeatAvailable('beta-thainguyen', 'utlan2', '2026-09-26', '14:30', 'C05', 'user_session_B'), 'Sau khi phiên A giải phóng ghế, ghế C05 trở lại trạng thái trống cho phiên B')
 
 	/* ------------------------------------------------------------------
 	   USE CASE 6: VOUCHER VALIDATION BUSINESS LOGIC

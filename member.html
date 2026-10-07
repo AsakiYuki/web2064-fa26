@@ -10,7 +10,8 @@
 	<link rel="stylesheet" href="/style/main.scss" />
 	<link rel="preconnect" href="https://fonts.googleapis.com" />
 	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-	<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+	<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"
+		rel="stylesheet" />
 	<script>
 		(function () {
 			const t = localStorage.getItem("beta_theme") || "mocha";
@@ -29,10 +30,13 @@
 				<div class="divider"></div>
 				<a href="#" id="btn-register">Đăng ký</a>
 				<div class="divider"></div>
-				<button type="button" class="theme-toggle-btn" id="theme-toggle-btn" role="switch" aria-checked="true" aria-label="Chuyển chế độ Giao diện Sáng / Tối" title="Chuyển chế độ Giao diện Sáng (Latte) / Tối (Mocha)">
+				<button type="button" class="theme-toggle-btn" id="theme-toggle-btn" role="switch" aria-checked="true"
+					aria-label="Chuyển chế độ Giao diện Sáng / Tối"
+					title="Chuyển chế độ Giao diện Sáng (Latte) / Tối (Mocha)">
 					<span class="theme-toggle-track">
 						<span class="theme-track-icon theme-track-icon-sun" aria-hidden="true">
-							<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+							<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+								stroke-linecap="round" stroke-linejoin="round">
 								<circle cx="12" cy="12" r="5" fill="currentColor"></circle>
 								<line x1="12" y1="1" x2="12" y2="3"></line>
 								<line x1="12" y1="21" x2="12" y2="23"></line>
@@ -50,10 +54,13 @@
 							</svg>
 						</span>
 						<span class="theme-toggle-thumb">
-							<svg class="theme-thumb-icon theme-thumb-moon" viewBox="0 0 24 24" fill="currentColor" stroke="none" aria-hidden="true">
+							<svg class="theme-thumb-icon theme-thumb-moon" viewBox="0 0 24 24" fill="currentColor"
+								stroke="none" aria-hidden="true">
 								<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
 							</svg>
-							<svg class="theme-thumb-icon theme-thumb-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+							<svg class="theme-thumb-icon theme-thumb-sun" viewBox="0 0 24 24" fill="none"
+								stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"
+								aria-hidden="true">
 								<circle cx="12" cy="12" r="5" fill="currentColor"></circle>
 								<line x1="12" y1="1" x2="12" y2="3"></line>
 								<line x1="12" y1="21" x2="12" y2="23"></line>
@@ -68,7 +75,8 @@
 					</span>
 				</button>
 				<div class="divider"></div>
-				<button type="button" class="lang-toggle-btn" id="lang-toggle-btn" title="Chuyển sang English" aria-label="Chuyển sang English">
+				<button type="button" class="lang-toggle-btn" id="lang-toggle-btn" title="Chuyển sang English"
+					aria-label="Chuyển sang English">
 					<span class="lang-flag">🇬🇧</span>
 					<span class="lang-code">EN</span>
 				</button>
@@ -80,7 +88,8 @@
 					<img src="/logo.webp" alt="Beta Cinemas Logo" />
 				</a>
 				<div class="cinema-selector-wrap" id="cinema-selector-wrap">
-					<button class="cinema-selector" id="cinema-selector-btn" aria-haspopup="listbox" aria-expanded="false">
+					<button class="cinema-selector" id="cinema-selector-btn" aria-haspopup="listbox"
+						aria-expanded="false">
 						<span class="cinema-selector-label" id="cinema-selector-label">Beta Thái Nguyên</span>
 						<svg class="cinema-selector-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor"
 							stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
@@ -97,9 +106,10 @@
 					<a href="/cinemas.html" id="nav-cinemas">Rạp</a>
 					<a href="/pricing.html" id="nav-pricing">Giá Vé</a>
 					<a href="/news.html" id="nav-news">Tin Mới Và Ưu Đãi</a>
-					<a href="#" id="nav-franchise">Nhượng Quyền</a>
+
 					<a href="/member.html" id="nav-member" class="active">Thành Viên</a>
-					<a href="/admin.html" id="nav-admin" class="admin-only" style="display: none; color: #fab387; font-weight: 700;">⚙️ Quản Trị</a>
+					<a href="/admin.html" id="nav-admin" class="admin-only"
+						style="display: none; color: #fab387; font-weight: 700;">⚙️ Quản Trị</a>
 				</nav>
 			</div>
 		</div>
@@ -159,19 +169,22 @@
 						<div class="card-face card-back" id="card-back-face">
 							<div class="card-magstripe"></div>
 							<div class="card-barcode-wrap">
-								<svg class="barcode-svg" id="card-barcode-svg" viewBox="0 0 240 48" preserveAspectRatio="none">
+								<svg class="barcode-svg" id="card-barcode-svg" viewBox="0 0 240 48"
+									preserveAspectRatio="none">
 									<!-- Dynamic Barcode Lines generated via JS -->
 								</svg>
 								<span class="barcode-num" id="card-barcode-num">8934520268492</span>
 							</div>
 							<p class="card-back-help">
-								Xuất trình mã này cho nhân viên tại quầy vé hoặc quầy bắp nước để tích điểm & áp dụng ưu đãi hội viên.
+								Xuất trình mã này cho nhân viên tại quầy vé hoặc quầy bắp nước để tích điểm & áp dụng ưu
+								đãi hội viên.
 							</p>
 						</div>
 					</div>
 
 					<button type="button" class="card-flip-btn" id="btn-flip-card">
-						<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+						<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+							stroke-width="2">
 							<polyline points="23 4 23 10 17 10"></polyline>
 							<path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
 						</svg>
@@ -188,7 +201,8 @@
 
 					<h1 id="welcome-user-heading">Chào Mừng Hội Viên Beta Cinemas!</h1>
 					<p class="m-sub-text" id="welcome-user-sub">
-						Tích lũy điểm thưởng không giới hạn cho mọi giao dịch xem phim và đồ ăn nhẹ. Đổi ngay vé miễn phí và hàng loạt voucher ưu đãi độc quyền.
+						Tích lũy điểm thưởng không giới hạn cho mọi giao dịch xem phim và đồ ăn nhẹ. Đổi ngay vé miễn
+						phí và hàng loạt voucher ưu đãi độc quyền.
 					</p>
 
 					<!-- Stats Grid -->
@@ -220,7 +234,8 @@
 							<div class="prog-fill" id="prog-fill-bar" style="width: 85%;"></div>
 						</div>
 						<p class="prog-desc" id="prog-desc-text">
-							Đạt hạng Beta Diamond để nhận đặc quyền x2 điểm ngày hội thành viên và vé mời Premiere phim chiếu sớm.
+							Đạt hạng Beta Diamond để nhận đặc quyền x2 điểm ngày hội thành viên và vé mời Premiere phim
+							chiếu sớm.
 						</p>
 					</div>
 
@@ -241,7 +256,8 @@
 					<div class="guest-callout-box" id="guest-callout-box" style="display: none;">
 						<div class="g-texts">
 							<h4>Bạn chưa đăng nhập tài khoản thành viên?</h4>
-							<p>Đăng ký thành viên Beta Cinemas ngay để nhận 50 điểm thưởng và tận hưởng ưu đãi 5% - 10%!</p>
+							<p>Đăng ký thành viên Beta Cinemas ngay để nhận 50 điểm thưởng và tận hưởng ưu đãi 5% - 10%!
+							</p>
 						</div>
 						<button type="button" class="btn-join-now" id="btn-guest-register">
 							Đăng Ký Thành Viên Ngay
@@ -259,7 +275,8 @@
 			<div class="store-header">
 				<div class="sh-left">
 					<h2>Gian Hàng Đổi Điểm Thưởng Hội Viên</h2>
-					<p>Sử dụng điểm tích lũy của bạn để đổi ngay mã voucher giảm giá, bắp nước hoặc vé xem phim miễn phí</p>
+					<p>Sử dụng điểm tích lũy của bạn để đổi ngay mã voucher giảm giá, bắp nước hoặc vé xem phim miễn phí
+					</p>
 				</div>
 				<div class="store-user-balance" id="store-balance-badge">
 					Điểm của bạn: <strong id="store-current-points">850 Điểm</strong>
@@ -284,7 +301,8 @@
 		<section class="member-calc-section">
 			<div class="calc-header">
 				<h2>Công Cụ Tính Điểm & Quyền Lợi Dự Kiến</h2>
-				<p>Kéo thanh chi tiêu để xem số điểm tích lũy và số tiền tiết kiệm bạn nhận được mỗi năm cùng Beta Cinemas</p>
+				<p>Kéo thanh chi tiêu để xem số điểm tích lũy và số tiền tiết kiệm bạn nhận được mỗi năm cùng Beta
+					Cinemas</p>
 			</div>
 
 			<div class="calc-layout">
@@ -293,7 +311,8 @@
 						<span>Mức chi tiêu xem phim hàng tháng:</span>
 						<span class="active-val" id="calc-spend-display">300.000 VNĐ</span>
 					</div>
-					<input type="range" min="100000" max="2000000" step="50000" value="300000" class="spend-slider" id="calc-slider" />
+					<input type="range" min="100000" max="2000000" step="50000" value="300000" class="spend-slider"
+						id="calc-slider" />
 
 					<div class="preset-buttons">
 						<button type="button" data-val="150000">150.000đ (1-2 vé)</button>
@@ -414,7 +433,8 @@
 					</div>
 					<div class="ev-info">
 						<h3>Happy Tuesday - Đồng Giá 50K</h3>
-						<p>Thành viên Beta Cinemas được mua vé xem phim 2D đồng giá chỉ 50.000đ/vé vào mỗi Thứ Ba hàng tuần.</p>
+						<p>Thành viên Beta Cinemas được mua vé xem phim 2D đồng giá chỉ 50.000đ/vé vào mỗi Thứ Ba hàng
+							tuần.</p>
 					</div>
 				</div>
 
@@ -425,7 +445,8 @@
 					</div>
 					<div class="ev-info">
 						<h3>Beta Member Day - x2 Điểm Thưởng</h3>
-						<p>Nhân đôi điểm tích lũy cho tất cả các giao dịch mua vé và combo bắp nước trong suốt ngày 15 mỗi tháng.</p>
+						<p>Nhân đôi điểm tích lũy cho tất cả các giao dịch mua vé và combo bắp nước trong suốt ngày 15
+							mỗi tháng.</p>
 					</div>
 				</div>
 
@@ -436,7 +457,8 @@
 					</div>
 					<div class="ev-info">
 						<h3>Tháng Sinh Nhật Rực Rỡ</h3>
-						<p>Nhận ngay mã vé xem phim 2D miễn phí và quà tặng bắp nước gửi trực tiếp vào ví ưu đãi trong tháng sinh nhật của bạn.</p>
+						<p>Nhận ngay mã vé xem phim 2D miễn phí và quà tặng bắp nước gửi trực tiếp vào ví ưu đãi trong
+							tháng sinh nhật của bạn.</p>
 					</div>
 				</div>
 			</div>
@@ -456,7 +478,9 @@
 						<span class="faq-arrow">▼</span>
 					</button>
 					<div class="faq-answer">
-						Bạn chỉ cần bấm nút "Đăng Ký" trên thanh điều hướng hoặc tại trang này, điền Họ tên, Số điện thoại và Email. Quá trình đăng ký hoàn toàn miễn phí và bạn sẽ nhận ngay <strong>50 điểm thưởng chào mừng</strong> vào tài khoản!
+						Bạn chỉ cần bấm nút "Đăng Ký" trên thanh điều hướng hoặc tại trang này, điền Họ tên, Số điện
+						thoại và Email. Quá trình đăng ký hoàn toàn miễn phí và bạn sẽ nhận ngay <strong>50 điểm thưởng
+							chào mừng</strong> vào tài khoản!
 					</div>
 				</div>
 
@@ -466,7 +490,9 @@
 						<span class="faq-arrow">▼</span>
 					</button>
 					<div class="faq-answer">
-						Mỗi 1.000 VNĐ chi tiêu mua vé hoặc bắp nước sẽ mang lại điểm tích lũy theo hạng thẻ của bạn (5% đối với Hạng Mới, 7% đối với Hạng VIP và 10% đối với Hạng Diamond). Khi đổi quà hoặc trừ tiền, <strong>1 Điểm thưởng = 1.000 VNĐ</strong> giá trị thực tế.
+						Mỗi 1.000 VNĐ chi tiêu mua vé hoặc bắp nước sẽ mang lại điểm tích lũy theo hạng thẻ của bạn (5%
+						đối với Hạng Mới, 7% đối với Hạng VIP và 10% đối với Hạng Diamond). Khi đổi quà hoặc trừ tiền,
+						<strong>1 Điểm thưởng = 1.000 VNĐ</strong> giá trị thực tế.
 					</div>
 				</div>
 
@@ -476,7 +502,8 @@
 						<span class="faq-arrow">▼</span>
 					</button>
 					<div class="faq-answer">
-						Điểm thưởng tích lũy có giá trị sử dụng trong vòng <strong>12 tháng</strong> kể từ ngày phát sinh giao dịch. Hệ thống sẽ gửi thông báo nhắc nhở trước 30 ngày nếu có điểm sắp hết hạn.
+						Điểm thưởng tích lũy có giá trị sử dụng trong vòng <strong>12 tháng</strong> kể từ ngày phát
+						sinh giao dịch. Hệ thống sẽ gửi thông báo nhắc nhở trước 30 ngày nếu có điểm sắp hết hạn.
 					</div>
 				</div>
 
@@ -486,7 +513,9 @@
 						<span class="faq-arrow">▼</span>
 					</button>
 					<div class="faq-answer">
-						Rất đơn giản, bạn chỉ cần mở trang Thành Viên trên điện thoại, bấm "Lật Thẻ" để nhân viên thu ngân quét mã vạch Barcode, hoặc đọc Số điện thoại đăng ký tài khoản cho nhân viên trước khi thanh toán.
+						Rất đơn giản, bạn chỉ cần mở trang Thành Viên trên điện thoại, bấm "Lật Thẻ" để nhân viên thu
+						ngân quét mã vạch Barcode, hoặc đọc Số điện thoại đăng ký tài khoản cho nhân viên trước khi
+						thanh toán.
 					</div>
 				</div>
 
@@ -496,7 +525,9 @@
 						<span class="faq-arrow">▼</span>
 					</button>
 					<div class="faq-answer">
-						Mã voucher sau khi đổi thành công sẽ được lưu trữ trong mục "Ưu Đãi Của Tôi" trên trang cá nhân và có thời hạn sử dụng từ 30 đến 60 ngày. Điểm thưởng đã đổi không thể quy đổi ngược lại thành điểm hoặc tiền mặt.
+						Mã voucher sau khi đổi thành công sẽ được lưu trữ trong mục "Ưu Đãi Của Tôi" trên trang cá nhân
+						và có thời hạn sử dụng từ 30 đến 60 ngày. Điểm thưởng đã đổi không thể quy đổi ngược lại thành
+						điểm hoặc tiền mặt.
 					</div>
 				</div>
 			</div>
@@ -508,7 +539,8 @@
 		<div class="m-modal-card">
 			<div class="mm-head">
 				<h3>Nhật Ký Tích & Tiêu Điểm</h3>
-				<button type="button" class="modal-close-btn" id="btn-close-history-modal" aria-label="Đóng">&#x2715;</button>
+				<button type="button" class="modal-close-btn" id="btn-close-history-modal"
+					aria-label="Đóng">&#x2715;</button>
 			</div>
 			<div class="mm-body">
 				<div class="history-table-wrap">
@@ -537,16 +569,20 @@
 		<div class="m-modal-card" style="max-width: 440px;">
 			<div class="mm-head">
 				<h3>Xác Nhận Đổi Quà Thưởng</h3>
-				<button type="button" class="modal-close-btn" id="btn-close-redeem-modal" aria-label="Đóng">&#x2715;</button>
+				<button type="button" class="modal-close-btn" id="btn-close-redeem-modal"
+					aria-label="Đóng">&#x2715;</button>
 			</div>
 			<div class="mm-body">
 				<div style="text-align: center; margin-bottom: 16px;">
 					<div style="font-size: 48px; margin-bottom: 8px;" id="confirm-reward-icon">🎁</div>
-					<h4 style="font-size: 17px; font-weight: 800; color: #cdd6f4; margin: 0 0 6px;" id="confirm-reward-title">Tên Quà</h4>
-					<p style="font-size: 13px; color: #a6adc8; margin: 0;" id="confirm-reward-desc">Mô tả chi tiết quà</p>
+					<h4 style="font-size: 17px; font-weight: 800; color: #cdd6f4; margin: 0 0 6px;"
+						id="confirm-reward-title">Tên Quà</h4>
+					<p style="font-size: 13px; color: #a6adc8; margin: 0;" id="confirm-reward-desc">Mô tả chi tiết quà
+					</p>
 				</div>
 
-				<div style="background: #313244; border-radius: 8px; padding: 14px; margin-bottom: 16px; border: 1px solid rgba(88, 91, 112, 0.4); font-size: 13px;">
+				<div
+					style="background: #313244; border-radius: 8px; padding: 14px; margin-bottom: 16px; border: 1px solid rgba(88, 91, 112, 0.4); font-size: 13px;">
 					<div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
 						<span style="color: #a6adc8;">Điểm hiện có:</span>
 						<strong id="confirm-user-current-pts" style="color: #cdd6f4;">850 Điểm</strong>
@@ -555,13 +591,15 @@
 						<span style="color: #a6adc8;">Điểm cần đổi:</span>
 						<strong id="confirm-reward-cost-pts" style="color: #f38ba8;">-50 Điểm</strong>
 					</div>
-					<div style="display: flex; justify-content: space-between; border-top: 1px dashed rgba(88, 91, 112, 0.4); padding-top: 6px;">
+					<div
+						style="display: flex; justify-content: space-between; border-top: 1px dashed rgba(88, 91, 112, 0.4); padding-top: 6px;">
 						<span style="font-weight: 700; color: #cdd6f4;">Điểm còn lại:</span>
 						<strong id="confirm-user-remain-pts" style="color: #a6e3a1; font-size: 15px;">800 Điểm</strong>
 					</div>
 				</div>
 				<p style="font-size: 12px; color: #a6adc8; margin: 0; line-height: 1.4;">
-					Sau khi xác nhận, mã quà tặng sẽ được cấp tự động vào Kho Ưu Đãi của bạn và sẵn sàng sử dụng khi đặt vé.
+					Sau khi xác nhận, mã quà tặng sẽ được cấp tự động vào Kho Ưu Đãi của bạn và sẵn sàng sử dụng khi đặt
+					vé.
 				</p>
 			</div>
 			<div class="mm-actions">

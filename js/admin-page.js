@@ -556,7 +556,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 						<td style="text-align: center;">
 							<div class="row-actions" style="justify-content: center;">
 								<button type="button" class="btn-action-icon btn-edit-movie" data-id="${m.id}" title="Chỉnh sửa phim">✏️</button>
-								<button type="button" class="btn-action-icon btn-delete btn-delete-movie" data-id="${m.id}" data-title="${m.title}" title="Xóa phim">🗑️</button>
 							</div>
 						</td>
 					</tr>
@@ -784,9 +783,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 							<div style="display: flex; gap: 8px;">
 								<button type="button" class="btn-admin-secondary btn-add-slot-for-movie" data-movie-id="${sc.movieId}" data-movie-title="${sc.movieTitle}" data-screen="${sc.screenName}" data-format="${sc.format}" style="font-size: 12px; padding: 5px 10px;">
 									➕ Thêm Giờ Chiếu
-								</button>
-								<button type="button" class="btn-admin-secondary btn-del-movie-schedule" data-movie-id="${sc.movieId}" data-movie-title="${sc.movieTitle}" style="font-size: 12px; padding: 5px 10px; color: #f38ba8; border-color: rgba(243, 139, 168, 0.3);">
-									🗑️ Xóa Lịch Phim Này
 								</button>
 							</div>
 						</div>
@@ -1105,7 +1101,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 						</div>
 						<div class="cc-card-actions">
 							<button type="button" class="btn-action-icon btn-edit-concession" data-id="${it.id}" title="Sửa thông tin và giá bán">✏️</button>
-							<button type="button" class="btn-action-icon btn-delete btn-del-concession" data-id="${it.id}" data-name="${it.name}" title="Xóa món này">🗑️</button>
 						</div>
 					</div>
 				`
@@ -1369,7 +1364,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 							? `<button type="button" class="btn-action-icon btn-cancel-admin-ticket" data-id="${b.id}" style="color: #fab387;" title="Hủy vé">✕</button>`
 							: ""
 						}
-								<button type="button" class="btn-action-icon btn-delete btn-delete-admin-ticket" data-id="${b.id}" title="Xóa vĩnh viễn đơn vé">🗑️</button>
 							</div>
 						</td>
 					</tr>

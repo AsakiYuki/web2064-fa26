@@ -10,6 +10,8 @@ import {
 	saveBookingTicket,
 	updateShowtimeSeats,
 	calculateVoucherDiscount,
+	checkSeatsAvailability,
+	releaseSeatHold,
 } from "./storage.js"
 import { generateQRCodeSVG } from "./qrcode.js"
 
@@ -208,6 +210,9 @@ document.addEventListener("DOMContentLoaded", async () => {
 		if (remainingSeconds <= 0) {
 			clearInterval(timerInterval)
 			if (timerDisplay) timerDisplay.textContent = "00:00"
+			if (pending?.holdId) {
+				releaseSeatHold(pending.holdId)
+			}
 			showToast("Thời gian giữ vé đã hết! Vui lòng thực hiện đặt vé lại.", "warning", 8000)
 			document.getElementById("btn-submit-payment")?.setAttribute("disabled", "true")
 			clearPendingBooking()
@@ -304,6 +309,18 @@ document.addEventListener("DOMContentLoaded", async () => {
 			return
 		}
 
+		// Kiểm tra lại tính khả dụng của ghế trước khi thanh toán
+		const seatList = seatsParam.split(",").map(s => s.trim()).filter(Boolean)
+		const availCheck = checkSeatsAvailability(currentCinema.id, currentMovie.id, dateStr, timeSlot, seatList, pending?.holdId)
+		if (!availCheck.allAvailable) {
+			showToast(`⚠️ Rất tiếc, ghế [${availCheck.unavailableSeats.join(", ")}] đã không còn khả dụng hoặc đã hết thời gian giữ vé! Vui lòng chọn lại.`, "error", 4500)
+			setTimeout(() => {
+				window.location.href = `/booking.html?movieId=${encodeURIComponent(currentMovie.id)}&cinemaId=${encodeURIComponent(currentCinema.id)}&date=${encodeURIComponent(dateStr)}&time=${encodeURIComponent(timeSlot)}`
+			}, 1800)
+			return
+		}
+
+		// Disable submit button during transaction
 		const submitBtn = document.getElementById("btn-submit-payment")
 		if (submitBtn) submitBtn.disabled = true
 
@@ -413,6 +430,12 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 				// Close QR Modal
 				closeQRModal()
+        
+        // 8. UPDATE SEAT STATUS TO 'SOLD' IN LOCALSTORAGE & RELEASE ACTIVE HOLD
+        updateShowtimeSeats(currentCinema.id, currentMovie.id, dateStr, timeSlot, seatList, "sold")
+        if (pending?.holdId) {
+          releaseSeatHold(pending.holdId)
+        }
 
 				// 10. SWITCH TO E-TICKET SUCCESS VIEW WITH SCANNABLE QR CODE
 				if (checkoutLayout) checkoutLayout.style.display = "none"

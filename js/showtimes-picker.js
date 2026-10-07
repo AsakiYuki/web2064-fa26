@@ -11,6 +11,16 @@ import {
 	getTicketPricing,
 	getShowtimeSeats,
 	updateShowtimeSeats,
+	canSelectSeat,
+	canDeselectSeat,
+	areSeatsContiguous,
+	isSeatAvailable,
+	checkSeatsAvailability,
+	getOrCreateHoldSessionId,
+	holdSeats,
+	releaseSeatHold,
+	getHeldSeats,
+	getSeatStatus,
 } from "./storage.js"
 
 export class ShowtimePicker {
@@ -615,6 +625,7 @@ export class ShowtimePicker {
 	}
 
 	openSeatModal(slotData) {
+		this.modalHoldId = getOrCreateHoldSessionId()
 		this.currentBooking = {
 			...slotData,
 			selectedSeats: [],
@@ -629,6 +640,8 @@ export class ShowtimePicker {
 			isIMAX: (slotData.format || "").toLowerCase().includes("imax"),
 		})
 
+		const heldByOthers = getHeldSeats(slotData.cinemaId, slotData.movieId, slotData.date, slotData.time, this.modalHoldId)
+
 		let seatRowsHTML = ""
 		seatLayout.forEach(rowBlock => {
 			let seatsInRow = ""
@@ -636,16 +649,22 @@ export class ShowtimePicker {
 
 			rowBlock.seats.forEach(seat => {
 				const isSold = seat.status === "sold"
+				const isHeld = !isSold && heldByOthers.includes(seat.id)
+				const statusClass = isSold ? "seat-sold" : isHeld ? "seat-holding" : ""
+				const statusData = isSold ? "sold" : isHeld ? "holding" : "available"
+
 				seatsInRow += `
-					<div class="seat-item seat-${seat.type} ${isSold ? "seat-sold" : ""}"
+					<div class="seat-item seat-${seat.type} ${statusClass}"
 						data-seat-id="${seat.id}"
+						data-seat-row="${seat.row}"
+						data-seat-col="${seat.col}"
 						data-seat-type="${seat.type}"
 						data-price="${seat.price}"
-						data-status="${seat.status}"
-						title="${seat.id} (${seat.type === "vip" ? "Ghế VIP" : seat.type === "sweetbox" ? "Ghế Đôi Sweetbox" : "Ghế Thường"}: ${formatCurrency(seat.price)})"
+						data-status="${statusData}"
+						title="${seat.id} (${isSold ? "Đã bán" : isHeld ? "Khách khác đang giữ tạm 5 phút" : `${seat.type === "vip" ? "Ghế VIP" : seat.type === "sweetbox" ? "Ghế Đôi Sweetbox" : "Ghế Thường"}: ${formatCurrency(seat.price)}`})"
 						role="checkbox"
 						aria-checked="false"
-						tabindex="${isSold ? "-1" : "0"}">
+						tabindex="${isSold || isHeld ? "-1" : "0"}">
 						${isSweetbox ? "👫" : seat.col}
 					</div>
 				`
@@ -693,6 +712,7 @@ export class ShowtimePicker {
 				<div class="l-item"><div class="l-box vip"></div> <span>VIP (${formatCurrency(basePrice + 10000)})</span></div>
 				<div class="l-item"><div class="l-box swb"></div> <span>Ghế đôi (${formatCurrency(basePrice * 2 + 15000)})</span></div>
 				<div class="l-item"><div class="l-box sold"></div> <span>Đã bán</span></div>
+				<div class="l-item"><div class="l-box holding"></div> <span>Đang giữ</span></div>
 				<div class="l-item"><div class="l-box sel"></div> <span>Đang chọn</span></div>
 			</div>
 
@@ -714,7 +734,7 @@ export class ShowtimePicker {
 		document.body.style.overflow = "hidden"
 
 		this.attachSeatModalEvents(slotData)
-		this.startModalHoldTimer()
+		this.stopModalHoldTimer()
 		translateDom(getSavedLang())
 	}
 
@@ -722,8 +742,8 @@ export class ShowtimePicker {
 		const modalBody = document.getElementById("seat-modal-body")
 		if (!modalBody) return
 
-		modalBody.querySelectorAll(".seat-item:not(.seat-sold)").forEach(seatEl => {
-			seatEl.addEventListener("click", () => this.toggleSeat(seatEl))
+		modalBody.querySelectorAll(".seat-item").forEach(seatEl => {
+			seatEl.addEventListener("click", () => this.toggleSeat(seatEl, slotData))
 		})
 
 		const proceedBtn = document.getElementById("btn-modal-proceed")
@@ -733,13 +753,29 @@ export class ShowtimePicker {
 				return
 			}
 
-			const seatNames = this.currentBooking.selectedSeats.map(s => s.id).join(", ")
-			const totalAmount = this.currentBooking.selectedSeats.reduce((sum, s) => sum + s.price, 0)
+			if (!areSeatsContiguous(this.currentBooking.selectedSeats)) {
+				showToast("⚠️ Vui lòng chọn các ghế ngồi sát nhau trong cùng một hàng, không được để trống ghế ở giữa!", "warning")
+				return
+			}
 
+			const seatIds = this.currentBooking.selectedSeats.map(s => s.id)
+			const availCheck = checkSeatsAvailability(slotData.cinemaId, slotData.movieId, slotData.date, slotData.time, seatIds, this.modalHoldId)
+			if (!availCheck.allAvailable) {
+				showToast(`⚠️ Ghế [${availCheck.unavailableSeats.join(", ")}] đã không còn khả dụng hoặc đã hết thời gian giữ ghế! Vui lòng chọn lại.`, "warning")
+				this.openSeatModal(slotData)
+				return
+			}
+
+			const seatNames = seatIds.join(", ")
+			const totalAmount = this.currentBooking.selectedSeats.reduce((sum, s) => sum + s.price, 0)
+			const holdIdToPass = this.modalHoldId
+
+			// Giữ nguyên ghế trong hold và chuyển giao sang booking.html
+			this.currentBooking.selectedSeats = []
 			this.closeSeatModal()
 
-			// Redirect to full booking page (Step 2: Concessions & Checkout)
-			const bookingUrl = `/booking.html?movieId=${encodeURIComponent(slotData.movieId)}&cinemaId=${encodeURIComponent(slotData.cinemaId)}&date=${encodeURIComponent(slotData.date)}&time=${encodeURIComponent(slotData.time)}&screen=${encodeURIComponent(slotData.screenName)}&format=${encodeURIComponent(slotData.format)}&seats=${encodeURIComponent(seatNames)}&total=${totalAmount}`
+			// Redirect to full booking page with holdId
+			const bookingUrl = `/booking.html?movieId=${encodeURIComponent(slotData.movieId)}&cinemaId=${encodeURIComponent(slotData.cinemaId)}&date=${encodeURIComponent(slotData.date)}&time=${encodeURIComponent(slotData.time)}&screen=${encodeURIComponent(slotData.screenName || "Phòng 1")}&format=${encodeURIComponent(slotData.format || "2D")}&seats=${encodeURIComponent(seatNames)}&total=${totalAmount}&holdId=${encodeURIComponent(holdIdToPass)}`
 
 			window.location.href = bookingUrl
 		})
@@ -750,26 +786,98 @@ export class ShowtimePicker {
 
 		const seatId = seatEl.dataset.seatId
 		const seatType = seatEl.dataset.seatType
+		const seatRow = seatEl.dataset.seatRow || seatId.charAt(0)
+		const seatCol = +seatEl.dataset.seatCol || +seatId.replace(/^[A-Z]/, "")
 		const seatPrice = +seatEl.dataset.price
+		const isSold = seatEl.classList.contains("seat-sold") || seatEl.dataset.status === "sold"
+
+		if (isSold) {
+			seatEl.classList.add("seat-shake")
+			setTimeout(() => seatEl.classList.remove("seat-shake"), 400)
+			showToast(`⚠️ Ghế ${seatId} đã có người đặt, vui lòng chọn ghế còn trống khác!`, "warning")
+			return
+		}
+
+		const heldByOthers = getHeldSeats(slotData.cinemaId, slotData.movieId, slotData.date, slotData.time, this.modalHoldId)
+		const isHeld = seatEl.classList.contains("seat-holding") || seatEl.dataset.status === "holding" || heldByOthers.includes(seatId)
+		if (isHeld) {
+			seatEl.classList.add("seat-holding")
+			seatEl.dataset.status = "holding"
+			seatEl.classList.add("seat-shake")
+			setTimeout(() => seatEl.classList.remove("seat-shake"), 400)
+			showToast(`⏳ Ghế ${seatId} đang được khách hàng khác giữ tạm thời trong 5 phút. Vui lòng chọn ghế khác!`, "warning")
+			return
+		}
 
 		const existingIdx = this.currentBooking.selectedSeats.findIndex(s => s.id === seatId)
 
 		if (existingIdx > -1) {
+			const check = canDeselectSeat(this.currentBooking.selectedSeats, seatId)
+			if (!check.allowed) {
+				seatEl.classList.add("seat-shake")
+				setTimeout(() => seatEl.classList.remove("seat-shake"), 400)
+				showToast(check.message, "warning")
+				return
+			}
 			this.currentBooking.selectedSeats.splice(existingIdx, 1)
 			seatEl.classList.remove("seat-selected")
 			seatEl.setAttribute("aria-checked", "false")
-		} else {
-			if (this.currentBooking.selectedSeats.length >= 8) {
-				showToast("Bạn chỉ có thể chọn tối đa 8 ghế trong 1 lượt đặt.", "warning")
-				return
+
+			if (this.currentBooking.selectedSeats.length === 0) {
+				releaseSeatHold(this.modalHoldId)
+				this.stopModalHoldTimer()
+			} else {
+				holdSeats(
+					slotData.cinemaId,
+					slotData.movieId,
+					slotData.date,
+					slotData.time,
+					this.currentBooking.selectedSeats.map(s => s.id),
+					this.modalHoldId,
+				)
 			}
-			this.currentBooking.selectedSeats.push({
+		} else {
+			const targetSeat = {
 				id: seatId,
+				row: seatRow,
+				col: seatCol,
 				type: seatType,
 				price: seatPrice,
-			})
+				status: "available",
+			}
+			const check = canSelectSeat(this.currentBooking.selectedSeats, targetSeat, this.modalHoldId)
+			if (!check.allowed) {
+				seatEl.classList.add("seat-shake")
+				setTimeout(() => seatEl.classList.remove("seat-shake"), 400)
+				showToast(check.message, "warning")
+				return
+			}
+
+			this.currentBooking.selectedSeats.push(targetSeat)
 			seatEl.classList.add("seat-selected")
 			seatEl.setAttribute("aria-checked", "true")
+
+			const holdRes = holdSeats(
+				slotData.cinemaId,
+				slotData.movieId,
+				slotData.date,
+				slotData.time,
+				this.currentBooking.selectedSeats.map(s => s.id),
+				this.modalHoldId,
+			)
+			if (!holdRes.success) {
+				this.currentBooking.selectedSeats.pop()
+				seatEl.classList.remove("seat-selected")
+				seatEl.setAttribute("aria-checked", "false")
+				seatEl.classList.add("seat-shake")
+				setTimeout(() => seatEl.classList.remove("seat-shake"), 400)
+				showToast(holdRes.message || "Không thể giữ ghế này!", "warning")
+				return
+			}
+
+			if (this.currentBooking.selectedSeats.length === 1) {
+				this.startModalHoldTimer(holdRes.remainingSeconds || 300)
+			}
 		}
 
 		this.updateModalSelectedUI()
@@ -794,28 +902,48 @@ export class ShowtimePicker {
 		}
 	}
 
-	startModalHoldTimer() {
-		let seconds = 300
+	startModalHoldTimer(initialSecs = 300) {
+		let seconds = initialSecs
 		const timerDigits = document.getElementById("modal-timer-digits")
 
 		if (this.modalHoldInterval) clearInterval(this.modalHoldInterval)
+
+		const updateDigits = s => {
+			const m = String(Math.floor(s / 60)).padStart(2, "0")
+			const sec = String(s % 60).padStart(2, "0")
+			if (timerDigits) timerDigits.textContent = `${m}:${sec}`
+		}
+		updateDigits(seconds)
 
 		this.modalHoldInterval = setInterval(() => {
 			seconds--
 			if (seconds <= 0) {
 				clearInterval(this.modalHoldInterval)
-				showToast("Thời gian giữ ghế đã hết! Vui lòng chọn lại.", "warning")
+				this.modalHoldInterval = null
+				if (this.modalHoldId) releaseSeatHold(this.modalHoldId)
+				showToast("⏰ Thời gian giữ ghế 5 phút đã hết! Vui lòng chọn lại.", "warning", 6000)
 				this.closeSeatModal()
 				return
 			}
-			const m = String(Math.floor(seconds / 60)).padStart(2, "0")
-			const s = String(seconds % 60).padStart(2, "0")
-			if (timerDigits) timerDigits.textContent = `${m}:${s}`
+			updateDigits(seconds)
 		}, 1000)
 	}
 
+	stopModalHoldTimer() {
+		if (this.modalHoldInterval) {
+			clearInterval(this.modalHoldInterval)
+			this.modalHoldInterval = null
+		}
+		const timerDigits = document.getElementById("modal-timer-digits")
+		if (timerDigits) timerDigits.textContent = "05:00"
+	}
+
 	closeSeatModal() {
-		if (this.modalHoldInterval) clearInterval(this.modalHoldInterval)
+		if (this.modalHoldId && this.currentBooking?.selectedSeats?.length > 0) {
+			releaseSeatHold(this.modalHoldId)
+			this.currentBooking.selectedSeats = []
+		}
+		this.stopModalHoldTimer()
 		const modal = document.getElementById("seat-booking-modal")
 		if (modal) {
 			modal.classList.remove("active")
