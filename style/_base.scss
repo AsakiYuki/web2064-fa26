@@ -71,8 +71,22 @@ ul {
 }
 
 .container {
-	margin: 0 auto;
-	max-width: 1260px;
-	padding: 0 16px;
-	width: 100%;
+    margin: 0 auto;
+    max-width: 1260px;
+    padding: 0 16px;
+    width: 100%;
+}
+
+// Tablet
+@media (max-width: $breakpoint-tablet) {
+    .container {
+        padding: 0 20px;
+    }
+}
+
+// Mobile
+@media (max-width: $breakpoint-mobile) {
+    .container {
+        padding: 0 16px;
+    }
 }

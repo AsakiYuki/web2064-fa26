@@ -21,3 +21,62 @@
 @use 'member';
 @use 'cinemas';
 @use 'latte';
+
+/* ============================================
+   RESPONSIVE FOOTER - MOBILE
+   ============================================ */
+
+@media (max-width: 900px) {
+
+	.main-footer {
+		width: 100%;
+		max-width: 100%;
+		overflow: hidden;
+
+		* {
+			max-width: 100%;
+			box-sizing: border-box;
+		}
+
+		/* Container footer */
+		.container {
+			width: 100%;
+			max-width: 100%;
+			padding: 30px 16px;
+			margin: 0;
+		}
+
+		/* Các cột footer chuyển thành 1 cột */
+		.footer-grid,
+		.footer-content,
+		.footer-columns {
+			display: flex;
+			flex-direction: column;
+			width: 100%;
+			gap: 28px;
+		}
+
+		/* Từng cột */
+		.footer-column {
+			width: 100%;
+			min-width: 0;
+			max-width: 100%;
+		}
+
+		/* Logo */
+		img {
+			max-width: 150px;
+			height: auto;
+		}
+
+		/* Không cho text kéo footer ra ngoài */
+		p,
+		span,
+		a,
+		li {
+			max-width: 100%;
+			overflow-wrap: break-word;
+			word-break: normal;
+		}
+	}
+}
