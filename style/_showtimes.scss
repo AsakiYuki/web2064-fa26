@@ -639,6 +639,16 @@
 					transform: none !important;
 				}
 
+				&.seat-holding {
+					background: rgba(250, 179, 135, 0.35) !important;
+					color: $ctp-peach !important;
+					cursor: not-allowed !important;
+					opacity: 0.9;
+					border: 1px dashed $ctp-peach !important;
+					transform: none !important;
+					position: relative;
+				}
+
 				&.seat-selected {
 					background: $accent-green !important;
 					color: $ctp-crust !important;
@@ -652,6 +662,12 @@
 			}
 		}
 	}
+
+@keyframes seatShake {
+	0%, 100% { transform: translateX(0); }
+	20%, 60% { transform: translateX(-4px); }
+	40%, 80% { transform: translateX(4px); }
+}
 
 	/* Modal Legend */
 	.modal-seat-legend,
@@ -683,6 +699,7 @@
 				&.vip, &.sample-vip { background: $ctp-peach; }
 				&.swb, &.sample-swb { background: $ctp-mauve; }
 				&.sold, &.sample-sold { background: $ctp-surface0; opacity: 0.6; }
+				&.holding, &.sample-holding { background: rgba(250, 179, 135, 0.35); border: 1px dashed $ctp-peach; }
 				&.sel, &.sample-sel { background: $accent-green; }
 			}
 		}
