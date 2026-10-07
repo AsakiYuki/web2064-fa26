@@ -2,7 +2,32 @@
  * Beta Cinemas - Seat Selection & Concessions Booking Logic
  */
 import { setupHeaderAndFooter, formatCurrency, formatDateVN, showToast, translateDom, getSavedLang } from "./common.js"
-import { getMoviesData, getCinemas, getConcessions, getTicketPricing, getShowtimeSeats, updateShowtimeSeats, isSeatSold, calculateVoucherDiscount, savePendingBooking, getPendingBooking, saveBookingTicket, clearPendingBooking } from "./storage.js"
+import {
+	getMoviesData,
+	getCinemas,
+	getConcessions,
+	getTicketPricing,
+	getShowtimeSeats,
+	updateShowtimeSeats,
+	isSeatSold,
+	calculateVoucherDiscount,
+	savePendingBooking,
+	getPendingBooking,
+	saveBookingTicket,
+	clearPendingBooking,
+	isPendingBookingExpired,
+	canSelectSeat,
+	canDeselectSeat,
+	areSeatsContiguous,
+	isSeatAvailable,
+	checkSeatsAvailability,
+	getOrCreateHoldSessionId,
+	holdSeats,
+	releaseSeatHold,
+	getHeldSeats,
+	getSeatHold,
+	getSeatStatus,
+} from "./storage.js"
 
 document.addEventListener("DOMContentLoaded", async () => {
 	await setupHeaderAndFooter()
@@ -70,6 +95,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 		pending.date === dateStr &&
 		pending.time === timeSlot,
 	)
+	const isSameShowtime = isMatchingShowtime
 
 	// Hold session identifier (ưu tiên kế thừa holdId từ pending booking hoặc URL để giữ nguyên phiên khi F5)
 	const holdIdFromUrl = urlParams.get("holdId")
@@ -81,21 +107,13 @@ document.addEventListener("DOMContentLoaded", async () => {
 	let hasNotifiedOneMinute = false
 	let isProceedingToCheckout = false
 
-	// Restore state from pending booking if available for the same showtime
-	const pending = getPendingBooking()
-	const isSameShowtime = pending &&
-		pending.movieId === currentMovie.id &&
-		pending.cinemaId === currentCinema.id &&
-		pending.date === dateStr &&
-		pending.time === timeSlot
-
 	let initialStep = 1
-	if (urlParams.get("step") === "2" || window.location.hash === "#combos" || window.location.hash === "#concessions" || (isSameShowtime && pending.currentStep === 2)) {
+	if (urlParams.get("step") === "2" || window.location.hash === "#combos" || window.location.hash === "#concessions" || (isMatchingShowtime && pending?.currentStep === 2)) {
 		initialStep = 2
 	}
 
 	// Restore hold timer from pending booking if not expired
-	if (isSameShowtime && pending.holdExpiresAt && pending.holdExpiresAt > Date.now()) {
+	if (isMatchingShowtime && pending?.holdExpiresAt && pending.holdExpiresAt > Date.now()) {
 		holdSecondsRemaining = Math.max(10, Math.floor((pending.holdExpiresAt - Date.now()) / 1000))
 	}
 
@@ -110,7 +128,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 		selectedSeats: [], // { id, row, col, type, price }
 		selectedConcessions: new Map(), // concessionId -> { item, qty }
 		discountAmount: 0,
-		appliedCoupon: (isSameShowtime && pending.voucherCode) ? pending.voucherCode : null,
+		appliedCoupon: (isMatchingShowtime && pending?.voucherCode) ? pending.voucherCode : null,
 		currentStep: initialStep, // 1: Seats, 2: Concessions
 	}
 
@@ -248,17 +266,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 		if (restoredSeatsCount > 0) parts.push(`${restoredSeatsCount} ghế (${bookingState.selectedSeats.map(s => s.id).join(", ")})`)
 		if (restoredConcessionsCount > 0) parts.push(`${restoredConcessionsCount} phần bắp nước`)
 		showToast(`✨ Đã tự động khôi phục ${parts.join(" & ")} bạn đã chọn!`, "info", 3500)
-	}
-
-	// Pre-populate selected concessions from pending booking
-	if (isSameShowtime && Array.isArray(pending.selectedConcessions)) {
-		const concessionsList = concessionsData?.items || []
-		pending.selectedConcessions.forEach(c => {
-			const foundItem = concessionsList.find(it => it.id === c.id) || { id: c.id, name: c.name, price: c.price }
-			if (c.qty > 0) {
-				bookingState.selectedConcessions.set(c.id, { item: foundItem, qty: c.qty })
-			}
-		})
 	}
 
 	initBookingInfoDisplay()
@@ -951,7 +958,9 @@ document.addEventListener("DOMContentLoaded", async () => {
 					}
 					window.history.replaceState({}, "", url)
 				} catch (e) {}
-				window.scrollTo({ top: 120, behavior: "smooth" })
+				if (smoothScroll) {
+					window.scrollTo({ top: 120, behavior: "smooth" })
+				}
 			}
 			updateBookingUrl()
 			updateSummarySidebar()
@@ -1024,9 +1033,9 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 		// Auto restore step 2 if returning or reloading on concessions step
 		if (bookingState.currentStep === 2 && bookingState.selectedSeats.length > 0) {
-			switchToStep(2)
+			switchToStep(2, false)
 		} else {
-			switchToStep(1)
+			switchToStep(1, false)
 		}
 	}
 

@@ -9,7 +9,7 @@
 import { apiRegister, apiLogin, apiUpdateUser, apiGetMovies, apiCreateMovie, apiUpdateMovie, apiDeleteMovie, apiGetShowtimes, apiGetConcessions, apiCreateConcession, apiUpdateConcession, apiDeleteConcession, apiGetBookings, apiCreateBooking, apiUpdateBooking, apiDeleteBooking, apiGetCinemas, apiGetGenres, apiGetTicketPricing } from './js/api.js'
 import { calculateVoucherDiscount, savePendingBooking, isPendingBookingExpired, clearPendingBooking, redeemMemberReward, saveUserSession, logoutUser, initializeStorage, canSelectSeat, canDeselectSeat, areSeatsContiguous, isSeatAvailable, checkSeatsAvailability, updateShowtimeSeats, holdSeats, releaseSeatHold, getHeldSeats, getSeatStatus } from './js/storage.js'
 
-const BACKEND_URL = 'http://localhost:3000'
+const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:3000'
 
 let passed = 0
 let failed = 0

@@ -396,9 +396,12 @@ document.addEventListener("DOMContentLoaded", async () => {
 				if (qrTimerInterval) clearInterval(qrTimerInterval)
 				clearInterval(timerInterval)
 
-				// 8. UPDATE SEAT STATUS TO 'SOLD' IN LOCALSTORAGE
+				// 8. UPDATE SEAT STATUS TO 'SOLD' IN LOCALSTORAGE & RELEASE ACTIVE HOLD
 				const seatList = seatsParam.split(",").map(s => s.trim()).filter(Boolean)
 				updateShowtimeSeats(currentCinema.id, currentMovie.id, dateStr, timeSlot, seatList, "sold")
+				if (pending?.holdId) {
+					releaseSeatHold(pending.holdId)
+				}
 
 				// 9. SAVE TICKET TO USER'S BOOKING HISTORY IN LOCALSTORAGE
 				const newTicket = {
@@ -430,12 +433,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 				// Close QR Modal
 				closeQRModal()
-        
-        // 8. UPDATE SEAT STATUS TO 'SOLD' IN LOCALSTORAGE & RELEASE ACTIVE HOLD
-        updateShowtimeSeats(currentCinema.id, currentMovie.id, dateStr, timeSlot, seatList, "sold")
-        if (pending?.holdId) {
-          releaseSeatHold(pending.holdId)
-        }
 
 				// 10. SWITCH TO E-TICKET SUCCESS VIEW WITH SCANNABLE QR CODE
 				if (checkoutLayout) checkoutLayout.style.display = "none"
