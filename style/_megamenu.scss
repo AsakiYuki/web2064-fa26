@@ -532,13 +532,110 @@
 	}
 }
 
-/* Hide desktop nav on mobile */
-@media (max-width: 900px) {
+/* Hide desktop nav on tablet and mobile */
+@media (max-width: $breakpoint-tablet) {
 	.nav-links {
 		display: none !important;
 	}
+
 	.cinema-selector-wrap {
 		margin-left: auto;
 		margin-right: 8px;
+	}
+}
+
+/* =========================================================
+   MOBILE FIX - HEADER + DRAWER
+   ========================================================= */
+@media (max-width: 900px) {
+
+	/* Không cho toàn bộ trang tạo chiều rộng dư */
+	html,
+	body {
+		width: 100%;
+		max-width: 100%;
+		overflow-x: hidden;
+	}
+
+	/* Header luôn bám đúng chiều rộng màn hình */
+	.main-header {
+		width: 100%;
+		max-width: 100%;
+		min-width: 0;
+	}
+
+	.header-navigator {
+		width: 100%;
+		max-width: 100%;
+		min-width: 0;
+
+		.container {
+			width: 100%;
+			max-width: 100%;
+			min-width: 0;
+			padding-left: 12px;
+			padding-right: 12px;
+			gap: 0;
+		}
+	}
+
+	/* Logo */
+	.header-logo {
+		margin-right: 0 !important;
+
+		img {
+			height: 40px !important;
+			width: auto;
+		}
+	}
+
+	/* Nút hamburger */
+	.mobile-menu-toggle {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		margin-left: auto;
+		flex-shrink: 0;
+	}
+
+	/* Cinema selector không được đẩy header rộng ra */
+	.cinema-selector-wrap {
+		margin-left: auto;
+		margin-right: 8px;
+		max-width: 180px;
+		min-width: 0;
+	}
+
+	.cinema-selector {
+		max-width: 180px;
+		overflow: hidden;
+		text-overflow: ellipsis;
+	}
+
+	/* Drawer luôn nằm trong viewport */
+	.mobile-nav-drawer {
+		position: fixed !important;
+		top: 0 !important;
+		right: 0 !important;
+		bottom: 0 !important;
+		left: auto !important;
+
+		width: 300px !important;
+		max-width: 85vw !important;
+		min-width: 0 !important;
+
+		transform: translateX(100%);
+	}
+
+	.mobile-nav-drawer.open {
+		transform: translateX(0);
+	}
+
+	/* Overlay phủ đúng màn hình */
+	.mobile-drawer-backdrop {
+		position: fixed !important;
+		inset: 0 !important;
+		width: 100vw !important;
+		height: 100vh !important;
 	}
 }

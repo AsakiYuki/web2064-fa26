@@ -233,3 +233,84 @@
 		}
 	}
 }
+
+/* ============================================
+   RESPONSIVE FOOTER - TABLET & MOBILE
+   ============================================ */
+
+@media (max-width: 900px) {
+
+	.main-footer {
+		width: 100%;
+		max-width: 100%;
+		overflow: hidden;
+
+		.footer-inner {
+			width: 100%;
+			max-width: 100%;
+			padding: 30px 16px;
+			margin: 0;
+
+			/* QUAN TRỌNG: từ 3 cột -> 1 cột */
+			display: flex;
+			flex-direction: column;
+			gap: 28px;
+		}
+
+		.footer-brand,
+		.footer-cinema-cluster,
+		.footer-contact {
+			width: 100%;
+			min-width: 0;
+			max-width: 100%;
+		}
+
+		/* Không chia danh sách rạp thành 2 cột trên mobile */
+		.footer-cinema-cluster {
+
+			.cinema-cluster-list {
+				display: flex;
+				flex-direction: column;
+				column-count: 1;
+				columns: 1;
+				width: 100%;
+			}
+		}
+
+		/* Logo */
+		.footer-brand {
+
+			img {
+				max-width: 150px;
+				height: auto;
+			}
+		}
+
+		/* Không cho nội dung kéo ngang footer */
+		p,
+		span,
+		a,
+		li {
+			max-width: 100%;
+			overflow-wrap: anywhere;
+			word-break: normal;
+		}
+	}
+
+	/* Footer copyright */
+	.main-footer {
+
+		.footer-bottom {
+
+			.container {
+				width: 100%;
+				max-width: 100%;
+				padding: 0 16px;
+			}
+
+			p {
+				text-align: center;
+			}
+		}
+	}
+}
