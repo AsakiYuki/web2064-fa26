@@ -557,50 +557,94 @@ export function generateQRCodeSVG(text, options = {}) {
 		size = 180,
 		darkColor = "#11111b",
 		lightColor = "#cdd6f4",
-		errorCorrection = QRErrorCorrectLevel.M,
+		errorCorrection = QRErrorCorrectLevel.L,
 		includeLogo = true,
 	} = options
 
-	const qr = new QRCodeModel(0, errorCorrection)
-	qr.addData(text)
-	qr.make()
+	let safeText = String(text || "BETACINEMAS")
+	// If text is extremely long, compact it
+	if (safeText.length > 120) {
+		safeText = safeText.slice(0, 120)
+	}
 
-	const count = qr.getModuleCount()
-	const margin = 2
-	const totalSize = count + margin * 2
-	const cellSize = size / totalSize
+	try {
+		const qr = new QRCodeModel(0, errorCorrection)
+		qr.addData(safeText)
+		qr.make()
 
-	let rects = ""
-	for (let row = 0; row < count; row++) {
-		for (let col = 0; col < count; col++) {
-			if (qr.isDark(row, col)) {
-				const x = (col + margin) * cellSize
-				const y = (row + margin) * cellSize
-				rects += `<rect x="${x.toFixed(2)}" y="${y.toFixed(2)}" width="${cellSize.toFixed(2)}" height="${cellSize.toFixed(2)}" fill="${darkColor}" />`
+		const count = qr.getModuleCount()
+		const margin = 2
+		const totalSize = count + margin * 2
+		const cellSize = size / totalSize
+
+		let rects = ""
+		for (let row = 0; row < count; row++) {
+			for (let col = 0; col < count; col++) {
+				if (qr.isDark(row, col)) {
+					const x = (col + margin) * cellSize
+					const y = (row + margin) * cellSize
+					rects += `<rect x="${x.toFixed(2)}" y="${y.toFixed(2)}" width="${cellSize.toFixed(2)}" height="${cellSize.toFixed(2)}" fill="${darkColor}" />`
+				}
 			}
 		}
-	}
 
-	// Optional Center Logo badge for Beta Cinemas
-	let centerLogo = ""
-	if (includeLogo) {
-		const center = size / 2
-		const radius = size * 0.13
-		const innerRadius = size * 0.11
-		centerLogo = `
-			<circle cx="${center}" cy="${center}" r="${radius.toFixed(2)}" fill="${darkColor}" />
-			<circle cx="${center}" cy="${center}" r="${innerRadius.toFixed(2)}" fill="${lightColor}" />
-			<text x="${center}" y="${(center + innerRadius * 0.45).toFixed(2)}" font-family="'Inter', sans-serif" font-size="${(innerRadius * 1.3).toFixed(2)}" font-weight="900" fill="${darkColor}" text-anchor="middle">β</text>
+		// Optional Center Logo badge for Beta Cinemas
+		let centerLogo = ""
+		if (includeLogo) {
+			const center = size / 2
+			const radius = size * 0.13
+			const innerRadius = size * 0.11
+			centerLogo = `
+				<circle cx="${center}" cy="${center}" r="${radius.toFixed(2)}" fill="${darkColor}" />
+				<circle cx="${center}" cy="${center}" r="${innerRadius.toFixed(2)}" fill="${lightColor}" />
+				<text x="${center}" y="${(center + innerRadius * 0.45).toFixed(2)}" font-family="'Inter', sans-serif" font-size="${(innerRadius * 1.3).toFixed(2)}" font-weight="900" fill="${darkColor}" text-anchor="middle">β</text>
+			`
+		}
+
+		return `
+			<svg viewBox="0 0 ${size} ${size}" width="${size}" height="${size}" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Mã QR vé xem phim">
+				<rect width="${size}" height="${size}" fill="${lightColor}" rx="8" />
+				${rects}
+				${centerLogo}
+			</svg>
 		`
-	}
+	} catch (err) {
+		console.warn("QR code generation fallback:", err)
+		// Fallback clean QR generator using simpler text
+		try {
+			const fallbackQr = new QRCodeModel(0, QRErrorCorrectLevel.L)
+			fallbackQr.addData(safeText.slice(0, 40))
+			fallbackQr.make()
+			const count = fallbackQr.getModuleCount()
+			const margin = 2
+			const totalSize = count + margin * 2
+			const cellSize = size / totalSize
 
-	return `
-		<svg viewBox="0 0 ${size} ${size}" width="${size}" height="${size}" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Mã QR vé xem phim">
-			<rect width="${size}" height="${size}" fill="${lightColor}" rx="8" />
-			${rects}
-			${centerLogo}
-		</svg>
-	`
+			let rects = ""
+			for (let row = 0; row < count; row++) {
+				for (let col = 0; col < count; col++) {
+					if (fallbackQr.isDark(row, col)) {
+						const x = (col + margin) * cellSize
+						const y = (row + margin) * cellSize
+						rects += `<rect x="${x.toFixed(2)}" y="${y.toFixed(2)}" width="${cellSize.toFixed(2)}" height="${cellSize.toFixed(2)}" fill="${darkColor}" />`
+					}
+				}
+			}
+			return `
+				<svg viewBox="0 0 ${size} ${size}" width="${size}" height="${size}" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Mã QR vé xem phim">
+					<rect width="${size}" height="${size}" fill="${lightColor}" rx="8" />
+					${rects}
+				</svg>
+			`
+		} catch (innerErr) {
+			return `
+				<svg viewBox="0 0 ${size} ${size}" width="${size}" height="${size}" xmlns="http://www.w3.org/2000/svg">
+					<rect width="${size}" height="${size}" fill="${lightColor}" rx="8" />
+					<text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" fill="${darkColor}" font-size="12" font-weight="700">QR CODE</text>
+				</svg>
+			`
+		}
+	}
 }
 
 /**

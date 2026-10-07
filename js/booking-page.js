@@ -2,30 +2,7 @@
  * Beta Cinemas - Seat Selection & Concessions Booking Logic
  */
 import { setupHeaderAndFooter, formatCurrency, formatDateVN, showToast, translateDom, getSavedLang } from "./common.js"
-import {
-	getMoviesData,
-	getCinemas,
-	getConcessions,
-	getTicketPricing,
-	getShowtimeSeats,
-	updateShowtimeSeats,
-	calculateVoucherDiscount,
-	savePendingBooking,
-	getPendingBooking,
-	clearPendingBooking,
-	isPendingBookingExpired,
-	canSelectSeat,
-	canDeselectSeat,
-	areSeatsContiguous,
-	isSeatAvailable,
-	checkSeatsAvailability,
-	getOrCreateHoldSessionId,
-	holdSeats,
-	releaseSeatHold,
-	getHeldSeats,
-	getSeatHold,
-	getSeatStatus,
-} from "./storage.js"
+import { getMoviesData, getCinemas, getConcessions, getTicketPricing, getShowtimeSeats, updateShowtimeSeats, isSeatSold, calculateVoucherDiscount, savePendingBooking, getPendingBooking, saveBookingTicket, clearPendingBooking } from "./storage.js"
 
 document.addEventListener("DOMContentLoaded", async () => {
 	await setupHeaderAndFooter()
@@ -104,6 +81,24 @@ document.addEventListener("DOMContentLoaded", async () => {
 	let hasNotifiedOneMinute = false
 	let isProceedingToCheckout = false
 
+	// Restore state from pending booking if available for the same showtime
+	const pending = getPendingBooking()
+	const isSameShowtime = pending &&
+		pending.movieId === currentMovie.id &&
+		pending.cinemaId === currentCinema.id &&
+		pending.date === dateStr &&
+		pending.time === timeSlot
+
+	let initialStep = 1
+	if (urlParams.get("step") === "2" || window.location.hash === "#combos" || window.location.hash === "#concessions" || (isSameShowtime && pending.currentStep === 2)) {
+		initialStep = 2
+	}
+
+	// Restore hold timer from pending booking if not expired
+	if (isSameShowtime && pending.holdExpiresAt && pending.holdExpiresAt > Date.now()) {
+		holdSecondsRemaining = Math.max(10, Math.floor((pending.holdExpiresAt - Date.now()) / 1000))
+	}
+
 	// Booking State
 	const bookingState = {
 		movie: currentMovie,
@@ -115,8 +110,8 @@ document.addEventListener("DOMContentLoaded", async () => {
 		selectedSeats: [], // { id, row, col, type, price }
 		selectedConcessions: new Map(), // concessionId -> { item, qty }
 		discountAmount: 0,
-		appliedCoupon: null,
-		currentStep: 1, // 1: Seats, 2: Concessions
+		appliedCoupon: (isSameShowtime && pending.voucherCode) ? pending.voucherCode : null,
+		currentStep: initialStep, // 1: Seats, 2: Concessions
 	}
 
 	// 1. Tự động khôi phục dữ liệu đã chọn khi người dùng F5 / reload trang
@@ -253,6 +248,17 @@ document.addEventListener("DOMContentLoaded", async () => {
 		if (restoredSeatsCount > 0) parts.push(`${restoredSeatsCount} ghế (${bookingState.selectedSeats.map(s => s.id).join(", ")})`)
 		if (restoredConcessionsCount > 0) parts.push(`${restoredConcessionsCount} phần bắp nước`)
 		showToast(`✨ Đã tự động khôi phục ${parts.join(" & ")} bạn đã chọn!`, "info", 3500)
+	}
+
+	// Pre-populate selected concessions from pending booking
+	if (isSameShowtime && Array.isArray(pending.selectedConcessions)) {
+		const concessionsList = concessionsData?.items || []
+		pending.selectedConcessions.forEach(c => {
+			const foundItem = concessionsList.find(it => it.id === c.id) || { id: c.id, name: c.name, price: c.price }
+			if (c.qty > 0) {
+				bookingState.selectedConcessions.set(c.id, { item: foundItem, qty: c.qty })
+			}
+		})
 	}
 
 	initBookingInfoDisplay()
@@ -399,6 +405,11 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 	function handleSeatToggle(seatEl) {
 		const id = seatEl.dataset.seatId
+		if (seatEl.classList.contains("seat-sold") || isSeatSold(currentCinema.id, currentMovie.id, dateStr, timeSlot, id)) {
+			showToast(`Ghế ${id} đã có người đặt, vui lòng chọn ghế khác.`, "warning", 2500)
+			return
+		}
+
 		const row = seatEl.dataset.row
 		const col = +seatEl.dataset.col
 		const type = seatEl.dataset.type
@@ -875,6 +886,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 			formatName,
 			date: dateStr,
 			time: timeSlot,
+			currentStep: bookingState.currentStep,
 			selectedSeats: bookingState.selectedSeats,
 			seatsString: seatNames,
 			selectedConcessions: comboList,
@@ -911,24 +923,35 @@ document.addEventListener("DOMContentLoaded", async () => {
 		function switchToStep(step, smoothScroll = true) {
 			bookingState.currentStep = step
 			if (step === 1) {
-				seatSection.style.display = "block"
-				comboSection.style.display = "none"
+				if (seatSection) seatSection.style.display = "block"
+				if (comboSection) comboSection.style.display = "none"
 				tabSeats?.classList.add("active")
 				tabCombos?.classList.remove("active")
 				stepItemSeats?.classList.add("active")
 				stepItemSeats?.classList.remove("completed")
 				stepItemCombos?.classList.remove("active")
+				try {
+					const url = new URL(window.location)
+					url.searchParams.set("step", "1")
+					window.history.replaceState({}, "", url)
+				} catch (e) {}
 			} else {
-				seatSection.style.display = "none"
-				comboSection.style.display = "block"
+				if (seatSection) seatSection.style.display = "none"
+				if (comboSection) comboSection.style.display = "block"
 				tabSeats?.classList.remove("active")
 				tabCombos?.classList.add("active")
 				stepItemSeats?.classList.remove("active")
 				stepItemSeats?.classList.add("completed")
 				stepItemCombos?.classList.add("active")
-				if (smoothScroll) {
-					window.scrollTo({ top: 120, behavior: "smooth" })
-				}
+				try {
+					const url = new URL(window.location)
+					url.searchParams.set("step", "2")
+					if (bookingState.selectedSeats.length > 0) {
+						url.searchParams.set("seats", bookingState.selectedSeats.map(s => s.id).join(","))
+					}
+					window.history.replaceState({}, "", url)
+				} catch (e) {}
+				window.scrollTo({ top: 120, behavior: "smooth" })
 			}
 			updateBookingUrl()
 			updateSummarySidebar()
@@ -999,9 +1022,11 @@ document.addEventListener("DOMContentLoaded", async () => {
 			}
 		})
 
-		// Khôi phục trạng thái tab/bước nếu người dùng đang ở bước 2 trước khi reload
+		// Auto restore step 2 if returning or reloading on concessions step
 		if (bookingState.currentStep === 2 && bookingState.selectedSeats.length > 0) {
-			switchToStep(2, false)
+			switchToStep(2)
+		} else {
+			switchToStep(1)
 		}
 	}
 
@@ -1175,6 +1200,39 @@ document.addEventListener("DOMContentLoaded", async () => {
 			</div>
 		`
 
+		// 1. Permanently update seats to 'sold' in LocalStorage
+		const seatList = bookingState.selectedSeats.map(s => s.id)
+		updateShowtimeSeats(currentCinema.id, currentMovie.id, dateStr, timeSlot, seatList, "sold")
+
+		// 2. Save ticket to booking history
+		const newTicket = {
+			id: bookingCode,
+			movieId: currentMovie.id,
+			movieTitle: currentMovie.title,
+			moviePoster: currentMovie.poster,
+			cinemaId: currentCinema.id,
+			cinemaName: currentCinema.name,
+			screenName,
+			formatName,
+			date: dateStr,
+			time: timeSlot,
+			seats: seatNames,
+			concessions: comboList.map(c => `${c.qty}x ${c.name}`).join(", ") || "Không kèm bắp nước",
+			total: finalTotal,
+			voucherCode: bookingState.appliedCoupon || null,
+			discountAmount: bookingState.discountAmount || 0,
+			paymentMethod: "counter",
+			bookingDate: new Date().toISOString(),
+			status: "paid",
+		}
+		saveBookingTicket(newTicket)
+		clearPendingBooking()
+
+		// 3. Clear selected seats and re-render seat map so booked seats immediately show as sold
+		bookingState.selectedSeats = []
+		renderSeatMap()
+		updateSummarySidebar()
+
 		modal.classList.add("active")
 		document.body.style.overflow = "hidden"
 
@@ -1275,9 +1333,11 @@ document.addEventListener("DOMContentLoaded", async () => {
 		}
 	}
 
-	function startHoldCountdown(initialSeconds = 300) {
+	function startHoldCountdown(resetToMax = false) {
 		if (holdTimerInterval) clearInterval(holdTimerInterval)
-		holdSecondsRemaining = initialSeconds
+		if (resetToMax || !holdSecondsRemaining || holdSecondsRemaining <= 0) {
+			holdSecondsRemaining = 300
+		}
 		hasNotifiedOneMinute = false
 		updateHoldTimerUI(holdSecondsRemaining, true)
 

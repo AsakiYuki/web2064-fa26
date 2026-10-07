@@ -781,7 +781,9 @@ export class ShowtimePicker {
 		})
 	}
 
-	toggleSeat(seatEl, slotData) {
+	toggleSeat(seatEl) {
+		if (seatEl.classList.contains("seat-sold") || seatEl.dataset.status === "sold") return
+
 		const seatId = seatEl.dataset.seatId
 		const seatType = seatEl.dataset.seatType
 		const seatRow = seatEl.dataset.seatRow || seatId.charAt(0)

@@ -179,17 +179,16 @@
 						<div class="customer-form-grid">
 							<div class="form-field">
 								<label for="cust-fullname">Họ và tên <span class="req">*</span></label>
-								<input type="text" id="cust-fullname" placeholder="Nguyễn Văn A" required />
+								<input type="text" id="cust-fullname" placeholder="Nguyễn Văn A" value="Nguyễn Văn A" />
 							</div>
 							<div class="form-field">
 								<label for="cust-phone">Số điện thoại <span class="req">*</span></label>
-								<input type="tel" id="cust-phone" placeholder="0912 345 678" required />
+								<input type="tel" id="cust-phone" placeholder="0912345678" value="0912345678" />
 							</div>
 							<div class="form-field field-full">
 								<label for="cust-email">Địa chỉ Email nhận vé điện tử <span class="req">*</span></label>
-								<input type="email" id="cust-email" placeholder="example@gmail.com" required />
-								<small style="color: #a6adc8; font-size: 11px; margin-top: 4px;">Vé điện tử & mã QR sẽ
-									được gửi trực tiếp đến địa chỉ email này sau khi hoàn tất giao dịch.</small>
+								<input type="email" id="cust-email" placeholder="customer@betacinemas.vn" value="customer@betacinemas.vn" />
+								<small style="color: #a6adc8; font-size: 11px; margin-top: 4px;">Vé điện tử & mã QR sẽ được gửi trực tiếp đến địa chỉ email này sau khi hoàn tất giao dịch.</small>
 							</div>
 						</div>
 					</section>
@@ -364,9 +363,8 @@
 				</div>
 
 				<!-- Submit payment button -->
-				<button type="submit" form="form-checkout-payment" class="btn-pay-now" id="btn-submit-payment">
-					<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-						stroke-width="2.5">
+				<button type="button" class="btn-pay-now" id="btn-submit-payment">
+					<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
 						<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
 					</svg>
 					XÁC NHẬN THANH TOÁN
@@ -374,17 +372,83 @@
 			</aside>
 		</div>
 
-		<!-- Simulated Payment Processing Modal -->
-		<div class="modal-backdrop" id="payment-processing-modal">
-			<div class="modal-content auth-modal-content"
-				style="max-width: 420px; text-align: center; padding: 36px 28px;">
-				<div class="processing-spinner"
-					style="width: 54px; height: 54px; border: 4px solid rgba(137,180,250,0.2); border-top-color: #89b4fa; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 20px;">
+		<!-- ===================== INTERACTIVE QR PAYMENT MODAL ===================== -->
+		<div class="modal-backdrop" id="payment-qr-modal" role="dialog" aria-modal="true" aria-labelledby="qr-modal-title">
+			<div class="modal-content qr-payment-modal-content">
+				<button type="button" class="modal-close-btn" id="qr-modal-close" aria-label="Đóng">&#x2715;</button>
+
+				<!-- Header -->
+				<div class="qr-modal-header">
+					<div class="qr-method-badge" id="qr-modal-method-badge">MOMO</div>
+					<h3 id="qr-modal-title">Quét Mã QR Để Thanh Toán</h3>
+					<p class="qr-modal-desc" id="qr-modal-desc">Mở ứng dụng Ví điện tử hoặc Ngân hàng trên điện thoại để quét mã QR thanh toán đơn vé</p>
+					<div class="qr-timer-pill">
+						<span>Thời gian quét mã:</span>
+						<strong id="qr-modal-timer">05:00</strong>
+					</div>
 				</div>
-				<h3 style="font-size: 20px; font-weight: 800; color: #cdd6f4; margin: 0 0 8px;" id="proc-title">Đang Xử
-					Lý Giao Dịch</h3>
-				<p style="font-size: 13px; color: #a6adc8; margin: 0;" id="proc-desc">Vui lòng không đóng trình duyệt
-					trong khi hệ thống kết nối với cổng thanh toán bảo mật...</p>
+
+				<!-- QR Display Frame -->
+				<div class="qr-modal-body">
+					<div class="qr-scan-frame">
+						<div class="qr-laser-line"></div>
+						<div class="qr-code-render-box" id="qr-payment-render-box">
+							<!-- Dynamic Payment QR code SVG -->
+						</div>
+					</div>
+
+					<div class="qr-payment-amount-box">
+						<span class="lbl">Số tiền cần thanh toán:</span>
+						<span class="val" id="qr-modal-amount">255.000 ₫</span>
+					</div>
+
+					<!-- Transfer details -->
+					<div class="qr-transfer-info-card">
+						<div class="qti-row">
+							<span class="qti-lbl">Đơn vị nhận:</span>
+							<strong class="qti-val">BETA MEDIA CINEMAS JSC</strong>
+						</div>
+						<div class="qti-row">
+							<span class="qti-lbl">Mã đơn đặt vé:</span>
+							<strong class="qti-val" id="qr-modal-booking-code">BT-842915</strong>
+						</div>
+						<div class="qti-row">
+							<span class="qti-lbl">Nội dung CK:</span>
+							<div class="qti-copy-wrap">
+								<code class="qti-val" id="qr-modal-transfer-msg">BETA BT842915</code>
+								<button type="button" class="btn-copy-code" id="btn-copy-transfer-msg" title="Sao chép nội dung">Sao chép</button>
+							</div>
+						</div>
+					</div>
+
+					<div class="qr-security-note">
+						<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+							<rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+							<path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+						</svg>
+						<span>Giao dịch bảo mật 256-bit SSL tự động xác nhận ngay sau khi quét</span>
+					</div>
+				</div>
+
+				<!-- Verification Loading Overlay (Shown during check) -->
+				<div class="qr-verifying-overlay" id="qr-verifying-overlay" style="display: none;">
+					<div class="processing-spinner"></div>
+					<h4>Đang Kiểm Tra & Đối Soát Giao Dịch...</h4>
+					<p>Hệ thống đang kết nối đối soát với ngân hàng, vui lòng giữ màn hình...</p>
+				</div>
+
+				<!-- Actions -->
+				<div class="qr-modal-footer">
+					<button type="button" class="btn-confirm-qr-paid" id="btn-confirm-qr-paid">
+						<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+							<polyline points="20 6 9 17 4 12"></polyline>
+						</svg>
+						<span>TÔI ĐÃ QUÉT MÃ VÀ THANH TOÁN</span>
+					</button>
+					<button type="button" class="btn-cancel-qr" id="btn-cancel-qr-modal">
+						Hủy / Đổi Phương Thức
+					</button>
+				</div>
 			</div>
 		</div>
 

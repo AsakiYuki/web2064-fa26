@@ -223,28 +223,72 @@ document.addEventListener("DOMContentLoaded", async () => {
 		if (timerDisplay) timerDisplay.textContent = `${m}:${s}`
 	}, 1000)
 
-	// 7. Simulated Payment Confirmation Process
+	// 7. Interactive QR Code Payment Confirmation Process
 	const payForm = document.getElementById("form-checkout-payment")
 	const checkoutLayout = document.getElementById("checkout-main-grid")
 	const eticketSuccessView = document.getElementById("eticket-success-view")
-	const procModal = document.getElementById("payment-processing-modal")
-	const procTitle = document.getElementById("proc-title")
-	const procDesc = document.getElementById("proc-desc")
+	const qrModal = document.getElementById("payment-qr-modal")
+	const qrModalClose = document.getElementById("qr-modal-close")
+	const qrCancelBtn = document.getElementById("btn-cancel-qr-modal")
+	const qrConfirmPaidBtn = document.getElementById("btn-confirm-qr-paid")
+	const qrVerifyOverlay = document.getElementById("qr-verifying-overlay")
+	const btnCopyTransfer = document.getElementById("btn-copy-transfer-msg")
+	let qrTimerInterval = null
 
-	payForm?.addEventListener("submit", async e => {
-		e.preventDefault()
+	const methodNames = {
+		momo: "Ví Điện Tử MoMo",
+		zalopay: "Ví Điện Tử ZaloPay",
+		vnpay: "Cổng VNPAY-QR",
+		visa: "Thẻ Quốc Tế 3D Secure",
+		atm: "VietQR / ATM Nội Địa",
+	}
+
+	function closeQRModal() {
+		if (qrTimerInterval) clearInterval(qrTimerInterval)
+		if (qrModal) {
+			qrModal.classList.remove("active")
+			document.body.style.overflow = ""
+		}
+		if (qrVerifyOverlay) qrVerifyOverlay.style.display = "none"
+		const submitBtn = document.getElementById("btn-submit-payment")
+		if (submitBtn) submitBtn.disabled = false
+	}
+
+	qrModalClose?.addEventListener("click", closeQRModal)
+	qrCancelBtn?.addEventListener("click", closeQRModal)
+	qrModal?.addEventListener("click", e => {
+		if (e.target === qrModal && (!qrVerifyOverlay || qrVerifyOverlay.style.display === "none")) {
+			closeQRModal()
+		}
+	})
+
+	// Copy transfer content button
+	btnCopyTransfer?.addEventListener("click", () => {
+		const transferCode = document.getElementById("qr-modal-transfer-msg")?.textContent || ""
+		if (transferCode && navigator.clipboard) {
+			navigator.clipboard.writeText(transferCode).then(() => {
+				showToast("Đã sao chép nội dung chuyển khoản!", "info", 2000)
+			}).catch(() => {})
+		}
+	})
+
+	function triggerPaymentProcess(e) {
+		if (e && typeof e.preventDefault === "function") {
+			e.preventDefault()
+		}
 
 		// Validate terms agreement
 		const termsCheck = document.getElementById("agree-terms-check")
 		if (!termsCheck?.checked) {
 			showToast("Vui lòng đồng ý với điều khoản sử dụng của rạp trước khi thanh toán.", "warning")
+			document.getElementById("agree-terms-check")?.focus()
 			return
 		}
 
 		// Validate customer contact form
-		const fullName = document.getElementById("cust-fullname")?.value.trim()
-		const phone = document.getElementById("cust-phone")?.value.trim()
-		const email = document.getElementById("cust-email")?.value.trim()
+		const fullName = document.getElementById("cust-fullname")?.value.trim() || "Nguyễn Văn A"
+		const phone = document.getElementById("cust-phone")?.value.trim() || "0912345678"
+		const email = document.getElementById("cust-email")?.value.trim() || "customer@betacinemas.vn"
 
 		if (!fullName || fullName.length < 2) {
 			showToast("Vui lòng nhập họ và tên người nhận vé hợp lệ.", "warning")
@@ -280,87 +324,138 @@ document.addEventListener("DOMContentLoaded", async () => {
 		const submitBtn = document.getElementById("btn-submit-payment")
 		if (submitBtn) submitBtn.disabled = true
 
-		// Method branding display
-		const methodNames = {
-			momo: "Ví Điện Tử MoMo",
-			zalopay: "Ví Điện Tử ZaloPay",
-			vnpay: "Cổng VNPAY-QR",
-			visa: "Thẻ Quốc Tế 3D Secure",
-			atm: "Cổng Thẻ ATM Nội Địa",
-		}
-		const methodNameText = methodNames[checkoutState.paymentMethod] || "Cổng thanh toán trực tuyến"
+		// Generate random unique booking code
+		const randomNum = Math.floor(100000 + Math.random() * 900000)
+		const bookingCode = `BT-${randomNum}`
+		const transferContent = `BETA ${bookingCode.replace("-", "")}`
+		const methodNameText = methodNames[checkoutState.paymentMethod] || "Cổng thanh toán QR"
 
-		// Show Simulated Payment Modal
-		if (procModal) {
-			if (procTitle) procTitle.textContent = `Đang Kết Nối ${methodNameText}`
-			if (procDesc) procDesc.textContent = `Hệ thống đang bảo mật giao dịch số tiền ${formatCurrency(checkoutState.finalTotal)}. Vui lòng giữ màn hình...`
-			procModal.classList.add("active")
+		// 1. Populate and Render Payment QR Code
+		const badgeEl = document.getElementById("qr-modal-method-badge")
+		const titleEl = document.getElementById("qr-modal-title")
+		const descEl = document.getElementById("qr-modal-desc")
+		const amountEl = document.getElementById("qr-modal-amount")
+		const bookingCodeEl = document.getElementById("qr-modal-booking-code")
+		const transferMsgEl = document.getElementById("qr-modal-transfer-msg")
+		const qrRenderBox = document.getElementById("qr-payment-render-box")
+
+		if (badgeEl) badgeEl.textContent = checkoutState.paymentMethod.toUpperCase()
+		if (titleEl) titleEl.textContent = `Quét Mã QR ${methodNameText}`
+		if (descEl) descEl.textContent = `Mở ứng dụng ${methodNameText} hoặc Mobile Banking trên điện thoại để quét mã QR chuyển khoản.`
+		if (amountEl) amountEl.textContent = formatCurrency(checkoutState.finalTotal)
+		if (bookingCodeEl) bookingCodeEl.textContent = bookingCode
+		if (transferMsgEl) transferMsgEl.textContent = transferContent
+
+		// Create standard dynamic payment QR data (compact and fast to scan)
+		const paymentQrData = `BETAPAY|${bookingCode}|${checkoutState.finalTotal}|${transferContent}`
+
+		if (qrRenderBox) {
+			qrRenderBox.innerHTML = generateQRCodeSVG(paymentQrData, {
+				size: 200,
+				darkColor: "#11111b",
+				lightColor: "#ffffff",
+				includeLogo: true,
+			})
+		}
+
+		// 2. Start QR Payment Countdown Timer (5 mins)
+		let qrSeconds = 300
+		const qrTimerDisplay = document.getElementById("qr-modal-timer")
+		if (qrTimerInterval) clearInterval(qrTimerInterval)
+		if (qrTimerDisplay) qrTimerDisplay.textContent = "05:00"
+
+		qrTimerInterval = setInterval(() => {
+			qrSeconds--
+			if (qrSeconds <= 0) {
+				clearInterval(qrTimerInterval)
+				showToast("Mã QR thanh toán đã hết hạn! Vui lòng thực hiện lại.", "warning", 6000)
+				closeQRModal()
+				return
+			}
+			const m = String(Math.floor(qrSeconds / 60)).padStart(2, "0")
+			const s = String(qrSeconds % 60).padStart(2, "0")
+			if (qrTimerDisplay) qrTimerDisplay.textContent = `${m}:${s}`
+		}, 1000)
+
+		// 3. Open QR Modal
+		if (qrModal) {
+			qrModal.classList.add("active")
 			document.body.style.overflow = "hidden"
 		}
 
-		// Realistic payment delay (1.5s)
-		await new Promise(resolve => setTimeout(resolve, 1600))
+		// 4. Handle "TÔI ĐÃ QUÉT MÃ VÀ THANH TOÁN" Confirmation Action
+		if (qrConfirmPaidBtn) {
+			qrConfirmPaidBtn.disabled = false
+			qrConfirmPaidBtn.onclick = async () => {
+				qrConfirmPaidBtn.disabled = true
+				if (qrVerifyOverlay) qrVerifyOverlay.style.display = "flex"
 
-		// Close processing modal
-		if (procModal) {
-			procModal.classList.remove("active")
-			document.body.style.overflow = ""
+				// Simulate realistic banking reconciliation check (1.8s)
+				await new Promise(resolve => setTimeout(resolve, 1800))
+
+				if (qrTimerInterval) clearInterval(qrTimerInterval)
+				clearInterval(timerInterval)
+
+				// 8. UPDATE SEAT STATUS TO 'SOLD' IN LOCALSTORAGE
+				const seatList = seatsParam.split(",").map(s => s.trim()).filter(Boolean)
+				updateShowtimeSeats(currentCinema.id, currentMovie.id, dateStr, timeSlot, seatList, "sold")
+
+				// 9. SAVE TICKET TO USER'S BOOKING HISTORY IN LOCALSTORAGE
+				const newTicket = {
+					id: bookingCode,
+					movieId: currentMovie.id,
+					movieTitle: currentMovie.title,
+					moviePoster: currentMovie.poster,
+					cinemaId: currentCinema.id,
+					cinemaName: currentCinema.name,
+					screenName,
+					formatName,
+					date: dateStr,
+					time: timeSlot,
+					seats: seatsParam,
+					concessions: concessionsParam,
+					total: checkoutState.finalTotal,
+					voucherCode: checkoutState.voucherCode || null,
+					discountAmount: checkoutState.discountAmount || 0,
+					paymentMethod: checkoutState.paymentMethod,
+					customerName: fullName,
+					customerPhone: cleanPhone,
+					customerEmail: email,
+					bookingDate: new Date().toISOString(),
+					status: "paid",
+				}
+
+				await saveBookingTicket(newTicket)
+				clearPendingBooking()
+
+				// Close QR Modal
+				closeQRModal()
+        
+        // 8. UPDATE SEAT STATUS TO 'SOLD' IN LOCALSTORAGE & RELEASE ACTIVE HOLD
+        updateShowtimeSeats(currentCinema.id, currentMovie.id, dateStr, timeSlot, seatList, "sold")
+        if (pending?.holdId) {
+          releaseSeatHold(pending.holdId)
+        }
+
+				// 10. SWITCH TO E-TICKET SUCCESS VIEW WITH SCANNABLE QR CODE
+				if (checkoutLayout) checkoutLayout.style.display = "none"
+				if (eticketSuccessView) {
+					eticketSuccessView.style.display = "block"
+					renderETicketContent(newTicket)
+					window.scrollTo({ top: 0, behavior: "smooth" })
+				}
+
+				showToast(
+					`🎉 Thanh toán thành công qua ${methodNameText}! Mã vé của bạn là ${bookingCode}. Chúc bạn xem phim vui vẻ!`,
+					"success",
+					7000
+				)
+			}
 		}
+	}
 
-		clearInterval(timerInterval)
-
-		// 8. UPDATE SEAT STATUS TO 'SOLD' IN LOCALSTORAGE & RELEASE ACTIVE HOLD
-		updateShowtimeSeats(currentCinema.id, currentMovie.id, dateStr, timeSlot, seatList, "sold")
-		if (pending?.holdId) {
-			releaseSeatHold(pending.holdId)
-		}
-
-		// 9. GENERATE RANDOM UNIQUE BOOKING CODE
-		const randomNum = Math.floor(100000 + Math.random() * 900000)
-		const bookingCode = `BT-${randomNum}`
-
-		// 10. SAVE TICKET TO USER'S BOOKING HISTORY IN LOCALSTORAGE
-		const newTicket = {
-			id: bookingCode,
-			movieId: currentMovie.id,
-			movieTitle: currentMovie.title,
-			moviePoster: currentMovie.poster,
-			cinemaId: currentCinema.id,
-			cinemaName: currentCinema.name,
-			screenName,
-			formatName,
-			date: dateStr,
-			time: timeSlot,
-			seats: seatsParam,
-			concessions: concessionsParam,
-			total: checkoutState.finalTotal,
-			voucherCode: checkoutState.voucherCode || null,
-			discountAmount: checkoutState.discountAmount || 0,
-			paymentMethod: checkoutState.paymentMethod,
-			customerName: fullName,
-			customerPhone: cleanPhone,
-			customerEmail: email,
-			bookingDate: new Date().toISOString(),
-			status: "paid",
-		}
-
-		saveBookingTicket(newTicket)
-		clearPendingBooking()
-
-		// 11. SWITCH TO E-TICKET SUCCESS VIEW WITH SCANNABLE QR CODE
-		if (checkoutLayout) checkoutLayout.style.display = "none"
-		if (eticketSuccessView) {
-			eticketSuccessView.style.display = "block"
-			renderETicketContent(newTicket)
-			window.scrollTo({ top: 0, behavior: "smooth" })
-		}
-
-		showToast(
-			`🎉 Thanh toán thành công qua ${methodNameText}! Mã vé của bạn là ${bookingCode}. Chúc bạn xem phim vui vẻ!`,
-			"success",
-			7000
-		)
-	})
+	payForm?.addEventListener("submit", triggerPaymentProcess)
+	document.getElementById("btn-submit-payment")?.addEventListener("click", triggerPaymentProcess)
 
 	function renderETicketContent(ticket) {
 		const codeEl = document.getElementById("et-ticket-code-val")
@@ -386,14 +481,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 		// Generate Real Scannable Vector QR Code using qrcode.js
 		if (qrCodeBox) {
-			const qrData = JSON.stringify({
-				ticket: ticket.id,
-				movie: ticket.movieTitle,
-				cinema: ticket.cinemaName,
-				time: `${ticket.time} ${ticket.date}`,
-				seats: ticket.seats,
-				status: "VALID_PAID",
-			})
+			const qrData = `BETATICKET|${ticket.id}|${ticket.time} ${ticket.date}|${ticket.seats}`
 			qrCodeBox.innerHTML = generateQRCodeSVG(qrData, {
 				size: 180,
 				darkColor: "#11111b",

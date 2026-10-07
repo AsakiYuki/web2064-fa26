@@ -33,6 +33,7 @@ import {
 	authenticateUser,
 } from "./storage.js"
 import { formatCurrency, formatDateVN, showToast, translateDom, getSavedLang, bindLangToggleEvents, bindThemeToggleEvents } from "./common.js"
+import { generateQRCodeSVG } from "./qrcode.js"
 
 document.addEventListener("DOMContentLoaded", async () => {
 	// Khởi tạo LocalStorage nếu chưa có
@@ -379,17 +380,17 @@ document.addEventListener("DOMContentLoaded", async () => {
 				} else {
 					recentTbody.innerHTML = recent5
 						.map(b => {
-							const isPaid = b.status === "paid"
+							const isPaid = b.status === "paid" || b.paymentStatus === "paid"
 							const isDone = b.status === "done"
 							const badgeClass = isPaid ? "badge-nowshowing" : isDone ? "badge-upcoming" : "badge-age"
-							const badgeText = isPaid ? "Đã thanh toán" : isDone ? "Đã xem" : "Đã hủy"
+							const badgeText = isPaid ? "🟢 Đã nhận tiền" : isDone ? "🔵 Đã xem" : "🔴 Đã hủy"
 
 							return `
 							<tr>
 								<td><strong style="color: #89b4fa; font-family: monospace;">${b.id}</strong></td>
 								<td>
-									<div class="cell-title">${b.userName || "Khách vãng lai"}</div>
-									<div class="cell-sub">${b.userPhone || b.userEmail || "N/A"}</div>
+									<div class="cell-title">${b.customerName || b.userName || "Khách vãng lai"}</div>
+									<div class="cell-sub">${b.customerPhone || b.userPhone || b.customerEmail || b.userEmail || "N/A"}</div>
 								</td>
 								<td>
 									<div class="cell-title">${b.movieTitle}</div>
@@ -1313,20 +1314,21 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 			bookingsTableTbody.innerHTML = filtered
 				.map(b => {
-					const isPaid = b.status === "paid"
+					const isPaid = b.status === "paid" || b.paymentStatus === "paid"
 					const isDone = b.status === "done"
 					const isCancelled = b.status === "cancelled"
 
 					const statusColor = isPaid ? "#a6e3a1" : isDone ? "#89b4fa" : "#f38ba8"
 					const statusBg = isPaid ? "rgba(166, 227, 161, 0.12)" : isDone ? "rgba(137, 180, 250, 0.12)" : "rgba(243, 139, 168, 0.12)"
+					const methodText = (b.paymentMethod || "QR").toUpperCase()
 
 					return `
 					<tr>
 						<td><strong style="color: #89b4fa; font-family: monospace; font-size: 13px;">${b.id}</strong></td>
 						<td>
-							<div class="cell-title" style="font-weight: 700;">${b.userName || "Khách Hàng"}</div>
-							<div class="cell-sub" style="color: #89b4fa;">📞 ${b.userPhone || "Chưa có SĐT"}</div>
-							<div class="cell-sub" style="color: #a6adc8;">✉️ ${b.userEmail || "Khách vãng lai"}</div>
+							<div class="cell-title" style="font-weight: 700;">${b.customerName || b.userName || "Khách Hàng"}</div>
+							<div class="cell-sub" style="color: #89b4fa;">📞 ${b.customerPhone || b.userPhone || "Chưa có SĐT"}</div>
+							<div class="cell-sub" style="color: #a6adc8;">✉️ ${b.customerEmail || b.userEmail || "Khách vãng lai"}</div>
 						</td>
 						<td>
 							<div class="cell-title">${b.movieTitle}</div>
@@ -1340,10 +1342,13 @@ document.addEventListener("DOMContentLoaded", async () => {
 							<div style="color: #a6e3a1; font-weight: 700;">🎟️ ${b.seats || "N/A"}</div>
 							<div class="cell-sub">🍿 ${b.concessions || "Không kèm combo"}</div>
 						</td>
-						<td style="color: #fab387; font-weight: 800; font-size: 14px;">${formatCurrency(b.total)}</td>
+						<td>
+							<div style="color: #fab387; font-weight: 800; font-size: 14px;">${formatCurrency(b.total)}</div>
+							<span style="display: inline-block; font-size: 10px; font-weight: 800; background: rgba(137, 180, 250, 0.15); color: #89b4fa; border: 1px solid rgba(137, 180, 250, 0.3); border-radius: 4px; padding: 2px 5px; margin-top: 2px;">${methodText}</span>
+						</td>
 						<td>
 							<select class="admin-select-status" data-id="${b.id}" style="background: ${statusBg}; color: ${statusColor}; border: 1px solid ${statusColor}; border-radius: 6px; padding: 6px 10px; font-weight: 700; font-size: 12px; cursor: pointer; outline: none;">
-								<option value="paid" ${isPaid ? "selected" : ""} style="color: #a6e3a1; background: #181825;">🟢 Đã thanh toán (Chờ xem)</option>
+								<option value="paid" ${isPaid ? "selected" : ""} style="color: #a6e3a1; background: #181825;">🟢 ĐÃ NHẬN TIỀN (Chờ xem)</option>
 								<option value="done" ${isDone ? "selected" : ""} style="color: #89b4fa; background: #181825;">🔵 Đã soát vé (Đã xem)</option>
 								<option value="cancelled" ${isCancelled ? "selected" : ""} style="color: #f38ba8; background: #181825;">🔴 Đã hủy vé</option>
 							</select>
@@ -1373,7 +1378,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 					const newStatus = e.target.value
 					updateBookingStatus(id, newStatus)
 					const statusLabels = {
-						paid: "🟢 Đã thanh toán (Chờ xem)",
+						paid: "🟢 ĐÃ NHẬN TIỀN (Chờ xem)",
 						done: "🔵 Đã soát vé (Đã xem)",
 						cancelled: "🔴 Đã hủy vé",
 					}
@@ -1452,12 +1457,21 @@ document.addEventListener("DOMContentLoaded", async () => {
 			const body = document.getElementById("modal-admin-ticket-body")
 			if (!adminTicketModal || !body) return
 
+			const qrSvg = generateQRCodeSVG(`BETATICKET|${t.id}|${t.time} ${t.date}|${t.seats}`, {
+				size: 160,
+				darkColor: "#11111b",
+				lightColor: "#cdd6f4",
+				includeLogo: true,
+			})
+
+			const pMethod = (t.paymentMethod || "QR").toUpperCase()
+
 			body.innerHTML = `
 			<div class="eticket-success-page-wrap" style="margin: 0; box-shadow: none; max-width: 100%;">
-				<div class="eticket-top-banner">
-					<div class="et-success-badge">✓</div>
-					<h2 style="color:#cdd6f4; font-size: 20px; font-weight:900; margin:0 0 4px; text-transform:uppercase;">VÉ XEM PHIM ĐIỆN TỬ</h2>
-					<p style="font-size: 13px; color: rgba(255,255,255,0.9); margin:0;">Mã vé: ${t.id} • Beta Cinemas Admin Verify</p>
+				<div class="eticket-top-banner" style="background: #10b981;">
+					<div class="et-success-badge" style="color: #10b981;">✓</div>
+					<h2 style="color:#11111b; font-size: 20px; font-weight:900; margin:0 0 4px; text-transform:uppercase;">ĐÃ NHẬN TIỀN - VÉ HỢP LỆ</h2>
+					<p style="font-size: 13px; color: rgba(17,17,27,0.85); margin:0;">Mã vé: ${t.id} • Thanh toán qua: <strong>${pMethod}</strong> • Beta Admin Verify</p>
 				</div>
 				<div class="eticket-ticket-pass">
 					<div class="et-code-banner">
@@ -1465,36 +1479,15 @@ document.addEventListener("DOMContentLoaded", async () => {
 						<div class="code-value">${t.id}</div>
 					</div>
 					<div class="et-qr-container">
-						<div class="qr-code-box">
-							<svg viewBox="0 0 200 200" width="160" height="160" xmlns="http://www.w3.org/2000/svg">
-								<rect width="200" height="200" fill="#cdd6f4" rx="10" />
-								<rect x="15" y="15" width="45" height="45" fill="#11111b" rx="6" />
-								<rect x="23" y="23" width="29" height="29" fill="#cdd6f4" rx="3" />
-								<rect x="29" y="29" width="17" height="17" fill="#11111b" rx="2" />
-								<rect x="140" y="15" width="45" height="45" fill="#11111b" rx="6" />
-								<rect x="148" y="23" width="29" height="29" fill="#cdd6f4" rx="3" />
-								<rect x="154" y="29" width="17" height="17" fill="#11111b" rx="2" />
-								<rect x="15" y="140" width="45" height="45" fill="#11111b" rx="6" />
-								<rect x="23" y="148" width="29" height="29" fill="#cdd6f4" rx="3" />
-								<rect x="29" y="154" width="17" height="17" fill="#11111b" rx="2" />
-								<rect x="70" y="20" width="12" height="12" fill="#181825" />
-								<rect x="90" y="20" width="12" height="24" fill="#181825" />
-								<rect x="110" y="20" width="18" height="12" fill="#181825" />
-								<rect x="70" y="44" width="24" height="12" fill="#181825" />
-								<circle cx="100" cy="100" r="22" fill="#89b4fa" />
-								<circle cx="100" cy="100" r="18" fill="#11111b" />
-								<text x="100" y="105" font-family="'Inter', sans-serif" font-size="13" font-weight="900" fill="#89b4fa" text-anchor="middle">β</text>
-								<rect x="70" y="160" width="24" height="24" fill="#181825" />
-								<rect x="110" y="165" width="18" height="18" fill="#181825" />
-								<rect x="145" y="165" width="40" height="18" fill="#181825" />
-							</svg>
+						<div class="qr-code-box" style="padding: 12px; background: #cdd6f4; border-radius: 8px;">
+							${qrSvg}
 						</div>
-						<div class="qr-hint">Xuất trình mã này cho nhân viên soát vé</div>
+						<div class="qr-hint">Vé đã thanh toán thành công - Xuất trình mã này tại Kiosk/Quầy soát vé</div>
 					</div>
 					<div class="et-info-grid">
 						<div class="et-info-item" style="grid-column: 1 / -1;">
 							<span class="et-lbl">Khách hàng</span>
-							<span class="et-val val-gold">${t.userName || "N/A"} (${t.userPhone || "N/A"})</span>
+							<span class="et-val val-gold">${t.customerName || t.userName || "Khách Hàng"} (${t.customerPhone || t.userPhone || "N/A"}) - ${t.customerEmail || t.userEmail || "N/A"}</span>
 						</div>
 						<div class="et-info-item" style="grid-column: 1 / -1;">
 							<span class="et-lbl">Phim</span>
@@ -1521,13 +1514,21 @@ document.addEventListener("DOMContentLoaded", async () => {
 							<span class="et-val">${t.concessions || "Không kèm bắp"}</span>
 						</div>
 						<div class="et-info-item" style="grid-column: 1 / -1; border-top: 1px dashed rgba(255,255,255,0.15); padding-top: 8px;">
-							<span class="et-lbl">Tổng Tiền</span>
-							<span class="et-val val-gold">${formatCurrency(t.total)}</span>
+							<div style="display:flex; justify-content: space-between; align-items: center;">
+								<div>
+									<span class="et-lbl">Tổng Tiền Đã Thu</span>
+									<div class="et-val val-gold" style="font-size: 18px;">${formatCurrency(t.total)}</div>
+								</div>
+								<div style="text-align: right;">
+									<span class="et-lbl">Trạng thái</span>
+									<div style="color: #10b981; font-weight: 800; font-size: 13px;">🟢 ĐÃ NHẬN TIỀN (${pMethod})</div>
+								</div>
+							</div>
 						</div>
 					</div>
 					<div class="et-barcode-wrap">
 						<div class="barcode-strip"></div>
-						<div class="barcode-number">${t.id} - VERIFIED BY ADMIN</div>
+						<div class="barcode-number">${t.id} - VERIFIED & RECEIVED BY BETA ADMIN</div>
 					</div>
 				</div>
 			</div>
