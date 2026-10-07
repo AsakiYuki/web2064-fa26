@@ -341,7 +341,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 			customerPhone: cleanPhone,
 			customerEmail: email,
 			bookingDate: new Date().toISOString(),
-			status: "paid",
+			status: "pending", // Khách vừa đặt: Chờ Admin xác nhận đặt vé
 		}
 
 		saveBookingTicket(newTicket)
@@ -356,7 +356,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 		}
 
 		showToast(
-			`🎉 Thanh toán thành công qua ${methodNameText}! Mã vé của bạn là ${bookingCode}. Chúc bạn xem phim vui vẻ!`,
+			`🎉 Đã gửi đơn đặt vé qua ${methodNameText}! Mã đơn: ${bookingCode}. Đơn đang chờ rạp xác nhận và thanh toán.`,
 			"success",
 			7000
 		)
