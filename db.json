@@ -2420,6 +2420,33 @@
       "userPhone": "0912345678",
       "userEmail": "customer@betacinemas.vn",
       "paymentStatus": "paid"
+    },
+    {
+      "id": "BT-832494",
+      "movieId": "bongma",
+      "movieTitle": "Bóng Ma Nhà Hát",
+      "moviePoster": "/poster/poster_bongma.jpg",
+      "cinemaId": "beta-thainguyen",
+      "cinemaName": "Beta Cinemas Thái Nguyên",
+      "screenName": "Phòng 2",
+      "formatName": "2D Phụ Đề",
+      "date": "2026-09-26",
+      "time": "16:00",
+      "seats": "H10, H11",
+      "concessions": "1x Bắp Rang Ngọt (60oz)",
+      "total": 209000,
+      "voucherCode": null,
+      "discountAmount": 0,
+      "paymentMethod": "momo",
+      "customerName": "ss",
+      "customerPhone": "0912345678",
+      "customerEmail": "ss@gmail.com",
+      "bookingDate": "2026-10-07T02:27:12.590Z",
+      "status": "paid",
+      "userName": "ss",
+      "userPhone": "0912345678",
+      "userEmail": "ss@gmail.com",
+      "paymentStatus": "paid"
     }
   ],
   "member_rewards": [
