@@ -1044,6 +1044,14 @@ export async function cancelBookingTicket(id) {
 	return updateBookingStatus(id, "cancelled")
 }
 
+export async function confirmBookingOrder(id) {
+	return updateBookingStatus(id, "confirmed")
+}
+
+export async function confirmTicketPayment(id) {
+	return updateBookingStatus(id, "paid")
+}
+
 export async function deleteBookingTicket(id) {
 	// Sync API DELETE /bookings/:id
 	apiDeleteBooking(id).catch(err => console.warn("[API] Lỗi khi xóa vé trên json-server:", err))

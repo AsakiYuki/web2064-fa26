@@ -514,17 +514,26 @@
 								style="background: #89b4fa; color: #11111b; border: none; padding: 7px 14px; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer;">
 								Tất Cả (<span id="cnt-bk-all">0</span>)
 							</button>
+							<!-- Giao diện hiển thị trạng thái vé phân bước -->
+							<button type="button" class="btn-filter-bk" data-status="pending"
+								style="background: #313244; color: #fab387; border: 1px solid rgba(88, 91, 112, 0.4); padding: 7px 14px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer;">
+								⏳ 1. Chờ Xác Nhận (<span id="cnt-bk-pending">0</span>)
+							</button>
+							<button type="button" class="btn-filter-bk" data-status="confirmed"
+								style="background: #313244; color: #89b4fa; border: 1px solid rgba(88, 91, 112, 0.4); padding: 7px 14px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer;">
+								💳 2. Chờ Thanh Toán (<span id="cnt-bk-confirmed">0</span>)
+							</button>
 							<button type="button" class="btn-filter-bk" data-status="paid"
-								style="background: #313244; color: #a6adc8; border: 1px solid rgba(88, 91, 112, 0.4); padding: 7px 14px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer;">
-								Chờ Xem / Đã Thanh Toán (<span id="cnt-bk-paid">0</span>)
+								style="background: #313244; color: #a6e3a1; border: 1px solid rgba(88, 91, 112, 0.4); padding: 7px 14px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer;">
+								🎉 Vé Thành Công (<span id="cnt-bk-paid">0</span>)
 							</button>
 							<button type="button" class="btn-filter-bk" data-status="done"
-								style="background: #313244; color: #a6adc8; border: 1px solid rgba(88, 91, 112, 0.4); padding: 7px 14px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer;">
-								Đã Soát Vé / Đã Xem (<span id="cnt-bk-done">0</span>)
+								style="background: #313244; color: #bac2de; border: 1px solid rgba(88, 91, 112, 0.4); padding: 7px 14px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer;">
+								🎟️ Đã Soát Vé (<span id="cnt-bk-done">0</span>)
 							</button>
 							<button type="button" class="btn-filter-bk" data-status="cancelled"
-								style="background: #313244; color: #a6adc8; border: 1px solid rgba(88, 91, 112, 0.4); padding: 7px 14px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer;">
-								Đã Hủy (<span id="cnt-bk-cancelled">0</span>)
+								style="background: #313244; color: #f38ba8; border: 1px solid rgba(88, 91, 112, 0.4); padding: 7px 14px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer;">
+								❌ Đã Hủy (<span id="cnt-bk-cancelled">0</span>)
 							</button>
 						</div>
 						<div class="actions-group">
@@ -548,8 +557,9 @@
 										<th>Suất Chiếu</th>
 										<th>Ghế & Bắp</th>
 										<th>Tổng Tiền</th>
-										<th>Quản Lý Trạng Thái</th>
-										<th style="text-align: center;">Thao Tác</th>
+										<th style="min-width: 170px;">1. Xác Nhận Đặt Vé</th>
+										<th style="min-width: 190px;">2. Xác Nhận Thanh Toán</th>
+										<th style="text-align: center; min-width: 130px;">Thao Tác</th>
 									</tr>
 								</thead>
 								<tbody id="admin-bookings-table-tbody">

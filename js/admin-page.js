@@ -21,6 +21,8 @@ import {
 	deleteConcessionItem,
 	cancelBookingTicket,
 	updateBookingStatus,
+	confirmBookingOrder,
+	confirmTicketPayment,
 	deleteBookingTicket,
 	resetStorageSection,
 	STORAGE_KEYS,
@@ -1273,16 +1275,22 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 			// Update counter badges on filter pills
 			const cntAll = bookings.length
-			const cntPaid = bookings.filter(b => b.status === "paid").length
+			const cntPending = bookings.filter(b => b.status === "pending").length
+			const cntConfirmed = bookings.filter(b => b.status === "confirmed").length
+			const cntPaid = bookings.filter(b => b.status === "paid" || b.paymentStatus === "paid").length
 			const cntDone = bookings.filter(b => b.status === "done").length
 			const cntCancelled = bookings.filter(b => b.status === "cancelled").length
 
 			const elAll = document.getElementById("cnt-bk-all")
+			const elPending = document.getElementById("cnt-bk-pending")
+			const elConfirmed = document.getElementById("cnt-bk-confirmed")
 			const elPaid = document.getElementById("cnt-bk-paid")
 			const elDone = document.getElementById("cnt-bk-done")
 			const elCancelled = document.getElementById("cnt-bk-cancelled")
 
 			if (elAll) elAll.textContent = cntAll
+			if (elPending) elPending.textContent = cntPending
+			if (elConfirmed) elConfirmed.textContent = cntConfirmed
 			if (elPaid) elPaid.textContent = cntPaid
 			if (elDone) elDone.textContent = cntDone
 			if (elCancelled) elCancelled.textContent = cntCancelled
@@ -1308,19 +1316,42 @@ document.addEventListener("DOMContentLoaded", async () => {
 			if (bookingsCountText) bookingsCountText.textContent = `Hiển thị ${filtered.length} / ${bookings.length} đơn đặt vé`
 
 			if (filtered.length === 0) {
-				bookingsTableTbody.innerHTML = `<tr><td colspan="8" style="text-align: center; color: #a6adc8; padding: 36px;">Không tìm thấy đơn đặt vé nào phù hợp</td></tr>`
+				bookingsTableTbody.innerHTML = `<tr><td colspan="9" style="text-align: center; color: #a6adc8; padding: 36px;">Không tìm thấy đơn đặt vé nào phù hợp</td></tr>`
 				return
 			}
 
 			bookingsTableTbody.innerHTML = filtered
 				.map(b => {
+					const isPending = b.status === "pending"
+					const isConfirmed = b.status === "confirmed"
 					const isPaid = b.status === "paid" || b.paymentStatus === "paid"
 					const isDone = b.status === "done"
 					const isCancelled = b.status === "cancelled"
-
-					const statusColor = isPaid ? "#a6e3a1" : isDone ? "#89b4fa" : "#f38ba8"
-					const statusBg = isPaid ? "rgba(166, 227, 161, 0.12)" : isDone ? "rgba(137, 180, 250, 0.12)" : "rgba(243, 139, 168, 0.12)"
 					const methodText = (b.paymentMethod || "QR").toUpperCase()
+
+					// Cột 1. Xác nhận đặt vé
+					let colStep1 = ""
+					if (isPending) {
+						colStep1 = `<button type="button" class="btn-action-order-confirm" data-id="${b.id}" style="background: rgba(250, 179, 135, 0.15); color: #fab387; border: 1px solid rgba(250, 179, 135, 0.4); border-radius: 6px; padding: 6px 10px; font-weight: 700; font-size: 12px; cursor: pointer;">⏳ Xác Nhận Đơn</button>`
+					} else if (isCancelled) {
+						colStep1 = `<span style="color: #f38ba8; font-size: 12px; font-weight: 700;">Đơn Đã Hủy</span>`
+					} else {
+						colStep1 = `<span style="color: #a6e3a1; font-size: 12px; font-weight: 700;">✓ Đã Xác Nhận</span>`
+					}
+
+					// Cột 2. Xác nhận thanh toán
+					let colStep2 = ""
+					if (isPending) {
+						colStep2 = `<span style="color: #6c7086; font-size: 11px;">Chờ duyệt bước 1</span>`
+					} else if (isConfirmed) {
+						colStep2 = `<button type="button" class="btn-action-payment-confirm" data-id="${b.id}" style="background: rgba(137, 180, 250, 0.15); color: #89b4fa; border: 1px solid rgba(137, 180, 250, 0.4); border-radius: 6px; padding: 6px 10px; font-weight: 700; font-size: 12px; cursor: pointer;">💳 Xác Nhận Thu Tiền</button>`
+					} else if (isPaid) {
+						colStep2 = `<span style="color: #a6e3a1; font-weight: 700; font-size: 12px;">🟢 ĐÃ NHẬN TIỀN</span>`
+					} else if (isDone) {
+						colStep2 = `<span style="color: #89b4fa; font-weight: 700; font-size: 12px;">🔵 Đã Soát Vé</span>`
+					} else {
+						colStep2 = `<span style="color: #f38ba8; font-weight: 700; font-size: 12px;">🔴 Đã Hủy Vé</span>`
+					}
 
 					return `
 					<tr>
@@ -1346,17 +1377,12 @@ document.addEventListener("DOMContentLoaded", async () => {
 							<div style="color: #fab387; font-weight: 800; font-size: 14px;">${formatCurrency(b.total)}</div>
 							<span style="display: inline-block; font-size: 10px; font-weight: 800; background: rgba(137, 180, 250, 0.15); color: #89b4fa; border: 1px solid rgba(137, 180, 250, 0.3); border-radius: 4px; padding: 2px 5px; margin-top: 2px;">${methodText}</span>
 						</td>
-						<td>
-							<select class="admin-select-status" data-id="${b.id}" style="background: ${statusBg}; color: ${statusColor}; border: 1px solid ${statusColor}; border-radius: 6px; padding: 6px 10px; font-weight: 700; font-size: 12px; cursor: pointer; outline: none;">
-								<option value="paid" ${isPaid ? "selected" : ""} style="color: #a6e3a1; background: #181825;">🟢 ĐÃ NHẬN TIỀN (Chờ xem)</option>
-								<option value="done" ${isDone ? "selected" : ""} style="color: #89b4fa; background: #181825;">🔵 Đã soát vé (Đã xem)</option>
-								<option value="cancelled" ${isCancelled ? "selected" : ""} style="color: #f38ba8; background: #181825;">🔴 Đã hủy vé</option>
-							</select>
-						</td>
+						<td>${colStep1}</td>
+						<td>${colStep2}</td>
 						<td style="text-align: center;">
 							<div class="row-actions" style="justify-content: center; gap: 6px;">
 								<button type="button" class="btn-action-icon btn-view-admin-ticket" data-id="${b.id}" title="Xem chi tiết vé điện tử & Mã QR">🎟️</button>
-								${!isDone
+								${!isDone && isPaid
 							? `<button type="button" class="btn-action-icon btn-checkin-ticket" data-id="${b.id}" style="color: #a6e3a1;" title="Soát vé nhanh (Xác nhận khách đã vào rạp)">✓</button>`
 							: ""
 						}
@@ -1371,18 +1397,24 @@ document.addEventListener("DOMContentLoaded", async () => {
 				})
 				.join("")
 
-			// 1. Change Status via inline select dropdown
-			bookingsTableTbody.querySelectorAll(".admin-select-status").forEach(select => {
-				select.addEventListener("change", e => {
-					const id = select.dataset.id
-					const newStatus = e.target.value
-					updateBookingStatus(id, newStatus)
-					const statusLabels = {
-						paid: "🟢 ĐÃ NHẬN TIỀN (Chờ xem)",
-						done: "🔵 Đã soát vé (Đã xem)",
-						cancelled: "🔴 Đã hủy vé",
-					}
-					showToast(`Đã cập nhật trạng thái đơn ${id} thành "${statusLabels[newStatus] || newStatus}"`, "success")
+			// 1. Confirm order step 1
+			bookingsTableTbody.querySelectorAll(".btn-action-order-confirm").forEach(btn => {
+				btn.addEventListener("click", async () => {
+					const id = btn.dataset.id
+					await confirmBookingOrder(id)
+					showToast(`✅ Đã xác nhận đơn đặt vé ${id}! Chuyển sang bước chờ thanh toán.`, "success")
+					renderAdminBookingsTable()
+					renderOverviewDashboard()
+					updateAllBadges()
+				})
+			})
+
+			// 2. Confirm payment step 2
+			bookingsTableTbody.querySelectorAll(".btn-action-payment-confirm").forEach(btn => {
+				btn.addEventListener("click", async () => {
+					const id = btn.dataset.id
+					await confirmTicketPayment(id)
+					showToast(`💰 Đã xác nhận thu tiền cho đơn vé ${id}! Vé đã sẵn sàng cho khách xem phim.`, "success")
 					renderAdminBookingsTable()
 					renderOverviewDashboard()
 					updateAllBadges()
