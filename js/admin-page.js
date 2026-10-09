@@ -306,7 +306,9 @@ document.addEventListener("DOMContentLoaded", async () => {
 			const movieSalesMap = {} // movieId -> { title, revenue, seatsCount, poster }
 
 			bookings.forEach(b => {
-				if (b.status === "paid" || b.status === "done") {
+				const isPaid = b.status === "paid" || b.status === "done" || b.paymentStatus === "paid"
+				const isCancelled = b.status === "cancelled" || b.bookingStatus === "cancelled"
+				if (isPaid && !isCancelled) {
 					const ticketTotal = Number(b.total) || 0
 					totalRevenue += ticketTotal
 					paidOrdersCount++
@@ -1275,11 +1277,26 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 			// Update counter badges on filter pills
 			const cntAll = bookings.length
-			const cntPending = bookings.filter(b => b.status === "pending").length
-			const cntConfirmed = bookings.filter(b => b.status === "confirmed").length
-			const cntPaid = bookings.filter(b => b.status === "paid" || b.paymentStatus === "paid").length
+			const cntPending = bookings.filter(b => {
+				const isCancelled = b.status === "cancelled" || b.bookingStatus === "cancelled"
+				const isDone = b.status === "done"
+				const isPaid = !isCancelled && (b.paymentStatus === "paid" || b.status === "paid")
+				const isConfirmed = !isCancelled && !isPaid && !isDone && (b.bookingStatus === "confirmed" || b.status === "confirmed")
+				return !isCancelled && !isPaid && !isDone && !isConfirmed
+			}).length
+			const cntConfirmed = bookings.filter(b => {
+				const isCancelled = b.status === "cancelled" || b.bookingStatus === "cancelled"
+				const isDone = b.status === "done"
+				const isPaid = !isCancelled && (b.paymentStatus === "paid" || b.status === "paid")
+				return !isCancelled && !isPaid && !isDone && (b.bookingStatus === "confirmed" || b.status === "confirmed")
+			}).length
+			const cntPaid = bookings.filter(b => {
+				const isCancelled = b.status === "cancelled" || b.bookingStatus === "cancelled"
+				const isDone = b.status === "done"
+				return !isCancelled && !isDone && (b.paymentStatus === "paid" || b.status === "paid")
+			}).length
 			const cntDone = bookings.filter(b => b.status === "done").length
-			const cntCancelled = bookings.filter(b => b.status === "cancelled").length
+			const cntCancelled = bookings.filter(b => b.status === "cancelled" || b.bookingStatus === "cancelled").length
 
 			const elAll = document.getElementById("cnt-bk-all")
 			const elPending = document.getElementById("cnt-bk-pending")
@@ -1299,22 +1316,18 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 			if (currentBookingStatusFilter !== "all") {
 				filtered = filtered.filter(b => {
-					// Chờ xác nhận đặt vé
-					if (currentBookingStatusFilter === "pending") {
-						return b.bookingStatus === "pending"
-					}
+					const isCancelled = b.status === "cancelled" || b.bookingStatus === "cancelled"
+					const isDone = b.status === "done"
+					const isPaid = !isCancelled && (b.paymentStatus === "paid" || b.status === "paid")
+					const isConfirmed = !isCancelled && !isPaid && !isDone && (b.bookingStatus === "confirmed" || b.status === "confirmed")
+					const isPending = !isCancelled && !isPaid && !isDone && !isConfirmed
 
-					// Đã xác nhận đặt vé
-					if (currentBookingStatusFilter === "confirmed") {
-						return b.bookingStatus === "confirmed"
-					}
+					if (currentBookingStatusFilter === "pending") return isPending
+					if (currentBookingStatusFilter === "confirmed") return isConfirmed
+					if (currentBookingStatusFilter === "paid") return isPaid
+					if (currentBookingStatusFilter === "done") return isDone
+					if (currentBookingStatusFilter === "cancelled") return isCancelled
 
-					// Đã xác nhận thanh toán
-					if (currentBookingStatusFilter === "paid") {
-						return b.paymentStatus === "paid"
-					}
-
-					// Các trạng thái cũ khác
 					return b.status === currentBookingStatusFilter
 				})
 			}
@@ -1341,26 +1354,28 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 			bookingsTableTbody.innerHTML = filtered
 				.map(b => {
-					const isPending = b.bookingStatus === "pending"
-					const isConfirmed = b.bookingStatus === "confirmed"
-					const isPaid = b.paymentStatus === "paid"
+					const isCancelled = b.status === "cancelled" || b.bookingStatus === "cancelled"
 					const isDone = b.status === "done"
-					const isCancelled = b.status === "cancelled"
+					const isPaid = !isCancelled && (b.paymentStatus === "paid" || b.status === "paid")
+					const isConfirmed = !isCancelled && !isPaid && !isDone && (b.bookingStatus === "confirmed" || b.status === "confirmed")
+					const isPending = !isCancelled && !isPaid && !isDone && !isConfirmed
 					const methodText = (b.paymentMethod || "QR").toUpperCase()
 
 					// Cột 1. Xác nhận đặt vé
 					let colStep1 = ""
-					if (isPending) {
-						colStep1 = `<button type="button" class="btn-action-order-confirm" data-id="${b.id}" style="background: rgba(250, 179, 135, 0.15); color: #fab387; border: 1px solid rgba(250, 179, 135, 0.4); border-radius: 6px; padding: 6px 10px; font-weight: 700; font-size: 12px; cursor: pointer;">⏳ Xác Nhận Đơn</button>`
-					} else if (isCancelled) {
+					if (isCancelled) {
 						colStep1 = `<span style="color: #f38ba8; font-size: 12px; font-weight: 700;">Đơn Đã Hủy</span>`
+					} else if (isPending) {
+						colStep1 = `<button type="button" class="btn-action-order-confirm" data-id="${b.id}" style="background: rgba(250, 179, 135, 0.15); color: #fab387; border: 1px solid rgba(250, 179, 135, 0.4); border-radius: 6px; padding: 6px 10px; font-weight: 700; font-size: 12px; cursor: pointer;">⏳ Xác Nhận Đơn</button>`
 					} else {
 						colStep1 = `<span style="color: #a6e3a1; font-size: 12px; font-weight: 700;">✓ Đã Xác Nhận</span>`
 					}
 
 					// Cột 2. Xác nhận thanh toán
 					let colStep2 = ""
-					if (isPending) {
+					if (isCancelled) {
+						colStep2 = `<span style="color: #f38ba8; font-weight: 700; font-size: 12px;">🔴 Đã Hủy Vé</span>`
+					} else if (isPending) {
 						colStep2 = `<span style="color: #6c7086; font-size: 11px;">Chờ duyệt bước 1</span>`
 					} else if (isConfirmed) {
 						colStep2 = `<button type="button" class="btn-action-payment-confirm" data-id="${b.id}" style="background: rgba(137, 180, 250, 0.15); color: #89b4fa; border: 1px solid rgba(137, 180, 250, 0.4); border-radius: 6px; padding: 6px 10px; font-weight: 700; font-size: 12px; cursor: pointer;">💳 Xác Nhận Thu Tiền</button>`
@@ -1401,7 +1416,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 						<td style="text-align: center;">
 							<div class="row-actions" style="justify-content: center; gap: 6px;">
 								<button type="button" class="btn-action-icon btn-view-admin-ticket" data-id="${b.id}" title="Xem chi tiết vé điện tử & Mã QR">🎟️</button>
-								${!isDone && isPaid
+								${!isDone && isPaid && !isCancelled
 							? `<button type="button" class="btn-action-icon btn-checkin-ticket" data-id="${b.id}" style="color: #a6e3a1;" title="Soát vé nhanh (Xác nhận khách đã vào rạp)">✓</button>`
 							: ""
 						}

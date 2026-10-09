@@ -274,7 +274,20 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 		let filtered = history
 		if (currentHistoryFilter !== "all") {
-			filtered = filtered.filter(t => t.status === currentHistoryFilter)
+			filtered = filtered.filter(t => {
+				const isCancelled = t.status === "cancelled" || t.bookingStatus === "cancelled"
+				const isDone = t.status === "done"
+				const isPaid = !isCancelled && (t.paymentStatus === "paid" || t.status === "paid")
+				const isConfirmed = !isCancelled && !isPaid && !isDone && (t.bookingStatus === "confirmed" || t.status === "confirmed")
+				const isPending = !isCancelled && !isPaid && !isDone && !isConfirmed
+
+				if (currentHistoryFilter === "pending") return isPending || isConfirmed
+				if (currentHistoryFilter === "paid") return isPaid
+				if (currentHistoryFilter === "done") return isDone
+				if (currentHistoryFilter === "cancelled") return isCancelled
+
+				return t.status === currentHistoryFilter
+			})
 		}
 		if (currentSearchKeyword) {
 			filtered = filtered.filter(
@@ -299,20 +312,36 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 		container.innerHTML = filtered
 			.map((t, idx) => {
-				const isPaid = t.status === "paid"
-				const isCancelled = t.status === "cancelled"
+				const isCancelled = t.status === "cancelled" || t.bookingStatus === "cancelled"
+				const isDone = t.status === "done"
+				const isPaid = !isCancelled && (t.paymentStatus === "paid" || t.status === "paid")
+				const isConfirmed = !isCancelled && !isPaid && !isDone && (t.bookingStatus === "confirmed" || t.status === "confirmed")
+				const isPending = !isCancelled && !isPaid && !isDone && !isConfirmed
+
 				let statusText = "Đã Thanh Toán"
 				let statusClass = "status-paid"
 				let statusBadgeStyle = "background: rgba(166, 227, 161, 0.2); color: #a6e3a1; border: 1px solid rgba(166, 227, 161, 0.4);"
 
-				if (t.status === "done") {
-					statusText = "Đã Sử Dụng"
-					statusClass = "status-done"
-					statusBadgeStyle = "background: rgba(148, 163, 184, 0.2); color: #bac2de; border: 1px solid rgba(148, 163, 184, 0.4);"
-				} else if (isCancelled) {
+				if (isCancelled) {
 					statusText = "Đã Hủy"
 					statusClass = "status-cancelled"
 					statusBadgeStyle = "background: rgba(243, 139, 168, 0.2); color: #f38ba8; border: 1px solid rgba(243, 139, 168, 0.4);"
+				} else if (isDone) {
+					statusText = "Đã Sử Dụng"
+					statusClass = "status-done"
+					statusBadgeStyle = "background: rgba(148, 163, 184, 0.2); color: #bac2de; border: 1px solid rgba(148, 163, 184, 0.4);"
+				} else if (isPaid) {
+					statusText = "Đã Thanh Toán"
+					statusClass = "status-paid"
+					statusBadgeStyle = "background: rgba(166, 227, 161, 0.2); color: #a6e3a1; border: 1px solid rgba(166, 227, 161, 0.4);"
+				} else if (isConfirmed) {
+					statusText = "Đã Xác Nhận Đơn"
+					statusClass = "status-confirmed"
+					statusBadgeStyle = "background: rgba(137, 180, 250, 0.2); color: #89b4fa; border: 1px solid rgba(137, 180, 250, 0.4);"
+				} else {
+					statusText = "Chờ Xác Nhận"
+					statusClass = "status-pending"
+					statusBadgeStyle = "background: rgba(250, 179, 135, 0.2); color: #fab387; border: 1px solid rgba(250, 179, 135, 0.4);"
 				}
 
 				return `
@@ -343,7 +372,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 								🎟️ Xem Vé Điện Tử
 							</button>
 							${
-								isPaid
+								!isCancelled && !isDone
 									? `
 								<button type="button" class="btn-cancel-ticket" data-ticket-id="${t.id}" style="background: rgba(243, 139, 168, 0.15); color: #f38ba8; border: 1px solid rgba(243, 139, 168, 0.3); padding: 6px 12px; border-radius: 6px; font-weight: 600; font-size: 12px; cursor: pointer;">
 									✕ Hủy Vé
@@ -389,6 +418,12 @@ document.addEventListener("DOMContentLoaded", async () => {
 		const body = document.getElementById("profile-ticket-modal-body")
 		if (!modal || !body) return
 
+		const isCancelled = t.status === "cancelled" || t.bookingStatus === "cancelled"
+		const isDone = t.status === "done"
+		const isPaid = !isCancelled && (t.paymentStatus === "paid" || t.status === "paid")
+		const isConfirmed = !isCancelled && !isPaid && !isDone && (t.bookingStatus === "confirmed" || t.status === "confirmed")
+		const qrStatus = isCancelled ? "CANCELLED" : isDone ? "USED" : isPaid ? "VALID_PAID" : isConfirmed ? "CONFIRMED_UNPAID" : "PENDING"
+
 		const qrSvg = generateQRCodeSVG(
 			JSON.stringify({
 				ticket: t.id,
@@ -396,7 +431,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 				cinema: t.cinemaName,
 				time: `${t.time} ${t.date}`,
 				seats: t.seats,
-				status: "VALID_PAID",
+				status: qrStatus,
 			}),
 			{
 				size: 160,

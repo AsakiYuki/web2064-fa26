@@ -248,6 +248,8 @@ export const DEFAULT_BOOKING_HISTORY = [
 		userPhone: "0987654321",
 		userEmail: "nam.nguyen@example.com",
 		bookingDate: "2026-09-26T07:30:00.000Z",
+		bookingStatus: "confirmed",
+		paymentStatus: "paid",
 		status: "paid",
 	},
 	{
@@ -269,6 +271,8 @@ export const DEFAULT_BOOKING_HISTORY = [
 		userPhone: "0912345678",
 		userEmail: "nguyen.an@gmail.com",
 		bookingDate: "2026-09-20T13:00:00.000Z",
+		bookingStatus: "confirmed",
+		paymentStatus: "paid",
 		status: "done",
 	},
 ]
@@ -993,22 +997,20 @@ export async function saveBookingTicket(ticket) {
 	const pMethod = ticket.paymentMethod || "momo"
 
 	const newTicket = {
-    ...ticket,
-    id: ticket.id || "BT-" + Math.floor(100000 + Math.random() * 900000),
-    customerName: cName,
-    customerPhone: cPhone,
-    customerEmail: cEmail,
-    userName: cName,
-    userPhone: cPhone,
-    userEmail: cEmail,
-    paymentMethod: pMethod,
-
-    paymentStatus: ticket.paymentStatus || "pending",
-
-    bookingDate: ticket.bookingDate || new Date().toISOString(),
-
-    status: ticket.status || "pending",
-}
+		...ticket,
+		id: ticket.id || "BT-" + Math.floor(100000 + Math.random() * 900000),
+		customerName: cName,
+		customerPhone: cPhone,
+		customerEmail: cEmail,
+		userName: cName,
+		userPhone: cPhone,
+		userEmail: cEmail,
+		paymentMethod: pMethod,
+		bookingStatus: ticket.bookingStatus || "pending",
+		paymentStatus: ticket.paymentStatus || "pending",
+		bookingDate: ticket.bookingDate || new Date().toISOString(),
+		status: ticket.status || "pending",
+	}
 	// 1. Sync API POST /bookings
 	apiCreateBooking(newTicket).catch(err => console.warn("[API] Lỗi khi lưu đơn vé lên json-server:", err))
 
@@ -1030,13 +1032,33 @@ export async function saveBookingTicket(ticket) {
 }
 
 export async function updateBookingStatus(id, newStatus) {
+	const patchData = { status: newStatus }
+	if (newStatus === "cancelled") {
+		patchData.bookingStatus = "cancelled"
+		patchData.paymentStatus = "cancelled"
+	} else if (newStatus === "done") {
+		patchData.bookingStatus = "confirmed"
+		patchData.paymentStatus = "paid"
+	}
+
 	// Sync API PATCH /bookings/:id
-	apiUpdateBooking(id, { status: newStatus }).catch(err => console.warn("[API] Lỗi khi cập nhật trạng thái vé:", err))
+	apiUpdateBooking(id, patchData).catch(err => console.warn("[API] Lỗi khi cập nhật trạng thái vé:", err))
 
 	const history = getBookingHistory()
 	const target = history.find(b => String(b.id) === String(id))
 	if (target) {
 		target.status = newStatus
+		if (newStatus === "cancelled") {
+			target.bookingStatus = "cancelled"
+			target.paymentStatus = "cancelled"
+			// Khi hủy vé, hoàn lại ghế thành available
+			if (target.seats && target.cinemaId && target.movieId && target.date && target.time) {
+				updateShowtimeSeats(target.cinemaId, target.movieId, target.date, target.time, target.seats, "available")
+			}
+		} else if (newStatus === "done") {
+			target.bookingStatus = "confirmed"
+			target.paymentStatus = "paid"
+		}
 		storageSet(STORAGE_KEYS.BOOKING_HISTORY, history)
 	}
 	return true
@@ -1047,27 +1069,35 @@ export async function cancelBookingTicket(id) {
 }
 
 export async function confirmBookingOrder(id) {
-    const history = getBookingHistory()
-    const target = history.find(b => String(b.id) === String(id))
+	const patchData = { bookingStatus: "confirmed", status: "confirmed" }
+	apiUpdateBooking(id, patchData).catch(err => console.warn("[API] Lỗi khi xác nhận đơn vé:", err))
 
-    if (target) {
-        target.bookingStatus = "confirmed"
-        storageSet(STORAGE_KEYS.BOOKING_HISTORY, history)
-    }
+	const history = getBookingHistory()
+	const target = history.find(b => String(b.id) === String(id))
 
-    return true
+	if (target) {
+		target.bookingStatus = "confirmed"
+		target.status = "confirmed"
+		storageSet(STORAGE_KEYS.BOOKING_HISTORY, history)
+	}
+
+	return true
 }
 
 export async function confirmTicketPayment(id) {
-    const history = getBookingHistory()
-    const target = history.find(b => String(b.id) === String(id))
+	const patchData = { paymentStatus: "paid", status: "paid" }
+	apiUpdateBooking(id, patchData).catch(err => console.warn("[API] Lỗi khi xác nhận thu tiền vé:", err))
 
-    if (target) {
-        target.paymentStatus = "paid"
-        storageSet(STORAGE_KEYS.BOOKING_HISTORY, history)
-    }
+	const history = getBookingHistory()
+	const target = history.find(b => String(b.id) === String(id))
 
-    return true
+	if (target) {
+		target.paymentStatus = "paid"
+		target.status = "paid"
+		storageSet(STORAGE_KEYS.BOOKING_HISTORY, history)
+	}
+
+	return true
 }
 
 export async function deleteBookingTicket(id) {
@@ -1361,7 +1391,31 @@ export function decrementShowtimeAvailableSeats(cinemaId, movieId, date, time, s
 	} catch (err) {
 		console.warn("[Storage] Lỗi khi trừ số lượng ghế khả dụng:", err)
 		return false
-  }
+	}
+}
+
+export function incrementShowtimeAvailableSeats(cinemaId, movieId, date, time, seatCount = 1) {
+	try {
+		const allShowtimes = getShowtimes()
+		if (!Array.isArray(allShowtimes)) return false
+
+		const dayCinema = allShowtimes.find(st => st.date === date && st.cinemaId === cinemaId)
+		if (!dayCinema || !Array.isArray(dayCinema.schedules)) return false
+
+		const schedule = dayCinema.schedules.find(sc => sc.movieId === movieId)
+		if (!schedule || !Array.isArray(schedule.slots)) return false
+
+		const slot = schedule.slots.find(s => s.time === time)
+		if (slot && typeof slot.availableSeats === "number") {
+			slot.availableSeats = Math.min(slot.totalSeats || 100, slot.availableSeats + seatCount)
+			storageSet(STORAGE_KEYS.SHOWTIMES, allShowtimes)
+			return true
+		}
+		return false
+	} catch (err) {
+		console.warn("[Storage] Lỗi khi cộng lại số lượng ghế khả dụng:", err)
+		return false
+	}
 }
 /* ==========================================================================
    SEAT HOLD MANAGEMENT (GIỮ GHẾ TRONG PHIÊN 5 PHÚT)
@@ -1659,6 +1713,8 @@ export function updateShowtimeSeats(cinemaId, movieId, date, time, seatIds, stat
 		storageSet(key, layout)
 		if (status === "sold") {
 			decrementShowtimeAvailableSeats(cinemaId, movieId, date, time, changedCount)
+		} else if (status === "available") {
+			incrementShowtimeAvailableSeats(cinemaId, movieId, date, time, changedCount)
 		}
 		return true
 	}

@@ -1232,6 +1232,8 @@ document.addEventListener("DOMContentLoaded", async () => {
 			discountAmount: bookingState.discountAmount || 0,
 			paymentMethod: "counter",
 			bookingDate: new Date().toISOString(),
+			bookingStatus: "confirmed",
+			paymentStatus: "paid",
 			status: "paid",
 		}
 		saveBookingTicket(newTicket)
