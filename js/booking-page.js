@@ -5,6 +5,7 @@ import { setupHeaderAndFooter, formatCurrency, formatDateVN, showToast, translat
 import {
 	getMoviesData,
 	getCinemas,
+	getCurrentCinemaId,
 	getConcessions,
 	getTicketPricing,
 	getShowtimeSeats,
@@ -58,7 +59,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 	// Read URL query params
 	const urlParams = new URLSearchParams(window.location.search)
 	const movieId = urlParams.get("movieId") || "utlan2"
-	const cinemaId = urlParams.get("cinemaId") || "beta-thainguyen"
+	const cinemaId = urlParams.get("cinemaId") || getCurrentCinemaId()
 	const dateStr = urlParams.get("date") || "2026-09-26"
 	const timeSlot = urlParams.get("time") || "14:30"
 	const screenName = urlParams.get("screen") || "Phòng chiếu 1"

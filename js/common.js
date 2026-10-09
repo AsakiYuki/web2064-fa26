@@ -2,7 +2,7 @@
  * Beta Cinemas - Common Utilities & Shared Components
  * Authentication, Mega Menu, Mobile Drawer, Modals & Toast notifications
  */
-import { initializeStorage, storageGet, STORAGE_KEYS, getCinemas, getFooterData } from "./storage.js"
+import { initializeStorage, storageGet, STORAGE_KEYS, getCinemas, getFooterData, getCurrentCinemaId, setCurrentCinemaId } from "./storage.js"
 import {
 	LANG_KEY,
 	TRANSLATIONS,
@@ -1191,13 +1191,20 @@ export async function setupHeaderAndFooter() {
 		}
 
 		// Cinema Dropdown
+		const currentCinemaId = getCurrentCinemaId()
+		const currentCinema = Array.isArray(cinemas) ? cinemas.find(c => c.id === currentCinemaId) : null
+		const lbl = document.getElementById("cinema-selector-label")
+		if (lbl && currentCinema) {
+			lbl.textContent = currentCinema.name
+		}
+
 		const ul = document.getElementById("cinema-dropdown-ul")
 		if (ul && Array.isArray(cinemas)) {
 			ul.innerHTML = cinemas
 				.map(
 					item => `
-				<li class="cinema-dropdown-item ${item.active ? "active" : ""}" data-city="${item.city}" data-name="${item.name}" role="option" tabindex="0">
-					${item.city} <span class="ci-arrow">›</span>
+				<li class="cinema-dropdown-item ${item.id === currentCinemaId ? "active" : ""}" data-id="${item.id}" data-city="${item.city}" data-name="${item.name}" role="option" tabindex="0">
+					${item.name} <span class="ci-arrow">›</span>
 				</li>
 			`,
 				)
@@ -1263,13 +1270,15 @@ function initCinemaDropdownEvents() {
 
 	dd.querySelectorAll(".cinema-dropdown-item").forEach(item => {
 		item.addEventListener("click", function () {
-			lbl.textContent = this.dataset.name || "Beta " + this.dataset.city
+			const cId = this.dataset.id
+			if (cId) {
+				setCurrentCinemaId(cId)
+			} else {
+				lbl.textContent = this.dataset.name || "Beta " + this.dataset.city
+			}
 			dd.querySelectorAll(".cinema-dropdown-item").forEach(el => el.classList.remove("active"))
 			this.classList.add("active")
 			closeDD()
-			window.dispatchEvent(
-				new CustomEvent("cinemaChanged", { detail: { city: this.dataset.city, name: this.dataset.name } }),
-			)
 		})
 	})
 
