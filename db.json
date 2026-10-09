@@ -2369,7 +2369,7 @@
       "userPhone": "0987654321",
       "userEmail": "nam.nguyen@example.com",
       "bookingDate": "2026-09-26T07:30:00.000Z",
-      "status": "paid"
+      "status": "done"
     },
     {
       "id": "BT-691759",
@@ -2392,7 +2392,7 @@
       "customerPhone": "0912345678",
       "customerEmail": "s@gmail.com",
       "bookingDate": "2026-10-05T02:36:18.613Z",
-      "status": "paid"
+      "status": "cancelled"
     },
     {
       "id": "BT-751922",
