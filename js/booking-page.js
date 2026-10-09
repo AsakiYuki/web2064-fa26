@@ -857,7 +857,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 				u.searchParams.delete("step")
 			}
 			window.history.replaceState(null, "", u.toString())
-		} catch (e) {}
+		} catch (e) { }
 	}
 
 	function syncPendingBookingToStorage(seatsTotal, concessionsTotal, finalTotal) {
@@ -941,7 +941,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 					const url = new URL(window.location)
 					url.searchParams.set("step", "1")
 					window.history.replaceState({}, "", url)
-				} catch (e) {}
+				} catch (e) { }
 			} else {
 				if (seatSection) seatSection.style.display = "none"
 				if (comboSection) comboSection.style.display = "block"
@@ -957,7 +957,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 						url.searchParams.set("seats", bookingState.selectedSeats.map(s => s.id).join(","))
 					}
 					window.history.replaceState({}, "", url)
-				} catch (e) {}
+				} catch (e) { }
 				if (smoothScroll) {
 					window.scrollTo({ top: 120, behavior: "smooth" })
 				}

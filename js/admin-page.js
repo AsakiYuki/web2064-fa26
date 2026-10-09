@@ -1297,27 +1297,27 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 			let filtered = bookings
 
-if (currentBookingStatusFilter !== "all") {
-    filtered = filtered.filter(b => {
-        // Chờ xác nhận đặt vé
-        if (currentBookingStatusFilter === "pending") {
-            return b.bookingStatus === "pending"
-        }
+			if (currentBookingStatusFilter !== "all") {
+				filtered = filtered.filter(b => {
+					// Chờ xác nhận đặt vé
+					if (currentBookingStatusFilter === "pending") {
+						return b.bookingStatus === "pending"
+					}
 
-        // Đã xác nhận đặt vé
-        if (currentBookingStatusFilter === "confirmed") {
-            return b.bookingStatus === "confirmed"
-        }
+					// Đã xác nhận đặt vé
+					if (currentBookingStatusFilter === "confirmed") {
+						return b.bookingStatus === "confirmed"
+					}
 
-        // Đã xác nhận thanh toán
-        if (currentBookingStatusFilter === "paid") {
-            return b.paymentStatus === "paid"
-        }
+					// Đã xác nhận thanh toán
+					if (currentBookingStatusFilter === "paid") {
+						return b.paymentStatus === "paid"
+					}
 
-        // Các trạng thái cũ khác
-        return b.status === currentBookingStatusFilter
-    })
-}
+					// Các trạng thái cũ khác
+					return b.status === currentBookingStatusFilter
+				})
+			}
 
 			if (currentBookingSearch) {
 				filtered = filtered.filter(
