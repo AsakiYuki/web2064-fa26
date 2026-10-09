@@ -993,20 +993,22 @@ export async function saveBookingTicket(ticket) {
 	const pMethod = ticket.paymentMethod || "momo"
 
 	const newTicket = {
-		...ticket,
-		id: ticket.id || "BT-" + Math.floor(100000 + Math.random() * 900000),
-		customerName: cName,
-		customerPhone: cPhone,
-		customerEmail: cEmail,
-		userName: cName,
-		userPhone: cPhone,
-		userEmail: cEmail,
-		paymentMethod: pMethod,
-		paymentStatus: "paid",
-		bookingDate: ticket.bookingDate || new Date().toISOString(),
-		status: ticket.status || "paid",
-	}
+    ...ticket,
+    id: ticket.id || "BT-" + Math.floor(100000 + Math.random() * 900000),
+    customerName: cName,
+    customerPhone: cPhone,
+    customerEmail: cEmail,
+    userName: cName,
+    userPhone: cPhone,
+    userEmail: cEmail,
+    paymentMethod: pMethod,
 
+    paymentStatus: ticket.paymentStatus || "pending",
+
+    bookingDate: ticket.bookingDate || new Date().toISOString(),
+
+    status: ticket.status || "pending",
+}
 	// 1. Sync API POST /bookings
 	apiCreateBooking(newTicket).catch(err => console.warn("[API] Lỗi khi lưu đơn vé lên json-server:", err))
 
@@ -1045,11 +1047,27 @@ export async function cancelBookingTicket(id) {
 }
 
 export async function confirmBookingOrder(id) {
-	return updateBookingStatus(id, "confirmed")
+    const history = getBookingHistory()
+    const target = history.find(b => String(b.id) === String(id))
+
+    if (target) {
+        target.bookingStatus = "confirmed"
+        storageSet(STORAGE_KEYS.BOOKING_HISTORY, history)
+    }
+
+    return true
 }
 
 export async function confirmTicketPayment(id) {
-	return updateBookingStatus(id, "paid")
+    const history = getBookingHistory()
+    const target = history.find(b => String(b.id) === String(id))
+
+    if (target) {
+        target.paymentStatus = "paid"
+        storageSet(STORAGE_KEYS.BOOKING_HISTORY, history)
+    }
+
+    return true
 }
 
 export async function deleteBookingTicket(id) {

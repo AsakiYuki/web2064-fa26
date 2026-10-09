@@ -405,28 +405,30 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 				// 9. SAVE TICKET TO USER'S BOOKING HISTORY IN LOCALSTORAGE
 				const newTicket = {
-					id: bookingCode,
-					movieId: currentMovie.id,
-					movieTitle: currentMovie.title,
-					moviePoster: currentMovie.poster,
-					cinemaId: currentCinema.id,
-					cinemaName: currentCinema.name,
-					screenName,
-					formatName,
-					date: dateStr,
-					time: timeSlot,
-					seats: seatsParam,
-					concessions: concessionsParam,
-					total: checkoutState.finalTotal,
-					voucherCode: checkoutState.voucherCode || null,
-					discountAmount: checkoutState.discountAmount || 0,
-					paymentMethod: checkoutState.paymentMethod,
-					customerName: fullName,
-					customerPhone: cleanPhone,
-					customerEmail: email,
-					bookingDate: new Date().toISOString(),
-					status: "paid",
-				}
+				id: bookingCode,
+				movieId: currentMovie.id,
+				movieTitle: currentMovie.title,
+				moviePoster: currentMovie.poster,
+				cinemaId: currentCinema.id,
+				cinemaName: currentCinema.name,
+				screenName,
+				formatName,
+				date: dateStr,
+				time: timeSlot,
+				seats: seatsParam,
+				concessions: concessionsParam,
+				total: checkoutState.finalTotal,
+				voucherCode: checkoutState.voucherCode || null,
+				discountAmount: checkoutState.discountAmount || 0,
+				paymentMethod: checkoutState.paymentMethod,
+				customerName: fullName,
+				customerPhone: cleanPhone,
+				customerEmail: email,
+				bookingDate: new Date().toISOString(),
+
+				bookingStatus: "pending",	
+				paymentStatus: "pending",
+}
 
 				await saveBookingTicket(newTicket)
 				clearPendingBooking()

@@ -1296,9 +1296,28 @@ document.addEventListener("DOMContentLoaded", async () => {
 			if (elCancelled) elCancelled.textContent = cntCancelled
 
 			let filtered = bookings
-			if (currentBookingStatusFilter !== "all") {
-				filtered = filtered.filter(b => b.status === currentBookingStatusFilter)
-			}
+
+if (currentBookingStatusFilter !== "all") {
+    filtered = filtered.filter(b => {
+        // Chờ xác nhận đặt vé
+        if (currentBookingStatusFilter === "pending") {
+            return b.bookingStatus === "pending"
+        }
+
+        // Đã xác nhận đặt vé
+        if (currentBookingStatusFilter === "confirmed") {
+            return b.bookingStatus === "confirmed"
+        }
+
+        // Đã xác nhận thanh toán
+        if (currentBookingStatusFilter === "paid") {
+            return b.paymentStatus === "paid"
+        }
+
+        // Các trạng thái cũ khác
+        return b.status === currentBookingStatusFilter
+    })
+}
 
 			if (currentBookingSearch) {
 				filtered = filtered.filter(
@@ -1322,9 +1341,9 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 			bookingsTableTbody.innerHTML = filtered
 				.map(b => {
-					const isPending = b.status === "pending"
-					const isConfirmed = b.status === "confirmed"
-					const isPaid = b.status === "paid" || b.paymentStatus === "paid"
+					const isPending = b.bookingStatus === "pending"
+					const isConfirmed = b.bookingStatus === "confirmed"
+					const isPaid = b.paymentStatus === "paid"
 					const isDone = b.status === "done"
 					const isCancelled = b.status === "cancelled"
 					const methodText = (b.paymentMethod || "QR").toUpperCase()
