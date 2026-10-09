@@ -441,12 +441,44 @@ document.addEventListener("DOMContentLoaded", async () => {
 			}
 		)
 
+		let bannerBg = "#10b981"
+		let badgeIcon = "✓"
+		let statusTitle = "VÉ XEM PHIM ĐIỆN TỬ"
+		let hintText = "Xuất trình mã QR này tại quầy hoặc máy in vé tự động"
+		let totalLabel = "Tổng Tiền Đã Thanh Toán"
+
+		if (isCancelled) {
+			bannerBg = "#f38ba8"
+			badgeIcon = "✕"
+			statusTitle = "VÉ ĐÃ HỦY - KHÔNG HIỆU LỰC"
+			hintText = "Đơn vé này đã bị hủy. Chỗ ngồi đã được giải phóng trở lại rạp."
+			totalLabel = "Tổng Tiền (Đơn Đã Hủy)"
+		} else if (isDone) {
+			bannerBg = "#89b4fa"
+			badgeIcon = "✓"
+			statusTitle = "VÉ ĐÃ SỬ DỤNG - ĐÃ SOÁT VÉ"
+			hintText = "Vé đã được soát vào rạp. Chúc bạn đã có buổi xem phim vui vẻ!"
+			totalLabel = "Tổng Tiền Đã Thanh Toán"
+		} else if (isConfirmed) {
+			bannerBg = "#fab387"
+			badgeIcon = "⏳"
+			statusTitle = "VÉ ĐÃ XÁC NHẬN - CHỜ THANH TOÁN"
+			hintText = "Đơn vé đã được nhân viên duyệt. Vui lòng hoàn tất thanh toán trước khi vào rạp."
+			totalLabel = "Tổng Tiền Cần Thanh Toán"
+		} else if (isPending) {
+			bannerBg = "#f9e2af"
+			badgeIcon = "⏳"
+			statusTitle = "VÉ CHỜ XÁC NHẬN ĐƠN"
+			hintText = "Đơn vé đang chờ rạp duyệt bước 1. Vui lòng chờ trong giây lát."
+			totalLabel = "Tổng Tiền Cần Thanh Toán"
+		}
+
 		body.innerHTML = `
 			<div class="eticket-success-page-wrap" style="margin: 0; box-shadow: none; max-width: 100%;">
-				<div class="eticket-top-banner">
-					<div class="et-success-badge">✓</div>
-					<h2 style="color:#cdd6f4; font-size: 20px; font-weight:900; margin:0 0 4px; text-transform:uppercase;">VÉ XEM PHIM ĐIỆN TỬ</h2>
-					<p style="font-size: 13px; color: rgba(255,255,255,0.9); margin:0;">Mã vé: ${t.id} • Beta Cinemas</p>
+				<div class="eticket-top-banner" style="background: ${bannerBg};">
+					<div class="et-success-badge" style="color: ${bannerBg};">${badgeIcon}</div>
+					<h2 style="color:#11111b; font-size: 20px; font-weight:900; margin:0 0 4px; text-transform:uppercase;">${statusTitle}</h2>
+					<p style="font-size: 13px; color: rgba(17,17,27,0.85); margin:0;">Mã vé: ${t.id} • Beta Cinemas</p>
 				</div>
 				<div class="eticket-ticket-pass">
 					<div class="et-code-banner">
@@ -457,7 +489,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 						<div class="qr-code-box">
 							${qrSvg}
 						</div>
-						<div class="qr-hint">Xuất trình mã QR này tại quầy hoặc máy in vé tự động</div>
+						<div class="qr-hint">${hintText}</div>
 					</div>
 					<div class="et-info-grid">
 						<div class="et-info-item" style="grid-column: 1 / -1;">
@@ -485,13 +517,13 @@ document.addEventListener("DOMContentLoaded", async () => {
 							<span class="et-val">${t.concessions || "Không kèm bắp"}</span>
 						</div>
 						<div class="et-info-item" style="grid-column: 1 / -1; border-top: 1px dashed rgba(255,255,255,0.15); padding-top: 8px;">
-							<span class="et-lbl">Tổng Tiền Đã Thanh Toán</span>
+							<span class="et-lbl">${totalLabel}</span>
 							<span class="et-val val-gold">${formatCurrency(t.total)}</span>
 						</div>
 					</div>
 					<div class="et-barcode-wrap">
 						<div class="barcode-strip"></div>
-						<div class="barcode-number">${t.id} - KIOSK READY</div>
+						<div class="barcode-number">${t.id} - ${qrStatus} - KIOSK READY</div>
 					</div>
 				</div>
 				<div class="eticket-bottom-actions">

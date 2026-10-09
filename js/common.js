@@ -270,6 +270,9 @@ export function updateNavAdminVisibility() {
 
 export function logoutUserAndNotify() {
 	logoutUser()
+	if (typeof window !== "undefined") {
+		window.dispatchEvent(new CustomEvent("beta_auth_changed", { detail: { user: null } }))
+	}
 	try {
 		updateHeaderAccountUI()
 		updateDrawerAccountUI()
@@ -285,6 +288,18 @@ export function logoutUserAndNotify() {
 			window.location.href = "/"
 		}, 800)
 	}
+}
+
+if (typeof window !== "undefined") {
+	window.addEventListener("beta_auth_changed", () => {
+		try {
+			updateHeaderAccountUI()
+			updateDrawerAccountUI()
+			updateNavAdminVisibility()
+		} catch (err) {
+			console.warn("[Auth Listener] Error updating UI:", err)
+		}
+	})
 }
 
 /** Update Account Bar in Header (Logged in vs Logged out) */
@@ -591,6 +606,9 @@ function initAuthModalEvents(modal) {
 	// Social Logins (Google / Facebook mock)
 	const loginSocial = provider => {
 		saveUserSession(DEFAULT_USERS[0])
+		if (typeof window !== "undefined") {
+			window.dispatchEvent(new CustomEvent("beta_auth_changed", { detail: { user: DEFAULT_USERS[0] } }))
+		}
 		try {
 			updateHeaderAccountUI()
 			updateDrawerAccountUI()
@@ -645,6 +663,9 @@ function initAuthModalEvents(modal) {
 					avatarText: fallbackName.charAt(0).toUpperCase(),
 				}
 				saveUserSession(userObj)
+				if (typeof window !== "undefined") {
+					window.dispatchEvent(new CustomEvent("beta_auth_changed", { detail: { user: userObj } }))
+				}
 				try {
 					updateHeaderAccountUI()
 					updateDrawerAccountUI()
@@ -659,6 +680,10 @@ function initAuthModalEvents(modal) {
 			setFieldError("login-account", authResult.message)
 			showToast(authResult.message, "warning")
 			return
+		}
+
+		if (typeof window !== "undefined") {
+			window.dispatchEvent(new CustomEvent("beta_auth_changed", { detail: { user: authResult.user } }))
 		}
 
 		try {
@@ -752,6 +777,10 @@ function initAuthModalEvents(modal) {
 			setFieldError("reg-email", regResult.message)
 			showToast(regResult.message, "warning")
 			return
+		}
+
+		if (typeof window !== "undefined") {
+			window.dispatchEvent(new CustomEvent("beta_auth_changed", { detail: { user: regResult.user } }))
 		}
 
 		try {

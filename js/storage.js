@@ -598,7 +598,11 @@ export async function updateUserInDatabase(updatedUser) {
 
 	const currentUser = getCurrentUser()
 	if (currentUser && (currentUser.id === updatedUser.id || currentUser.email === updatedUser.email)) {
-		saveUserSession({ ...currentUser, ...updatedUser })
+		const merged = { ...currentUser, ...updatedUser }
+		saveUserSession(merged)
+		if (typeof window !== "undefined") {
+			window.dispatchEvent(new CustomEvent("beta_auth_changed", { detail: { user: merged } }))
+		}
 	}
 }
 
