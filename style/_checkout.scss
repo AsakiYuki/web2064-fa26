@@ -656,6 +656,7 @@
 .qr-payment-modal-content {
 	max-width: 480px;
 	width: 92%;
+	max-height: 90vh;
 	background: $ctp-surface0;
 	color: $ctp-text;
 	border-radius: $radius-xl;
@@ -663,7 +664,22 @@
 	border: 1px solid $border-color;
 	box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
 	position: relative;
-	overflow: hidden;
+	overflow-y: auto;
+	-webkit-overflow-scrolling: touch;
+	overscroll-behavior: contain;
+	scrollbar-width: thin;
+	scrollbar-color: rgba($primary-color, 0.4) transparent;
+
+	&::-webkit-scrollbar {
+		width: 6px;
+	}
+	&::-webkit-scrollbar-track {
+		background: transparent;
+	}
+	&::-webkit-scrollbar-thumb {
+		background: rgba($primary-color, 0.4);
+		border-radius: 10px;
+	}
 
 	.qr-modal-header {
 		text-align: center;
