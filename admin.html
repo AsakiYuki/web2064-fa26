@@ -801,10 +801,12 @@
 
 	<!-- MODAL: VIEW E-TICKET QR -->
 	<div class="admin-modal-backdrop" id="modal-admin-ticket">
-		<div class="admin-modal-card" style="max-width: 540px; padding: 0; background: transparent; border: none;">
+		<div class="admin-modal-card"
+			style="max-width: 560px; max-height: 90vh; padding: 0; background: transparent; border: none; display: flex; flex-direction: column; overflow: hidden; position: relative;">
 			<button class="btn-close-modal" id="modal-admin-ticket-close"
-				style="position: absolute; top: 14px; right: 14px; z-index: 10; color: #cdd6f4; font-size: 24px;">&times;</button>
-			<div id="modal-admin-ticket-body"></div>
+				style="position: absolute; top: 14px; right: 14px; z-index: 50; color: #11111b; background: rgba(255, 255, 255, 0.9); width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: 800; border: none; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.35); transition: all 0.2s;">&times;</button>
+			<div id="modal-admin-ticket-body"
+				style="overflow-y: auto; max-height: 90vh; border-radius: 16px; -webkit-overflow-scrolling: touch; overscroll-behavior: contain;"></div>
 		</div>
 	</div>
 
