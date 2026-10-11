@@ -1174,11 +1174,27 @@
 	background: $ctp-surface0;
 	color: $ctp-text;
 	max-width: 520px;
+	max-height: 90vh;
 	border-radius: $radius-xl;
 	padding: 0;
-	overflow: hidden;
+	overflow-y: auto;
+	-webkit-overflow-scrolling: touch;
+	overscroll-behavior: contain;
 	box-shadow: $shadow-lg;
 	border: 1px solid $border-color;
+	scrollbar-width: thin;
+	scrollbar-color: rgba($primary-color, 0.4) transparent;
+
+	&::-webkit-scrollbar {
+		width: 6px;
+	}
+	&::-webkit-scrollbar-track {
+		background: transparent;
+	}
+	&::-webkit-scrollbar-thumb {
+		background: rgba($primary-color, 0.4);
+		border-radius: 10px;
+	}
 
 	.ticket-head-banner {
 		background: $primary-color;
