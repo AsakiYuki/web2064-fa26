@@ -1003,18 +1003,23 @@ export async function saveBookingTicket(ticket) {
     userEmail: cEmail,
     paymentMethod: pMethod,
 
-    paymentStatus: ticket.paymentStatus || "pending",
-
-    bookingDate: ticket.bookingDate || new Date().toISOString(),
-
-    status: ticket.status || "pending",
+    bookingStatus: ticket.bookingStatus || "pending",
+paymentStatus: ticket.paymentStatus || "pending",
+bookingDate: ticket.bookingDate || new Date().toISOString(),
+status: ticket.status || "pending",
 }
-	// 1. Sync API POST /bookings
-	apiCreateBooking(newTicket).catch(err => console.warn("[API] Lỗi khi lưu đơn vé lên json-server:", err))
-
-	// 2. Sync local history
+	
+	// 1. Lưu vào lịch sử trên trình duyệt
 	history.unshift(newTicket)
 	storageSet(STORAGE_KEYS.BOOKING_HISTORY, history)
+
+	// 2. Gửi đơn lên json-server và kiểm tra lỗi
+	try {
+		await apiCreateBooking(newTicket)
+		console.log("[API] Đã lưu đơn vé:", newTicket.id)
+	} catch (err) {
+		console.error("[API] Không lưu được đơn vé:", err)
+	}
 
 	// Reward points to currentUser
 	const currentUser = getCurrentUser()
