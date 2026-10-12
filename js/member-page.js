@@ -10,6 +10,7 @@ import {
 	showToast,
 	getCurrentUser,
 	openAuthModal,
+	updateHeaderAccountUI,
 	translateDom,
 	getSavedLang,
 } from "./common.js"
@@ -41,6 +42,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 	// Listen for auth state changes (login / register / logout)
 	window.addEventListener("beta_auth_changed", () => {
+		updateHeaderAccountUI()
 		setupMemberHeroUI()
 		renderRewardsStore()
 	})
@@ -549,6 +551,7 @@ function setupModals() {
 						// Update UI immediately
 						setupMemberHeroUI()
 						renderRewardsStore()
+						updateHeaderAccountUI()
 					} else {
 						showToast(res.message || "Đổi quà không thành công!", "error")
 					}

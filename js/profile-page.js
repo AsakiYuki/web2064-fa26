@@ -274,7 +274,20 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 		let filtered = history
 		if (currentHistoryFilter !== "all") {
-			filtered = filtered.filter(t => t.status === currentHistoryFilter)
+			filtered = filtered.filter(t => {
+				const isCancelled = t.status === "cancelled" || t.bookingStatus === "cancelled"
+				const isDone = t.status === "done"
+				const isPaid = !isCancelled && (t.paymentStatus === "paid" || t.status === "paid")
+				const isConfirmed = !isCancelled && !isPaid && !isDone && (t.bookingStatus === "confirmed" || t.status === "confirmed")
+				const isPending = !isCancelled && !isPaid && !isDone && !isConfirmed
+
+				if (currentHistoryFilter === "pending") return isPending || isConfirmed
+				if (currentHistoryFilter === "paid") return isPaid
+				if (currentHistoryFilter === "done") return isDone
+				if (currentHistoryFilter === "cancelled") return isCancelled
+
+				return t.status === currentHistoryFilter
+			})
 		}
 		if (currentSearchKeyword) {
 			filtered = filtered.filter(
@@ -299,20 +312,36 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 		container.innerHTML = filtered
 			.map((t, idx) => {
-				const isPaid = t.status === "paid"
-				const isCancelled = t.status === "cancelled"
+				const isCancelled = t.status === "cancelled" || t.bookingStatus === "cancelled"
+				const isDone = t.status === "done"
+				const isPaid = !isCancelled && (t.paymentStatus === "paid" || t.status === "paid")
+				const isConfirmed = !isCancelled && !isPaid && !isDone && (t.bookingStatus === "confirmed" || t.status === "confirmed")
+				const isPending = !isCancelled && !isPaid && !isDone && !isConfirmed
+
 				let statusText = "Đã Thanh Toán"
 				let statusClass = "status-paid"
 				let statusBadgeStyle = "background: rgba(166, 227, 161, 0.2); color: #a6e3a1; border: 1px solid rgba(166, 227, 161, 0.4);"
 
-				if (t.status === "done") {
-					statusText = "Đã Sử Dụng"
-					statusClass = "status-done"
-					statusBadgeStyle = "background: rgba(148, 163, 184, 0.2); color: #bac2de; border: 1px solid rgba(148, 163, 184, 0.4);"
-				} else if (isCancelled) {
+				if (isCancelled) {
 					statusText = "Đã Hủy"
 					statusClass = "status-cancelled"
 					statusBadgeStyle = "background: rgba(243, 139, 168, 0.2); color: #f38ba8; border: 1px solid rgba(243, 139, 168, 0.4);"
+				} else if (isDone) {
+					statusText = "Đã Sử Dụng"
+					statusClass = "status-done"
+					statusBadgeStyle = "background: rgba(148, 163, 184, 0.2); color: #bac2de; border: 1px solid rgba(148, 163, 184, 0.4);"
+				} else if (isPaid) {
+					statusText = "Đã Thanh Toán"
+					statusClass = "status-paid"
+					statusBadgeStyle = "background: rgba(166, 227, 161, 0.2); color: #a6e3a1; border: 1px solid rgba(166, 227, 161, 0.4);"
+				} else if (isConfirmed) {
+					statusText = "Đã Xác Nhận Đơn"
+					statusClass = "status-confirmed"
+					statusBadgeStyle = "background: rgba(137, 180, 250, 0.2); color: #89b4fa; border: 1px solid rgba(137, 180, 250, 0.4);"
+				} else {
+					statusText = "Chờ Xác Nhận"
+					statusClass = "status-pending"
+					statusBadgeStyle = "background: rgba(250, 179, 135, 0.2); color: #fab387; border: 1px solid rgba(250, 179, 135, 0.4);"
 				}
 
 				return `
@@ -343,7 +372,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 								🎟️ Xem Vé Điện Tử
 							</button>
 							${
-								isPaid
+								!isCancelled && !isDone
 									? `
 								<button type="button" class="btn-cancel-ticket" data-ticket-id="${t.id}" style="background: rgba(243, 139, 168, 0.15); color: #f38ba8; border: 1px solid rgba(243, 139, 168, 0.3); padding: 6px 12px; border-radius: 6px; font-weight: 600; font-size: 12px; cursor: pointer;">
 									✕ Hủy Vé
@@ -389,6 +418,12 @@ document.addEventListener("DOMContentLoaded", async () => {
 		const body = document.getElementById("profile-ticket-modal-body")
 		if (!modal || !body) return
 
+		const isCancelled = t.status === "cancelled" || t.bookingStatus === "cancelled"
+		const isDone = t.status === "done"
+		const isPaid = !isCancelled && (t.paymentStatus === "paid" || t.status === "paid")
+		const isConfirmed = !isCancelled && !isPaid && !isDone && (t.bookingStatus === "confirmed" || t.status === "confirmed")
+		const qrStatus = isCancelled ? "CANCELLED" : isDone ? "USED" : isPaid ? "VALID_PAID" : isConfirmed ? "CONFIRMED_UNPAID" : "PENDING"
+
 		const qrSvg = generateQRCodeSVG(
 			JSON.stringify({
 				ticket: t.id,
@@ -396,7 +431,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 				cinema: t.cinemaName,
 				time: `${t.time} ${t.date}`,
 				seats: t.seats,
-				status: "VALID_PAID",
+				status: qrStatus,
 			}),
 			{
 				size: 160,
@@ -406,12 +441,44 @@ document.addEventListener("DOMContentLoaded", async () => {
 			}
 		)
 
+		let bannerBg = "#10b981"
+		let badgeIcon = "✓"
+		let statusTitle = "VÉ XEM PHIM ĐIỆN TỬ"
+		let hintText = "Xuất trình mã QR này tại quầy hoặc máy in vé tự động"
+		let totalLabel = "Tổng Tiền Đã Thanh Toán"
+
+		if (isCancelled) {
+			bannerBg = "#f38ba8"
+			badgeIcon = "✕"
+			statusTitle = "VÉ ĐÃ HỦY - KHÔNG HIỆU LỰC"
+			hintText = "Đơn vé này đã bị hủy. Chỗ ngồi đã được giải phóng trở lại rạp."
+			totalLabel = "Tổng Tiền (Đơn Đã Hủy)"
+		} else if (isDone) {
+			bannerBg = "#89b4fa"
+			badgeIcon = "✓"
+			statusTitle = "VÉ ĐÃ SỬ DỤNG - ĐÃ SOÁT VÉ"
+			hintText = "Vé đã được soát vào rạp. Chúc bạn đã có buổi xem phim vui vẻ!"
+			totalLabel = "Tổng Tiền Đã Thanh Toán"
+		} else if (isConfirmed) {
+			bannerBg = "#fab387"
+			badgeIcon = "⏳"
+			statusTitle = "VÉ ĐÃ XÁC NHẬN - CHỜ THANH TOÁN"
+			hintText = "Đơn vé đã được nhân viên duyệt. Vui lòng hoàn tất thanh toán trước khi vào rạp."
+			totalLabel = "Tổng Tiền Cần Thanh Toán"
+		} else if (isPending) {
+			bannerBg = "#f9e2af"
+			badgeIcon = "⏳"
+			statusTitle = "VÉ CHỜ XÁC NHẬN ĐƠN"
+			hintText = "Đơn vé đang chờ rạp duyệt bước 1. Vui lòng chờ trong giây lát."
+			totalLabel = "Tổng Tiền Cần Thanh Toán"
+		}
+
 		body.innerHTML = `
 			<div class="eticket-success-page-wrap" style="margin: 0; box-shadow: none; max-width: 100%;">
-				<div class="eticket-top-banner">
-					<div class="et-success-badge">✓</div>
-					<h2 style="color:#cdd6f4; font-size: 20px; font-weight:900; margin:0 0 4px; text-transform:uppercase;">VÉ XEM PHIM ĐIỆN TỬ</h2>
-					<p style="font-size: 13px; color: rgba(255,255,255,0.9); margin:0;">Mã vé: ${t.id} • Beta Cinemas</p>
+				<div class="eticket-top-banner" style="background: ${bannerBg};">
+					<div class="et-success-badge" style="color: ${bannerBg};">${badgeIcon}</div>
+					<h2 style="color:#11111b; font-size: 20px; font-weight:900; margin:0 0 4px; text-transform:uppercase;">${statusTitle}</h2>
+					<p style="font-size: 13px; color: rgba(17,17,27,0.85); margin:0;">Mã vé: ${t.id} • Beta Cinemas</p>
 				</div>
 				<div class="eticket-ticket-pass">
 					<div class="et-code-banner">
@@ -422,7 +489,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 						<div class="qr-code-box">
 							${qrSvg}
 						</div>
-						<div class="qr-hint">Xuất trình mã QR này tại quầy hoặc máy in vé tự động</div>
+						<div class="qr-hint">${hintText}</div>
 					</div>
 					<div class="et-info-grid">
 						<div class="et-info-item" style="grid-column: 1 / -1;">
@@ -450,13 +517,13 @@ document.addEventListener("DOMContentLoaded", async () => {
 							<span class="et-val">${t.concessions || "Không kèm bắp"}</span>
 						</div>
 						<div class="et-info-item" style="grid-column: 1 / -1; border-top: 1px dashed rgba(255,255,255,0.15); padding-top: 8px;">
-							<span class="et-lbl">Tổng Tiền Đã Thanh Toán</span>
+							<span class="et-lbl">${totalLabel}</span>
 							<span class="et-val val-gold">${formatCurrency(t.total)}</span>
 						</div>
 					</div>
 					<div class="et-barcode-wrap">
 						<div class="barcode-strip"></div>
-						<div class="barcode-number">${t.id} - KIOSK READY</div>
+						<div class="barcode-number">${t.id} - ${qrStatus} - KIOSK READY</div>
 					</div>
 				</div>
 				<div class="eticket-bottom-actions">

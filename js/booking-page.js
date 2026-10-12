@@ -5,6 +5,7 @@ import { setupHeaderAndFooter, formatCurrency, formatDateVN, showToast, translat
 import {
 	getMoviesData,
 	getCinemas,
+	getCurrentCinemaId,
 	getConcessions,
 	getTicketPricing,
 	getShowtimeSeats,
@@ -58,7 +59,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 	// Read URL query params
 	const urlParams = new URLSearchParams(window.location.search)
 	const movieId = urlParams.get("movieId") || "utlan2"
-	const cinemaId = urlParams.get("cinemaId") || "beta-thainguyen"
+	const cinemaId = urlParams.get("cinemaId") || getCurrentCinemaId()
 	const dateStr = urlParams.get("date") || "2026-09-26"
 	const timeSlot = urlParams.get("time") || "14:30"
 	const screenName = urlParams.get("screen") || "Phòng chiếu 1"
@@ -857,7 +858,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 				u.searchParams.delete("step")
 			}
 			window.history.replaceState(null, "", u.toString())
-		} catch (e) {}
+		} catch (e) { }
 	}
 
 	function syncPendingBookingToStorage(seatsTotal, concessionsTotal, finalTotal) {
@@ -941,7 +942,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 					const url = new URL(window.location)
 					url.searchParams.set("step", "1")
 					window.history.replaceState({}, "", url)
-				} catch (e) {}
+				} catch (e) { }
 			} else {
 				if (seatSection) seatSection.style.display = "none"
 				if (comboSection) comboSection.style.display = "block"
@@ -957,7 +958,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 						url.searchParams.set("seats", bookingState.selectedSeats.map(s => s.id).join(","))
 					}
 					window.history.replaceState({}, "", url)
-				} catch (e) {}
+				} catch (e) { }
 				if (smoothScroll) {
 					window.scrollTo({ top: 120, behavior: "smooth" })
 				}
@@ -1232,6 +1233,8 @@ document.addEventListener("DOMContentLoaded", async () => {
 			discountAmount: bookingState.discountAmount || 0,
 			paymentMethod: "counter",
 			bookingDate: new Date().toISOString(),
+			bookingStatus: "confirmed",
+			paymentStatus: "paid",
 			status: "paid",
 		}
 		saveBookingTicket(newTicket)

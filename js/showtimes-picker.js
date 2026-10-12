@@ -6,6 +6,7 @@
 import { formatCurrency, showToast, formatDateVN, translateDom, getSavedLang } from "./common.js"
 import {
 	getCinemas,
+	getCurrentCinemaId,
 	getMoviesData,
 	getShowtimes,
 	getTicketPricing,
@@ -82,12 +83,16 @@ export class ShowtimePicker {
 			// Default date is today: 2026-09-26
 			this.selectedDate = "2026-09-26"
 
-			// Check URL param for cinema if available
+			// Check URL param for cinema if available, else use preferred cinema
 			const urlParams = new URLSearchParams(window.location.search)
 			if (urlParams.get("cinema")) {
 				const cinemaParam = urlParams.get("cinema")
 				const found = this.cinemas.find(c => c.id === cinemaParam)
 				if (found) this.selectedCinemaId = found.id
+			} else {
+				const currentFav = getCurrentCinemaId()
+				const foundFav = this.cinemas.find(c => c.id === currentFav)
+				if (foundFav) this.selectedCinemaId = foundFav.id
 			}
 
 			// Validate and auto-pick the first available cinema for this date/movie
@@ -95,6 +100,14 @@ export class ShowtimePicker {
 
 			this.render()
 			this.initSeatModal()
+
+			window.addEventListener("cinemaChanged", e => {
+				if (e.detail?.id && this.cinemas.some(c => c.id === e.detail.id)) {
+					this.selectedCinemaId = e.detail.id
+					this.validateActiveSelection()
+					this.render()
+				}
+			})
 
 			window.addEventListener("betaLangChange", () => {
 				this.render()

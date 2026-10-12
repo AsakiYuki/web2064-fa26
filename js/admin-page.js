@@ -306,7 +306,9 @@ document.addEventListener("DOMContentLoaded", async () => {
 			const movieSalesMap = {} // movieId -> { title, revenue, seatsCount, poster }
 
 			bookings.forEach(b => {
-				if (b.status === "paid" || b.status === "done") {
+				const isPaid = b.status === "paid" || b.status === "done" || b.paymentStatus === "paid"
+				const isCancelled = b.status === "cancelled" || b.bookingStatus === "cancelled"
+				if (isPaid && !isCancelled) {
 					const ticketTotal = Number(b.total) || 0
 					totalRevenue += ticketTotal
 					paidOrdersCount++
@@ -382,10 +384,27 @@ document.addEventListener("DOMContentLoaded", async () => {
 				} else {
 					recentTbody.innerHTML = recent5
 						.map(b => {
-							const isPaid = b.status === "paid" || b.paymentStatus === "paid"
+							const isCancelled = b.status === "cancelled" || b.bookingStatus === "cancelled"
 							const isDone = b.status === "done"
-							const badgeClass = isPaid ? "badge-nowshowing" : isDone ? "badge-upcoming" : "badge-age"
-							const badgeText = isPaid ? "🟢 Đã nhận tiền" : isDone ? "🔵 Đã xem" : "🔴 Đã hủy"
+							const isPaid = !isCancelled && (b.paymentStatus === "paid" || b.status === "paid")
+							const isConfirmed = !isCancelled && !isPaid && !isDone && (b.bookingStatus === "confirmed" || b.status === "confirmed")
+							const isPending = !isCancelled && !isPaid && !isDone && !isConfirmed
+
+							let badgeClass = "badge-age"
+							let badgeText = "🔴 Đã hủy"
+							if (isDone) {
+								badgeClass = "badge-upcoming"
+								badgeText = "🔵 Đã soát vé"
+							} else if (isPaid) {
+								badgeClass = "badge-nowshowing"
+								badgeText = "🟢 Đã nhận tiền"
+							} else if (isConfirmed) {
+								badgeClass = "badge-age"
+								badgeText = "🟡 Chờ thanh toán"
+							} else if (isPending) {
+								badgeClass = "badge-age"
+								badgeText = "⏳ Chờ xác nhận"
+							}
 
 							return `
 							<tr>
@@ -556,8 +575,9 @@ document.addEventListener("DOMContentLoaded", async () => {
 						<td>${m.director || "Chưa rõ"}</td>
 						<td style="color: #fab387; font-weight: 800;">★ ${m.ratingScore || 9.0}</td>
 						<td style="text-align: center;">
-							<div class="row-actions" style="justify-content: center;">
+							<div class="row-actions" style="justify-content: center; gap: 6px;">
 								<button type="button" class="btn-action-icon btn-edit-movie" data-id="${m.id}" title="Chỉnh sửa phim">✏️</button>
+								<button type="button" class="btn-action-icon btn-delete-movie" data-id="${m.id}" data-title="${m.title}" title="Xóa phim khỏi hệ thống" style="color: #f38ba8;">🗑️</button>
 							</div>
 						</td>
 					</tr>
@@ -785,6 +805,9 @@ document.addEventListener("DOMContentLoaded", async () => {
 							<div style="display: flex; gap: 8px;">
 								<button type="button" class="btn-admin-secondary btn-add-slot-for-movie" data-movie-id="${sc.movieId}" data-movie-title="${sc.movieTitle}" data-screen="${sc.screenName}" data-format="${sc.format}" style="font-size: 12px; padding: 5px 10px;">
 									➕ Thêm Giờ Chiếu
+								</button>
+								<button type="button" class="btn-admin-danger btn-del-movie-schedule" data-movie-id="${sc.movieId}" data-movie-title="${sc.movieTitle}" style="font-size: 12px; padding: 5px 10px; background: rgba(243, 139, 168, 0.15); color: #f38ba8; border: 1px solid rgba(243, 139, 168, 0.3); border-radius: 6px; cursor: pointer;" title="Xóa toàn bộ lịch chiếu phim này trong ngày">
+									🗑️ Xóa Lịch Phim
 								</button>
 							</div>
 						</div>
@@ -1101,8 +1124,9 @@ document.addEventListener("DOMContentLoaded", async () => {
 								${it.originalPrice ? `<span class="cc-orig-price">${formatCurrency(it.originalPrice)}</span>` : ""}
 							</div>
 						</div>
-						<div class="cc-card-actions">
+						<div class="cc-card-actions" style="display: flex; gap: 6px;">
 							<button type="button" class="btn-action-icon btn-edit-concession" data-id="${it.id}" title="Sửa thông tin và giá bán">✏️</button>
+							<button type="button" class="btn-action-icon btn-del-concession" data-id="${it.id}" data-name="${it.name}" title="Xóa món này khỏi menu" style="color: #f38ba8;">🗑️</button>
 						</div>
 					</div>
 				`
@@ -1275,11 +1299,26 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 			// Update counter badges on filter pills
 			const cntAll = bookings.length
-			const cntPending = bookings.filter(b => b.status === "pending").length
-			const cntConfirmed = bookings.filter(b => b.status === "confirmed").length
-			const cntPaid = bookings.filter(b => b.status === "paid" || b.paymentStatus === "paid").length
+			const cntPending = bookings.filter(b => {
+				const isCancelled = b.status === "cancelled" || b.bookingStatus === "cancelled"
+				const isDone = b.status === "done"
+				const isPaid = !isCancelled && (b.paymentStatus === "paid" || b.status === "paid")
+				const isConfirmed = !isCancelled && !isPaid && !isDone && (b.bookingStatus === "confirmed" || b.status === "confirmed")
+				return !isCancelled && !isPaid && !isDone && !isConfirmed
+			}).length
+			const cntConfirmed = bookings.filter(b => {
+				const isCancelled = b.status === "cancelled" || b.bookingStatus === "cancelled"
+				const isDone = b.status === "done"
+				const isPaid = !isCancelled && (b.paymentStatus === "paid" || b.status === "paid")
+				return !isCancelled && !isPaid && !isDone && (b.bookingStatus === "confirmed" || b.status === "confirmed")
+			}).length
+			const cntPaid = bookings.filter(b => {
+				const isCancelled = b.status === "cancelled" || b.bookingStatus === "cancelled"
+				const isDone = b.status === "done"
+				return !isCancelled && !isDone && (b.paymentStatus === "paid" || b.status === "paid")
+			}).length
 			const cntDone = bookings.filter(b => b.status === "done").length
-			const cntCancelled = bookings.filter(b => b.status === "cancelled").length
+			const cntCancelled = bookings.filter(b => b.status === "cancelled" || b.bookingStatus === "cancelled").length
 
 			const elAll = document.getElementById("cnt-bk-all")
 			const elPending = document.getElementById("cnt-bk-pending")
@@ -1297,27 +1336,23 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 			let filtered = bookings
 
-if (currentBookingStatusFilter !== "all") {
-    filtered = filtered.filter(b => {
-        // Chờ xác nhận đặt vé
-        if (currentBookingStatusFilter === "pending") {
-            return b.bookingStatus === "pending"
-        }
+			if (currentBookingStatusFilter !== "all") {
+				filtered = filtered.filter(b => {
+					const isCancelled = b.status === "cancelled" || b.bookingStatus === "cancelled"
+					const isDone = b.status === "done"
+					const isPaid = !isCancelled && (b.paymentStatus === "paid" || b.status === "paid")
+					const isConfirmed = !isCancelled && !isPaid && !isDone && (b.bookingStatus === "confirmed" || b.status === "confirmed")
+					const isPending = !isCancelled && !isPaid && !isDone && !isConfirmed
 
-        // Đã xác nhận đặt vé
-        if (currentBookingStatusFilter === "confirmed") {
-            return b.bookingStatus === "confirmed"
-        }
+					if (currentBookingStatusFilter === "pending") return isPending
+					if (currentBookingStatusFilter === "confirmed") return isConfirmed
+					if (currentBookingStatusFilter === "paid") return isPaid
+					if (currentBookingStatusFilter === "done") return isDone
+					if (currentBookingStatusFilter === "cancelled") return isCancelled
 
-        // Đã xác nhận thanh toán
-        if (currentBookingStatusFilter === "paid") {
-            return b.paymentStatus === "paid"
-        }
-
-        // Các trạng thái cũ khác
-        return b.status === currentBookingStatusFilter
-    })
-}
+					return b.status === currentBookingStatusFilter
+				})
+			}
 
 			if (currentBookingSearch) {
 				filtered = filtered.filter(
@@ -1341,26 +1376,28 @@ if (currentBookingStatusFilter !== "all") {
 
 			bookingsTableTbody.innerHTML = filtered
 				.map(b => {
-					const isPending = b.bookingStatus === "pending"
-					const isConfirmed = b.bookingStatus === "confirmed"
-					const isPaid = b.paymentStatus === "paid"
+					const isCancelled = b.status === "cancelled" || b.bookingStatus === "cancelled"
 					const isDone = b.status === "done"
-					const isCancelled = b.status === "cancelled"
+					const isPaid = !isCancelled && (b.paymentStatus === "paid" || b.status === "paid")
+					const isConfirmed = !isCancelled && !isPaid && !isDone && (b.bookingStatus === "confirmed" || b.status === "confirmed")
+					const isPending = !isCancelled && !isPaid && !isDone && !isConfirmed
 					const methodText = (b.paymentMethod || "QR").toUpperCase()
 
 					// Cột 1. Xác nhận đặt vé
 					let colStep1 = ""
-					if (isPending) {
-						colStep1 = `<button type="button" class="btn-action-order-confirm" data-id="${b.id}" style="background: rgba(250, 179, 135, 0.15); color: #fab387; border: 1px solid rgba(250, 179, 135, 0.4); border-radius: 6px; padding: 6px 10px; font-weight: 700; font-size: 12px; cursor: pointer;">⏳ Xác Nhận Đơn</button>`
-					} else if (isCancelled) {
+					if (isCancelled) {
 						colStep1 = `<span style="color: #f38ba8; font-size: 12px; font-weight: 700;">Đơn Đã Hủy</span>`
+					} else if (isPending) {
+						colStep1 = `<button type="button" class="btn-action-order-confirm" data-id="${b.id}" style="background: rgba(250, 179, 135, 0.15); color: #fab387; border: 1px solid rgba(250, 179, 135, 0.4); border-radius: 6px; padding: 6px 10px; font-weight: 700; font-size: 12px; cursor: pointer;">⏳ Xác Nhận Đơn</button>`
 					} else {
 						colStep1 = `<span style="color: #a6e3a1; font-size: 12px; font-weight: 700;">✓ Đã Xác Nhận</span>`
 					}
 
 					// Cột 2. Xác nhận thanh toán
 					let colStep2 = ""
-					if (isPending) {
+					if (isCancelled) {
+						colStep2 = `<span style="color: #f38ba8; font-weight: 700; font-size: 12px;">🔴 Đã Hủy Vé</span>`
+					} else if (isPending) {
 						colStep2 = `<span style="color: #6c7086; font-size: 11px;">Chờ duyệt bước 1</span>`
 					} else if (isConfirmed) {
 						colStep2 = `<button type="button" class="btn-action-payment-confirm" data-id="${b.id}" style="background: rgba(137, 180, 250, 0.15); color: #89b4fa; border: 1px solid rgba(137, 180, 250, 0.4); border-radius: 6px; padding: 6px 10px; font-weight: 700; font-size: 12px; cursor: pointer;">💳 Xác Nhận Thu Tiền</button>`
@@ -1401,13 +1438,13 @@ if (currentBookingStatusFilter !== "all") {
 						<td style="text-align: center;">
 							<div class="row-actions" style="justify-content: center; gap: 6px;">
 								<button type="button" class="btn-action-icon btn-view-admin-ticket" data-id="${b.id}" title="Xem chi tiết vé điện tử & Mã QR">🎟️</button>
-								${!isDone && isPaid
+								${!isDone && isPaid && !isCancelled
 							? `<button type="button" class="btn-action-icon btn-checkin-ticket" data-id="${b.id}" style="color: #a6e3a1;" title="Soát vé nhanh (Xác nhận khách đã vào rạp)">✓</button>`
 							: ""
 						}
 								${!isCancelled
 							? `<button type="button" class="btn-action-icon btn-cancel-admin-ticket" data-id="${b.id}" style="color: #fab387;" title="Hủy vé">✕</button>`
-							: ""
+							: `<button type="button" class="btn-action-icon btn-delete-admin-ticket" data-id="${b.id}" style="color: #f38ba8;" title="Xóa vĩnh viễn đơn vé này khỏi hệ thống">🗑️</button>`
 						}
 							</div>
 						</td>
@@ -1508,21 +1545,75 @@ if (currentBookingStatusFilter !== "all") {
 			const body = document.getElementById("modal-admin-ticket-body")
 			if (!adminTicketModal || !body) return
 
-			const qrSvg = generateQRCodeSVG(`BETATICKET|${t.id}|${t.time} ${t.date}|${t.seats}`, {
-				size: 160,
-				darkColor: "#11111b",
-				lightColor: "#cdd6f4",
-				includeLogo: true,
-			})
+			const isCancelled = t.status === "cancelled" || t.bookingStatus === "cancelled"
+			const isDone = t.status === "done"
+			const isPaid = !isCancelled && (t.paymentStatus === "paid" || t.status === "paid")
+			const isConfirmed = !isCancelled && !isPaid && !isDone && (t.bookingStatus === "confirmed" || t.status === "confirmed")
+			const isPending = !isCancelled && !isPaid && !isDone && !isConfirmed
+
+			const qrStatus = isCancelled ? "CANCELLED" : isDone ? "USED" : isPaid ? "VALID_PAID" : isConfirmed ? "CONFIRMED_UNPAID" : "PENDING"
+			const qrSvg = generateQRCodeSVG(
+				JSON.stringify({
+					ticketId: t.id,
+					movie: t.movieTitle,
+					cinema: t.cinemaName,
+					time: `${t.time} ${t.date}`,
+					seats: t.seats,
+					status: qrStatus,
+				}),
+				{
+					size: 160,
+					darkColor: "#11111b",
+					lightColor: "#cdd6f4",
+					includeLogo: true,
+				}
+			)
 
 			const pMethod = (t.paymentMethod || "QR").toUpperCase()
 
+			let bannerBg = "#10b981"
+			let badgeIcon = "✓"
+			let statusTitle = "ĐÃ NHẬN TIỀN - VÉ HỢP LỆ"
+			let statusSub = `Mã vé: ${t.id} • Thanh toán qua: <strong>${pMethod}</strong> • Beta Admin Verify`
+			let statusBadgeText = `🟢 ĐÃ NHẬN TIỀN (${pMethod})`
+			let hintText = "Vé đã thanh toán thành công - Xuất trình mã này tại Kiosk/Quầy soát vé"
+
+			if (isCancelled) {
+				bannerBg = "#f38ba8"
+				badgeIcon = "✕"
+				statusTitle = "ĐÃ HỦY VÉ - KHÔNG HỢP LỆ"
+				statusSub = `Mã vé: ${t.id} • Đơn vé đã bị hủy khỏi hệ thống`
+				statusBadgeText = "🔴 ĐÃ HỦY VÉ"
+				hintText = "Vé này đã bị hủy, ghế ngồi đã được giải phóng trở lại rạp."
+			} else if (isDone) {
+				bannerBg = "#89b4fa"
+				badgeIcon = "✓"
+				statusTitle = "ĐÃ SOÁT VÉ - VÉ ĐÃ SỬ DỤNG"
+				statusSub = `Mã vé: ${t.id} • Khách hàng đã vào phòng chiếu xem phim`
+				statusBadgeText = "🔵 ĐÃ SOÁT VÉ"
+				hintText = "Vé đã được nhân viên rạp soát và check-in thành công."
+			} else if (isConfirmed) {
+				bannerBg = "#fab387"
+				badgeIcon = "⏳"
+				statusTitle = "ĐÃ XÁC NHẬN - CHỜ THU TIỀN"
+				statusSub = `Mã vé: ${t.id} • Đã duyệt đơn bước 1, chờ thu tiền qua ${pMethod}`
+				statusBadgeText = `🟡 CHỜ THU TIỀN (${pMethod})`
+				hintText = "Đơn vé đã được xác nhận. Vui lòng nhấn 'Xác Nhận Thu Tiền' khi khách thanh toán."
+			} else if (isPending) {
+				bannerBg = "#f9e2af"
+				badgeIcon = "⏳"
+				statusTitle = "CHỜ DUYỆT ĐƠN BƯỚC 1"
+				statusSub = `Mã vé: ${t.id} • Đơn vé mới tạo, đang chờ kiểm tra`
+				statusBadgeText = "⏳ CHỜ XÁC NHẬN ĐƠN"
+				hintText = "Đơn vé đang chờ duyệt, nhấn 'Xác Nhận Đơn' tại danh sách vé."
+			}
+
 			body.innerHTML = `
 			<div class="eticket-success-page-wrap" style="margin: 0; box-shadow: none; max-width: 100%;">
-				<div class="eticket-top-banner" style="background: #10b981;">
-					<div class="et-success-badge" style="color: #10b981;">✓</div>
-					<h2 style="color:#11111b; font-size: 20px; font-weight:900; margin:0 0 4px; text-transform:uppercase;">ĐÃ NHẬN TIỀN - VÉ HỢP LỆ</h2>
-					<p style="font-size: 13px; color: rgba(17,17,27,0.85); margin:0;">Mã vé: ${t.id} • Thanh toán qua: <strong>${pMethod}</strong> • Beta Admin Verify</p>
+				<div class="eticket-top-banner" style="background: ${bannerBg};">
+					<div class="et-success-badge" style="color: ${bannerBg};">${badgeIcon}</div>
+					<h2 style="color:#11111b; font-size: 20px; font-weight:900; margin:0 0 4px; text-transform:uppercase;">${statusTitle}</h2>
+					<p style="font-size: 13px; color: rgba(17,17,27,0.85); margin:0;">${statusSub}</p>
 				</div>
 				<div class="eticket-ticket-pass">
 					<div class="et-code-banner">
@@ -1533,7 +1624,7 @@ if (currentBookingStatusFilter !== "all") {
 						<div class="qr-code-box" style="padding: 12px; background: #cdd6f4; border-radius: 8px;">
 							${qrSvg}
 						</div>
-						<div class="qr-hint">Vé đã thanh toán thành công - Xuất trình mã này tại Kiosk/Quầy soát vé</div>
+						<div class="qr-hint">${hintText}</div>
 					</div>
 					<div class="et-info-grid">
 						<div class="et-info-item" style="grid-column: 1 / -1;">
@@ -1567,19 +1658,19 @@ if (currentBookingStatusFilter !== "all") {
 						<div class="et-info-item" style="grid-column: 1 / -1; border-top: 1px dashed rgba(255,255,255,0.15); padding-top: 8px;">
 							<div style="display:flex; justify-content: space-between; align-items: center;">
 								<div>
-									<span class="et-lbl">Tổng Tiền Đã Thu</span>
+									<span class="et-lbl">${isCancelled ? "Tổng Tiền Đơn Hủy" : "Tổng Tiền"}</span>
 									<div class="et-val val-gold" style="font-size: 18px;">${formatCurrency(t.total)}</div>
 								</div>
 								<div style="text-align: right;">
 									<span class="et-lbl">Trạng thái</span>
-									<div style="color: #10b981; font-weight: 800; font-size: 13px;">🟢 ĐÃ NHẬN TIỀN (${pMethod})</div>
+									<div style="color: ${bannerBg}; font-weight: 800; font-size: 13px;">${statusBadgeText}</div>
 								</div>
 							</div>
 						</div>
 					</div>
 					<div class="et-barcode-wrap">
 						<div class="barcode-strip"></div>
-						<div class="barcode-number">${t.id} - VERIFIED & RECEIVED BY BETA ADMIN</div>
+						<div class="barcode-number">${t.id} - ${qrStatus} - BETA ADMIN</div>
 					</div>
 				</div>
 			</div>

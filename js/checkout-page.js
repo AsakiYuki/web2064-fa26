@@ -1,7 +1,7 @@
 /**
  * Beta Cinemas - Checkout & E-Ticket QR Code Logic
  */
-import { setupHeaderAndFooter, formatCurrency, formatDateVN, showToast, getCurrentUser, translateDom, getSavedLang } from "./common.js"
+import { setupHeaderAndFooter, formatCurrency, formatDateVN, showToast, getCurrentUser, updateHeaderAccountUI, translateDom, getSavedLang } from "./common.js"
 import {
 	getMoviesData,
 	getCinemas,
@@ -99,6 +99,69 @@ document.addEventListener("DOMContentLoaded", async () => {
 		if (phoneInput && !phoneInput.value) phoneInput.value = user.phone || ""
 		if (emailInput && !emailInput.value) emailInput.value = user.email || ""
 	}
+
+	// 2.1 Stepper Navigation (Allow returning to Seat selection or Concessions)
+	let isPaymentCompleted = false
+	let isNavigatingInternally = false
+
+	const stepNav1 = document.getElementById("step-nav-1")
+	const stepNav2 = document.getElementById("step-nav-2")
+	if (stepNav1) {
+		stepNav1.style.cursor = "pointer"
+		stepNav1.addEventListener("click", () => {
+			isNavigatingInternally = true
+			window.location.href = `/booking.html?movieId=${encodeURIComponent(movieId)}&cinemaId=${encodeURIComponent(cinemaId)}&date=${encodeURIComponent(dateStr)}&time=${encodeURIComponent(timeSlot)}&screen=${encodeURIComponent(screenName)}&format=${encodeURIComponent(formatName)}&step=1`
+		})
+	}
+	if (stepNav2) {
+		stepNav2.style.cursor = "pointer"
+		stepNav2.addEventListener("click", () => {
+			isNavigatingInternally = true
+			window.location.href = `/booking.html?movieId=${encodeURIComponent(movieId)}&cinemaId=${encodeURIComponent(cinemaId)}&date=${encodeURIComponent(dateStr)}&time=${encodeURIComponent(timeSlot)}&screen=${encodeURIComponent(screenName)}&format=${encodeURIComponent(formatName)}&step=2`
+		})
+	}
+
+	// 2.2 Protect Checkout Session: Prompt beforeunload and handle leaving
+	window.addEventListener("beforeunload", e => {
+		if (isPaymentCompleted || isNavigatingInternally) return
+		const msg = getSavedLang() === "en"
+			? "You have an ongoing checkout session. Are you sure you want to leave?"
+			: "⚠️ Bạn có đơn vé đang chờ thanh toán. Bạn có chắc chắn muốn rời khỏi trang không?"
+		e.preventDefault()
+		e.returnValue = msg
+		return msg
+	})
+
+	document.addEventListener(
+		"click",
+		e => {
+			if (isPaymentCompleted || isNavigatingInternally) return
+			const anchor = e.target.closest("a")
+			if (!anchor) return
+			const href = anchor.getAttribute("href")
+			if (!href || href === "#" || href.startsWith("#") || href.startsWith("javascript:") || anchor.target === "_blank") return
+
+			if (href.includes("booking.html")) {
+				isNavigatingInternally = true
+				return
+			}
+
+			const confirmMsg = getSavedLang() === "en"
+				? "Are you sure you want to leave checkout? Your held seats will be released."
+				: "⚠️ Bạn có chắc chắn muốn rời khỏi trang thanh toán? Ghế đang giữ của bạn sẽ được hoàn lại để nhường cho khách khác."
+			if (!window.confirm(confirmMsg)) {
+				e.preventDefault()
+				e.stopPropagation()
+				return
+			}
+
+			if (pending?.holdId) {
+				releaseSeatHold(pending.holdId)
+			}
+			clearPendingBooking()
+		},
+		true,
+	)
 
 	// 3. Render Order Review in Sidebar
 	renderSidebarDetails()
@@ -431,7 +494,9 @@ document.addEventListener("DOMContentLoaded", async () => {
 }
 
 				await saveBookingTicket(newTicket)
+				isPaymentCompleted = true
 				clearPendingBooking()
+				updateHeaderAccountUI()
 
 				// Close QR Modal
 				closeQRModal()
