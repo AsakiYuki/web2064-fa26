@@ -1002,6 +1002,7 @@ export async function saveBookingTicket(ticket) {
 
 	const newTicket = {
 <<<<<<< HEAD
+
     ...ticket,
     id: ticket.id || "BT-" + Math.floor(100000 + Math.random() * 900000),
     customerName: cName,
@@ -1011,57 +1012,38 @@ export async function saveBookingTicket(ticket) {
     userPhone: cPhone,
     userEmail: cEmail,
     paymentMethod: pMethod,
-
     bookingStatus: ticket.bookingStatus || "pending",
-paymentStatus: ticket.paymentStatus || "pending",
-bookingDate: ticket.bookingDate || new Date().toISOString(),
-status: ticket.status || "pending",
+    paymentStatus: ticket.paymentStatus || "pending",
+    bookingDate: ticket.bookingDate || new Date().toISOString(),
+    status: ticket.status || "pending",
 }
-	
-	// 1. Lưu vào lịch sử trên trình duyệt
-=======
-		...ticket,
-		id: ticket.id || "BT-" + Math.floor(100000 + Math.random() * 900000),
-		customerName: cName,
-		customerPhone: cPhone,
-		customerEmail: cEmail,
-		userName: cName,
-		userPhone: cPhone,
-		userEmail: cEmail,
-		paymentMethod: pMethod,
-		bookingStatus: ticket.bookingStatus || "pending",
-		paymentStatus: ticket.paymentStatus || "pending",
-		bookingDate: ticket.bookingDate || new Date().toISOString(),
-		status: ticket.status || "pending",
-	}
-	// 1. Sync API POST /bookings
-	apiCreateBooking(newTicket).catch(err => console.warn("[API] Lỗi khi lưu đơn vé lên json-server:", err))
 
-	// 2. Sync local history
->>>>>>> e7a600259ffb296e6ed75b4e65175a45ee081536
-	history.unshift(newTicket)
-	storageSet(STORAGE_KEYS.BOOKING_HISTORY, history)
+// 1. Lưu vào lịch sử trên trình duyệt
+history.unshift(newTicket)
+storageSet(STORAGE_KEYS.BOOKING_HISTORY, history)
 
-	// 2. Gửi đơn lên json-server và kiểm tra lỗi
-	try {
-		await apiCreateBooking(newTicket)
-		console.log("[API] Đã lưu đơn vé:", newTicket.id)
-	} catch (err) {
-		console.error("[API] Không lưu được đơn vé:", err)
-	}
-
-	// Reward points to currentUser
-	const currentUser = getCurrentUser()
-	if (currentUser) {
-		const earnedPoints = Math.round((newTicket.total || 0) / 1000)
-		currentUser.points = (currentUser.points || 0) + earnedPoints
-		saveUserSession(currentUser)
-		updateUserInDatabase(currentUser)
-	}
-
-	clearPendingBooking()
-	return newTicket
+// 2. Gửi đơn lên json-server
+try {
+    await apiCreateBooking(newTicket)
+    console.log("[API] Đã lưu đơn vé:", newTicket.id)
+} catch (err) {
+    console.error("[API] Không lưu được đơn vé:", err)
 }
+
+// 3. Cộng điểm thưởng cho người dùng
+const currentUser = getCurrentUser()
+if (currentUser) {
+    const earnedPoints = Math.round((newTicket.total || 0) / 1000)
+    currentUser.points = (currentUser.points || 0) + earnedPoints
+    saveUserSession(currentUser)
+    updateUserInDatabase(currentUser)
+}
+
+clearPendingBooking()
+return newTicket
+}
+
+
 
 export async function updateBookingStatus(id, newStatus) {
 	const patchData = { status: newStatus }
