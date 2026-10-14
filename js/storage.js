@@ -1000,48 +1000,38 @@ export async function saveBookingTicket(ticket) {
 	const cEmail = ticket.customerEmail || ticket.userEmail || ""
 	const pMethod = ticket.paymentMethod || "momo"
 
+	
 	const newTicket = {
-<<<<<<< HEAD
+		...ticket,
+		id: ticket.id || "BT-" + Math.floor(100000 + Math.random() * 900000),
+		customerName: cName,
+		customerPhone: cPhone,
+		customerEmail: cEmail,
+		userName: cName,
+		userPhone: cPhone,
+		userEmail: cEmail,
+		paymentMethod: pMethod,
+		bookingStatus: ticket.bookingStatus || "pending",
+		paymentStatus: ticket.paymentStatus || "pending",
+		bookingDate: ticket.bookingDate || new Date().toISOString(),
+		status: ticket.status || "pending",
+	}
 
-    ...ticket,
-    id: ticket.id || "BT-" + Math.floor(100000 + Math.random() * 900000),
-    customerName: cName,
-    customerPhone: cPhone,
-    customerEmail: cEmail,
-    userName: cName,
-    userPhone: cPhone,
-    userEmail: cEmail,
-    paymentMethod: pMethod,
-    bookingStatus: ticket.bookingStatus || "pending",
-    paymentStatus: ticket.paymentStatus || "pending",
-    bookingDate: ticket.bookingDate || new Date().toISOString(),
-    status: ticket.status || "pending",
+	// 1. Lưu vào lịch sử trên trình duyệt
+	history.unshift(newTicket)
+	storageSet(STORAGE_KEYS.BOOKING_HISTORY, history)
+
+	// 2. Gửi đơn lên json-server
+	try {
+		await apiCreateBooking(newTicket)
+		console.log("[API] Đã lưu đơn vé:", newTicket.id)
+	} catch (err) {
+		console.error("[API] Không lưu được đơn vé:", err)
+	}
+
+	return newTicket
 }
 
-// 1. Lưu vào lịch sử trên trình duyệt
-history.unshift(newTicket)
-storageSet(STORAGE_KEYS.BOOKING_HISTORY, history)
-
-// 2. Gửi đơn lên json-server
-try {
-    await apiCreateBooking(newTicket)
-    console.log("[API] Đã lưu đơn vé:", newTicket.id)
-} catch (err) {
-    console.error("[API] Không lưu được đơn vé:", err)
-}
-
-// 3. Cộng điểm thưởng cho người dùng
-const currentUser = getCurrentUser()
-if (currentUser) {
-    const earnedPoints = Math.round((newTicket.total || 0) / 1000)
-    currentUser.points = (currentUser.points || 0) + earnedPoints
-    saveUserSession(currentUser)
-    updateUserInDatabase(currentUser)
-}
-
-clearPendingBooking()
-return newTicket
-}
 
 
 
