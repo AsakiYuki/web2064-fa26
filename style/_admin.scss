@@ -1007,6 +1007,15 @@
 	}
 }
 
+/* Ticket details can be taller than the viewport, so scroll the modal card. */
+.admin-modal-backdrop#modal-admin-ticket > .admin-modal-card {
+	max-height: calc(100vh - 40px);
+	max-height: calc(100dvh - 40px);
+	overflow-x: hidden;
+	overflow-y: auto;
+	overscroll-behavior: contain;
+}
+
 @keyframes modalZoom {
 	from {
 		opacity: 0;
