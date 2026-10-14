@@ -148,6 +148,10 @@
 	&:hover .mega-menu-container.mega-menu-cinemas {
 		transform: translate(-50%, 0);
 	}
+
+	&:hover .mega-menu-container.mega-menu-movies {
+		transform: translate(-50%, 0);
+	}
 }
 
 .mega-menu-container {
@@ -177,10 +181,11 @@
 
 	&.mega-menu-movies {
 		display: grid;
-		grid-template-columns: 190px 1fr;
+		grid-template-columns: minmax(150px, 190px) minmax(0, 1fr);
 		gap: 20px;
-		width: 720px;
-		left: -200px;
+		width: min(720px, calc(100vw - 32px));
+		left: 50%;
+		transform: translate(-50%, 8px);
 		align-items: stretch;
 
 		.mega-cats-list {
