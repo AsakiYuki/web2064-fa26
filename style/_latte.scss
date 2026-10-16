@@ -2797,6 +2797,46 @@
 		}
 	}
 
+	// Member E-Ticket Scrollable Modal Light Theme Overrides
+	#profile-ticket-modal {
+		.eticket-modal-content {
+			box-shadow: 0 20px 60px rgba(76, 79, 105, 0.22) !important;
+
+			&::-webkit-scrollbar-track {
+				background: rgba(230, 233, 239, 0.6) !important;
+			}
+			&::-webkit-scrollbar-thumb {
+				background: rgba(30, 102, 245, 0.4) !important;
+
+				&:hover {
+					background: $latte-blue !important;
+				}
+			}
+
+			.modal-close-btn {
+				background: rgba(255, 255, 255, 0.85) !important;
+				border: 1px solid $latte-surface2 !important;
+				color: $latte-text !important;
+
+				&:hover {
+					background: $latte-red !important;
+					color: #ffffff !important;
+				}
+			}
+		}
+
+		.btn-close-modal-bottom {
+			background: $latte-mantle !important;
+			border-color: $latte-surface2 !important;
+			color: $latte-text !important;
+
+			&:hover {
+				background: $latte-surface0 !important;
+				color: $latte-blue !important;
+			}
+		}
+	}
+
 	// Admin Portal Complete Styling
 	.admin-sidebar {
 		background-color: $latte-mantle;
