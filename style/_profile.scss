@@ -544,3 +544,76 @@
 	}
 }
 
+/* ==========================================================================
+   MEMBER E-TICKET MODAL & VERTICAL SCROLL
+   ========================================================================== */
+#profile-ticket-modal {
+	padding: 24px 16px;
+	overflow-y: auto;
+	-webkit-overflow-scrolling: touch;
+	align-items: flex-start;
+
+	@media (min-height: 920px) {
+		align-items: center;
+	}
+
+	.eticket-modal-content {
+		max-width: 560px;
+		width: 100%;
+		margin: auto;
+		background: transparent;
+		border: none;
+		padding: 0;
+		max-height: calc(100vh - 48px);
+		max-height: calc(100dvh - 48px);
+		overflow-y: auto;
+		overflow-x: hidden;
+		overscroll-behavior: contain;
+		-webkit-overflow-scrolling: touch;
+		border-radius: $radius-xl;
+		position: relative;
+		box-shadow: 0 20px 60px rgba(0, 0, 0, 0.55);
+
+		/* Custom scrollbar */
+		&::-webkit-scrollbar {
+			width: 6px;
+		}
+		&::-webkit-scrollbar-track {
+			background: rgba(17, 17, 27, 0.4);
+			border-radius: 9999px;
+		}
+		&::-webkit-scrollbar-thumb {
+			background: rgba($primary-color, 0.5);
+			border-radius: 9999px;
+
+			&:hover {
+				background: $primary-color;
+			}
+		}
+
+		.modal-close-btn {
+			position: sticky;
+			top: 14px;
+			float: right;
+			margin-right: 14px;
+			margin-bottom: -50px;
+			z-index: 20;
+			background: rgba($ctp-crust, 0.7);
+			backdrop-filter: blur(8px);
+			border: 1px solid rgba($ctp-surface2, 0.5);
+			color: #ffffff;
+			width: 36px;
+			height: 36px;
+			border-radius: 50%;
+			box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
+
+			&:hover {
+				background: $ctp-red;
+				color: #ffffff;
+				transform: rotate(90deg) scale(1.05);
+			}
+		}
+	}
+}
+
+
