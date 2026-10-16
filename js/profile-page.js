@@ -224,6 +224,12 @@ document.addEventListener("DOMContentLoaded", async () => {
 			document.body.style.overflow = ""
 		}
 	})
+	document.addEventListener("keydown", e => {
+		if (e.key === "Escape" && modal?.classList.contains("active")) {
+			modal.classList.remove("active")
+			document.body.style.overflow = ""
+		}
+	})
 
 	/* ==========================================================================
 	   HELPER FUNCTIONS
@@ -389,19 +395,26 @@ document.addEventListener("DOMContentLoaded", async () => {
 			})
 			.join("")
 
-		// Attach view e-ticket clicks
+		// Attach view e-ticket clicks with robust string ID lookup
 		container.querySelectorAll(".btn-view-eticket").forEach(btn => {
 			btn.addEventListener("click", () => {
-				const ticketId = btn.dataset.ticketId
-				const targetTicket = history.find(t => t.id === ticketId)
-				if (targetTicket) openProfileTicketModal(targetTicket)
+				const ticketId = String(btn.dataset.ticketId || "").trim()
+				const allTickets = getBookingHistory()
+				const targetTicket =
+					allTickets.find(t => String(t.id || t.bookingCode || "").trim() === ticketId) ||
+					history.find(t => String(t.id || t.bookingCode || "").trim() === ticketId)
+				if (targetTicket) {
+					openProfileTicketModal(targetTicket)
+				} else {
+					showToast(`Không tìm thấy thông tin chi tiết vé ${ticketId}`, "error")
+				}
 			})
 		})
 
 		// Attach cancel ticket clicks
 		container.querySelectorAll(".btn-cancel-ticket").forEach(btn => {
 			btn.addEventListener("click", () => {
-				const ticketId = btn.dataset.ticketId
+				const ticketId = String(btn.dataset.ticketId || "").trim()
 				if (confirm(`Bạn có chắc chắn muốn hủy vé ${ticketId}? Tiền vé sẽ được hoàn về phương thức thanh toán ban đầu.`)) {
 					cancelBookingTicket(ticketId)
 					showToast(`Đã hủy vé ${ticketId} thành công.`, "info")
