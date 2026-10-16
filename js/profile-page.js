@@ -1,5 +1,5 @@
 import { setupHeaderAndFooter, formatCurrency, formatDateVN, showToast, getCurrentUser, saveUserSession, translateDom, getSavedLang } from "./common.js"
-import { getBookingHistory, updateUserInDatabase, cancelBookingTicket, VOUCHER_LIST } from "./storage.js"
+import { getBookingHistory, updateUserInDatabase, changeUserPassword, cancelBookingTicket, VOUCHER_LIST } from "./storage.js"
 import { generateQRCodeSVG } from "./qrcode.js"
 
 const DEFAULT_PROFILE = {
@@ -185,30 +185,68 @@ document.addEventListener("DOMContentLoaded", async () => {
 		})
 	})
 
-	// 7. Change Password Form
+	// 7. Change Password Form with Old Password Verification & Server Sync
 	const passForm = document.getElementById("form-change-password")
-	passForm?.addEventListener("submit", e => {
+	const submitPassBtn = passForm?.querySelector("button[type='submit']")
+
+	passForm?.addEventListener("submit", async e => {
 		e.preventDefault()
-		const oldPass = document.getElementById("old-pass")?.value
-		const newPass = document.getElementById("new-pass")?.value
-		const confirmPass = document.getElementById("confirm-pass")?.value
+		const oldPass = document.getElementById("old-pass")?.value || ""
+		const newPass = document.getElementById("new-pass")?.value || ""
+		const confirmPass = document.getElementById("confirm-pass")?.value || ""
+
+		if (!oldPass) {
+			showToast("Vui lòng nhập mật khẩu hiện tại của bạn.", "warning")
+			document.getElementById("old-pass")?.focus()
+			return
+		}
 
 		if (newPass.length < 6) {
 			showToast("Mật khẩu mới phải có ít nhất 6 ký tự.", "warning")
+			document.getElementById("new-pass")?.focus()
+			return
+		}
+
+		if (oldPass === newPass) {
+			showToast("Mật khẩu mới không được trùng với mật khẩu hiện tại!", "warning")
+			document.getElementById("new-pass")?.focus()
 			return
 		}
 
 		if (newPass !== confirmPass) {
 			showToast("Mật khẩu mới và xác nhận mật khẩu không trùng khớp!", "warning")
+			document.getElementById("confirm-pass")?.focus()
 			return
 		}
 
-		user.password = newPass
-		saveUserSession(user)
-		updateUserInDatabase(user)
+		if (submitPassBtn) {
+			submitPassBtn.disabled = true
+			submitPassBtn.dataset.origText = submitPassBtn.textContent
+			submitPassBtn.textContent = "Đang xác thực với hệ thống..."
+		}
 
-		passForm.reset()
-		showToast("Đổi mật khẩu thành công! Hãy ghi nhớ mật khẩu mới của bạn.", "success")
+		try {
+			// Xác minh mật khẩu cũ và lưu lên server
+			const res = await changeUserPassword(oldPass, newPass)
+
+			if (!res.success) {
+				showToast(res.message || "Đổi mật khẩu thất bại! Vui lòng thử lại.", "error", 5000)
+				return
+			}
+
+			// Chỉ báo thành công và xóa form khi server cập nhật thành công
+			user.password = newPass
+			passForm.reset()
+			showToast("🎉 Đổi mật khẩu thành công! Mật khẩu mới đã được cập nhật an toàn.", "success", 5000)
+		} catch (err) {
+			console.error("[ChangePassword] Error:", err)
+			showToast("Lỗi kết nối máy chủ! Không thể đổi mật khẩu lúc này.", "error")
+		} finally {
+			if (submitPassBtn) {
+				submitPassBtn.disabled = false
+				submitPassBtn.textContent = submitPassBtn.dataset.origText || "Cập Nhật Mật Khẩu"
+			}
+		}
 	})
 
 	// 8. Modal E-Ticket Close
