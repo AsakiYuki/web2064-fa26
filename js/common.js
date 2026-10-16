@@ -40,7 +40,18 @@ export function formatCurrency(amount) {
 /** Format Date to Vietnamese display: e.g. "Thứ Bảy, 26/09/2026" */
 export function formatDateVN(dateStr) {
 	if (!dateStr) return ""
+	if (typeof dateStr === "string" && (dateStr.includes("Thứ") || dateStr.includes("Chủ Nhật"))) return dateStr
+	const dmyMatch = typeof dateStr === "string" ? dateStr.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/) : null
+	if (dmyMatch) {
+		const [, d, m, y] = dmyMatch
+		const dateObj = new Date(Number(y), Number(m) - 1, Number(d))
+		if (!isNaN(dateObj.getTime())) {
+			const days = ["Chủ Nhật", "Thứ Hai", "Thứ Ba", "Thứ Tư", "Thứ Năm", "Thứ Sáu", "Thứ Bảy"]
+			return `${days[dateObj.getDay()]}, ${d.padStart(2, "0")}/${m.padStart(2, "0")}/${y}`
+		}
+	}
 	const date = new Date(dateStr)
+	if (isNaN(date.getTime())) return String(dateStr)
 	const days = ["Chủ Nhật", "Thứ Hai", "Thứ Ba", "Thứ Tư", "Thứ Năm", "Thứ Sáu", "Thứ Bảy"]
 	const dayName = days[date.getDay()]
 	const d = String(date.getDate()).padStart(2, "0")
