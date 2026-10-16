@@ -2528,6 +2528,67 @@
 				color: $latte-peach !important;
 			}
 		}
+
+		.summary-breakdown-section {
+			border-bottom-color: rgba($latte-surface2, 0.6) !important;
+
+			.breakdown-group-title {
+				color: $latte-subtext0 !important;
+			}
+
+			.breakdown-row {
+				color: $latte-subtext1 !important;
+
+				.row-desc {
+					strong {
+						color: $latte-text !important;
+					}
+					small {
+						color: $latte-subtext0 !important;
+					}
+				}
+
+				.row-val {
+					color: $latte-text !important;
+				}
+			}
+
+			.breakdown-subtotal-row {
+				border-top-color: rgba($latte-surface2, 0.6) !important;
+
+				span {
+					color: $latte-subtext1 !important;
+				}
+
+				strong {
+					color: $latte-blue !important;
+				}
+			}
+
+			.empty-placeholder {
+				color: $latte-overlay1 !important;
+			}
+		}
+
+		.summary-total-bar {
+			.total-title {
+				color: $latte-subtext1 !important;
+			}
+
+			.total-amount {
+				color: $latte-peach !important;
+				text-shadow: none !important;
+			}
+		}
+
+		.btn-checkout-now {
+			background: $latte-blue !important;
+			color: #ffffff !important;
+
+			&:hover {
+				background: $latte-sapphire !important;
+			}
+		}
 	}
 
 	.combo-item-card {
@@ -2543,6 +2604,183 @@
 		}
 		.combo-price {
 			color: $latte-peach !important;
+		}
+	}
+
+	// Booking Complete Ticket Card
+	.ticket-card-complete {
+		background: #ffffff !important;
+		border: 1px solid $latte-surface2 !important;
+		box-shadow: 0 12px 36px rgba(76, 79, 105, 0.12) !important;
+
+		.ticket-head-banner {
+			background: $latte-blue !important;
+			color: #ffffff !important;
+
+			h3, p {
+				color: #ffffff !important;
+			}
+		}
+
+		.ticket-body-details {
+			background: #ffffff !important;
+
+			.ticket-code-row {
+				background: $latte-mantle !important;
+				border: 1px dashed $latte-surface2 !important;
+
+				.t-code-label {
+					color: $latte-subtext1 !important;
+					font-weight: 700;
+				}
+
+				.t-code-val {
+					color: $latte-peach !important;
+				}
+			}
+
+			.ticket-info-grid {
+				.ti-item {
+					.ti-lbl {
+						color: $latte-subtext1 !important;
+						font-weight: 700;
+					}
+
+					.ti-val {
+						color: $latte-text !important;
+					}
+				}
+			}
+
+			.barcode-wrapper {
+				border-top-color: $latte-surface2 !important;
+
+				span {
+					color: $latte-subtext0 !important;
+				}
+
+				.barcode-lines {
+					background: repeating-linear-gradient(
+						90deg,
+						$latte-text 0px,
+						$latte-text 2px,
+						transparent 2px,
+						transparent 4px,
+						$latte-text 4px,
+						$latte-text 7px,
+						transparent 7px,
+						transparent 8px,
+						$latte-text 8px,
+						$latte-text 11px
+					) !important;
+				}
+			}
+		}
+
+		.ticket-footer-actions {
+			background: $latte-mantle !important;
+			border-top: 1px solid $latte-surface2 !important;
+
+			.btn-ticket-done {
+				background: $latte-blue !important;
+				color: #ffffff !important;
+
+				&:hover {
+					background: $latte-sapphire !important;
+				}
+			}
+		}
+	}
+
+	// ETicket & Booking Detail Modal Pass
+	.eticket-success-page-wrap {
+		background: #ffffff !important;
+		border: 1px solid $latte-surface2 !important;
+		box-shadow: 0 12px 32px rgba(76, 79, 105, 0.12) !important;
+	}
+
+	.eticket-ticket-pass {
+		background: #ffffff !important;
+
+		&::before,
+		&::after {
+			background: $latte-base !important;
+		}
+
+		.et-code-banner {
+			background: $latte-mantle !important;
+			border-color: $latte-surface2 !important;
+
+			.code-label {
+				color: $latte-subtext1 !important;
+				font-weight: 700;
+			}
+
+			.code-value {
+				color: $latte-peach !important;
+				font-weight: 900;
+			}
+		}
+
+		.et-qr-container {
+			.qr-code-box {
+				background: #ffffff !important;
+				border: 1px solid $latte-surface2 !important;
+				box-shadow: 0 4px 14px rgba(76, 79, 105, 0.1) !important;
+			}
+
+			.qr-hint {
+				color: $latte-subtext0 !important;
+			}
+		}
+
+		.et-info-grid {
+			border-top: 1px solid $latte-surface2 !important;
+			border-bottom: 1px solid $latte-surface2 !important;
+
+			.et-info-item {
+				.et-lbl {
+					color: $latte-subtext1 !important;
+					font-weight: 700;
+				}
+
+				.et-val {
+					color: $latte-text !important;
+					font-weight: 700;
+
+					&.val-gold {
+						color: $latte-peach !important;
+					}
+
+					&.val-green {
+						color: $latte-green !important;
+					}
+				}
+			}
+		}
+
+		.et-barcode-wrap {
+			border-top-color: $latte-surface2 !important;
+
+			.barcode-lines {
+				background: repeating-linear-gradient(
+					90deg,
+					$latte-text 0px,
+					$latte-text 2px,
+					transparent 2px,
+					transparent 4px,
+					$latte-text 4px,
+					$latte-text 7px,
+					transparent 7px,
+					transparent 8px,
+					$latte-text 8px,
+					$latte-text 11px
+				) !important;
+			}
+
+			.barcode-number {
+				color: $latte-subtext0 !important;
+			}
 		}
 	}
 
