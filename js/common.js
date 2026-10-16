@@ -418,18 +418,6 @@ export function openAuthModal(defaultTab = "login") {
 					<button type="button" class="auth-tab-btn" id="auth-tab-register" data-tab="register">ĐĂNG KÝ</button>
 				</div>
 				<div class="auth-body">
-					<!-- Social Logins -->
-					<div class="social-login-grid">
-						<button type="button" class="btn-social btn-google" id="btn-social-google">
-							<span>G</span> Google
-						</button>
-						<button type="button" class="btn-social btn-facebook" id="btn-social-facebook">
-							<span>f</span> Facebook
-						</button>
-					</div>
-
-					<div class="auth-divider-line"><span>Hoặc</span></div>
-
 					<!-- LOGIN FORM -->
 					<form id="form-auth-login" class="auth-form" novalidate>
 						<div class="form-group">
@@ -614,24 +602,6 @@ function initAuthModalEvents(modal) {
 		if (regPassInput.value.length >= 6) setFieldError("reg-password", "")
 	})
 
-	// Social Logins (Google / Facebook mock)
-	const loginSocial = provider => {
-		saveUserSession(DEFAULT_USERS[0])
-		if (typeof window !== "undefined") {
-			window.dispatchEvent(new CustomEvent("beta_auth_changed", { detail: { user: DEFAULT_USERS[0] } }))
-		}
-		try {
-			updateHeaderAccountUI()
-			updateDrawerAccountUI()
-		} catch (err) {
-			console.warn("UI update error:", err)
-		} finally {
-			closeAuthModal()
-		}
-		showToast(`Đăng nhập thành công với tài khoản ${provider}! Chào mừng bạn.`, "success")
-	}
-	document.getElementById("btn-social-google")?.addEventListener("click", () => loginSocial("Google"))
-	document.getElementById("btn-social-facebook")?.addEventListener("click", () => loginSocial("Facebook"))
 
 	// Login form submit with validation
 	document.getElementById("form-auth-login")?.addEventListener("submit", async e => {
