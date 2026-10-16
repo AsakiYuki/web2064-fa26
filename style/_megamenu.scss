@@ -144,6 +144,14 @@
 		visibility: visible;
 		transform: translateY(0);
 	}
+
+	&:hover .mega-menu-container.mega-menu-cinemas {
+		transform: translate(-50%, 0);
+	}
+
+	&:hover .mega-menu-container.mega-menu-movies {
+		transform: translate(-50%, 0);
+	}
 }
 
 .mega-menu-container {
@@ -173,10 +181,11 @@
 
 	&.mega-menu-movies {
 		display: grid;
-		grid-template-columns: 190px 1fr;
+		grid-template-columns: minmax(150px, 190px) minmax(0, 1fr);
 		gap: 20px;
-		width: 720px;
-		left: -200px;
+		width: min(720px, calc(100vw - 32px));
+		left: 50%;
+		transform: translate(-50%, 8px);
 		align-items: stretch;
 
 		.mega-cats-list {
@@ -293,12 +302,14 @@
 
 	&.mega-menu-cinemas {
 		display: grid;
-		grid-template-columns: repeat(3, 1fr);
+		grid-template-columns: repeat(3, minmax(0, 1fr));
 		gap: 16px;
-		width: 720px;
-		left: -240px;
+		width: min(720px, calc(100vw - 32px));
+		left: 50%;
+		transform: translate(-50%, 8px);
 
 		.mega-cinema-region {
+			min-width: 0;
 			display: flex;
 			flex-direction: column;
 			gap: 6px;
@@ -311,6 +322,7 @@
 				border-bottom: 1.5px solid rgba($primary-color, 0.3);
 				padding-bottom: 4px;
 				margin-bottom: 4px;
+				overflow-wrap: anywhere;
 			}
 
 			.cinema-quick-link {
@@ -319,12 +331,24 @@
 				padding: 4px 6px;
 				border-radius: 4px;
 				transition: all 0.15s;
+				overflow-wrap: anywhere;
 
 				&:hover {
 					background: $ctp-surface1;
 					color: $primary-color;
 					font-weight: 600;
 				}
+			}
+		}
+
+		.mega-cinema-footer {
+			grid-column: 1 / -1;
+			min-width: 0;
+
+			.btn-all-cinemas {
+				display: inline-block;
+				max-width: 100%;
+				overflow-wrap: anywhere;
 			}
 		}
 	}
