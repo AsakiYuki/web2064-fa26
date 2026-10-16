@@ -158,6 +158,31 @@ export async function apiUpdateUser(userId, updates) {
 }
 
 /**
+ * Đặt lại mật khẩu tài khoản (Forgot Password)
+ * @param {string} account - Email hoặc số điện thoại
+ * @param {string} newPassword - Mật khẩu mới
+ */
+export async function apiResetPassword(account, newPassword) {
+	const res = await request("/reset-password", {
+		method: "POST",
+		body: JSON.stringify({ account, newPassword }),
+	})
+	return res.ok ? { success: true, message: res.data?.message || "Đặt lại mật khẩu thành công!" } : { success: false, message: res.error || "Không thể đặt lại mật khẩu" }
+}
+
+/**
+ * Đổi mật khẩu tài khoản với xác thực mật khẩu cũ
+ * @param {Object} payload - { userId, email, oldPassword, newPassword }
+ */
+export async function apiChangePassword(payload) {
+	const res = await request("/change-password", {
+		method: "POST",
+		body: JSON.stringify(payload),
+	})
+	return res.ok ? { success: true, message: res.data?.message || "Đổi mật khẩu thành công!" } : { success: false, message: res.error || "Không thể đổi mật khẩu" }
+}
+
+/**
  * Lấy danh sách người dùng
  */
 export async function apiGetUsers() {

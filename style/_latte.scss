@@ -584,6 +584,16 @@
 					}
 				}
 
+				.otp-notice-box {
+					background: rgba(30, 102, 245, 0.08) !important;
+					border-color: rgba(30, 102, 245, 0.25) !important;
+					color: $latte-blue !important;
+
+					strong {
+						color: $latte-peach !important;
+					}
+				}
+
 				.btn-submit-auth {
 					background: linear-gradient(135deg, $latte-blue 0%, #1e56d0 100%) !important;
 					color: #ffffff !important;
