@@ -23,6 +23,41 @@
 		color: $latte-text !important;
 	}
 
+	// --- Global Typography Readability ---
+	h1, h2, h3, h4, h5, h6 {
+		color: $latte-text;
+	}
+
+	strong, b {
+		color: $latte-text;
+	}
+
+	// Override inline dark-mode pastel colors commonly output by template literals
+	[style*="color: #cdd6f4"], [style*="color:#cdd6f4"],
+	[style*="color: #bac2de"], [style*="color:#bac2de"] {
+		color: $latte-text !important;
+	}
+
+	[style*="color: #a6adc8"], [style*="color:#a6adc8"],
+	[style*="color: #9399b2"], [style*="color:#9399b2"] {
+		color: $latte-subtext0 !important;
+	}
+
+	[style*="color: #fab387"], [style*="color:#fab387"],
+	[style*="color: #f9e2af"], [style*="color:#f9e2af"] {
+		color: $latte-peach !important;
+	}
+
+	[style*="color: #89b4fa"], [style*="color:#89b4fa"] {
+		color: $latte-blue !important;
+	}
+
+	[style*="background: #313244"], [style*="background:#313244"] {
+		background: #ffffff !important;
+		border: 1px solid $latte-surface2 !important;
+		color: $latte-text !important;
+	}
+
 	::selection {
 		background-color: rgba($latte-blue, 0.25);
 		color: $latte-text;
