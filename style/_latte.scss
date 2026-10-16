@@ -2598,14 +2598,19 @@
 	.kpi-card {
 		background-color: #ffffff;
 		border-color: $latte-surface2;
-		box-shadow: 0 4px 16px rgba(76, 79, 105, 0.06);
+		box-shadow: 0 4px 16px rgba(76, 79, 105, 0.08);
 
+		.kpi-label,
 		.kpi-title {
-			color: $latte-subtext0;
+			color: $latte-subtext0 !important;
 		}
 
 		.kpi-value {
-			color: $latte-text;
+			color: $latte-text !important;
+		}
+
+		.kpi-subtext {
+			color: $latte-overlay1 !important;
 		}
 	}
 
@@ -2613,7 +2618,76 @@
 	.admin-table-container {
 		background-color: #ffffff;
 		border-color: $latte-surface2;
-		box-shadow: 0 4px 16px rgba(76, 79, 105, 0.06);
+		box-shadow: 0 4px 16px rgba(76, 79, 105, 0.08);
+
+		.card-head {
+			border-bottom-color: $latte-surface2;
+
+			h2 {
+				color: $latte-text !important;
+			}
+
+			.card-subtitle {
+				color: $latte-subtext0 !important;
+			}
+		}
+	}
+
+	.admin-data-table {
+		th {
+			background: $latte-mantle !important;
+			color: $latte-subtext1 !important;
+			border-bottom: 2px solid $latte-surface2 !important;
+			font-weight: 700;
+		}
+
+		td {
+			color: $latte-text !important;
+			border-bottom: 1px solid rgba($latte-surface2, 0.45) !important;
+		}
+
+		tbody tr:hover {
+			background: rgba(30, 102, 245, 0.04) !important;
+		}
+
+		.cell-title {
+			color: $latte-text !important;
+		}
+
+		.cell-sub {
+			color: $latte-subtext0 !important;
+		}
+
+		.table-thumb {
+			background: $latte-mantle !important;
+		}
+	}
+
+	.row-actions {
+		.btn-action-icon {
+			background: $latte-mantle !important;
+			border: 1px solid $latte-surface2 !important;
+			color: $latte-text !important;
+
+			&:hover {
+				background: $latte-surface0 !important;
+				color: $latte-blue !important;
+				border-color: $latte-blue !important;
+			}
+		}
+	}
+
+	.admin-actions-bar {
+		.btn-admin-secondary {
+			background: $latte-mantle !important;
+			border: 1px solid $latte-surface2 !important;
+			color: $latte-text !important;
+
+			&:hover {
+				background: $latte-surface0 !important;
+				color: $latte-blue !important;
+			}
+		}
 	}
 
 	.admin-search-input,
