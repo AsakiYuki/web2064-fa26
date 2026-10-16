@@ -39,7 +39,8 @@
 	}
 
 	[style*="color: #a6adc8"], [style*="color:#a6adc8"],
-	[style*="color: #9399b2"], [style*="color:#9399b2"] {
+	[style*="color: #9399b2"], [style*="color:#9399b2"],
+	[style*="color: #6c7086"], [style*="color:#6c7086"] {
 		color: $latte-subtext0 !important;
 	}
 
@@ -50,6 +51,18 @@
 
 	[style*="color: #89b4fa"], [style*="color:#89b4fa"] {
 		color: $latte-blue !important;
+	}
+
+	[style*="color: #a6e3a1"], [style*="color:#a6e3a1"] {
+		color: $latte-green !important;
+	}
+
+	[style*="color: #f38ba8"], [style*="color:#f38ba8"] {
+		color: $latte-red !important;
+	}
+
+	[style*="color: #cba6f7"], [style*="color:#cba6f7"] {
+		color: $latte-mauve !important;
 	}
 
 	[style*="background: #313244"], [style*="background:#313244"] {
@@ -2926,6 +2939,45 @@
 				color: $latte-blue !important;
 			}
 		}
+	}
+
+	.admin-badge {
+		&.badge-nowshowing {
+			background: rgba(46, 125, 50, 0.12) !important;
+			color: $latte-green !important;
+			border: 1px solid rgba(46, 125, 50, 0.35) !important;
+		}
+		&.badge-upcoming {
+			background: rgba(194, 65, 12, 0.12) !important;
+			color: $latte-peach !important;
+			border: 1px solid rgba(194, 65, 12, 0.35) !important;
+		}
+		&.badge-special {
+			background: rgba(136, 57, 239, 0.12) !important;
+			color: $latte-mauve !important;
+			border: 1px solid rgba(136, 57, 239, 0.35) !important;
+		}
+		&.badge-age {
+			background: rgba(210, 15, 57, 0.12) !important;
+			color: $latte-red !important;
+			border: 1px solid rgba(210, 15, 57, 0.35) !important;
+		}
+	}
+
+	.btn-action-order-confirm {
+		background: rgba(194, 65, 12, 0.12) !important;
+		color: $latte-peach !important;
+		border: 1px solid rgba(194, 65, 12, 0.35) !important;
+	}
+
+	.btn-action-payment-confirm {
+		background: rgba(30, 102, 245, 0.12) !important;
+		color: $latte-blue !important;
+		border: 1px solid rgba(30, 102, 245, 0.35) !important;
+	}
+
+	.btn-cancel-admin-ticket {
+		color: $latte-red !important;
 	}
 
 	.admin-search-input,
