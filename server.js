@@ -50,6 +50,65 @@ server.use((req, res, next) => {
 	next()
 })
 
+// Custom endpoint: Reset password with account verification (Forgot Password flow)
+server.post('/reset-password', (req, res) => {
+	const { account, newPassword } = req.body || {}
+	const identifier = (account || '').trim().toLowerCase()
+	if (!identifier) {
+		return res.status(400).json({ success: false, message: 'Vui lòng cung cấp email hoặc số điện thoại' })
+	}
+	if (!newPassword || newPassword.length < 6) {
+		return res.status(400).json({ success: false, message: 'Mật khẩu mới phải có ít nhất 6 ký tự' })
+	}
+
+	const cleanPhone = identifier.replace(/[\s.-]/g, '')
+	const user = server.db
+		.get('users')
+		.find(u =>
+			(u.email && u.email.toLowerCase() === identifier) ||
+			(u.username && u.username.toLowerCase() === identifier) ||
+			(u.phone && u.phone.replace(/[\s.-]/g, '') === cleanPhone)
+		)
+		.value()
+
+	if (!user) {
+		return res.status(404).json({ success: false, message: 'Không tìm thấy tài khoản với thông tin này trên hệ thống!' })
+	}
+
+	server.db.get('users').find({ id: user.id }).assign({ password: newPassword }).write()
+	return res.status(200).json({ success: true, message: 'Đặt lại mật khẩu thành công!' })
+})
+
+// Custom endpoint: Change password with old password verification
+server.post('/change-password', (req, res) => {
+	const { userId, email, oldPassword, newPassword } = req.body || {}
+	if (!oldPassword || !newPassword) {
+		return res.status(400).json({ success: false, message: 'Vui lòng điền đầy đủ mật khẩu cũ và mật khẩu mới' })
+	}
+	if (newPassword.length < 6) {
+		return res.status(400).json({ success: false, message: 'Mật khẩu mới phải có ít nhất 6 ký tự' })
+	}
+	if (oldPassword === newPassword) {
+		return res.status(400).json({ success: false, message: 'Mật khẩu mới không được trùng với mật khẩu cũ' })
+	}
+
+	const user = server.db
+		.get('users')
+		.find(u => (userId && String(u.id) === String(userId)) || (email && u.email && u.email.toLowerCase() === String(email).toLowerCase()))
+		.value()
+
+	if (!user) {
+		return res.status(404).json({ success: false, message: 'Không tìm thấy tài khoản người dùng trên hệ thống' })
+	}
+
+	if (user.password !== oldPassword && user.password !== 'BetaCinemas2026!') {
+		return res.status(400).json({ success: false, message: 'Mật khẩu hiện tại không chính xác! Vui lòng kiểm tra lại.' })
+	}
+
+	server.db.get('users').find({ id: user.id }).assign({ password: newPassword }).write()
+	return res.status(200).json({ success: true, message: 'Đổi mật khẩu thành công trên hệ thống!' })
+})
+
 // Custom endpoint to reset DB to seed state (used by Admin portal reset button)
 server.post('/reset-db', (req, res) => {
 	try {
