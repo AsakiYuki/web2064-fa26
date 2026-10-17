@@ -176,6 +176,80 @@ async function runAllTests() {
 	})
 	assert(loginNonExistentRes.status === 400, 'Đăng nhập với email không tồn tại bị từ chối với HTTP 400')
 
+	// 1.11 [Bảo mật] Đổi mật khẩu với mật khẩu cũ SAI -> bị từ chối
+	const changePassWrongOldRes = await fetch(`${BACKEND_URL}/change-password`, {
+		method: 'POST',
+		headers: { 'Content-Type': 'application/json' },
+		body: JSON.stringify({
+			userId: regData.user.id,
+			email: testEmail,
+			oldPassword: 'IncorrectOldPassword!',
+			newPassword: 'BrandNewPassword123!',
+		}),
+	})
+	assert(changePassWrongOldRes.status === 400, 'Đổi mật khẩu với mật khẩu cũ sai bị từ chối với HTTP 400')
+
+	// 1.12 [Bảo mật] Đổi mật khẩu với mật khẩu mới TRÙNG mật khẩu cũ -> bị từ chối
+	const changePassSameRes = await fetch(`${BACKEND_URL}/change-password`, {
+		method: 'POST',
+		headers: { 'Content-Type': 'application/json' },
+		body: JSON.stringify({
+			userId: regData.user.id,
+			email: testEmail,
+			oldPassword: testPass,
+			newPassword: testPass,
+		}),
+	})
+	assert(changePassSameRes.status === 400, 'Đổi mật khẩu trùng mật khẩu cũ bị từ chối với HTTP 400')
+
+	// 1.13 [Bảo mật] Đổi mật khẩu HỢP LỆ với mật khẩu cũ ĐÚNG -> thành công HTTP 200
+	const newChangedPass = 'BrandNewPassword123!'
+	const changePassSuccessRes = await fetch(`${BACKEND_URL}/change-password`, {
+		method: 'POST',
+		headers: { 'Content-Type': 'application/json' },
+		body: JSON.stringify({
+			userId: regData.user.id,
+			email: testEmail,
+			oldPassword: testPass,
+			newPassword: newChangedPass,
+		}),
+	})
+	assert(changePassSuccessRes.status === 200, 'Đổi mật khẩu thành công khi xác thực đúng mật khẩu cũ')
+
+	// 1.14 [Bảo mật] Đăng nhập bằng mật khẩu mới vừa đổi -> thành công HTTP 200
+	const loginNewPassRes = await fetch(`${BACKEND_URL}/login`, {
+		method: 'POST',
+		headers: { 'Content-Type': 'application/json' },
+		body: JSON.stringify({
+			email: testEmail,
+			password: newChangedPass,
+		}),
+	})
+	assert(loginNewPassRes.status === 200, 'Đăng nhập thành công với mật khẩu mới sau khi đổi')
+
+	// 1.15 [Bảo mật] Quên mật khẩu & Đặt lại mật khẩu (POST /reset-password)
+	const resetPassNew = 'ResetPassword456!'
+	const resetPassRes = await fetch(`${BACKEND_URL}/reset-password`, {
+		method: 'POST',
+		headers: { 'Content-Type': 'application/json' },
+		body: JSON.stringify({
+			account: testEmail,
+			newPassword: resetPassNew,
+		}),
+	})
+	assert(resetPassRes.status === 200, 'Quy trình đặt lại mật khẩu (POST /reset-password) thành công')
+
+	// 1.16 Đăng nhập bằng mật khẩu vừa được đặt lại
+	const loginResetPassRes = await fetch(`${BACKEND_URL}/login`, {
+		method: 'POST',
+		headers: { 'Content-Type': 'application/json' },
+		body: JSON.stringify({
+			email: testEmail,
+			password: resetPassNew,
+		}),
+	})
+	assert(loginResetPassRes.status === 200, 'Đăng nhập thành công với mật khẩu mới vừa được đặt lại')
+
 	/* ------------------------------------------------------------------
 	   USE CASE 2: MOVIES CRUD VIA JSON-SERVER
 	   ------------------------------------------------------------------ */

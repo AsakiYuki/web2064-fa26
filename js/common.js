@@ -703,32 +703,9 @@ function initAuthModalEvents(modal) {
 		// Authenticate with json-server-auth / storage
 		const authResult = await authenticateUser(acc, pwd)
 		if (!authResult.success) {
-			// Fallback: If not in list, check if matches default demo pattern or create quick session
-			if (acc.includes("@") && pwd.length >= 6) {
-				const fallbackName = acc.split("@")[0]
-				const userObj = {
-					...DEFAULT_USERS[0],
-					name: fallbackName.charAt(0).toUpperCase() + fallbackName.slice(1),
-					email: acc,
-					avatarText: fallbackName.charAt(0).toUpperCase(),
-				}
-				saveUserSession(userObj)
-				if (typeof window !== "undefined") {
-					window.dispatchEvent(new CustomEvent("beta_auth_changed", { detail: { user: userObj } }))
-				}
-				try {
-					updateHeaderAccountUI()
-					updateDrawerAccountUI()
-				} catch (err) {
-					console.warn("UI update error:", err)
-				} finally {
-					closeAuthModal()
-				}
-				showToast(`Đăng nhập thành công! Chào mừng ${userObj.name} đã quay lại.`, "success")
-				return
-			}
-			setFieldError("login-account", authResult.message)
-			showToast(authResult.message, "warning")
+			const errMsg = authResult.message || "Tài khoản hoặc mật khẩu không chính xác!"
+			setFieldError("login-account", errMsg)
+			showToast(errMsg, "warning")
 			return
 		}
 

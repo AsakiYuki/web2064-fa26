@@ -578,7 +578,6 @@ export async function authenticateUser(account, password) {
 				(cleanAcc === "admin" &&
 					(u.role === "admin" || u.username === "admin" || u.email?.toLowerCase().startsWith("admin")))) &&
 			(u.password === password ||
-				u.password === "BetaCinemas2026!" ||
 				(cleanAcc === "admin" && password === "12345678") ||
 				(u.role === "admin" && password === "12345678")),
 	)
@@ -1082,6 +1081,7 @@ export async function saveBookingTicket(ticket) {
 	const cEmail = ticket.customerEmail || ticket.userEmail || ""
 	const pMethod = ticket.paymentMethod || "momo"
 
+	
 	const newTicket = {
 		...ticket,
 		id: ticket.id || "BT-" + Math.floor(100000 + Math.random() * 900000),
@@ -1118,6 +1118,9 @@ export async function saveBookingTicket(ticket) {
 	clearPendingBooking()
 	return { ...savedTicket, pointsSave: { success: true } }
 }
+
+
+
 
 export async function updateBookingStatus(id, newStatus) {
 	const patchData = { status: newStatus }
