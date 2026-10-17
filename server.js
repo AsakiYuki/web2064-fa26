@@ -1,5 +1,6 @@
 import jsonServer from 'json-server'
 import auth from 'json-server-auth'
+import jwt from 'jsonwebtoken'
 import fs from 'fs'
 import path from 'path'
 
@@ -8,6 +9,90 @@ const router = jsonServer.router('db.json')
 const middlewares = jsonServer.defaults()
 
 const PORT = process.env.PORT || 3000
+const JWT_SECRET = 'json-server-auth-123456'
+
+const VOUCHER_RULES = {
+	BETA10: { type: 'percent', value: 10, minOrder: 0, maxDiscount: 100000 },
+	BETA20: { type: 'percent', value: 20, minOrder: 100000, maxDiscount: 150000 },
+	BETA50: { type: 'fixed', value: 50000, minOrder: 0, minConcessions: 100000, maxDiscount: 50000 },
+	FREEPOP: { type: 'fixed', value: 30000, minOrder: 0, minConcessions: 50000, maxDiscount: 30000 },
+	HAPPYTUE: { type: 'fixed', value: 20000, minOrder: 50000, weekday: 2, maxDiscount: 20000 },
+	'BETA-U22': { type: 'fixed', value: 20000, minOrder: 50000, maxDiscount: 20000 },
+}
+
+function resolveRequestUser(req, res, required = false) {
+	const header = req.headers.authorization || ''
+	if (!header) {
+		if (required) res.status(401).json({ success: false, message: 'Vui lòng đăng nhập để tiếp tục.' })
+		return null
+	}
+	const [scheme, token] = header.split(' ')
+	try {
+		if (scheme !== 'Bearer' || !token) throw new Error('Invalid token')
+		const claims = jwt.verify(token, JWT_SECRET)
+		const user = server.db.get('users').find(u => String(u.id) === String(claims.sub)).value()
+		if (!user) throw new Error('User not found')
+		return user
+	} catch {
+		res.status(401).json({ success: false, message: 'Phiên đăng nhập hết hạn. Vui lòng đăng nhập lại.' })
+		return null
+	}
+}
+
+function calculateServerVoucher(code, user, { rawTotal, concessionsTotal = 0, showDate } = {}) {
+	const cleanCode = String(code || '').trim().toUpperCase()
+	const amount = Number(rawTotal)
+	const concessionAmount = Number(concessionsTotal) || 0
+	if (!cleanCode || !Number.isFinite(amount) || amount <= 0) {
+		return { success: false, message: 'Mã voucher hoặc tổng đơn hàng không hợp lệ.' }
+	}
+
+	const ownedMatches = (user?.vouchers || []).filter(v => String(v.code || '').toUpperCase() === cleanCode)
+	const owned = ownedMatches.find(v => v.status === 'active' && new Date(v.expiresAt).getTime() > Date.now()) || ownedMatches[0]
+	const rewardRequiresOwnership = (server.db.get('member_rewards').value() || []).some(
+		reward => String(reward.code || '').toUpperCase() === cleanCode,
+	)
+	if (rewardRequiresOwnership && !owned) {
+		return { success: false, message: 'Voucher này cần được đổi bằng điểm trước khi sử dụng.' }
+	}
+	if (owned) {
+		if (owned.status !== 'active') return { success: false, message: 'Voucher này đã được sử dụng hoặc không còn hiệu lực.' }
+		const expiresAt = owned.expiresAt ? new Date(owned.expiresAt).getTime() : NaN
+		if (!Number.isFinite(expiresAt) || expiresAt <= Date.now()) {
+			return { success: false, message: 'Voucher này đã hết hạn.' }
+		}
+	}
+
+	const rule = VOUCHER_RULES[cleanCode]
+	if (!rule) return { success: false, message: 'Voucher này không áp dụng thanh toán trực tuyến.' }
+	if (amount < (rule.minOrder || 0)) {
+		return { success: false, message: `Đơn hàng cần đạt tối thiểu ${rule.minOrder.toLocaleString('vi-VN')}đ.` }
+	}
+	if (concessionAmount < (rule.minConcessions || 0)) {
+		return { success: false, message: `Cần có combo bắp nước từ ${rule.minConcessions.toLocaleString('vi-VN')}đ để dùng mã này.` }
+	}
+	if (rule.weekday !== undefined) {
+		const day = new Date(`${showDate}T00:00:00Z`).getUTCDay()
+		if (!showDate || Number.isNaN(day) || day !== rule.weekday) {
+			return { success: false, message: 'Mã này chỉ áp dụng cho suất chiếu vào Thứ Ba.' }
+		}
+	}
+	let discountAmount = rule.type === 'percent' ? Math.round(amount * rule.value / 100) : rule.value
+	if (rule.maxDiscount) discountAmount = Math.min(discountAmount, rule.maxDiscount)
+	discountAmount = Math.min(discountAmount, amount)
+	return { success: true, code: cleanCode, discountAmount, ownedVoucher: owned || null }
+}
+
+function persistState(nextState) {
+	server.db.setState(nextState)
+	server.db.write()
+}
+
+function userWithoutPassword(user) {
+	if (!user) return null
+	const { password, ...safeUser } = user
+	return safeUser
+}
 
 // Bind the router db to the server
 server.db = router.db
@@ -107,6 +192,131 @@ server.post('/change-password', (req, res) => {
 
 	server.db.get('users').find({ id: user.id }).assign({ password: newPassword }).write()
 	return res.status(200).json({ success: true, message: 'Đổi mật khẩu thành công trên hệ thống!' })
+})
+
+// Redeem a reward and write its points transaction in one server-side operation.
+server.post('/member/redeem', (req, res) => {
+	const user = resolveRequestUser(req, res, true)
+	if (!user) return
+	const { rewardId, requestId } = req.body || {}
+	if (!requestId || String(requestId).length > 100) {
+		return res.status(400).json({ success: false, message: 'Thiếu mã giao dịch đổi quà.' })
+	}
+	const state = JSON.parse(JSON.stringify(server.db.getState()))
+	state.points_transactions = Array.isArray(state.points_transactions) ? state.points_transactions : []
+	const prior = state.points_transactions.find(tx => tx.requestId === requestId)
+	if (prior) {
+		if (String(prior.userId) !== String(user.id)) return res.status(409).json({ success: false, message: 'Mã giao dịch đã được sử dụng.' })
+		if (String(prior.rewardId) !== String(rewardId)) return res.status(409).json({ success: false, message: 'Mã giao dịch đã gắn với phần thưởng khác.' })
+		const priorUser = state.users.find(u => String(u.id) === String(user.id))
+		const priorReward = (state.member_rewards || []).find(item => String(item.id) === String(prior.rewardId))
+		const priorVoucher = (priorUser?.vouchers || []).find(item => item.id === prior.voucherId)
+		return res.json({ success: true, transaction: prior, reward: priorReward, voucher: priorVoucher, user: userWithoutPassword(priorUser) })
+	}
+	const reward = (state.member_rewards || []).find(item => String(item.id) === String(rewardId))
+	if (!reward) return res.status(404).json({ success: false, message: 'Phần thưởng không tồn tại.' })
+	const points = Number(reward.points)
+	const target = state.users.find(u => String(u.id) === String(user.id))
+	if (!Number.isFinite(points) || points <= 0) return res.status(400).json({ success: false, message: 'Số điểm đổi quà không hợp lệ.' })
+	if ((Number(target.points) || 0) < points) {
+		return res.status(409).json({ success: false, code: 'INSUFFICIENT_POINTS', message: 'Số dư điểm hiện tại không đủ để đổi quà.' })
+	}
+
+	const now = new Date()
+	const expiryDays = Math.max(1, Number(reward.expiryDays) || 30)
+	const expiresAt = new Date(now.getTime() + expiryDays * 86400000).toISOString()
+	const voucher = {
+		id: `V-${requestId}`,
+		code: reward.code,
+		name: reward.title,
+		points,
+		category: reward.category,
+		discount: reward.description,
+		status: 'active',
+		redeemedAt: now.toISOString(),
+		expiresAt,
+	}
+	target.points = (Number(target.points) || 0) - points
+	target.vouchers = [...(target.vouchers || []), voucher]
+	target.pointsHistory = [...(target.pointsHistory || [])]
+	target.pointsHistory.unshift({
+		id: `PT-${requestId}`,
+		requestId,
+		title: `Đổi quà: ${reward.title}`,
+		points: -points,
+		date: now.toISOString(),
+		code: reward.code,
+		type: 'redeem',
+	})
+	const transaction = {
+		requestId,
+		userId: target.id,
+		rewardId: reward.id,
+		points: -points,
+		voucherId: voucher.id,
+		createdAt: now.toISOString(),
+		remainingPoints: target.points,
+	}
+	state.points_transactions.push(transaction)
+	persistState(state)
+	return res.status(201).json({ success: true, transaction, voucher, user: userWithoutPassword(target) })
+})
+
+server.post('/vouchers/validate', (req, res) => {
+	const user = resolveRequestUser(req, res, false)
+	if (req.headers.authorization && !user) return
+	const result = calculateServerVoucher(req.body?.code, user, req.body || {})
+	return res.status(result.success ? 200 : 400).json(result)
+})
+
+// Commit the ticket, consume a member voucher, and award points atomically.
+server.post('/checkout/complete', (req, res) => {
+	const user = resolveRequestUser(req, res, false)
+	if (req.headers.authorization && !user) return
+	const ticket = req.body?.ticket
+	const context = req.body?.voucherContext || {}
+	if (!ticket?.id) return res.status(400).json({ success: false, message: 'Thiếu mã đặt vé.' })
+
+	const state = JSON.parse(JSON.stringify(server.db.getState()))
+	state.bookings = Array.isArray(state.bookings) ? state.bookings : []
+	state.voucher_uses = Array.isArray(state.voucher_uses) ? state.voucher_uses : []
+	const priorBooking = state.bookings.find(item => String(item.id) === String(ticket.id))
+	if (priorBooking) return res.json({ success: true, ticket: priorBooking, user: user ? userWithoutPassword(state.users.find(u => String(u.id) === String(user.id))) : null, duplicate: true })
+
+	let committedTicket = { ...ticket }
+	if (ticket.voucherCode) {
+		const targetUser = user ? state.users.find(u => String(u.id) === String(user.id)) : null
+		const validation = calculateServerVoucher(ticket.voucherCode, targetUser, context)
+		if (!validation.success) return res.status(409).json(validation)
+		committedTicket.discountAmount = validation.discountAmount
+		committedTicket.total = Math.max(0, Number(context.rawTotal) - validation.discountAmount)
+		if (validation.ownedVoucher) {
+			validation.ownedVoucher.status = 'used'
+			validation.ownedVoucher.usedAt = new Date().toISOString()
+			validation.ownedVoucher.bookingId = ticket.id
+			state.voucher_uses.push({ userId: targetUser.id, voucherId: validation.ownedVoucher.id, code: validation.code, bookingId: ticket.id, usedAt: validation.ownedVoucher.usedAt })
+		}
+	}
+
+	state.bookings.unshift(committedTicket)
+	let updatedUser = null
+	if (user) {
+		updatedUser = state.users.find(u => String(u.id) === String(user.id))
+		const earnedPoints = Math.max(0, Math.round((Number(committedTicket.total) || 0) / 1000))
+		if (earnedPoints > 0) {
+			updatedUser.points = (Number(updatedUser.points) || 0) + earnedPoints
+			updatedUser.pointsHistory = [...(updatedUser.pointsHistory || [])]
+			updatedUser.pointsHistory.unshift({
+				id: `PE-${ticket.id}`,
+				title: `Tích điểm đặt vé #${ticket.id}`,
+				points: earnedPoints,
+				date: new Date().toISOString(),
+				type: 'earn',
+			})
+		}
+	}
+	persistState(state)
+	return res.status(201).json({ success: true, ticket: committedTicket, user: updatedUser ? userWithoutPassword(updatedUser) : null })
 })
 
 // Custom endpoint to reset DB to seed state (used by Admin portal reset button)

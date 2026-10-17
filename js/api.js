@@ -7,9 +7,10 @@
 
 // Auto-detect API base endpoint (Vite proxy /api -> localhost:3000, or fallback direct)
 const isBrowser = typeof window !== "undefined"
-const API_BASE = isBrowser && (window.location.port === "5173" || window.location.port === "4173")
+const configuredApiBase = import.meta.env?.VITE_API_BASE_URL
+const API_BASE = configuredApiBase || (isBrowser && (window.location.port === "5173" || window.location.port === "4173")
 	? "/api"
-	: (typeof process !== "undefined" && process.env?.BACKEND_URL) || "http://localhost:3000"
+	: "http://localhost:3000")
 
 const TOKEN_KEY = "beta_auth_token"
 
@@ -180,6 +181,30 @@ export async function apiChangePassword(payload) {
 		body: JSON.stringify(payload),
 	})
 	return res.ok ? { success: true, message: res.data?.message || "Đổi mật khẩu thành công!" } : { success: false, message: res.error || "Không thể đổi mật khẩu" }
+}
+
+export async function apiRedeemMemberReward(rewardId, requestId) {
+	const res = await request("/member/redeem", {
+		method: "POST",
+		body: JSON.stringify({ rewardId, requestId }),
+	})
+	return res.ok ? res.data : { success: false, message: res.error || "Không thể đổi quà lúc này." }
+}
+
+export async function apiValidateVoucher(payload) {
+	const res = await request("/vouchers/validate", {
+		method: "POST",
+		body: JSON.stringify(payload),
+	})
+	return res.ok ? res.data : { success: false, message: res.error || "Voucher không hợp lệ." }
+}
+
+export async function apiCompleteCheckout(ticket, voucherContext) {
+	const res = await request("/checkout/complete", {
+		method: "POST",
+		body: JSON.stringify({ ticket, voucherContext }),
+	})
+	return res.ok ? res.data : { success: false, message: res.error || "Không thể hoàn tất đơn vé." }
 }
 
 /**
