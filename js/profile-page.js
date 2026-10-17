@@ -1,5 +1,5 @@
 import { setupHeaderAndFooter, formatCurrency, formatDateVN, showToast, getCurrentUser, saveUserSession, translateDom, getSavedLang } from "./common.js"
-import { getBookingHistory, updateUserInDatabase, cancelBookingTicket, VOUCHER_LIST } from "./storage.js"
+import { getBookingHistory, updateUserInDatabase, changeUserPassword, cancelBookingTicket, VOUCHER_LIST } from "./storage.js"
 import { generateQRCodeSVG } from "./qrcode.js"
 
 const DEFAULT_PROFILE = {
@@ -185,30 +185,68 @@ document.addEventListener("DOMContentLoaded", async () => {
 		})
 	})
 
-	// 7. Change Password Form
+	// 7. Change Password Form with Old Password Verification & Server Sync
 	const passForm = document.getElementById("form-change-password")
-	passForm?.addEventListener("submit", e => {
+	const submitPassBtn = passForm?.querySelector("button[type='submit']")
+
+	passForm?.addEventListener("submit", async e => {
 		e.preventDefault()
-		const oldPass = document.getElementById("old-pass")?.value
-		const newPass = document.getElementById("new-pass")?.value
-		const confirmPass = document.getElementById("confirm-pass")?.value
+		const oldPass = document.getElementById("old-pass")?.value || ""
+		const newPass = document.getElementById("new-pass")?.value || ""
+		const confirmPass = document.getElementById("confirm-pass")?.value || ""
+
+		if (!oldPass) {
+			showToast("Vui lòng nhập mật khẩu hiện tại của bạn.", "warning")
+			document.getElementById("old-pass")?.focus()
+			return
+		}
 
 		if (newPass.length < 6) {
 			showToast("Mật khẩu mới phải có ít nhất 6 ký tự.", "warning")
+			document.getElementById("new-pass")?.focus()
+			return
+		}
+
+		if (oldPass === newPass) {
+			showToast("Mật khẩu mới không được trùng với mật khẩu hiện tại!", "warning")
+			document.getElementById("new-pass")?.focus()
 			return
 		}
 
 		if (newPass !== confirmPass) {
 			showToast("Mật khẩu mới và xác nhận mật khẩu không trùng khớp!", "warning")
+			document.getElementById("confirm-pass")?.focus()
 			return
 		}
 
-		user.password = newPass
-		saveUserSession(user)
-		updateUserInDatabase(user)
+		if (submitPassBtn) {
+			submitPassBtn.disabled = true
+			submitPassBtn.dataset.origText = submitPassBtn.textContent
+			submitPassBtn.textContent = "Đang xác thực với hệ thống..."
+		}
 
-		passForm.reset()
-		showToast("Đổi mật khẩu thành công! Hãy ghi nhớ mật khẩu mới của bạn.", "success")
+		try {
+			// Xác minh mật khẩu cũ và lưu lên server
+			const res = await changeUserPassword(oldPass, newPass)
+
+			if (!res.success) {
+				showToast(res.message || "Đổi mật khẩu thất bại! Vui lòng thử lại.", "error", 5000)
+				return
+			}
+
+			// Chỉ báo thành công và xóa form khi server cập nhật thành công
+			user.password = newPass
+			passForm.reset()
+			showToast("🎉 Đổi mật khẩu thành công! Mật khẩu mới đã được cập nhật an toàn.", "success", 5000)
+		} catch (err) {
+			console.error("[ChangePassword] Error:", err)
+			showToast("Lỗi kết nối máy chủ! Không thể đổi mật khẩu lúc này.", "error")
+		} finally {
+			if (submitPassBtn) {
+				submitPassBtn.disabled = false
+				submitPassBtn.textContent = submitPassBtn.dataset.origText || "Cập Nhật Mật Khẩu"
+			}
+		}
 	})
 
 	// 8. Modal E-Ticket Close
@@ -220,6 +258,12 @@ document.addEventListener("DOMContentLoaded", async () => {
 	})
 	modal?.addEventListener("click", e => {
 		if (e.target === modal) {
+			modal.classList.remove("active")
+			document.body.style.overflow = ""
+		}
+	})
+	document.addEventListener("keydown", e => {
+		if (e.key === "Escape" && modal?.classList.contains("active")) {
 			modal.classList.remove("active")
 			document.body.style.overflow = ""
 		}
@@ -389,19 +433,26 @@ document.addEventListener("DOMContentLoaded", async () => {
 			})
 			.join("")
 
-		// Attach view e-ticket clicks
+		// Attach view e-ticket clicks with robust string ID lookup
 		container.querySelectorAll(".btn-view-eticket").forEach(btn => {
 			btn.addEventListener("click", () => {
-				const ticketId = btn.dataset.ticketId
-				const targetTicket = history.find(t => t.id === ticketId)
-				if (targetTicket) openProfileTicketModal(targetTicket)
+				const ticketId = String(btn.dataset.ticketId || "").trim()
+				const allTickets = getBookingHistory()
+				const targetTicket =
+					allTickets.find(t => String(t.id || t.bookingCode || "").trim() === ticketId) ||
+					history.find(t => String(t.id || t.bookingCode || "").trim() === ticketId)
+				if (targetTicket) {
+					openProfileTicketModal(targetTicket)
+				} else {
+					showToast(`Không tìm thấy thông tin chi tiết vé ${ticketId}`, "error")
+				}
 			})
 		})
 
 		// Attach cancel ticket clicks
 		container.querySelectorAll(".btn-cancel-ticket").forEach(btn => {
 			btn.addEventListener("click", () => {
-				const ticketId = btn.dataset.ticketId
+				const ticketId = String(btn.dataset.ticketId || "").trim()
 				if (confirm(`Bạn có chắc chắn muốn hủy vé ${ticketId}? Tiền vé sẽ được hoàn về phương thức thanh toán ban đầu.`)) {
 					cancelBookingTicket(ticketId)
 					showToast(`Đã hủy vé ${ticketId} thành công.`, "info")
@@ -416,21 +467,37 @@ document.addEventListener("DOMContentLoaded", async () => {
 	function openProfileTicketModal(t) {
 		const modal = document.getElementById("profile-ticket-modal")
 		const body = document.getElementById("profile-ticket-modal-body")
-		if (!modal || !body) return
+		if (!modal || !body || !t) return
 
+		const ticketId = t.id || t.bookingCode || "BT-" + Math.floor(100000 + Math.random() * 900000)
 		const isCancelled = t.status === "cancelled" || t.bookingStatus === "cancelled"
 		const isDone = t.status === "done"
 		const isPaid = !isCancelled && (t.paymentStatus === "paid" || t.status === "paid")
 		const isConfirmed = !isCancelled && !isPaid && !isDone && (t.bookingStatus === "confirmed" || t.status === "confirmed")
+		const isPending = !isCancelled && !isPaid && !isDone && !isConfirmed
 		const qrStatus = isCancelled ? "CANCELLED" : isDone ? "USED" : isPaid ? "VALID_PAID" : isConfirmed ? "CONFIRMED_UNPAID" : "PENDING"
+
+		const cName = t.customerName || t.userName || "Khách Hàng"
+		const cPhone = t.customerPhone || t.userPhone || "Chưa cập nhật"
+		const cEmail = t.customerEmail || t.userEmail || "Chưa cập nhật"
+		const seatsText = Array.isArray(t.seats) ? t.seats.join(", ") : t.seats || "Chưa chọn ghế"
+		const concessionsText = t.concessions || "Không kèm bắp nước"
+		const movieTitle = t.movieTitle || "Vé Xem Phim"
+		const cinemaName = t.cinemaName || "Beta Cinemas"
+		const screenName = t.screenName || "Phòng 1"
+		const formatName = t.formatName || "2D"
+		const timeSlot = t.time || "19:00"
+		const dateFormatted = formatDateVN(t.date) || "Hôm nay"
+		const totalAmount = t.total || 0
+		const pMethod = (t.paymentMethod || "QR").toUpperCase()
 
 		const qrSvg = generateQRCodeSVG(
 			JSON.stringify({
-				ticket: t.id,
-				movie: t.movieTitle,
-				cinema: t.cinemaName,
-				time: `${t.time} ${t.date}`,
-				seats: t.seats,
+				ticket: ticketId,
+				movie: movieTitle,
+				cinema: cinemaName,
+				time: `${timeSlot} ${t.date || ""}`,
+				seats: seatsText,
 				status: qrStatus,
 			}),
 			{
@@ -443,34 +510,34 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 		let bannerBg = "#10b981"
 		let badgeIcon = "✓"
-		let statusTitle = "VÉ XEM PHIM ĐIỆN TỬ"
-		let hintText = "Xuất trình mã QR này tại quầy hoặc máy in vé tự động"
-		let totalLabel = "Tổng Tiền Đã Thanh Toán"
+		let statusTitle = "VÉ ĐÃ THANH TOÁN - HỢP LỆ"
+		let hintText = "Xuất trình mã QR này tại quầy hoặc máy in vé tự động tại rạp"
+		let statusBadgeText = `🟢 ĐÃ THANH TOÁN (${pMethod})`
 
 		if (isCancelled) {
 			bannerBg = "#f38ba8"
 			badgeIcon = "✕"
 			statusTitle = "VÉ ĐÃ HỦY - KHÔNG HIỆU LỰC"
 			hintText = "Đơn vé này đã bị hủy. Chỗ ngồi đã được giải phóng trở lại rạp."
-			totalLabel = "Tổng Tiền (Đơn Đã Hủy)"
+			statusBadgeText = "🔴 ĐÃ HỦY VÉ"
 		} else if (isDone) {
 			bannerBg = "#89b4fa"
 			badgeIcon = "✓"
 			statusTitle = "VÉ ĐÃ SỬ DỤNG - ĐÃ SOÁT VÉ"
 			hintText = "Vé đã được soát vào rạp. Chúc bạn đã có buổi xem phim vui vẻ!"
-			totalLabel = "Tổng Tiền Đã Thanh Toán"
+			statusBadgeText = "🔵 ĐÃ SOÁT VÉ"
 		} else if (isConfirmed) {
 			bannerBg = "#fab387"
 			badgeIcon = "⏳"
 			statusTitle = "VÉ ĐÃ XÁC NHẬN - CHỜ THANH TOÁN"
-			hintText = "Đơn vé đã được nhân viên duyệt. Vui lòng hoàn tất thanh toán trước khi vào rạp."
-			totalLabel = "Tổng Tiền Cần Thanh Toán"
+			hintText = "Đơn vé đã được duyệt. Vui lòng thanh toán trước khi vào phòng chiếu."
+			statusBadgeText = `🟡 CHỜ THANH TOÁN (${pMethod})`
 		} else if (isPending) {
 			bannerBg = "#f9e2af"
 			badgeIcon = "⏳"
 			statusTitle = "VÉ CHỜ XÁC NHẬN ĐƠN"
 			hintText = "Đơn vé đang chờ rạp duyệt bước 1. Vui lòng chờ trong giây lát."
-			totalLabel = "Tổng Tiền Cần Thanh Toán"
+			statusBadgeText = "⏳ CHỜ DUYỆT ĐƠN"
 		}
 
 		body.innerHTML = `
@@ -478,12 +545,12 @@ document.addEventListener("DOMContentLoaded", async () => {
 				<div class="eticket-top-banner" style="background: ${bannerBg};">
 					<div class="et-success-badge" style="color: ${bannerBg};">${badgeIcon}</div>
 					<h2 style="color:#11111b; font-size: 20px; font-weight:900; margin:0 0 4px; text-transform:uppercase;">${statusTitle}</h2>
-					<p style="font-size: 13px; color: rgba(17,17,27,0.85); margin:0;">Mã vé: ${t.id} • Beta Cinemas</p>
+					<p style="font-size: 13px; color: rgba(17,17,27,0.85); margin:0;">Mã vé: ${ticketId} • Phương thức: ${pMethod} • Beta Cinemas</p>
 				</div>
 				<div class="eticket-ticket-pass">
 					<div class="et-code-banner">
 						<div class="code-label">MÃ QUÉT TẠI RẠP (KIOSK)</div>
-						<div class="code-value">${t.id}</div>
+						<div class="code-value">${ticketId}</div>
 					</div>
 					<div class="et-qr-container">
 						<div class="qr-code-box">
@@ -493,47 +560,62 @@ document.addEventListener("DOMContentLoaded", async () => {
 					</div>
 					<div class="et-info-grid">
 						<div class="et-info-item" style="grid-column: 1 / -1;">
+							<span class="et-lbl">Khách hàng</span>
+							<span class="et-val val-gold">${cName} (${cPhone}) - ${cEmail}</span>
+						</div>
+						<div class="et-info-item" style="grid-column: 1 / -1;">
 							<span class="et-lbl">Phim</span>
-							<span class="et-val val-gold">${t.movieTitle}</span>
+							<span class="et-val val-gold">${movieTitle}</span>
 						</div>
 						<div class="et-info-item">
 							<span class="et-lbl">Rạp</span>
-							<span class="et-val">${t.cinemaName}</span>
+							<span class="et-val">${cinemaName}</span>
 						</div>
 						<div class="et-info-item">
 							<span class="et-lbl">Phòng / Định dạng</span>
-							<span class="et-val">${t.screenName || "Phòng 1"} (${t.formatName || "2D"})</span>
+							<span class="et-val">${screenName} (${formatName})</span>
 						</div>
 						<div class="et-info-item">
 							<span class="et-lbl">Thời Gian</span>
-							<span class="et-val">${t.time} - ${formatDateVN(t.date)}</span>
+							<span class="et-val">${timeSlot} - ${dateFormatted}</span>
 						</div>
 						<div class="et-info-item">
 							<span class="et-lbl">Ghế Ngồi</span>
-							<span class="et-val val-green">${t.seats}</span>
+							<span class="et-val val-green">${seatsText}</span>
 						</div>
 						<div class="et-info-item" style="grid-column: 1 / -1;">
 							<span class="et-lbl">Bắp Nước</span>
-							<span class="et-val">${t.concessions || "Không kèm bắp"}</span>
+							<span class="et-val">${concessionsText}</span>
 						</div>
-						<div class="et-info-item" style="grid-column: 1 / -1; border-top: 1px dashed rgba(255,255,255,0.15); padding-top: 8px;">
-							<span class="et-lbl">${totalLabel}</span>
-							<span class="et-val val-gold">${formatCurrency(t.total)}</span>
+						<div class="et-info-item" style="grid-column: 1 / -1; border-top: 1px dashed rgba(255,255,255,0.15); padding-top: 10px;">
+							<div style="display:flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+								<div>
+									<span class="et-lbl">${isCancelled ? "Tổng Tiền (Đơn Đã Hủy)" : "Tổng Tiền"}</span>
+									<div class="et-val val-gold" style="font-size: 18px;">${formatCurrency(totalAmount)}</div>
+								</div>
+								<div style="text-align: right;">
+									<span class="et-lbl">Trạng thái</span>
+									<div style="color: ${bannerBg}; font-weight: 800; font-size: 13px;">${statusBadgeText}</div>
+								</div>
+							</div>
 						</div>
 					</div>
 					<div class="et-barcode-wrap">
 						<div class="barcode-strip"></div>
-						<div class="barcode-number">${t.id} - ${qrStatus} - KIOSK READY</div>
+						<div class="barcode-number">${ticketId} - ${qrStatus} - KIOSK READY</div>
 					</div>
 				</div>
-				<div class="eticket-bottom-actions">
-					<button type="button" class="btn-et-action btn-save-ticket" id="btn-print-profile-ticket">
+				<div class="eticket-bottom-actions" style="display: flex; gap: 10px; justify-content: center; padding: 16px; background: inherit;">
+					<button type="button" class="btn-et-action btn-save-ticket" id="btn-print-profile-ticket" style="cursor: pointer;">
 						<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
 							<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
 							<polyline points="7 10 12 15 17 10"></polyline>
 							<line x1="12" y1="15" x2="12" y2="3"></line>
 						</svg>
 						In Vé / Lưu Vé
+					</button>
+					<button type="button" class="btn-et-action btn-close-modal-bottom" id="btn-close-profile-ticket-bottom" style="background: rgba(88, 91, 112, 0.35); color: inherit; border: 1px solid rgba(88, 91, 112, 0.4); padding: 10px 20px; border-radius: 8px; font-weight: 700; cursor: pointer;">
+						✕ Đóng
 					</button>
 				</div>
 			</div>
@@ -544,6 +626,11 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 		document.getElementById("btn-print-profile-ticket")?.addEventListener("click", () => {
 			window.print()
+		})
+
+		document.getElementById("btn-close-profile-ticket-bottom")?.addEventListener("click", () => {
+			modal.classList.remove("active")
+			document.body.style.overflow = ""
 		})
 
 		translateDom(getSavedLang())

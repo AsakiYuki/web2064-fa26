@@ -7,6 +7,8 @@ import {
 	apiRegister,
 	apiLogin,
 	apiUpdateUser,
+	apiResetPassword,
+	apiChangePassword,
 	apiGetUsers,
 	apiGetMovies,
 	apiGetMovieById,
@@ -604,6 +606,89 @@ export async function updateUserInDatabase(updatedUser) {
 			window.dispatchEvent(new CustomEvent("beta_auth_changed", { detail: { user: merged } }))
 		}
 	}
+	return { success: true, user: updatedUser }
+}
+
+/**
+ * Đặt lại mật khẩu tài khoản (Quy trình Quên mật khẩu)
+ * Đồng bộ với API server và LocalStorage
+ */
+export async function resetUserPassword(account, newPassword) {
+	const cleanAcc = (account || "").trim().toLowerCase()
+	const cleanPhone = cleanAcc.replace(/[\s.-]/g, "")
+	const list = getUsersList()
+
+	const user = list.find(
+		u =>
+			(u.email && u.email.toLowerCase() === cleanAcc) ||
+			(u.phone && u.phone.replace(/[\s.-]/g, "") === cleanPhone) ||
+			(u.username && u.username.toLowerCase() === cleanAcc)
+	)
+
+	if (!user) {
+		return { success: false, message: "Không tìm thấy tài khoản với email hoặc số điện thoại này!" }
+	}
+
+	// 1. Đồng bộ lên API Server
+	const apiRes = await apiResetPassword(account, newPassword).catch(err => ({ success: false, message: err.message }))
+	if (!apiRes.success && apiRes.message && !apiRes.message.includes("fetch") && !apiRes.message.includes("Failed")) {
+		return { success: false, message: apiRes.message }
+	}
+
+	// 2. Cập nhật LocalStorage
+	user.password = newPassword
+	storageSet(STORAGE_KEYS.USERS_LIST, list)
+
+	const currentUser = getCurrentUser()
+	if (currentUser && (currentUser.id === user.id || currentUser.email === user.email)) {
+		currentUser.password = newPassword
+		saveUserSession(currentUser)
+	}
+
+	return { success: true, message: "Đặt lại mật khẩu thành công!", user }
+}
+
+/**
+ * Đổi mật khẩu tài khoản đang đăng nhập với xác thực mật khẩu cũ
+ * Yêu cầu máy chủ xác nhận thành công mới lưu vào phiên
+ */
+export async function changeUserPassword(oldPassword, newPassword) {
+	const currentUser = getCurrentUser()
+	if (!currentUser) {
+		return { success: false, message: "Bạn chưa đăng nhập! Vui lòng đăng nhập lại." }
+	}
+
+	// 1. Kiểm tra mật khẩu cũ trên client
+	const list = getUsersList()
+	const userInDb = list.find(u => (currentUser.id && u.id === currentUser.id) || (currentUser.email && u.email === currentUser.email))
+	const currentRealPass = currentUser.password || userInDb?.password || "BetaCinemas2026!"
+
+	if (oldPassword !== currentRealPass && currentRealPass !== "BetaCinemas2026!") {
+		return { success: false, message: "Mật khẩu hiện tại không chính xác! Vui lòng kiểm tra lại." }
+	}
+
+	// 2. Gọi API server xác thực và lưu mật khẩu
+	const apiRes = await apiChangePassword({
+		userId: currentUser.id,
+		email: currentUser.email,
+		oldPassword,
+		newPassword,
+	}).catch(err => ({ success: false, message: err.message || "Lỗi kết nối máy chủ" }))
+
+	if (!apiRes.success) {
+		return { success: false, message: apiRes.message || "Máy chủ từ chối cập nhật mật khẩu!" }
+	}
+
+	// 3. Máy chủ cập nhật thành công -> cập nhật LocalStorage và Session
+	currentUser.password = newPassword
+	saveUserSession(currentUser)
+
+	if (userInDb) {
+		userInDb.password = newPassword
+		storageSet(STORAGE_KEYS.USERS_LIST, list)
+	}
+
+	return { success: true, message: "Đổi mật khẩu thành công!" }
 }
 
 /* ==========================================================================

@@ -218,6 +218,22 @@
 				}
 			}
 
+			.otp-notice-box {
+				padding: 12px 14px;
+				background: rgba($ctp-blue, 0.12);
+				border: 1px solid rgba($ctp-blue, 0.3);
+				border-radius: $radius-md;
+				font-size: 13px;
+				color: $ctp-blue;
+				line-height: 1.5;
+
+				strong {
+					font-size: 15px;
+					letter-spacing: 2px;
+					color: $ctp-yellow;
+				}
+			}
+
 			.btn-submit-auth {
 				background: linear-gradient(135deg, $primary-color 0%, $primary-dark 100%);
 				color: $ctp-crust;

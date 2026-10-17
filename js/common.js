@@ -40,7 +40,18 @@ export function formatCurrency(amount) {
 /** Format Date to Vietnamese display: e.g. "Thứ Bảy, 26/09/2026" */
 export function formatDateVN(dateStr) {
 	if (!dateStr) return ""
+	if (typeof dateStr === "string" && (dateStr.includes("Thứ") || dateStr.includes("Chủ Nhật"))) return dateStr
+	const dmyMatch = typeof dateStr === "string" ? dateStr.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/) : null
+	if (dmyMatch) {
+		const [, d, m, y] = dmyMatch
+		const dateObj = new Date(Number(y), Number(m) - 1, Number(d))
+		if (!isNaN(dateObj.getTime())) {
+			const days = ["Chủ Nhật", "Thứ Hai", "Thứ Ba", "Thứ Tư", "Thứ Năm", "Thứ Sáu", "Thứ Bảy"]
+			return `${days[dateObj.getDay()]}, ${d.padStart(2, "0")}/${m.padStart(2, "0")}/${y}`
+		}
+	}
 	const date = new Date(dateStr)
+	if (isNaN(date.getTime())) return String(dateStr)
 	const days = ["Chủ Nhật", "Thứ Hai", "Thứ Ba", "Thứ Tư", "Thứ Năm", "Thứ Sáu", "Thứ Bảy"]
 	const dayName = days[date.getDay()]
 	const d = String(date.getDate()).padStart(2, "0")
@@ -244,6 +255,8 @@ import {
 	logoutUser,
 	registerNewUser,
 	authenticateUser,
+	resetUserPassword,
+	getUsersList,
 	isAccountRegistered,
 	isUserAdmin,
 	isCurrentAdmin,
@@ -407,18 +420,6 @@ export function openAuthModal(defaultTab = "login") {
 					<button type="button" class="auth-tab-btn" id="auth-tab-register" data-tab="register">ĐĂNG KÝ</button>
 				</div>
 				<div class="auth-body">
-					<!-- Social Logins -->
-					<div class="social-login-grid">
-						<button type="button" class="btn-social btn-google" id="btn-social-google">
-							<span>G</span> Google
-						</button>
-						<button type="button" class="btn-social btn-facebook" id="btn-social-facebook">
-							<span>f</span> Facebook
-						</button>
-					</div>
-
-					<div class="auth-divider-line"><span>Hoặc</span></div>
-
 					<!-- LOGIN FORM -->
 					<form id="form-auth-login" class="auth-form" novalidate>
 						<div class="form-group">
@@ -492,6 +493,64 @@ export function openAuthModal(defaultTab = "login") {
 							Đã có tài khoản? <a id="switch-to-login">Đăng nhập</a>
 						</div>
 					</form>
+
+					<!-- FORGOT PASSWORD FORM -->
+					<form id="form-auth-forgot" class="auth-form" style="display: none;" novalidate>
+						<div class="auth-title-intro" style="margin-bottom: 16px;">
+							<h3 style="font-size: 18px; margin-bottom: 4px;">Đặt lại mật khẩu</h3>
+							<p style="font-size: 13px; color: var(--text-secondary, #a6adc8);">Nhập email hoặc số điện thoại để nhận mã xác minh OTP</p>
+						</div>
+
+						<!-- Step 1: Input Account -->
+						<div class="form-group" id="group-forgot-account">
+							<label for="forgot-account">Email hoặc Số điện thoại <span class="req">*</span></label>
+							<div class="input-icon-wrap">
+								<input type="text" id="forgot-account" placeholder="username@example.com hoặc SĐT" />
+							</div>
+							<span class="field-error-msg" id="err-forgot-account"></span>
+						</div>
+
+						<button type="button" class="btn-submit-auth" id="btn-forgot-send-otp">GỬI MÃ XÁC MINH OTP</button>
+
+						<!-- Step 2: Input OTP & New Password (initially hidden) -->
+						<div id="forgot-step-reset" style="display: none; flex-direction: column; gap: 14px; margin-top: 6px;">
+							<div class="otp-notice-box" style="padding: 10px 14px; background: rgba(137, 180, 250, 0.12); border: 1px solid rgba(137, 180, 250, 0.3); border-radius: 8px; font-size: 13px; color: #89b4fa; line-height: 1.4;">
+								<span>Mã xác minh OTP đã được tạo: <strong id="forgot-otp-display" style="font-size: 15px; letter-spacing: 2px; color: #f9e2af;"></strong> (có hiệu lực 5 phút)</span>
+							</div>
+
+							<div class="form-group">
+								<label for="forgot-otp">Mã xác minh (OTP 6 số) <span class="req">*</span></label>
+								<div class="input-icon-wrap">
+									<input type="text" id="forgot-otp" maxlength="6" placeholder="Ví dụ: 123456" />
+								</div>
+								<span class="field-error-msg" id="err-forgot-otp"></span>
+							</div>
+
+							<div class="form-group">
+								<label for="forgot-new-password">Mật khẩu mới <span class="req">*</span></label>
+								<div class="input-icon-wrap">
+									<input type="password" id="forgot-new-password" placeholder="Tối thiểu 6 ký tự" />
+									<button type="button" class="toggle-pwd-btn" data-target="forgot-new-password" aria-label="Hiện mật khẩu">👁</button>
+								</div>
+								<span class="field-error-msg" id="err-forgot-new-password"></span>
+							</div>
+
+							<div class="form-group">
+								<label for="forgot-confirm-password">Xác nhận mật khẩu mới <span class="req">*</span></label>
+								<div class="input-icon-wrap">
+									<input type="password" id="forgot-confirm-password" placeholder="Nhập lại mật khẩu mới" />
+									<button type="button" class="toggle-pwd-btn" data-target="forgot-confirm-password" aria-label="Hiện mật khẩu">👁</button>
+								</div>
+								<span class="field-error-msg" id="err-forgot-confirm-password"></span>
+							</div>
+
+							<button type="submit" class="btn-submit-auth" id="btn-forgot-confirm-submit">XÁC NHẬN ĐẶT LẠI MẬT KHẨU</button>
+						</div>
+
+						<div class="auth-footer-prompt" style="margin-top: 14px;">
+							<a id="switch-forgot-to-login">← Quay lại Đăng nhập</a>
+						</div>
+					</form>
 				</div>
 			</div>
 		`
@@ -517,6 +576,7 @@ function setAuthTab(tab) {
 	const regTabBtn = document.getElementById("auth-tab-register")
 	const loginForm = document.getElementById("form-auth-login")
 	const regForm = document.getElementById("form-auth-register")
+	const forgotForm = document.getElementById("form-auth-forgot")
 
 	// Clear errors
 	document.querySelectorAll(".field-error-msg").forEach(el => {
@@ -532,11 +592,19 @@ function setAuthTab(tab) {
 		regTabBtn?.classList.remove("active")
 		if (loginForm) loginForm.style.display = "flex"
 		if (regForm) regForm.style.display = "none"
-	} else {
+		if (forgotForm) forgotForm.style.display = "none"
+	} else if (tab === "register") {
 		loginTabBtn?.classList.remove("active")
 		regTabBtn?.classList.add("active")
 		if (loginForm) loginForm.style.display = "none"
 		if (regForm) regForm.style.display = "flex"
+		if (forgotForm) forgotForm.style.display = "none"
+	} else if (tab === "forgot") {
+		loginTabBtn?.classList.remove("active")
+		regTabBtn?.classList.remove("active")
+		if (loginForm) loginForm.style.display = "none"
+		if (regForm) regForm.style.display = "none"
+		if (forgotForm) forgotForm.style.display = "flex"
 	}
 }
 
@@ -603,24 +671,6 @@ function initAuthModalEvents(modal) {
 		if (regPassInput.value.length >= 6) setFieldError("reg-password", "")
 	})
 
-	// Social Logins (Google / Facebook mock)
-	const loginSocial = provider => {
-		saveUserSession(DEFAULT_USERS[0])
-		if (typeof window !== "undefined") {
-			window.dispatchEvent(new CustomEvent("beta_auth_changed", { detail: { user: DEFAULT_USERS[0] } }))
-		}
-		try {
-			updateHeaderAccountUI()
-			updateDrawerAccountUI()
-		} catch (err) {
-			console.warn("UI update error:", err)
-		} finally {
-			closeAuthModal()
-		}
-		showToast(`Đăng nhập thành công với tài khoản ${provider}! Chào mừng bạn.`, "success")
-	}
-	document.getElementById("btn-social-google")?.addEventListener("click", () => loginSocial("Google"))
-	document.getElementById("btn-social-facebook")?.addEventListener("click", () => loginSocial("Facebook"))
 
 	// Login form submit with validation
 	document.getElementById("form-auth-login")?.addEventListener("submit", async e => {
@@ -798,9 +848,140 @@ function initAuthModalEvents(modal) {
 		)
 	})
 
+	// Quên mật khẩu: State lưu mã OTP và thông tin tài khoản đang xử lý
+	let activeResetState = null
+
 	document.getElementById("link-forgot-pwd")?.addEventListener("click", e => {
 		e.preventDefault()
-		showToast("Vui lòng kiểm tra email hoặc liên hệ hotline 1900 636807 để đặt lại mật khẩu.", "info", 5000)
+		setAuthTab("forgot")
+	})
+
+	document.getElementById("switch-forgot-to-login")?.addEventListener("click", e => {
+		e.preventDefault()
+		setAuthTab("login")
+	})
+
+	// Gửi mã OTP xác minh đặt lại mật khẩu
+	document.getElementById("btn-forgot-send-otp")?.addEventListener("click", () => {
+		const accInput = document.getElementById("forgot-account")
+		const acc = accInput?.value.trim() || ""
+
+		if (!acc) {
+			setFieldError("forgot-account", "Vui lòng nhập Email hoặc Số điện thoại đã đăng ký.")
+			return
+		}
+
+		const cleanAcc = acc.toLowerCase()
+		const cleanPhone = cleanAcc.replace(/[\s.-]/g, "")
+		const users = getUsersList()
+		const user = users.find(
+			u =>
+				(u.email && u.email.toLowerCase() === cleanAcc) ||
+				(u.phone && u.phone.replace(/[\s.-]/g, "") === cleanPhone) ||
+				(u.username && u.username.toLowerCase() === cleanAcc)
+		)
+
+		if (!user) {
+			setFieldError("forgot-account", "Không tìm thấy tài khoản với email hoặc số điện thoại này!")
+			return
+		}
+		setFieldError("forgot-account", "")
+
+		// Tạo mã OTP 6 số ngẫu nhiên
+		const otp = String(Math.floor(100000 + Math.random() * 900000))
+		activeResetState = {
+			account: acc,
+			otp,
+			expiresAt: Date.now() + 5 * 60 * 1000,
+		}
+
+		const otpDisplay = document.getElementById("forgot-otp-display")
+		if (otpDisplay) otpDisplay.textContent = otp
+
+		const stepReset = document.getElementById("forgot-step-reset")
+		if (stepReset) stepReset.style.display = "flex"
+
+		const btnSend = document.getElementById("btn-forgot-send-otp")
+		if (btnSend) btnSend.style.display = "none"
+
+		if (accInput) accInput.readOnly = true
+
+		showToast(`Mã OTP xác minh của bạn: ${otp} (có hiệu lực 5 phút)`, "info", 8000)
+	})
+
+	// Xác nhận đặt lại mật khẩu
+	document.getElementById("form-auth-forgot")?.addEventListener("submit", async e => {
+		e.preventDefault()
+
+		if (!activeResetState || Date.now() > activeResetState.expiresAt) {
+			setFieldError("forgot-otp", "Mã xác minh đã hết hạn hoặc chưa được tạo. Vui lòng bấm gửi lại mã.")
+			return
+		}
+
+		const otpInput = document.getElementById("forgot-otp")?.value.trim() || ""
+		const newPass = document.getElementById("forgot-new-password")?.value || ""
+		const confirmPass = document.getElementById("forgot-confirm-password")?.value || ""
+
+		let hasError = false
+
+		if (!otpInput) {
+			setFieldError("forgot-otp", "Vui lòng nhập mã OTP 6 chữ số.")
+			hasError = true
+		} else if (otpInput !== activeResetState.otp) {
+			setFieldError("forgot-otp", "Mã xác minh OTP không chính xác. Vui lòng thử lại.")
+			hasError = true
+		} else {
+			setFieldError("forgot-otp", "")
+		}
+
+		if (!newPass) {
+			setFieldError("forgot-new-password", "Vui lòng nhập mật khẩu mới.")
+			hasError = true
+		} else if (newPass.length < 6) {
+			setFieldError("forgot-new-password", "Mật khẩu mới phải có tối thiểu 6 ký tự.")
+			hasError = true
+		} else {
+			setFieldError("forgot-new-password", "")
+		}
+
+		if (!confirmPass) {
+			setFieldError("forgot-confirm-password", "Vui lòng xác nhận lại mật khẩu mới.")
+			hasError = true
+		} else if (confirmPass !== newPass) {
+			setFieldError("forgot-confirm-password", "Mật khẩu xác nhận không khớp với mật khẩu mới.")
+			hasError = true
+		} else {
+			setFieldError("forgot-confirm-password", "")
+		}
+
+		if (hasError) return
+
+		const res = await resetUserPassword(activeResetState.account, newPass)
+		if (!res.success) {
+			showToast(res.message || "Không thể đặt lại mật khẩu. Vui lòng thử lại sau.", "error")
+			return
+		}
+
+		showToast("🎉 Đặt lại mật khẩu thành công! Bạn có thể đăng nhập bằng mật khẩu mới.", "success", 6000)
+
+		// Điền sẵn tài khoản sang form Đăng nhập
+		const loginAccInput = document.getElementById("login-account")
+		const loginPwdInput = document.getElementById("login-password")
+		if (loginAccInput) loginAccInput.value = activeResetState.account
+		if (loginPwdInput) loginPwdInput.value = ""
+
+		// Reset form quên mật khẩu
+		activeResetState = null
+		const forgotForm = document.getElementById("form-auth-forgot")
+		if (forgotForm) forgotForm.reset()
+		const stepReset = document.getElementById("forgot-step-reset")
+		if (stepReset) stepReset.style.display = "none"
+		const btnSend = document.getElementById("btn-forgot-send-otp")
+		if (btnSend) btnSend.style.display = "block"
+		const accInput = document.getElementById("forgot-account")
+		if (accInput) accInput.readOnly = false
+
+		setAuthTab("login")
 	})
 }
 
