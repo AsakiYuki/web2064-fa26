@@ -7,6 +7,9 @@ import {
 	apiRegister,
 	apiLogin,
 	apiUpdateUser,
+	apiRedeemMemberReward,
+	apiValidateVoucher,
+	apiCompleteCheckout,
 	apiResetPassword,
 	apiGetUsers,
 	apiGetMovies,
@@ -24,7 +27,6 @@ import {
 	apiUpdateConcession,
 	apiDeleteConcession,
 	apiGetBookings,
-	apiCreateBooking,
 	apiUpdateBooking,
 	apiDeleteBooking,
 	apiGetCinemas,
@@ -1095,26 +1097,26 @@ export async function saveBookingTicket(ticket) {
 		bookingDate: ticket.bookingDate || new Date().toISOString(),
 		status: ticket.status || "pending",
 	}
-	// 1. Sync API POST /bookings
-	apiCreateBooking(newTicket).catch(err => console.warn("[API] Lỗi khi lưu đơn vé lên json-server:", err))
-
-	// 2. Sync local history
-	history.unshift(newTicket)
-	storageSet(STORAGE_KEYS.BOOKING_HISTORY, history)
-
-	let pointsSave = null
-	// Award points only after the server confirms the account update.
-	const currentUser = getCurrentUser()
-	if (currentUser) {
-		const earnedPoints = Math.round((newTicket.total || 0) / 1000)
-		if (earnedPoints > 0) {
-			const updatedUser = { ...currentUser, points: (currentUser.points || 0) + earnedPoints }
-			pointsSave = await updateUserInDatabase(updatedUser)
+	const committed = await apiCompleteCheckout(newTicket, {
+		rawTotal: Number(ticket.rawTotal ?? ticket.total) || 0,
+		concessionsTotal: Number(ticket.concessionsTotal) || 0,
+		showDate: ticket.date,
+	})
+	if (!committed.success) return { ...newTicket, saveError: committed.message || "Không thể lưu đơn vé lên máy chủ." }
+	const savedTicket = { ...newTicket, ...committed.ticket }
+	if (committed.user) {
+		delete committed.user.password
+		saveUserSession(committed.user)
+		if (typeof window !== "undefined") {
+			window.dispatchEvent(new CustomEvent("beta_auth_changed", { detail: { user: committed.user } }))
 		}
 	}
 
+	// Sync local history only after the server commits the booking and any voucher use.
+	if (!history.some(item => String(item.id) === String(savedTicket.id))) history.unshift(savedTicket)
+	storageSet(STORAGE_KEYS.BOOKING_HISTORY, history)
 	clearPendingBooking()
-	return { ...newTicket, pointsSave }
+	return { ...savedTicket, pointsSave: { success: true } }
 }
 
 export async function updateBookingStatus(id, newStatus) {
@@ -1249,7 +1251,8 @@ export const VOUCHER_LIST = [
 		value: 50000,
 		name: "Giảm trực tiếp 50.000đ",
 		description: "Giảm 50K cho đơn hàng kèm bắp nước từ 100K",
-		minOrder: 100000,
+		minOrder: 0,
+		minConcessions: 100000,
 		maxDiscount: 50000,
 	},
 	{
@@ -1258,7 +1261,8 @@ export const VOUCHER_LIST = [
 		value: 30000,
 		name: "Tặng bắp nước / Giảm 30K",
 		description: "Giảm 30.000đ quy đổi cho combo bắp nước",
-		minOrder: 50000,
+		minOrder: 0,
+		minConcessions: 50000,
 		maxDiscount: 30000,
 	},
 	{
@@ -1268,6 +1272,7 @@ export const VOUCHER_LIST = [
 		name: "Thứ Ba Vui Vẻ - Giảm 20K",
 		description: "Giảm 20K cho ngày Thứ 3 xem phim",
 		minOrder: 50000,
+		weekday: 2,
 		maxDiscount: 20000,
 	},
 	{
@@ -1281,7 +1286,7 @@ export const VOUCHER_LIST = [
 	},
 ]
 
-export function calculateVoucherDiscount(code, rawTotal) {
+export function calculateVoucherDiscount(code, rawTotal, context = {}) {
 	if (!code || typeof code !== "string") {
 		return { isValid: false, discountAmount: 0, voucher: null, message: "Vui lòng nhập mã voucher" }
 	}
@@ -1298,6 +1303,17 @@ export function calculateVoucherDiscount(code, rawTotal) {
 		}
 	}
 
+	const rewardNeedsOwnership = getMemberRewards().some(reward => String(reward.code || "").toUpperCase() === cleanCode)
+	const ownedVouchers = getCurrentUser()?.vouchers?.filter(item => String(item.code || "").toUpperCase() === cleanCode) || []
+	const ownedVoucher = ownedVouchers.find(item => item.status === "active" && new Date(item.expiresAt).getTime() > Date.now()) || ownedVouchers[0]
+	const ownedExpiry = ownedVoucher?.expiresAt ? new Date(ownedVoucher.expiresAt).getTime() : NaN
+	if (rewardNeedsOwnership && (!ownedVoucher || ownedVoucher.status !== "active" || !Number.isFinite(ownedExpiry))) {
+		return { isValid: false, discountAmount: 0, voucher, message: "Bạn cần đổi voucher bằng điểm và voucher phải còn hiệu lực." }
+	}
+	if (ownedVoucher && ownedExpiry <= Date.now()) {
+		return { isValid: false, discountAmount: 0, voucher, message: "Voucher này đã hết hạn." }
+	}
+
 	if (voucher.minOrder && rawTotal < voucher.minOrder) {
 		return {
 			isValid: false,
@@ -1305,6 +1321,12 @@ export function calculateVoucherDiscount(code, rawTotal) {
 			voucher,
 			message: `Mã ${cleanCode} chỉ áp dụng cho đơn hàng từ ${new Intl.NumberFormat("vi-VN").format(voucher.minOrder)} đ`,
 		}
+	}
+	if (voucher.minConcessions && Number(context.concessionsTotal || 0) < voucher.minConcessions) {
+		return { isValid: false, discountAmount: 0, voucher, message: `Mã ${cleanCode} cần có combo bắp nước từ ${voucher.minConcessions.toLocaleString("vi-VN")} đ` }
+	}
+	if (voucher.weekday !== undefined && new Date(`${context.showDate}T00:00:00Z`).getUTCDay() !== voucher.weekday) {
+		return { isValid: false, discountAmount: 0, voucher, message: "Mã này chỉ áp dụng cho suất chiếu vào Thứ Ba." }
 	}
 
 	let discount = 0
@@ -2033,66 +2055,25 @@ export async function redeemMemberReward(rewardId) {
 	if (!user) {
 		return { success: false, error: "NOT_LOGGED_IN", message: "Vui lòng đăng nhập để đổi quà thưởng!" }
 	}
-
-	const rewards = getMemberRewards()
-	const reward = rewards.find(r => r.id === rewardId)
-	if (!reward) {
-		return { success: false, error: "REWARD_NOT_FOUND", message: "Phần thưởng không tồn tại!" }
-	}
-
-	const userPoints = Number(user.points) || 0
-	if (userPoints < reward.points) {
-		return {
-			success: false,
-			error: "INSUFFICIENT_POINTS",
-			message: `Bạn hiện có ${userPoints} điểm, còn thiếu ${reward.points - userPoints} điểm để đổi quà này!`,
+	const requestId = globalThis.crypto?.randomUUID?.() || `redeem-${Date.now()}-${Math.random().toString(36).slice(2)}`
+	const result = await apiRedeemMemberReward(rewardId, requestId)
+	if (!result.success) return result
+	if (result.user) {
+		delete result.user.password
+		saveUserSession(result.user)
+		if (typeof window !== "undefined") {
+			window.dispatchEvent(new CustomEvent("beta_auth_changed", { detail: { user: result.user } }))
 		}
 	}
-
-	// Prepare changes without mutating the active session until the API succeeds.
-	const updatedUser = { ...user, points: userPoints - reward.points }
-
-	// Tạo mã voucher vào danh sách vouchers của user
-	const voucherCode = reward.code
-	const newVoucher = {
-		code: voucherCode,
-		name: reward.title,
-		points: reward.points,
-		category: reward.category,
-		discount: reward.description,
-		expiry: "31/12/2026",
-		redeemedAt: new Date().toISOString(),
-	}
-
-	updatedUser.vouchers = [...(user.vouchers || []), newVoucher]
-
-	// Thêm vào lịch sử tích / tiêu điểm
-	updatedUser.pointsHistory = [...(user.pointsHistory || [])]
-	updatedUser.pointsHistory.unshift({
-		id: `PH-${Date.now()}`,
-		title: `Đổi quà: ${reward.title}`,
-		points: -reward.points,
-		date: new Date().toISOString(),
-		code: voucherCode,
-		type: "redeem",
-	})
-
-	// Cập nhật database và session
-	const saved = await updateUserInDatabase(updatedUser)
-	if (!saved.success)
-		return {
-			success: false,
-			error: "SAVE_FAILED",
-			message: saved.message || "Không thể lưu giao dịch lên máy chủ. Vui lòng thử lại.",
-		}
-
 	return {
-		success: true,
-		reward,
-		remainingPoints: updatedUser.points,
-		voucher: newVoucher,
-		message: `Đổi thành công "${reward.title}"! Đã thêm vào Kho ưu đãi của bạn.`,
+		...result,
+		remainingPoints: result.user?.points ?? result.transaction?.remainingPoints,
+		message: `Đổi thành công "${result.voucher?.name || "phần thưởng"}"! Voucher có hạn đến ${new Date(result.voucher.expiresAt).toLocaleDateString("vi-VN")}.`,
 	}
+}
+
+export async function validateVoucherForCheckout(code, rawTotal, concessionsTotal, showDate) {
+	return apiValidateVoucher({ code, rawTotal, concessionsTotal, showDate })
 }
 
 export function getUserPointsHistory(user) {
