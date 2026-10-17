@@ -183,6 +183,30 @@ export async function apiChangePassword(payload) {
 	return res.ok ? { success: true, message: res.data?.message || "Đổi mật khẩu thành công!" } : { success: false, message: res.error || "Không thể đổi mật khẩu" }
 }
 
+export async function apiRedeemMemberReward(rewardId, requestId) {
+	const res = await request("/member/redeem", {
+		method: "POST",
+		body: JSON.stringify({ rewardId, requestId }),
+	})
+	return res.ok ? res.data : { success: false, message: res.error || "Không thể đổi quà lúc này." }
+}
+
+export async function apiValidateVoucher(payload) {
+	const res = await request("/vouchers/validate", {
+		method: "POST",
+		body: JSON.stringify(payload),
+	})
+	return res.ok ? res.data : { success: false, message: res.error || "Voucher không hợp lệ." }
+}
+
+export async function apiCompleteCheckout(ticket, voucherContext) {
+	const res = await request("/checkout/complete", {
+		method: "POST",
+		body: JSON.stringify({ ticket, voucherContext }),
+	})
+	return res.ok ? res.data : { success: false, message: res.error || "Không thể hoàn tất đơn vé." }
+}
+
 /**
  * Lấy danh sách người dùng
  */
