@@ -1,7 +1,7 @@
 /**
  * Beta Cinemas - Seat Selection & Concessions Booking Logic
  */
-import { setupHeaderAndFooter, formatCurrency, formatDateVN, showToast, translateDom, getSavedLang } from "./common.js"
+import { setupHeaderAndFooter, formatCurrency, formatDateVN, showToast, translateDom, getSavedLang, getCurrentUser, openAuthModal } from "./common.js"
 import {
 	getMoviesData,
 	getCinemas,
@@ -991,20 +991,57 @@ document.addEventListener("DOMContentLoaded", async () => {
 			return true
 		}
 
+		function checkAuthNotice() {
+			const authNotice = document.getElementById("booking-auth-notice")
+			const user = getCurrentUser()
+			if (authNotice) {
+				authNotice.style.display = user ? "none" : "flex"
+			}
+		}
+
+		document.getElementById("btn-booking-login-prompt")?.addEventListener("click", () => {
+			openAuthModal("login")
+		})
+
+		window.addEventListener("beta_auth_changed", () => {
+			checkAuthNotice()
+			updateSummarySidebar()
+		})
+
+		checkAuthNotice()
+
 		tabSeats?.addEventListener("click", () => switchToStep(1))
 		tabCombos?.addEventListener("click", () => {
 			if (!validateSeatsBeforeProceed()) return
+			const user = getCurrentUser()
+			if (!user) {
+				showToast("Vui lòng đăng nhập tài khoản để tiếp tục đặt vé!", "warning", 5000)
+				openAuthModal("login")
+				return
+			}
 			switchToStep(2)
 		})
 
 		step2Btn?.addEventListener("click", () => {
 			if (!validateSeatsBeforeProceed()) return
+			const user = getCurrentUser()
+			if (!user) {
+				showToast("Vui lòng đăng nhập tài khoản để tiếp tục đặt vé!", "warning", 5000)
+				openAuthModal("login")
+				return
+			}
 			switchToStep(2)
 		})
 		backBtn?.addEventListener("click", () => switchToStep(1))
 
 		checkoutBtn?.addEventListener("click", () => {
 			if (!validateSeatsBeforeProceed()) return
+			const user = getCurrentUser()
+			if (!user) {
+				showToast("Vui lòng đăng nhập tài khoản để tiếp tục đặt vé!", "warning", 5000)
+				openAuthModal("login")
+				return
+			}
 			if (bookingState.currentStep === 1) {
 				switchToStep(2)
 			} else {
