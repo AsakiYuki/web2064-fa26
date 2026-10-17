@@ -584,26 +584,49 @@ export function isCurrentAdmin() {
  * Cập nhật thông tin người dùng trong json-server & LocalStorage
  */
 export async function updateUserInDatabase(updatedUser) {
-	// Call API PATCH /users/:id
+	// Keep the local profile unchanged unless the server confirms the update.
+	let serverUser = null
 	if (updatedUser.id) {
-		apiUpdateUser(updatedUser.id, updatedUser).catch(() => {})
+		const serverUpdates = { ...updatedUser }
+		delete serverUpdates.password
+		const result = await apiUpdateUser(updatedUser.id, serverUpdates)
+		if (!result.success) return result
+		serverUser = result.user
 	}
+	const persistedUser = { ...(serverUser || {}), ...updatedUser }
+	delete persistedUser.password
 
 	const list = getUsersList()
 	const idx = list.findIndex(u => u.id === updatedUser.id || (u.email && u.email === updatedUser.email))
 	if (idx !== -1) {
-		list[idx] = { ...list[idx], ...updatedUser }
+		list[idx] = { ...list[idx], ...persistedUser }
+		delete list[idx].password
 		storageSet(STORAGE_KEYS.USERS_LIST, list)
 	}
 
 	const currentUser = getCurrentUser()
 	if (currentUser && (currentUser.id === updatedUser.id || currentUser.email === updatedUser.email)) {
-		const merged = { ...currentUser, ...updatedUser }
+		const merged = { ...currentUser, ...persistedUser }
+		delete merged.password
 		saveUserSession(merged)
 		if (typeof window !== "undefined") {
 			window.dispatchEvent(new CustomEvent("beta_auth_changed", { detail: { user: merged } }))
 		}
 	}
+	return { success: true, localOnly: !updatedUser.id }
+}
+
+/** Verify the current password, then let json-server-auth hash and save the new one. */
+export async function changeUserPassword(user, currentPassword, newPassword) {
+	if (!user?.id || !user.email) return { success: false, message: "Tài khoản chưa được liên kết với máy chủ." }
+	const verified = await apiLogin(user.email, currentPassword)
+	if (!verified.success) return { success: false, message: "Mật khẩu hiện tại không chính xác." }
+	const result = await apiUpdateUser(user.id, { password: newPassword })
+	if (!result.success) return result
+	const safeUser = { ...user }
+	delete safeUser.password
+	saveUserSession(safeUser)
+	return { success: true, user: safeUser }
 }
 
 /* ==========================================================================
@@ -1022,17 +1045,19 @@ export async function saveBookingTicket(ticket) {
 	history.unshift(newTicket)
 	storageSet(STORAGE_KEYS.BOOKING_HISTORY, history)
 
-	// Reward points to currentUser
+	let pointsSave = null
+	// Award points only after the server confirms the account update.
 	const currentUser = getCurrentUser()
 	if (currentUser) {
 		const earnedPoints = Math.round((newTicket.total || 0) / 1000)
-		currentUser.points = (currentUser.points || 0) + earnedPoints
-		saveUserSession(currentUser)
-		updateUserInDatabase(currentUser)
+		if (earnedPoints > 0) {
+			const updatedUser = { ...currentUser, points: (currentUser.points || 0) + earnedPoints }
+			pointsSave = await updateUserInDatabase(updatedUser)
+		}
 	}
 
 	clearPendingBooking()
-	return newTicket
+	return { ...newTicket, pointsSave }
 }
 
 export async function updateBookingStatus(id, newStatus) {
@@ -1962,8 +1987,8 @@ export async function redeemMemberReward(rewardId) {
 		}
 	}
 
-	// Trừ điểm của người dùng
-	user.points = userPoints - reward.points
+	// Prepare changes without mutating the active session until the API succeeds.
+	const updatedUser = { ...user, points: userPoints - reward.points }
 
 	// Tạo mã voucher vào danh sách vouchers của user
 	const voucherCode = reward.code
@@ -1977,12 +2002,11 @@ export async function redeemMemberReward(rewardId) {
 		redeemedAt: new Date().toISOString()
 	}
 
-	if (!user.vouchers) user.vouchers = []
-	user.vouchers.push(newVoucher)
+	updatedUser.vouchers = [...(user.vouchers || []), newVoucher]
 
 	// Thêm vào lịch sử tích / tiêu điểm
-	if (!user.pointsHistory) user.pointsHistory = []
-	user.pointsHistory.unshift({
+	updatedUser.pointsHistory = [...(user.pointsHistory || [])]
+	updatedUser.pointsHistory.unshift({
 		id: `PH-${Date.now()}`,
 		title: `Đổi quà: ${reward.title}`,
 		points: -reward.points,
@@ -1992,12 +2016,13 @@ export async function redeemMemberReward(rewardId) {
 	})
 
 	// Cập nhật database và session
-	await updateUserInDatabase(user)
+	const saved = await updateUserInDatabase(updatedUser)
+	if (!saved.success) return { success: false, error: "SAVE_FAILED", message: saved.message || "Không thể lưu giao dịch lên máy chủ. Vui lòng thử lại." }
 
 	return {
 		success: true,
 		reward,
-		remainingPoints: user.points,
+		remainingPoints: updatedUser.points,
 		voucher: newVoucher,
 		message: `Đổi thành công "${reward.title}"! Đã thêm vào Kho ưu đãi của bạn.`
 	}

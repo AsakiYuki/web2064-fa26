@@ -7,9 +7,10 @@
 
 // Auto-detect API base endpoint (Vite proxy /api -> localhost:3000, or fallback direct)
 const isBrowser = typeof window !== "undefined"
-const API_BASE = isBrowser && (window.location.port === "5173" || window.location.port === "4173")
+const configuredApiBase = import.meta.env?.VITE_API_BASE_URL
+const API_BASE = configuredApiBase || (isBrowser && (window.location.port === "5173" || window.location.port === "4173")
 	? "/api"
-	: (typeof process !== "undefined" && process.env?.BACKEND_URL) || "http://localhost:3000"
+	: "http://localhost:3000")
 
 const TOKEN_KEY = "beta_auth_token"
 

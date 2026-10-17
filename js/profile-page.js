@@ -1,5 +1,5 @@
 import { setupHeaderAndFooter, formatCurrency, formatDateVN, showToast, getCurrentUser, saveUserSession, translateDom, getSavedLang } from "./common.js"
-import { getBookingHistory, updateUserInDatabase, cancelBookingTicket, VOUCHER_LIST } from "./storage.js"
+import { getBookingHistory, updateUserInDatabase, changeUserPassword, cancelBookingTicket, VOUCHER_LIST } from "./storage.js"
 import { generateQRCodeSVG } from "./qrcode.js"
 
 const DEFAULT_PROFILE = {
@@ -31,6 +31,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 	}
 
 	renderUserInfo(user)
+	renderVouchers(user)
 
 	// 2. Setup Profile Navigation Tabs
 	const urlParams = new URLSearchParams(window.location.search)
@@ -125,9 +126,9 @@ document.addEventListener("DOMContentLoaded", async () => {
 		if (avatarPreview) avatarPreview.textContent = val || "N"
 	})
 
-	// 5. Bắt sự kiện người dùng bấm Lưu và Ghi vào LocalStorage
+	// 5. Save profile changes to the server before updating the local session.
 	const infoForm = document.getElementById("form-profile-info")
-	infoForm?.addEventListener("submit", e => {
+	infoForm?.addEventListener("submit", async e => {
 		e.preventDefault()
 		// Lấy giá trị từ người dùng gõ vào
 		const name = document.getElementById("pf-name")?.value.trim()
@@ -147,47 +148,87 @@ document.addEventListener("DOMContentLoaded", async () => {
 			return
 		}
 
-		// Cập nhật  thông tin vào OBJECT user
-		user.name = name
-		user.email = email
-		user.phone = phone
-		user.birthday = birthday
-		user.gender = gender
-		user.cinemaFavorite = favCinema
-		user.avatarText = name.charAt(0).toUpperCase()
-		user.avatar = user.avatarText
+		const updatedUser = {
+			...user,
+			name,
+			email,
+			phone,
+			birthday,
+			gender,
+			cinemaFavorite: favCinema,
+			avatarText: name.charAt(0).toUpperCase(),
+			avatar: name.charAt(0).toUpperCase(),
+		}
 
-		saveUserSession(user)
-		updateUserInDatabase(user)
-		renderUserInfo(user)
-		// Báo thành công
-		showToast("✅ Đã cập nhật và lưu thông tin cá nhân vào LocalStorage thành công!", "success")
+		const saveButton = infoForm.querySelector('[type="submit"]')
+		const originalLabel = saveButton?.textContent
+		if (saveButton) {
+			saveButton.disabled = true
+			saveButton.textContent = "Đang lưu..."
+		}
+		try {
+			const result = await updateUserInDatabase(updatedUser)
+			if (!result.success) {
+				showToast(result.message || "Không thể cập nhật hồ sơ trên máy chủ. Vui lòng thử lại.", "error")
+				return
+			}
+
+			user = updatedUser
+			saveUserSession(user)
+			renderUserInfo(user)
+			showToast(result.localOnly
+				? "Đã lưu hồ sơ trên thiết bị này. Tài khoản chưa được đồng bộ với máy chủ."
+				: "Đã cập nhật hồ sơ thành công.", "success")
+		} catch (error) {
+			showToast(error.message || "Không thể cập nhật hồ sơ trên máy chủ. Vui lòng thử lại.", "error")
+		} finally {
+			if (saveButton) {
+				saveButton.disabled = false
+				saveButton.textContent = originalLabel
+			}
+		}
 	})
 
 	// Reset profile button
-	document.getElementById("btn-reset-profile")?.addEventListener("click", () => {
+	document.getElementById("btn-reset-profile")?.addEventListener("click", async e => {
 		if (confirm("Bạn có chắc chắn muốn đặt lại thông tin cá nhân về mặc định?")) {
-			user = { ...DEFAULT_PROFILE }
-			saveUserSession(user)
-			renderUserInfo(user)
-			showToast("Đã khôi phục thông tin cá nhân về mặc định.", "info")
+			const button = e.currentTarget
+			const originalLabel = button.textContent
+			button.disabled = true
+			button.textContent = "Đang lưu..."
+			const resetUser = { ...DEFAULT_PROFILE, id: user.id, email: user.email }
+			try {
+				const result = await updateUserInDatabase(resetUser)
+				if (!result.success) {
+					showToast(result.message || "Không thể đặt lại hồ sơ trên máy chủ.", "error")
+					return
+				}
+				user = resetUser
+				saveUserSession(user)
+				renderUserInfo(user)
+				showToast("Đã đặt lại hồ sơ.", "success")
+			} catch (error) {
+				showToast(error.message || "Không thể đặt lại hồ sơ trên máy chủ.", "error")
+			} finally {
+				button.disabled = false
+				button.textContent = originalLabel
+			}
 		}
 	})
 
 	// 6. Voucher Copy Buttons
-	document.querySelectorAll(".btn-use-voucher").forEach(btn => {
-		btn.addEventListener("click", () => {
-			const code = btn.dataset.code
-			if (code) {
-				navigator.clipboard?.writeText(code)
-				showToast(`Đã sao chép mã ưu đãi ${code}! Dùng mã này khi đặt vé để nhận giảm giá.`, "success")
-			}
-		})
+	document.getElementById("profile-vouchers-grid")?.addEventListener("click", e => {
+		const btn = e.target.closest(".btn-use-voucher")
+		const code = btn?.dataset.code
+		if (code) {
+			navigator.clipboard?.writeText(code)
+			showToast(`Đã sao chép mã ưu đãi ${code}!`, "success")
+		}
 	})
 
 	// 7. Change Password Form
 	const passForm = document.getElementById("form-change-password")
-	passForm?.addEventListener("submit", e => {
+	passForm?.addEventListener("submit", async e => {
 		e.preventDefault()
 		const oldPass = document.getElementById("old-pass")?.value
 		const newPass = document.getElementById("new-pass")?.value
@@ -203,12 +244,29 @@ document.addEventListener("DOMContentLoaded", async () => {
 			return
 		}
 
-		user.password = newPass
-		saveUserSession(user)
-		updateUserInDatabase(user)
-
-		passForm.reset()
-		showToast("Đổi mật khẩu thành công! Hãy ghi nhớ mật khẩu mới của bạn.", "success")
+		const saveButton = passForm.querySelector('[type="submit"]')
+		const originalLabel = saveButton?.textContent
+		if (saveButton) {
+			saveButton.disabled = true
+			saveButton.textContent = "Đang lưu..."
+		}
+		try {
+			const result = await changeUserPassword(user, oldPass, newPass)
+			if (!result.success) {
+				showToast(result.message || "Không thể đổi mật khẩu. Vui lòng thử lại.", "error")
+				return
+			}
+			user = result.user
+			passForm.reset()
+			showToast("Đổi mật khẩu thành công! Hãy ghi nhớ mật khẩu mới của bạn.", "success")
+		} catch (error) {
+			showToast(error.message || "Không thể đổi mật khẩu. Vui lòng thử lại.", "error")
+		} finally {
+			if (saveButton) {
+				saveButton.disabled = false
+				saveButton.textContent = originalLabel
+			}
+		}
 	})
 
 	// 8. Modal E-Ticket Close
@@ -261,6 +319,46 @@ document.addEventListener("DOMContentLoaded", async () => {
 		if (pfFav && u.cinemaFavorite) pfFav.value = u.cinemaFavorite
 
 		translateDom(getSavedLang())
+	}
+
+	function renderVouchers(u) {
+		const grid = document.getElementById("profile-vouchers-grid")
+		if (!grid) return
+		grid.replaceChildren()
+		const vouchers = Array.isArray(u.vouchers) ? u.vouchers : []
+		if (vouchers.length === 0) {
+			const empty = document.createElement("p")
+			empty.style.color = "#a6adc8"
+			empty.textContent = "Bạn chưa có voucher nào."
+			grid.append(empty)
+			return
+		}
+		vouchers.forEach(voucher => {
+			const card = document.createElement("div")
+			card.className = "voucher-card"
+			const icon = document.createElement("div")
+			icon.className = "v-icon"
+			icon.textContent = "🎟️"
+			const info = document.createElement("div")
+			info.className = "v-info"
+			const code = document.createElement("span")
+			code.className = "v-code"
+			code.textContent = voucher.code || "Voucher"
+			const description = document.createElement("p")
+			description.className = "v-desc"
+			description.textContent = voucher.name || voucher.discount || "Ưu đãi thành viên"
+			const expiry = document.createElement("span")
+			expiry.className = "v-exp"
+			expiry.textContent = voucher.expiry ? `Hạn sử dụng: ${voucher.expiry}` : "Voucher thành viên"
+			info.append(code, description, expiry)
+			const copy = document.createElement("button")
+			copy.type = "button"
+			copy.className = "btn-use-voucher"
+			copy.dataset.code = voucher.code || ""
+			copy.textContent = "Sao chép"
+			card.append(icon, info, copy)
+			grid.append(card)
+		})
 	}
 
 	function renderBookingHistory() {
