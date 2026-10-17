@@ -2,6 +2,7 @@ import jsonServer from 'json-server'
 import auth from 'json-server-auth'
 import fs from 'fs'
 import path from 'path'
+import bcrypt from 'bcryptjs'
 
 const server = jsonServer.create()
 const router = jsonServer.router('db.json')
@@ -75,7 +76,8 @@ server.post('/reset-password', (req, res) => {
 		return res.status(404).json({ success: false, message: 'Không tìm thấy tài khoản với thông tin này trên hệ thống!' })
 	}
 
-	server.db.get('users').find({ id: user.id }).assign({ password: newPassword }).write()
+	const hashedPassword = bcrypt.hashSync(newPassword, 10)
+	server.db.get('users').find({ id: user.id }).assign({ password: hashedPassword }).write()
 	return res.status(200).json({ success: true, message: 'Đặt lại mật khẩu thành công!' })
 })
 
@@ -101,11 +103,21 @@ server.post('/change-password', (req, res) => {
 		return res.status(404).json({ success: false, message: 'Không tìm thấy tài khoản người dùng trên hệ thống' })
 	}
 
-	if (user.password !== oldPassword && user.password !== 'BetaCinemas2026!') {
+	let isOldValid = false
+	if (user.password) {
+		if (user.password.startsWith('$2a$') || user.password.startsWith('$2b$')) {
+			isOldValid = bcrypt.compareSync(oldPassword, user.password)
+		} else {
+			isOldValid = (user.password === oldPassword)
+		}
+	}
+
+	if (!isOldValid) {
 		return res.status(400).json({ success: false, message: 'Mật khẩu hiện tại không chính xác! Vui lòng kiểm tra lại.' })
 	}
 
-	server.db.get('users').find({ id: user.id }).assign({ password: newPassword }).write()
+	const hashedPassword = bcrypt.hashSync(newPassword, 10)
+	server.db.get('users').find({ id: user.id }).assign({ password: hashedPassword }).write()
 	return res.status(200).json({ success: true, message: 'Đổi mật khẩu thành công trên hệ thống!' })
 })
 

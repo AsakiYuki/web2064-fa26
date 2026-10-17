@@ -550,7 +550,6 @@ export async function authenticateUser(account, password) {
 				(u.username && u.username.toLowerCase() === cleanAcc) ||
 				(cleanAcc === "admin" && (u.role === "admin" || u.username === "admin" || u.email?.toLowerCase().startsWith("admin")))) &&
 			(u.password === password ||
-				u.password === "BetaCinemas2026!" ||
 				(cleanAcc === "admin" && password === "12345678") ||
 				(u.role === "admin" && password === "12345678"))
 	)
@@ -663,7 +662,7 @@ export async function changeUserPassword(oldPassword, newPassword) {
 	const userInDb = list.find(u => (currentUser.id && u.id === currentUser.id) || (currentUser.email && u.email === currentUser.email))
 	const currentRealPass = currentUser.password || userInDb?.password || "BetaCinemas2026!"
 
-	if (oldPassword !== currentRealPass && currentRealPass !== "BetaCinemas2026!") {
+	if (oldPassword !== currentRealPass) {
 		return { success: false, message: "Mật khẩu hiện tại không chính xác! Vui lòng kiểm tra lại." }
 	}
 
