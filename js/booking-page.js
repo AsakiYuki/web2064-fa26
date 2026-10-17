@@ -762,7 +762,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 		let couponMsgText = ""
 
 		if (bookingState.appliedCoupon) {
-			const res = calculateVoucherDiscount(bookingState.appliedCoupon, rawGrandTotal)
+			const res = calculateVoucherDiscount(bookingState.appliedCoupon, rawGrandTotal, { concessionsTotal, showDate: dateStr })
 			if (res.isValid) {
 				discount = res.discountAmount
 				couponMsgText = res.message
@@ -1074,7 +1074,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 			})
 			const rawTotal = seatsTotal + concessionsTotal
 
-			const result = calculateVoucherDiscount(code, rawTotal)
+			const result = calculateVoucherDiscount(code, rawTotal, { concessionsTotal, showDate: dateStr })
 			if (result.isValid) {
 				bookingState.appliedCoupon = code
 				if (msg) {
@@ -1210,9 +1210,8 @@ document.addEventListener("DOMContentLoaded", async () => {
 			</div>
 		`
 
-		// 1. Permanently update seats to 'sold' in LocalStorage
+		// Prepare sold-seat update after the server commits the ticket.
 		const seatList = bookingState.selectedSeats.map(s => s.id)
-		updateShowtimeSeats(currentCinema.id, currentMovie.id, dateStr, timeSlot, seatList, "sold")
 
 		// 2. Save ticket to booking history
 		const newTicket = {
@@ -1228,6 +1227,8 @@ document.addEventListener("DOMContentLoaded", async () => {
 			time: timeSlot,
 			seats: seatNames,
 			concessions: comboList.map(c => `${c.qty}x ${c.name}`).join(", ") || "Không kèm bắp nước",
+			rawTotal: seatsTotal + concessionsTotal,
+			concessionsTotal,
 			total: finalTotal,
 			voucherCode: bookingState.appliedCoupon || null,
 			discountAmount: bookingState.discountAmount || 0,
@@ -1238,9 +1239,11 @@ document.addEventListener("DOMContentLoaded", async () => {
 			status: "paid",
 		}
 		const savedTicket = await saveBookingTicket(newTicket)
-		if (savedTicket.pointsSave && !savedTicket.pointsSave.success) {
-			showToast("Vé đã được ghi nhận nhưng điểm thưởng chưa đồng bộ. Vui lòng liên hệ hỗ trợ để kiểm tra.", "warning", 7000)
+		if (savedTicket.saveError) {
+			showToast(savedTicket.saveError, "error", 7000)
+			return
 		}
+		updateShowtimeSeats(currentCinema.id, currentMovie.id, dateStr, timeSlot, seatList, "sold")
 		clearPendingBooking()
 
 		// 3. Clear selected seats and re-render seat map so booked seats immediately show as sold

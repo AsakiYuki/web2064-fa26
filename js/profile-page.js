@@ -387,13 +387,21 @@ document.addEventListener("DOMContentLoaded", async () => {
 			description.textContent = voucher.name || voucher.discount || "Ưu đãi thành viên"
 			const expiry = document.createElement("span")
 			expiry.className = "v-exp"
-			expiry.textContent = voucher.expiry ? `Hạn sử dụng: ${voucher.expiry}` : "Voucher thành viên"
+			const expiresAt = voucher.expiresAt ? new Date(voucher.expiresAt).toLocaleDateString("vi-VN") : voucher.expiry
+			const status = voucher.status === "used"
+				? "Đã sử dụng"
+				: voucher.expiresAt && new Date(voucher.expiresAt).getTime() <= Date.now()
+					? "Đã hết hạn"
+					: "Còn hiệu lực"
+			expiry.textContent = expiresAt ? `Hạn sử dụng: ${expiresAt} · ${status}` : "Voucher thành viên"
 			info.append(code, description, expiry)
 			const copy = document.createElement("button")
 			copy.type = "button"
 			copy.className = "btn-use-voucher"
 			copy.dataset.code = voucher.code || ""
-			copy.textContent = "Sao chép"
+			const isExpired = voucher.expiresAt && new Date(voucher.expiresAt).getTime() <= Date.now()
+			copy.disabled = voucher.status === "used" || isExpired
+			copy.textContent = voucher.status === "used" ? "Đã dùng" : isExpired ? "Hết hạn" : "Sao chép"
 			card.append(icon, info, copy)
 			grid.append(card)
 		})

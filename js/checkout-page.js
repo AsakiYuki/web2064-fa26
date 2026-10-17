@@ -9,7 +9,7 @@ import {
 	clearPendingBooking,
 	saveBookingTicket,
 	updateShowtimeSeats,
-	calculateVoucherDiscount,
+	validateVoucherForCheckout,
 	checkSeatsAvailability,
 	releaseSeatHold,
 } from "./storage.js"
@@ -49,6 +49,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 	const concessionsParam = urlParams.get("concessions") || pending?.concessionsString || "1x Beta Combo Đôi"
 	let initialVoucher = urlParams.get("voucher") || pending?.voucherCode || ""
 	let rawTotal = pending ? (pending.seatsTotal || 0) + (pending.concessionsTotal || 0) : (+urlParams.get("total") || 255000)
+	const concessionsTotal = Number(pending?.concessionsTotal) || 0
 
 	// If rawTotal wasn't split, deduce fallback
 	if (rawTotal <= 0) rawTotal = 255000
@@ -80,8 +81,8 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 	// Calculate initial voucher discount if present
 	if (initialVoucher) {
-		const vRes = calculateVoucherDiscount(initialVoucher, checkoutState.rawTotal)
-		if (vRes.isValid) {
+		const vRes = await validateVoucherForCheckout(initialVoucher, checkoutState.rawTotal, concessionsTotal, dateStr)
+		if (vRes.success) {
 			checkoutState.discountAmount = vRes.discountAmount
 			checkoutState.finalTotal = Math.max(0, checkoutState.rawTotal - checkoutState.discountAmount)
 		} else {
@@ -213,7 +214,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 			}
 		}
 
-		vBtn?.addEventListener("click", () => {
+		vBtn?.addEventListener("click", async () => {
 			const code = vInput?.value.trim().toUpperCase() || ""
 			if (!code) {
 				checkoutState.voucherCode = ""
@@ -227,8 +228,10 @@ document.addEventListener("DOMContentLoaded", async () => {
 				return
 			}
 
-			const vRes = calculateVoucherDiscount(code, checkoutState.rawTotal)
-			if (vRes.isValid) {
+			vBtn.disabled = true
+			const vRes = await validateVoucherForCheckout(code, checkoutState.rawTotal, concessionsTotal, dateStr)
+			vBtn.disabled = false
+			if (vRes.success) {
 				checkoutState.voucherCode = code
 				checkoutState.discountAmount = vRes.discountAmount
 				checkoutState.finalTotal = Math.max(0, checkoutState.rawTotal - checkoutState.discountAmount)
@@ -461,10 +464,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 				// 8. UPDATE SEAT STATUS TO 'SOLD' IN LOCALSTORAGE & RELEASE ACTIVE HOLD
 				const seatList = seatsParam.split(",").map(s => s.trim()).filter(Boolean)
-				updateShowtimeSeats(currentCinema.id, currentMovie.id, dateStr, timeSlot, seatList, "sold")
-				if (pending?.holdId) {
-					releaseSeatHold(pending.holdId)
-				}
 
 				// 9. SAVE TICKET TO USER'S BOOKING HISTORY IN LOCALSTORAGE
 				const newTicket = {
@@ -480,6 +479,8 @@ document.addEventListener("DOMContentLoaded", async () => {
 				time: timeSlot,
 				seats: seatsParam,
 				concessions: concessionsParam,
+				rawTotal: checkoutState.rawTotal,
+				concessionsTotal,
 				total: checkoutState.finalTotal,
 				voucherCode: checkoutState.voucherCode || null,
 				discountAmount: checkoutState.discountAmount || 0,
@@ -494,9 +495,14 @@ document.addEventListener("DOMContentLoaded", async () => {
 }
 
 				const savedTicket = await saveBookingTicket(newTicket)
-				if (savedTicket.pointsSave && !savedTicket.pointsSave.success) {
-					showToast("Vé đã được ghi nhận nhưng điểm thưởng chưa đồng bộ. Vui lòng liên hệ hỗ trợ để kiểm tra.", "warning", 7000)
+				if (savedTicket.saveError) {
+					showToast(savedTicket.saveError, "error", 7000)
+					if (qrVerifyOverlay) qrVerifyOverlay.style.display = "none"
+					qrConfirmPaidBtn.disabled = false
+					return
 				}
+				updateShowtimeSeats(currentCinema.id, currentMovie.id, dateStr, timeSlot, seatList, "sold")
+				if (pending?.holdId) releaseSeatHold(pending.holdId)
 				isPaymentCompleted = true
 				clearPendingBooking()
 				updateHeaderAccountUI()
@@ -508,7 +514,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 				if (checkoutLayout) checkoutLayout.style.display = "none"
 				if (eticketSuccessView) {
 					eticketSuccessView.style.display = "block"
-					renderETicketContent(newTicket)
+					renderETicketContent(savedTicket)
 					window.scrollTo({ top: 0, behavior: "smooth" })
 				}
 
