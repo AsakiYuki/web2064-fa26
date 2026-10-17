@@ -8,7 +8,6 @@ import {
 	apiLogin,
 	apiUpdateUser,
 	apiResetPassword,
-	apiChangePassword,
 	apiGetUsers,
 	apiGetMovies,
 	apiGetMovieById,
@@ -658,7 +657,6 @@ export async function changeUserPassword(user, currentPassword, newPassword) {
 	delete safeUser.password
 	saveUserSession(safeUser)
 	return { success: true, user: safeUser }
-	return { success: true, user: updatedUser }
 }
 
 /**
@@ -698,51 +696,6 @@ export async function resetUserPassword(account, newPassword) {
 	}
 
 	return { success: true, message: "Đặt lại mật khẩu thành công!", user }
-}
-
-/**
- * Đổi mật khẩu tài khoản đang đăng nhập với xác thực mật khẩu cũ
- * Yêu cầu máy chủ xác nhận thành công mới lưu vào phiên
- */
-export async function changeUserPassword(oldPassword, newPassword) {
-	const currentUser = getCurrentUser()
-	if (!currentUser) {
-		return { success: false, message: "Bạn chưa đăng nhập! Vui lòng đăng nhập lại." }
-	}
-
-	// 1. Kiểm tra mật khẩu cũ trên client
-	const list = getUsersList()
-	const userInDb = list.find(
-		u => (currentUser.id && u.id === currentUser.id) || (currentUser.email && u.email === currentUser.email),
-	)
-	const currentRealPass = currentUser.password || userInDb?.password || "BetaCinemas2026!"
-
-	if (oldPassword !== currentRealPass && currentRealPass !== "BetaCinemas2026!") {
-		return { success: false, message: "Mật khẩu hiện tại không chính xác! Vui lòng kiểm tra lại." }
-	}
-
-	// 2. Gọi API server xác thực và lưu mật khẩu
-	const apiRes = await apiChangePassword({
-		userId: currentUser.id,
-		email: currentUser.email,
-		oldPassword,
-		newPassword,
-	}).catch(err => ({ success: false, message: err.message || "Lỗi kết nối máy chủ" }))
-
-	if (!apiRes.success) {
-		return { success: false, message: apiRes.message || "Máy chủ từ chối cập nhật mật khẩu!" }
-	}
-
-	// 3. Máy chủ cập nhật thành công -> cập nhật LocalStorage và Session
-	currentUser.password = newPassword
-	saveUserSession(currentUser)
-
-	if (userInDb) {
-		userInDb.password = newPassword
-		storageSet(STORAGE_KEYS.USERS_LIST, list)
-	}
-
-	return { success: true, message: "Đổi mật khẩu thành công!" }
 }
 
 /* ==========================================================================
