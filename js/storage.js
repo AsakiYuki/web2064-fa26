@@ -351,34 +351,45 @@ export async function initializeStorage(force = false) {
 			storageSet(STORAGE_KEYS.MOVIES, formattedMovies)
 		} else if (!storageHas(STORAGE_KEYS.MOVIES) || force) {
 			// Fallback local JSON
-			const m = await fetch("/data/movies.json").then(r => r.json()).catch(() => null)
+			const m = await fetch("/data/movies.json")
+				.then(r => r.json())
+				.catch(() => null)
 			if (m) storageSet(STORAGE_KEYS.MOVIES, m)
 		}
 
 		if (cinemasRes && cinemasRes.length > 0) {
 			storageSet(STORAGE_KEYS.CINEMAS, cinemasRes)
 		} else if (!storageHas(STORAGE_KEYS.CINEMAS) || force) {
-			const c = await fetch("/data/cinemas.json").then(r => r.json()).catch(() => null)
+			const c = await fetch("/data/cinemas.json")
+				.then(r => r.json())
+				.catch(() => null)
 			if (c) storageSet(STORAGE_KEYS.CINEMAS, c)
 		}
 
 		if (showtimesRes && showtimesRes.length > 0) {
 			storageSet(STORAGE_KEYS.SHOWTIMES, showtimesRes)
 		} else if (!storageHas(STORAGE_KEYS.SHOWTIMES) || force) {
-			const s = await fetch("/data/showtimes.json").then(r => r.json()).catch(() => null)
+			const s = await fetch("/data/showtimes.json")
+				.then(r => r.json())
+				.catch(() => null)
 			if (s) storageSet(STORAGE_KEYS.SHOWTIMES, s)
 		}
 
 		if (concessionsRes && concessionsRes.length > 0) {
-			const cats = categoriesRes && categoriesRes.length > 0 ? categoriesRes : [
-				{ id: "combos", name: "Combo Bắp Nước", active: true },
-				{ id: "popcorn", name: "Bắp Rang Bơ", active: false },
-				{ id: "beverages", name: "Nước Uống", active: false },
-				{ id: "snacks", name: "Đồ Ăn Kèm", active: false },
-			]
+			const cats =
+				categoriesRes && categoriesRes.length > 0
+					? categoriesRes
+					: [
+							{ id: "combos", name: "Combo Bắp Nước", active: true },
+							{ id: "popcorn", name: "Bắp Rang Bơ", active: false },
+							{ id: "beverages", name: "Nước Uống", active: false },
+							{ id: "snacks", name: "Đồ Ăn Kèm", active: false },
+						]
 			storageSet(STORAGE_KEYS.CONCESSIONS, { categories: cats, items: concessionsRes })
 		} else if (!storageHas(STORAGE_KEYS.CONCESSIONS) || force) {
-			const cc = await fetch("/data/concessions.json").then(r => r.json()).catch(() => null)
+			const cc = await fetch("/data/concessions.json")
+				.then(r => r.json())
+				.catch(() => null)
 			if (cc) storageSet(STORAGE_KEYS.CONCESSIONS, cc)
 		}
 
@@ -391,28 +402,36 @@ export async function initializeStorage(force = false) {
 		if (genresRes && genresRes.length > 0) {
 			storageSet(STORAGE_KEYS.GENRES, genresRes)
 		} else if (!storageHas(STORAGE_KEYS.GENRES) || force) {
-			const g = await fetch("/data/genres.json").then(r => r.json()).catch(() => null)
+			const g = await fetch("/data/genres.json")
+				.then(r => r.json())
+				.catch(() => null)
 			if (g) storageSet(STORAGE_KEYS.GENRES, g)
 		}
 
 		if (bannersRes) {
 			storageSet(STORAGE_KEYS.BANNERS, bannersRes)
 		} else if (!storageHas(STORAGE_KEYS.BANNERS) || force) {
-			const b = await fetch("/data/banners.json").then(r => r.json()).catch(() => null)
+			const b = await fetch("/data/banners.json")
+				.then(r => r.json())
+				.catch(() => null)
 			if (b) storageSet(STORAGE_KEYS.BANNERS, b)
 		}
 
 		if (pricingRes && Object.keys(pricingRes).length > 0) {
 			storageSet(STORAGE_KEYS.TICKET_PRICING, pricingRes)
 		} else if (!storageHas(STORAGE_KEYS.TICKET_PRICING) || force) {
-			const p = await fetch("/data/ticket_pricing.json").then(r => r.json()).catch(() => null)
+			const p = await fetch("/data/ticket_pricing.json")
+				.then(r => r.json())
+				.catch(() => null)
 			if (p) storageSet(STORAGE_KEYS.TICKET_PRICING, p)
 		}
 
 		if (footerRes && footerRes.length > 0) {
 			storageSet(STORAGE_KEYS.FOOTER, footerRes)
 		} else if (!storageHas(STORAGE_KEYS.FOOTER) || force) {
-			const f = await fetch("/data/footer.json").then(r => r.json()).catch(() => null)
+			const f = await fetch("/data/footer.json")
+				.then(r => r.json())
+				.catch(() => null)
 			if (f) storageSet(STORAGE_KEYS.FOOTER, f)
 		}
 
@@ -422,7 +441,9 @@ export async function initializeStorage(force = false) {
 			if (rwRes && rwRes.length > 0) {
 				storageSet(STORAGE_KEYS.MEMBER_REWARDS, rwRes)
 			} else {
-				const rw = await fetch("/data/member_rewards.json").then(r => r.json()).catch(() => null)
+				const rw = await fetch("/data/member_rewards.json")
+					.then(r => r.json())
+					.catch(() => null)
 				if (rw) storageSet(STORAGE_KEYS.MEMBER_REWARDS, rw)
 			}
 		}
@@ -481,7 +502,7 @@ export function isAccountRegistered(emailOrPhone) {
 	return list.some(
 		u =>
 			(u.email && u.email.toLowerCase() === clean) ||
-			(u.phone && u.phone.replace(/[\s.-]/g, "") === clean.replace(/[\s.-]/g, ""))
+			(u.phone && u.phone.replace(/[\s.-]/g, "") === clean.replace(/[\s.-]/g, "")),
 	)
 }
 
@@ -502,7 +523,12 @@ export async function registerNewUser(userData) {
 	const cleanPhone = (userData.phone || "").trim().replace(/[\s.-]/g, "")
 	const list = getUsersList()
 
-	if (list.some(u => (u.email && u.email.toLowerCase() === cleanEmail) || (u.phone && u.phone.replace(/[\s.-]/g, "") === cleanPhone))) {
+	if (
+		list.some(
+			u =>
+				(u.email && u.email.toLowerCase() === cleanEmail) || (u.phone && u.phone.replace(/[\s.-]/g, "") === cleanPhone),
+		)
+	) {
 		return { success: false, message: "Email hoặc Số điện thoại này đã được đăng ký tài khoản!" }
 	}
 
@@ -548,11 +574,12 @@ export async function authenticateUser(account, password) {
 			((u.email && u.email.toLowerCase() === cleanAcc) ||
 				(u.phone && u.phone.replace(/[\s.-]/g, "") === cleanPhone) ||
 				(u.username && u.username.toLowerCase() === cleanAcc) ||
-				(cleanAcc === "admin" && (u.role === "admin" || u.username === "admin" || u.email?.toLowerCase().startsWith("admin")))) &&
+				(cleanAcc === "admin" &&
+					(u.role === "admin" || u.username === "admin" || u.email?.toLowerCase().startsWith("admin")))) &&
 			(u.password === password ||
 				u.password === "BetaCinemas2026!" ||
 				(cleanAcc === "admin" && password === "12345678") ||
-				(u.role === "admin" && password === "12345678"))
+				(u.role === "admin" && password === "12345678")),
 	)
 
 	if (user) {
@@ -570,7 +597,9 @@ export async function authenticateUser(account, password) {
  */
 export function isUserAdmin(user) {
 	if (!user) return false
-	return user.role === "admin" || user.username === "admin" || (user.email && user.email.toLowerCase().startsWith("admin"))
+	return (
+		user.role === "admin" || user.username === "admin" || (user.email && user.email.toLowerCase().startsWith("admin"))
+	)
 }
 
 /**
@@ -586,26 +615,49 @@ export function isCurrentAdmin() {
  * Cập nhật thông tin người dùng trong json-server & LocalStorage
  */
 export async function updateUserInDatabase(updatedUser) {
-	// Call API PATCH /users/:id
+	// Keep the local profile unchanged unless the server confirms the update.
+	let serverUser = null
 	if (updatedUser.id) {
-		apiUpdateUser(updatedUser.id, updatedUser).catch(() => {})
+		const serverUpdates = { ...updatedUser }
+		delete serverUpdates.password
+		const result = await apiUpdateUser(updatedUser.id, serverUpdates)
+		if (!result.success) return result
+		serverUser = result.user
 	}
+	const persistedUser = { ...(serverUser || {}), ...updatedUser }
+	delete persistedUser.password
 
 	const list = getUsersList()
 	const idx = list.findIndex(u => u.id === updatedUser.id || (u.email && u.email === updatedUser.email))
 	if (idx !== -1) {
-		list[idx] = { ...list[idx], ...updatedUser }
+		list[idx] = { ...list[idx], ...persistedUser }
+		delete list[idx].password
 		storageSet(STORAGE_KEYS.USERS_LIST, list)
 	}
 
 	const currentUser = getCurrentUser()
 	if (currentUser && (currentUser.id === updatedUser.id || currentUser.email === updatedUser.email)) {
-		const merged = { ...currentUser, ...updatedUser }
+		const merged = { ...currentUser, ...persistedUser }
+		delete merged.password
 		saveUserSession(merged)
 		if (typeof window !== "undefined") {
 			window.dispatchEvent(new CustomEvent("beta_auth_changed", { detail: { user: merged } }))
 		}
 	}
+	return { success: true, localOnly: !updatedUser.id }
+}
+
+/** Verify the current password, then let json-server-auth hash and save the new one. */
+export async function changeUserPassword(user, currentPassword, newPassword) {
+	if (!user?.id || !user.email) return { success: false, message: "Tài khoản chưa được liên kết với máy chủ." }
+	const verified = await apiLogin(user.email, currentPassword)
+	if (!verified.success) return { success: false, message: "Mật khẩu hiện tại không chính xác." }
+	const result = await apiUpdateUser(user.id, { password: newPassword })
+	if (!result.success) return result
+	const safeUser = { ...user }
+	delete safeUser.password
+	saveUserSession(safeUser)
+	return { success: true, user: safeUser }
 	return { success: true, user: updatedUser }
 }
 
@@ -622,7 +674,7 @@ export async function resetUserPassword(account, newPassword) {
 		u =>
 			(u.email && u.email.toLowerCase() === cleanAcc) ||
 			(u.phone && u.phone.replace(/[\s.-]/g, "") === cleanPhone) ||
-			(u.username && u.username.toLowerCase() === cleanAcc)
+			(u.username && u.username.toLowerCase() === cleanAcc),
 	)
 
 	if (!user) {
@@ -660,7 +712,9 @@ export async function changeUserPassword(oldPassword, newPassword) {
 
 	// 1. Kiểm tra mật khẩu cũ trên client
 	const list = getUsersList()
-	const userInDb = list.find(u => (currentUser.id && u.id === currentUser.id) || (currentUser.email && u.email === currentUser.email))
+	const userInDb = list.find(
+		u => (currentUser.id && u.id === currentUser.id) || (currentUser.email && u.email === currentUser.email),
+	)
 	const currentRealPass = currentUser.password || userInDb?.password || "BetaCinemas2026!"
 
 	if (oldPassword !== currentRealPass && currentRealPass !== "BetaCinemas2026!") {
@@ -709,11 +763,7 @@ export function getMovieById(movieId) {
 	const data = getMoviesData()
 	if (!data || !data.items) return null
 
-	const allMovies = [
-		...(data.items.nowshowing || []),
-		...(data.items.upcoming || []),
-		...(data.items.special || []),
-	]
+	const allMovies = [...(data.items.nowshowing || []), ...(data.items.upcoming || []), ...(data.items.special || [])]
 
 	return allMovies.find(m => String(m.id) === String(movieId)) || null
 }
@@ -722,11 +772,7 @@ export function getMovieBySlug(slug) {
 	const data = getMoviesData()
 	if (!data || !data.items) return null
 
-	const allMovies = [
-		...(data.items.nowshowing || []),
-		...(data.items.upcoming || []),
-		...(data.items.special || []),
-	]
+	const allMovies = [...(data.items.nowshowing || []), ...(data.items.upcoming || []), ...(data.items.special || [])]
 
 	return allMovies.find(m => m.slug === slug) || null
 }
@@ -742,11 +788,7 @@ export function searchMovies(query, tab = null) {
 	if (tab && data.items[tab]) {
 		movieList = [...data.items[tab]]
 	} else {
-		movieList = [
-			...(data.items.nowshowing || []),
-			...(data.items.upcoming || []),
-			...(data.items.special || []),
-		]
+		movieList = [...(data.items.nowshowing || []), ...(data.items.upcoming || []), ...(data.items.special || [])]
 	}
 
 	return movieList.filter(m => {
@@ -776,7 +818,7 @@ export function filterMovies(filters = {}) {
 					(m.title && m.title.toLowerCase().includes(q)) ||
 					(m.originalTitle && m.originalTitle.toLowerCase().includes(q)) ||
 					(m.director && m.director.toLowerCase().includes(q)) ||
-					(Array.isArray(m.cast) && m.cast.some(c => c.toLowerCase().includes(q)))
+					(Array.isArray(m.cast) && m.cast.some(c => c.toLowerCase().includes(q))),
 			)
 		}
 	}
@@ -785,7 +827,7 @@ export function filterMovies(filters = {}) {
 		list = list.filter(
 			m =>
 				(m.genreIds && m.genreIds.includes(genre)) ||
-				(m.genre && m.genre.toLowerCase().includes(genre.replace("-", " ")))
+				(m.genre && m.genre.toLowerCase().includes(genre.replace("-", " "))),
 		)
 	}
 
@@ -1107,17 +1149,19 @@ export async function saveBookingTicket(ticket) {
 	history.unshift(newTicket)
 	storageSet(STORAGE_KEYS.BOOKING_HISTORY, history)
 
-	// Reward points to currentUser
+	let pointsSave = null
+	// Award points only after the server confirms the account update.
 	const currentUser = getCurrentUser()
 	if (currentUser) {
 		const earnedPoints = Math.round((newTicket.total || 0) / 1000)
-		currentUser.points = (currentUser.points || 0) + earnedPoints
-		saveUserSession(currentUser)
-		updateUserInDatabase(currentUser)
+		if (earnedPoints > 0) {
+			const updatedUser = { ...currentUser, points: (currentUser.points || 0) + earnedPoints }
+			pointsSave = await updateUserInDatabase(updatedUser)
+		}
 	}
 
 	clearPendingBooking()
-	return newTicket
+	return { ...newTicket, pointsSave }
 }
 
 export async function updateBookingStatus(id, newStatus) {
@@ -1546,9 +1590,7 @@ export function cleanExpiredSeatHolds() {
  */
 export function getActiveSeatHolds(cinemaId, movieId, date, time) {
 	const active = cleanExpiredSeatHolds()
-	return active.filter(
-		h => h.cinemaId === cinemaId && h.movieId === movieId && h.date === date && h.time === time,
-	)
+	return active.filter(h => h.cinemaId === cinemaId && h.movieId === movieId && h.date === date && h.time === time)
 }
 
 /**
@@ -1584,7 +1626,10 @@ export function holdSeats(cinemaId, movieId, date, time, seatIds = [], holdId = 
 	const cleanSeats = Array.isArray(seatIds)
 		? seatIds
 		: typeof seatIds === "string"
-			? seatIds.split(",").map(s => s.trim()).filter(Boolean)
+			? seatIds
+					.split(",")
+					.map(s => s.trim())
+					.filter(Boolean)
 			: []
 
 	if (cleanSeats.length === 0) {
@@ -1753,7 +1798,10 @@ export function checkSeatsAvailability(cinemaId, movieId, date, time, seatIds = 
 	const list = Array.isArray(seatIds)
 		? seatIds
 		: typeof seatIds === "string"
-			? seatIds.split(",").map(s => s.trim()).filter(Boolean)
+			? seatIds
+					.split(",")
+					.map(s => s.trim())
+					.filter(Boolean)
 			: []
 
 	const unavailableSeats = []
@@ -1930,7 +1978,8 @@ export function canDeselectSeat(currentSeats = [], seatIdToRemove) {
 			return {
 				allowed: false,
 				reason: "split",
-				message: "Không thể bỏ chọn ghế ở giữa vì các ghế còn lại sẽ bị cách xa nhau. Vui lòng bỏ chọn từ hai đầu ngoài!",
+				message:
+					"Không thể bỏ chọn ghế ở giữa vì các ghế còn lại sẽ bị cách xa nhau. Vui lòng bỏ chọn từ hai đầu ngoài!",
 			}
 		}
 	}
@@ -2043,12 +2092,12 @@ export async function redeemMemberReward(rewardId) {
 		return {
 			success: false,
 			error: "INSUFFICIENT_POINTS",
-			message: `Bạn hiện có ${userPoints} điểm, còn thiếu ${reward.points - userPoints} điểm để đổi quà này!`
+			message: `Bạn hiện có ${userPoints} điểm, còn thiếu ${reward.points - userPoints} điểm để đổi quà này!`,
 		}
 	}
 
-	// Trừ điểm của người dùng
-	user.points = userPoints - reward.points
+	// Prepare changes without mutating the active session until the API succeeds.
+	const updatedUser = { ...user, points: userPoints - reward.points }
 
 	// Tạo mã voucher vào danh sách vouchers của user
 	const voucherCode = reward.code
@@ -2059,32 +2108,37 @@ export async function redeemMemberReward(rewardId) {
 		category: reward.category,
 		discount: reward.description,
 		expiry: "31/12/2026",
-		redeemedAt: new Date().toISOString()
+		redeemedAt: new Date().toISOString(),
 	}
 
-	if (!user.vouchers) user.vouchers = []
-	user.vouchers.push(newVoucher)
+	updatedUser.vouchers = [...(user.vouchers || []), newVoucher]
 
 	// Thêm vào lịch sử tích / tiêu điểm
-	if (!user.pointsHistory) user.pointsHistory = []
-	user.pointsHistory.unshift({
+	updatedUser.pointsHistory = [...(user.pointsHistory || [])]
+	updatedUser.pointsHistory.unshift({
 		id: `PH-${Date.now()}`,
 		title: `Đổi quà: ${reward.title}`,
 		points: -reward.points,
 		date: new Date().toISOString(),
 		code: voucherCode,
-		type: "redeem"
+		type: "redeem",
 	})
 
 	// Cập nhật database và session
-	await updateUserInDatabase(user)
+	const saved = await updateUserInDatabase(updatedUser)
+	if (!saved.success)
+		return {
+			success: false,
+			error: "SAVE_FAILED",
+			message: saved.message || "Không thể lưu giao dịch lên máy chủ. Vui lòng thử lại.",
+		}
 
 	return {
 		success: true,
 		reward,
-		remainingPoints: user.points,
+		remainingPoints: updatedUser.points,
 		voucher: newVoucher,
-		message: `Đổi thành công "${reward.title}"! Đã thêm vào Kho ưu đãi của bạn.`
+		message: `Đổi thành công "${reward.title}"! Đã thêm vào Kho ưu đãi của bạn.`,
 	}
 }
 
@@ -2100,15 +2154,15 @@ export function getUserPointsHistory(user) {
 			title: "Tích lũy vé Đơn #BT-842915",
 			points: 45,
 			date: "2026-09-28T14:30:00.000Z",
-			type: "earn"
+			type: "earn",
 		},
 		{
 			id: "PH-100",
 			title: "Thưởng kích hoạt thành viên Beta VIP",
 			points: 50,
 			date: "2026-09-15T09:00:00.000Z",
-			type: "earn"
-		}
+			type: "earn",
+		},
 	]
 }
 

@@ -1120,7 +1120,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 		}
 	}
 
-	function openETicketModal() {
+	async function openETicketModal() {
 		const modal = document.getElementById("eticket-modal")
 		const body = document.getElementById("eticket-modal-body")
 		if (!modal || !body) return
@@ -1237,7 +1237,10 @@ document.addEventListener("DOMContentLoaded", async () => {
 			paymentStatus: "paid",
 			status: "paid",
 		}
-		saveBookingTicket(newTicket)
+		const savedTicket = await saveBookingTicket(newTicket)
+		if (savedTicket.pointsSave && !savedTicket.pointsSave.success) {
+			showToast("Vé đã được ghi nhận nhưng điểm thưởng chưa đồng bộ. Vui lòng liên hệ hỗ trợ để kiểm tra.", "warning", 7000)
+		}
 		clearPendingBooking()
 
 		// 3. Clear selected seats and re-render seat map so booked seats immediately show as sold

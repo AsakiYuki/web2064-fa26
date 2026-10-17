@@ -493,7 +493,10 @@ document.addEventListener("DOMContentLoaded", async () => {
 				paymentStatus: "pending",
 }
 
-				await saveBookingTicket(newTicket)
+				const savedTicket = await saveBookingTicket(newTicket)
+				if (savedTicket.pointsSave && !savedTicket.pointsSave.success) {
+					showToast("Vé đã được ghi nhận nhưng điểm thưởng chưa đồng bộ. Vui lòng liên hệ hỗ trợ để kiểm tra.", "warning", 7000)
+				}
 				isPaymentCompleted = true
 				clearPendingBooking()
 				updateHeaderAccountUI()
