@@ -5,8 +5,13 @@ import fs from 'fs'
 import path from 'path'
 import bcrypt from 'bcryptjs'
 
+const isVercel = Boolean(process.env.VERCEL || process.env.NOW_REGION)
+const dbPath = isVercel ? path.join('/tmp', 'db.json') : path.resolve('db.json')
+if (isVercel && !fs.existsSync(dbPath)) {
+	fs.copyFileSync(path.resolve('db.seed.json'), dbPath)
+}
 const server = jsonServer.create()
-const router = jsonServer.router('db.json')
+const router = jsonServer.router(dbPath)
 const middlewares = jsonServer.defaults()
 
 const PORT = process.env.PORT || 3000
@@ -136,39 +141,16 @@ server.use((req, res, next) => {
 	next()
 })
 
-// Custom endpoint: Reset password with account verification (Forgot Password flow)
-server.post('/reset-password', (req, res) => {
-	const { account, newPassword } = req.body || {}
-	const identifier = (account || '').trim().toLowerCase()
-	if (!identifier) {
-		return res.status(400).json({ success: false, message: 'Vui lòng cung cấp email hoặc số điện thoại' })
-	}
-	if (!newPassword || newPassword.length < 6) {
-		return res.status(400).json({ success: false, message: 'Mật khẩu mới phải có ít nhất 6 ký tự' })
-	}
-
-	const cleanPhone = identifier.replace(/[\s.-]/g, '')
-	const user = server.db
-		.get('users')
-		.find(u =>
-			(u.email && u.email.toLowerCase() === identifier) ||
-			(u.username && u.username.toLowerCase() === identifier) ||
-			(u.phone && u.phone.replace(/[\s.-]/g, '') === cleanPhone)
-		)
-		.value()
-
-	if (!user) {
-		return res.status(404).json({ success: false, message: 'Không tìm thấy tài khoản với thông tin này trên hệ thống!' })
-	}
-
-	const hashedPassword = bcrypt.hashSync(newPassword, 10)
-	server.db.get('users').find({ id: user.id }).assign({ password: hashedPassword }).write()
-	return res.status(200).json({ success: true, message: 'Đặt lại mật khẩu thành công!' })
+// Do not permit password resets based only on a public account identifier.
+server.post('/reset-password', (_req, res) => {
+	return res.status(501).json({ success: false, message: 'Đặt lại mật khẩu cần xác minh email hoặc số điện thoại. Vui lòng liên hệ hỗ trợ tài khoản.' })
 })
 
 // Custom endpoint: Change password with old password verification
 server.post('/change-password', (req, res) => {
-	const { userId, email, oldPassword, newPassword } = req.body || {}
+	const caller = resolveRequestUser(req, res, true)
+	if (!caller) return
+	const { oldPassword, newPassword } = req.body || {}
 	if (!oldPassword || !newPassword) {
 		return res.status(400).json({ success: false, message: 'Vui lòng điền đầy đủ mật khẩu cũ và mật khẩu mới' })
 	}
@@ -181,7 +163,7 @@ server.post('/change-password', (req, res) => {
 
 	const user = server.db
 		.get('users')
-		.find(u => (userId && String(u.id) === String(userId)) || (email && u.email && u.email.toLowerCase() === String(email).toLowerCase()))
+		.find(u => String(u.id) === String(caller.id))
 		.value()
 
 	if (!user) {
@@ -333,9 +315,12 @@ server.post('/checkout/complete', (req, res) => {
 
 // Custom endpoint to reset DB to seed state (used by Admin portal reset button)
 server.post('/reset-db', (req, res) => {
+	const caller = resolveRequestUser(req, res, true)
+	if (!caller) return
+	if (caller.role !== 'admin') return res.status(403).json({ success: false, message: 'Chỉ quản trị viên mới được thực hiện thao tác này.' })
 	try {
 		const seedPath = path.resolve('db.seed.json')
-		const targetPath = path.resolve('db.json')
+		const targetPath = dbPath
 		if (fs.existsSync(seedPath)) {
 			const seedData = fs.readFileSync(seedPath, 'utf8')
 			fs.writeFileSync(targetPath, seedData, 'utf8')
@@ -348,6 +333,28 @@ server.post('/reset-db', (req, res) => {
 	} catch (err) {
 		return res.status(500).json({ success: false, error: err.message })
 	}
+})
+
+// Protect every generic resource mutation on the server. User profile writes are
+// handled by a separate authenticated endpoint so clients cannot set roles/points.
+server.use((req, res, next) => {
+	const method = req.method.toUpperCase()
+	if (!['POST', 'PUT', 'PATCH', 'DELETE'].includes(method)) return next()
+	if (['/login', '/register'].includes(req.path)) return next()
+	const caller = resolveRequestUser(req, res, true)
+	if (!caller) return
+	if (req.path === '/users' || req.path.startsWith('/users/')) {
+		const targetId = req.path.split('/')[2]
+		if (caller.role !== 'admin' && !(method === 'PATCH' && String(caller.id) === String(targetId))) {
+			return res.status(403).json({ message: 'Không có quyền cập nhật tài khoản này.' })
+		}
+		if (caller.role !== 'admin' && Object.keys(req.body || {}).some(key => !['name', 'email', 'phone', 'birthday', 'gender', 'city', 'cinemaFavorite', 'avatarText', 'avatar'].includes(key))) {
+			return res.status(403).json({ message: 'Không có quyền thay đổi trường dữ liệu này.' })
+		}
+		return next()
+	}
+	if (caller.role !== 'admin') return res.status(403).json({ message: 'Chỉ quản trị viên mới được thay đổi dữ liệu.' })
+	return next()
 })
 
 // Explicit route for member_rewards
@@ -373,8 +380,10 @@ server.use(auth)
 // Use json-server router for all resource CRUD (/movies, /showtimes, /concessions, /bookings, /cinemas, etc.)
 server.use(router)
 
-server.listen(PORT, () => {
+if (!isVercel) server.listen(PORT, () => {
 	console.log(`🚀 [JSON-Server + Auth] Running on http://localhost:${PORT}`)
 	console.log(`   - Auth Endpoints: POST /register, POST /login`)
 	console.log(`   - CRUD Endpoints: /movies, /showtimes, /concessions, /bookings, /cinemas, /users`)
 })
+
+export default server

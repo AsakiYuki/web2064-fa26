@@ -59,9 +59,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 	function checkAdminAccess() {
 		const currentUser = getCurrentUser()
 		const isAdmin = isUserAdmin(currentUser)
-		const isPreview = new URLSearchParams(window.location.search).has("preview")
-
-		if (isAdmin || isPreview) {
+		if (isAdmin) {
 			if (authGate) authGate.style.display = "none"
 			if (adminLayout) adminLayout.style.display = "flex"
 
