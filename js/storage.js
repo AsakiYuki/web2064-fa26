@@ -29,6 +29,7 @@ import {
 	apiUpdateConcession,
 	apiDeleteConcession,
 	apiGetBookings,
+	apiGetMyBookings,
 	apiUpdateBooking,
 	apiDeleteBooking,
 	apiConfirmBookingPayment,
@@ -324,6 +325,7 @@ function formatMoviesData(rawMovies) {
 export async function initializeStorage(force = false) {
 	try {
 		console.info(`[Storage] Đang đồng bộ hóa dữ liệu với json-server...`)
+		const sessionUser = getCurrentUser()
 
 		// Thử lấy dữ liệu từ json-server
 		const [
@@ -343,7 +345,7 @@ export async function initializeStorage(force = false) {
 			apiGetShowtimes(),
 			apiGetConcessions(),
 			apiGetConcessionCategories(),
-			apiGetBookings(),
+			sessionUser?.role === "admin" ? apiGetBookings() : sessionUser ? apiGetMyBookings() : Promise.resolve(null),
 			apiGetGenres(),
 			apiGetBanners(),
 			apiGetTicketPricing(),
@@ -398,7 +400,7 @@ export async function initializeStorage(force = false) {
 			if (cc) storageSet(STORAGE_KEYS.CONCESSIONS, cc)
 		}
 
-		if (bookingsRes && bookingsRes.length > 0) {
+		if (Array.isArray(bookingsRes)) {
 			storageSet(STORAGE_KEYS.BOOKING_HISTORY, bookingsRes)
 		} else if (!storageHas(STORAGE_KEYS.BOOKING_HISTORY)) {
 			storageSet(STORAGE_KEYS.BOOKING_HISTORY, DEFAULT_BOOKING_HISTORY)

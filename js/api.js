@@ -342,6 +342,11 @@ export async function apiGetBookings() {
 	return res.ok && Array.isArray(res.data) ? res.data : []
 }
 
+export async function apiGetMyBookings() {
+	const res = await request("/my/bookings")
+	return res.ok && Array.isArray(res.data) ? res.data : []
+}
+
 export async function apiCreateBooking(booking) {
 	const res = await request("/bookings", {
 		method: "POST",

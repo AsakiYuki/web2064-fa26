@@ -259,6 +259,14 @@ server.post('/change-password', (req, res) => {
 	return res.status(200).json({ success: true, message: 'Đổi mật khẩu thành công trên hệ thống!' })
 })
 
+// Return only the authenticated member's tickets for profile history.
+server.get('/my/bookings', (req, res) => {
+	const caller = resolveRequestUser(req, res, true)
+	if (!caller) return
+	const bookings = (server.db.get('bookings').value() || []).filter(item => String(item.userId) === String(caller.id))
+	return res.json(bookings)
+})
+
 // Redeem a reward and write its points transaction in one server-side operation.
 server.post('/member/redeem', (req, res) => {
 	const user = resolveRequestUser(req, res, true)
