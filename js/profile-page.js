@@ -11,6 +11,7 @@ import {
 } from "./common.js"
 import {
 	getBookingHistory,
+	syncMyBookingsFromServer,
 	updateUserInDatabase,
 	changeUserPassword,
 	cancelBookingTicket,
@@ -74,6 +75,12 @@ document.addEventListener("DOMContentLoaded", async () => {
 				panel.classList.remove("active")
 			}
 		})
+		if (target === "history") {
+			renderBookingHistory()
+			syncMyBookingsFromServer().then(res => {
+				if (res?.changed) renderBookingHistory()
+			})
+		}
 	}
 
 	tabBtns.forEach(btn => {
@@ -82,8 +89,26 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 	activateTab(initialTab)
 
-	// 3. Render Booking History
+	// 3. Render Booking History with auto-sync
 	renderBookingHistory()
+	syncMyBookingsFromServer().then(res => {
+		if (res?.changed) renderBookingHistory()
+	})
+
+	// Background polling to reflect admin payment approvals in real-time
+	setInterval(() => {
+		if (document.visibilityState === "visible") {
+			syncMyBookingsFromServer().then(res => {
+				if (res?.changed) renderBookingHistory()
+			})
+		}
+	}, 7000)
+
+	window.addEventListener("focus", () => {
+		syncMyBookingsFromServer().then(res => {
+			if (res?.changed) renderBookingHistory()
+		})
+	})
 
 	// Booking History Status Filter Buttons
 	const filterBtns = document.querySelectorAll("#history-status-filters .btn-filter-status")

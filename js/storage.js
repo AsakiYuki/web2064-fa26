@@ -990,6 +990,38 @@ export function getBookingHistory() {
 	return storageGet(STORAGE_KEYS.BOOKING_HISTORY, DEFAULT_BOOKING_HISTORY)
 }
 
+/**
+ * Đồng bộ lịch sử đặt vé cá nhân từ máy chủ json-server
+ */
+export async function syncMyBookingsFromServer() {
+	try {
+		const res = await apiGetMyBookings()
+		if (Array.isArray(res) && res.length > 0) {
+			const history = getBookingHistory()
+			let changed = false
+			res.forEach(serverTicket => {
+				const idx = history.findIndex(t => String(t.id) === String(serverTicket.id))
+				if (idx >= 0) {
+					if (history[idx].paymentStatus !== serverTicket.paymentStatus || history[idx].status !== serverTicket.status) {
+						history[idx] = { ...history[idx], ...serverTicket }
+						changed = true
+					}
+				} else {
+					history.unshift(serverTicket)
+					changed = true
+				}
+			})
+			if (changed) {
+				storageSet(STORAGE_KEYS.BOOKING_HISTORY, history)
+				return { changed: true, history }
+			}
+		}
+	} catch (err) {
+		console.warn("[Storage] Không thể đồng bộ lịch sử vé từ máy chủ:", err)
+	}
+	return { changed: false, history: getBookingHistory() }
+}
+
 export async function saveBookingTicket(ticket) {
 	const history = getBookingHistory()
 	const cName = ticket.customerName || ticket.userName || "Khách Hàng"
