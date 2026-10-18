@@ -18,23 +18,35 @@ const TOKEN_KEY = "beta_auth_token"
    TOKEN & HEADERS MANAGEMENT
    ========================================================================== */
 
-export function getAuthToken() {
-	if (typeof localStorage === "undefined") return ""
-	return localStorage.getItem(TOKEN_KEY) || ""
-}
+let memoryToken = ""
 
-export function setAuthToken(token) {
-	if (typeof localStorage === "undefined") return
-	if (token) {
-		localStorage.setItem(TOKEN_KEY, token)
-	} else {
-		localStorage.removeItem(TOKEN_KEY)
+export function getAuthToken() {
+	if (typeof localStorage === "undefined") return memoryToken
+	try {
+		return localStorage.getItem(TOKEN_KEY) || memoryToken || ""
+	} catch {
+		return memoryToken
 	}
 }
 
-export function removeAuthToken() {
+export function setAuthToken(token) {
+	memoryToken = token || ""
 	if (typeof localStorage === "undefined") return
-	localStorage.removeItem(TOKEN_KEY)
+	try {
+		if (token) {
+			localStorage.setItem(TOKEN_KEY, token)
+		} else {
+			localStorage.removeItem(TOKEN_KEY)
+		}
+	} catch {}
+}
+
+export function removeAuthToken() {
+	memoryToken = ""
+	if (typeof localStorage === "undefined") return
+	try {
+		localStorage.removeItem(TOKEN_KEY)
+	} catch {}
 }
 
 function getHeaders(isJson = true) {
@@ -373,6 +385,14 @@ export async function apiDeleteBooking(id) {
 export async function apiConfirmBookingPayment(id) {
 	const res = await request(`/admin/bookings/${encodeURIComponent(id)}/confirm-payment`, { method: 'POST', body: '{}' })
 	return res.ok ? res.data : { success: false, message: res.error || 'Không thể xác nhận thanh toán.' }
+}
+
+export async function apiDemoConfirmPayment(id) {
+	const res = await request(`/demo/webhook/confirm-payment`, {
+		method: 'POST',
+		body: JSON.stringify({ bookingId: id }),
+	})
+	return res.ok ? res.data : { success: false, message: res.error || 'Không thể xác nhận thanh toán giả lập.' }
 }
 
 export async function apiCancelBooking(id) {

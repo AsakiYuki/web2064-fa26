@@ -33,6 +33,7 @@ import {
 	apiUpdateBooking,
 	apiDeleteBooking,
 	apiConfirmBookingPayment,
+	apiDemoConfirmPayment,
 	apiCancelBooking,
 	apiGetCinemas,
 	apiGetGenres,
@@ -43,6 +44,7 @@ import {
 	apiGetMemberRewards,
 	apiResetDatabase,
 	getAuthToken,
+	setAuthToken,
 	removeAuthToken,
 } from "./api.js"
 
@@ -491,6 +493,9 @@ export function getUser() {
 
 export function saveUserSession(userData) {
 	storageSet(STORAGE_KEYS.USER_SESSION, userData)
+	if (userData?.token) {
+		setAuthToken(userData.token)
+	}
 }
 
 export function logoutUser() {
@@ -985,6 +990,38 @@ export function getBookingHistory() {
 	return storageGet(STORAGE_KEYS.BOOKING_HISTORY, DEFAULT_BOOKING_HISTORY)
 }
 
+/**
+ * Đồng bộ lịch sử đặt vé cá nhân từ máy chủ json-server
+ */
+export async function syncMyBookingsFromServer() {
+	try {
+		const res = await apiGetMyBookings()
+		if (Array.isArray(res) && res.length > 0) {
+			const history = getBookingHistory()
+			let changed = false
+			res.forEach(serverTicket => {
+				const idx = history.findIndex(t => String(t.id) === String(serverTicket.id))
+				if (idx >= 0) {
+					if (history[idx].paymentStatus !== serverTicket.paymentStatus || history[idx].status !== serverTicket.status) {
+						history[idx] = { ...history[idx], ...serverTicket }
+						changed = true
+					}
+				} else {
+					history.unshift(serverTicket)
+					changed = true
+				}
+			})
+			if (changed) {
+				storageSet(STORAGE_KEYS.BOOKING_HISTORY, history)
+				return { changed: true, history }
+			}
+		}
+	} catch (err) {
+		console.warn("[Storage] Không thể đồng bộ lịch sử vé từ máy chủ:", err)
+	}
+	return { changed: false, history: getBookingHistory() }
+}
+
 export async function saveBookingTicket(ticket) {
 	const history = getBookingHistory()
 	const cName = ticket.customerName || ticket.userName || "Khách Hàng"
@@ -1110,6 +1147,32 @@ export async function confirmTicketPayment(id) {
 	}
 
 	return true
+}
+
+export async function demoConfirmPayment(id) {
+	const result = await apiDemoConfirmPayment(id)
+	if (!result.success) return { success: false, message: result.message }
+
+	const history = getBookingHistory()
+	const target = history.find(b => String(b.id) === String(id))
+
+	if (target) {
+		target.paymentStatus = "paid"
+		target.bookingStatus = "confirmed"
+		target.status = "paid"
+		target.paidAt = result.booking?.paidAt || new Date().toISOString()
+		storageSet(STORAGE_KEYS.BOOKING_HISTORY, history)
+	}
+
+	if (result.user) {
+		delete result.user.password
+		saveUserSession(result.user)
+		if (typeof window !== "undefined") {
+			window.dispatchEvent(new CustomEvent("beta_auth_changed", { detail: { user: result.user } }))
+		}
+	}
+
+	return { success: true, booking: result.booking }
 }
 
 export async function deleteBookingTicket(id) {

@@ -1423,13 +1423,9 @@ function initCinemaDropdownEvents() {
 		btn.setAttribute("aria-expanded", "false")
 	}
 
-	btn.addEventListener("click", e => {
-		e.stopPropagation()
-		dd.classList.contains("open") ? closeDD() : openDD()
-	})
-
 	dd.querySelectorAll(".cinema-dropdown-item").forEach(item => {
-		item.addEventListener("click", function () {
+		item.onclick = function (e) {
+			e.stopPropagation()
 			const cId = this.dataset.id
 			if (cId) {
 				setCurrentCinemaId(cId)
@@ -1439,7 +1435,15 @@ function initCinemaDropdownEvents() {
 			dd.querySelectorAll(".cinema-dropdown-item").forEach(el => el.classList.remove("active"))
 			this.classList.add("active")
 			closeDD()
-		})
+		}
+	})
+
+	if (btn.dataset.bound === "true") return
+	btn.dataset.bound = "true"
+
+	btn.addEventListener("click", e => {
+		e.stopPropagation()
+		dd.classList.contains("open") ? closeDD() : openDD()
 	})
 
 	document.addEventListener("click", e => {

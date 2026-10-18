@@ -81,8 +81,9 @@ export class ShowtimePicker {
 			this.showtimes = showtimesData || []
 			this.ticketPricing = pricing
 
-			// Always start from the visitor's local calendar date.
-			this.selectedDate = this.toDateString(new Date())
+			// Start from the active calendar date (today or earliest available showtime date)
+			const baseDate = this.getBaseDate()
+			this.selectedDate = this.toDateString(baseDate)
 
 			// Check URL param for cinema if available, else use preferred cinema
 			const urlParams = new URLSearchParams(window.location.search)
@@ -131,10 +132,33 @@ export class ShowtimePicker {
 		return `${yyyy}-${mm}-${dd}`
 	}
 
-	/** Generate 8 days starting from today */
+	getBaseDate() {
+		const today = new Date()
+		today.setHours(0, 0, 0, 0)
+		const todayStr = this.toDateString(today)
+
+		const hasFutureOrToday = this.showtimes.some(
+			s => s.date >= todayStr && Array.isArray(s.schedules) && s.schedules.length > 0
+		)
+		if (hasFutureOrToday) {
+			return today
+		}
+
+		const availableDates = this.showtimes
+			.filter(s => Array.isArray(s.schedules) && s.schedules.length > 0)
+			.map(s => s.date)
+			.sort()
+
+		if (availableDates.length > 0) {
+			const [y, m, d] = availableDates[0].split("-").map(Number)
+			return new Date(y, m - 1, d)
+		}
+		return today
+	}
+
+	/** Generate 8 days starting from the base date */
 	getDatesList() {
-		const baseDate = new Date()
-		baseDate.setHours(0, 0, 0, 0)
+		const baseDate = this.getBaseDate()
 		const dates = []
 		const dayNames = ["Chủ Nhật", "Thứ 2", "Thứ 3", "Thứ 4", "Thứ 5", "Thứ 6", "Thứ 7"]
 
@@ -584,7 +608,11 @@ export class ShowtimePicker {
 		// Cinema choice cards
 		container.querySelectorAll(".cinema-card-choice").forEach(card => {
 			card.addEventListener("click", () => {
-				setCurrentCinemaId(card.dataset.cinemaId)
+				const cinemaId = card.dataset.cinemaId
+				if (!cinemaId) return
+				this.selectedCinemaId = cinemaId
+				setCurrentCinemaId(cinemaId)
+				this.render()
 			})
 		})
 

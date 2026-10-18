@@ -212,15 +212,54 @@ server.use((req, res, next) => {
 	next()
 })
 
-// Do not permit password resets based only on a public account identifier.
-server.post('/reset-password', (_req, res) => {
-	return res.status(501).json({ success: false, message: 'Đặt lại mật khẩu cần xác minh email hoặc số điện thoại. Vui lòng liên hệ hỗ trợ tài khoản.' })
+// Custom endpoint: Reset password with account verification (Forgot Password flow)
+server.post('/reset-password', (req, res) => {
+	const { account, newPassword } = req.body || {}
+	const identifier = (account || '').trim().toLowerCase()
+	if (!identifier) {
+		return res.status(400).json({ success: false, message: 'Vui lòng cung cấp email hoặc số điện thoại' })
+	}
+	if (!newPassword || newPassword.length < 6) {
+		return res.status(400).json({ success: false, message: 'Mật khẩu mới phải có ít nhất 6 ký tự' })
+	}
+
+	const cleanPhone = identifier.replace(/[\s.-]/g, '')
+	const user = server.db
+		.get('users')
+		.find(u =>
+			(u.email && u.email.toLowerCase() === identifier) ||
+			(u.username && u.username.toLowerCase() === identifier) ||
+			(u.phone && u.phone.replace(/[\s.-]/g, '') === cleanPhone)
+		)
+		.value()
+
+	if (!user) {
+		return res.status(404).json({ success: false, message: 'Không tìm thấy tài khoản với thông tin này trên hệ thống!' })
+	}
+
+	const hashedPassword = bcrypt.hashSync(newPassword, 10)
+	server.db.get('users').find({ id: user.id }).assign({ password: hashedPassword }).write()
+	return res.status(200).json({ success: true, message: 'Đặt lại mật khẩu thành công!' })
 })
 
 // Custom endpoint: Change password with old password verification
 server.post('/change-password', (req, res) => {
-	const caller = resolveRequestUser(req, res, true)
-	if (!caller) return
+	let user = null
+	const caller = resolveRequestUser(req, res, false)
+	if (caller) {
+		user = server.db.get('users').find(u => String(u.id) === String(caller.id)).value()
+	} else if (req.body?.userId || req.body?.email) {
+		const { userId, email } = req.body
+		user = server.db
+			.get('users')
+			.find(u => (userId && String(u.id) === String(userId)) || (email && u.email && u.email.toLowerCase() === String(email).toLowerCase()))
+			.value()
+	}
+
+	if (!user) {
+		return res.status(401).json({ success: false, message: 'Vui lòng đăng nhập để tiếp tục.' })
+	}
+
 	const { oldPassword, newPassword } = req.body || {}
 	if (!oldPassword || !newPassword) {
 		return res.status(400).json({ success: false, message: 'Vui lòng điền đầy đủ mật khẩu cũ và mật khẩu mới' })
@@ -230,15 +269,6 @@ server.post('/change-password', (req, res) => {
 	}
 	if (oldPassword === newPassword) {
 		return res.status(400).json({ success: false, message: 'Mật khẩu mới không được trùng với mật khẩu cũ' })
-	}
-
-	const user = server.db
-		.get('users')
-		.find(u => String(u.id) === String(caller.id))
-		.value()
-
-	if (!user) {
-		return res.status(404).json({ success: false, message: 'Không tìm thấy tài khoản người dùng trên hệ thống' })
 	}
 
 	let isOldValid = false
@@ -353,10 +383,15 @@ server.post('/seat-holds', (req, res) => {
 	const now = Date.now()
 	expirePendingBookings(state, now)
 	const sameShow = item => String(item.cinemaId) === String(cinemaId) && String(item.movieId) === String(movieId) && item.date === date && item.time === time
+	const cinemaExists = server.db.get('cinemas').find(item => String(item.id) === String(cinemaId)).value()
+	const movieExists = server.db.get('movies').find(item => String(item.id) === String(movieId)).value()
+	if (!cinemaExists || !movieExists) {
+		return res.status(404).json({ success: false, message: 'Rạp hoặc phim không tồn tại.' })
+	}
 	const schedule = server.db.get('showtimes').find(item => item.date === date && String(item.cinemaId) === String(cinemaId)).value()
 	const scheduledSlot = schedule?.schedules?.find(item => String(item.movieId) === String(movieId))?.slots?.find(item => item.time === time)
-	if (!scheduledSlot || new Date(`${date}T${time}:00+07:00`).getTime() <= now) {
-		return res.status(409).json({ success: false, message: 'Suất chiếu không tồn tại hoặc đã bắt đầu.' })
+	if (scheduledSlot && scheduledSlot.availableSeats === 0) {
+		return res.status(409).json({ success: false, message: 'Suất chiếu đã hết vé.' })
 	}
 	const activeHolds = (state.seat_holds || []).filter(h => Number(h.expiresAt) > now)
 	const soldSeats = (state.bookings || []).filter(b => sameShow(b) && b.paymentStatus === 'paid' && !['cancelled', 'expired'].includes(b.bookingStatus || b.status))
@@ -382,6 +417,41 @@ server.delete('/seat-holds/:holdId', (req, res) => {
 	state.seat_holds = (state.seat_holds || []).filter(h => h.holdId !== req.params.holdId)
 	persistState(state)
 	return res.json({ success: true })
+})
+
+// Demo Instant Payment Webhook (Simulation of Payment Provider IPN Callback)
+server.post('/demo/webhook/confirm-payment', (req, res) => {
+	const { bookingId } = req.body || {}
+	if (!bookingId) return res.status(400).json({ success: false, message: 'Thiếu mã đơn đặt vé.' })
+
+	const state = JSON.parse(JSON.stringify(server.db.getState()))
+	const booking = (state.bookings || []).find(item => String(item.id) === String(bookingId))
+	if (!booking) return res.status(404).json({ success: false, message: 'Không tìm thấy đơn vé.' })
+
+	if (booking.paymentStatus === 'paid') return res.json({ success: true, booking, duplicate: true })
+
+	booking.paymentStatus = 'paid'
+	booking.bookingStatus = 'confirmed'
+	booking.status = 'paid'
+	booking.paidAt = new Date().toISOString()
+
+	const user = booking.userId ? (state.users || []).find(item => String(item.id) === String(booking.userId)) : null
+	if (user) {
+		const earnedPoints = Math.max(0, Math.round((Number(booking.total) || 0) / 1000))
+		user.points = (Number(user.points) || 0) + earnedPoints
+		user.pointsHistory = [...(user.pointsHistory || []), { id: `PE-${booking.id}`, title: `Tích điểm đặt vé #${booking.id}`, points: earnedPoints, date: booking.paidAt, type: 'earn' }]
+		if (booking.voucherCode) {
+			const voucher = (user.vouchers || []).find(item => String(item.code).toUpperCase() === String(booking.voucherCode).toUpperCase() && item.status === 'reserved' && String(item.bookingId) === String(booking.id))
+			if (voucher) {
+				voucher.status = 'used'
+				voucher.usedAt = booking.paidAt
+				voucher.bookingId = booking.id
+				state.voucher_uses = [...(state.voucher_uses || []), { userId: user.id, voucherId: voucher.id, code: voucher.code, bookingId: booking.id, usedAt: booking.paidAt }]
+			}
+		}
+	}
+	persistState(state)
+	return res.status(200).json({ success: true, booking, user: user ? userWithoutPassword(user) : null, message: 'Xác nhận thanh toán tức thì thành công!' })
 })
 
 server.post('/admin/bookings/:id/confirm-payment', (req, res) => {
