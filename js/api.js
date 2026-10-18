@@ -365,6 +365,11 @@ export async function apiDeleteBooking(id) {
 	return res.ok ? { success: true } : { success: false, error: res.error }
 }
 
+export async function apiConfirmBookingPayment(id) {
+	const res = await request(`/admin/bookings/${encodeURIComponent(id)}/confirm-payment`, { method: 'POST', body: '{}' })
+	return res.ok ? res.data : { success: false, message: res.error || 'Không thể xác nhận thanh toán.' }
+}
+
 /* ==========================================================================
    STATIC & SYSTEM APIS (/cinemas, /genres, /banners, /promotions, etc.)
    ========================================================================== */

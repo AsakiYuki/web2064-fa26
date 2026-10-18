@@ -31,6 +31,7 @@ import {
 	apiGetBookings,
 	apiUpdateBooking,
 	apiDeleteBooking,
+	apiConfirmBookingPayment,
 	apiGetCinemas,
 	apiGetGenres,
 	apiGetBanners,
@@ -1085,8 +1086,8 @@ export async function confirmBookingOrder(id) {
 }
 
 export async function confirmTicketPayment(id) {
-	const patchData = { paymentStatus: "paid", status: "paid" }
-	apiUpdateBooking(id, patchData).catch(err => console.warn("[API] Lỗi khi xác nhận thu tiền vé:", err))
+	const result = await apiConfirmBookingPayment(id)
+	if (!result.success) return false
 
 	const history = getBookingHistory()
 	const target = history.find(b => String(b.id) === String(id))

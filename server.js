@@ -100,6 +100,77 @@ function userWithoutPassword(user) {
 	return safeUser
 }
 
+function expirePendingBookings(state, now = Date.now()) {
+	for (const booking of state.bookings || []) {
+		if (booking.paymentStatus !== 'pending' || !Number(booking.holdExpiresAt) || Number(booking.holdExpiresAt) > now) continue
+		booking.paymentStatus = 'expired'
+		booking.bookingStatus = 'expired'
+		booking.status = 'expired'
+		const owner = (state.users || []).find(user => String(user.id) === String(booking.userId))
+		const voucher = owner?.vouchers?.find(item => item.status === 'reserved' && String(item.bookingId) === String(booking.id))
+		if (voucher) {
+			voucher.status = 'active'
+			delete voucher.bookingId
+		}
+	}
+}
+
+function getSeatPrice(seatId, basePrice) {
+	const clean = String(seatId || '').toUpperCase()
+	const sweetbox = clean.match(/^([LM])(\d{2})-\1(\d{2})$/)
+	if (sweetbox) {
+		const first = Number(sweetbox[2])
+		const second = Number(sweetbox[3])
+		if (first < 1 || second !== first + 1 || first % 2 !== 1 || second > 12) return null
+		return basePrice * 2 + 15000
+	}
+	const seat = clean.match(/^([A-HJK])(\d{2})$/)
+	if (!seat || Number(seat[2]) < 1 || Number(seat[2]) > 14) return null
+	return 'EFGHJK'.includes(seat[1]) ? basePrice + 10000 : basePrice
+}
+
+function isSeedSeatSold(cinemaId, movieId, date, time, seatId) {
+	const rows = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'J', 'K', 'L', 'M']
+	const seed = `${cinemaId}_${movieId}_${date}_${time}`
+	let hash = 0
+	for (const char of seed) hash = ((hash << 5) - hash + char.charCodeAt(0)) | 0
+	const absHash = Math.abs(hash)
+	const id = String(seatId).toUpperCase()
+	const row = rows.findIndex(letter => id.startsWith(letter))
+	if (row < 0) return true
+	if (row >= 10) {
+		const match = id.match(/^[LM](\d{2})-[LM](\d{2})$/)
+		if (!match) return true
+		return (absHash + row * 11 + Math.ceil(Number(match[1]) / 2) * 17) % 7 === 0
+	}
+	const match = id.match(/^[A-HJK](\d{2})$/)
+	if (!match) return true
+	return (absHash * (row + 3) + Number(match[1]) * 19) % 9 === 0
+}
+
+function calculateOrderTotals(state, ticket, seatIds) {
+	const day = (state.showtimes || []).find(item => item.date === ticket.date && String(item.cinemaId) === String(ticket.cinemaId))
+	const schedule = day?.schedules?.find(item => String(item.movieId) === String(ticket.movieId))
+	const slot = schedule?.slots?.find(item => item.time === ticket.time)
+	if (!slot || (ticket.screenName && schedule.screenName !== ticket.screenName) || (ticket.formatName && schedule.format !== ticket.formatName)) return null
+	const basePrice = String(ticket.formatName || schedule.format || '').toLowerCase().includes('imax') ? 120000 : 70000
+	const seatPrices = seatIds.map(seat => getSeatPrice(seat, basePrice))
+	if (seatPrices.some(price => price === null)) return null
+	const seatTotal = seatPrices.reduce((sum, price) => sum + price, 0)
+	let concessionsTotal = 0
+	const concessions = String(ticket.concessions || '').trim()
+	if (concessions && !['Không chọn', 'None'].includes(concessions)) {
+		for (const part of concessions.split(',')) {
+			const match = part.trim().match(/^(\d+)\s*x\s*(.+)$/i)
+			if (!match || Number(match[1]) < 1) return null
+			const item = (state.concessions || []).find(product => product.name === match[2].trim())
+			if (!item) return null
+			concessionsTotal += Number(item.price) * Number(match[1])
+		}
+	}
+	return { rawTotal: seatTotal + concessionsTotal, concessionsTotal }
+}
+
 // Bind the router db to the server
 server.db = router.db
 
@@ -272,10 +343,11 @@ server.post('/seat-holds', (req, res) => {
 	}
 	const state = JSON.parse(JSON.stringify(server.db.getState()))
 	const now = Date.now()
+	expirePendingBookings(state, now)
 	const sameShow = item => String(item.cinemaId) === String(cinemaId) && String(item.movieId) === String(movieId) && item.date === date && item.time === time
 	const schedule = server.db.get('showtimes').find(item => item.date === date && String(item.cinemaId) === String(cinemaId)).value()
 	const scheduledSlot = schedule?.schedules?.find(item => String(item.movieId) === String(movieId))?.slots?.find(item => item.time === time)
-	if (!scheduledSlot || new Date(`${date}T${time}:00`).getTime() <= now) {
+	if (!scheduledSlot || new Date(`${date}T${time}:00+07:00`).getTime() <= now) {
 		return res.status(409).json({ success: false, message: 'Suất chiếu không tồn tại hoặc đã bắt đầu.' })
 	}
 	const activeHolds = (state.seat_holds || []).filter(h => Number(h.expiresAt) > now)
@@ -287,6 +359,9 @@ server.post('/seat-holds', (req, res) => {
 		...(state.bookings || []).filter(b => sameShow(b) && b.paymentStatus === 'pending' && Number(b.holdExpiresAt) > now).flatMap(b => String(b.seats || '').split(',').map(s => s.trim().toUpperCase())).filter(s => cleanSeats.includes(s)),
 	])]
 	if (conflicts.length) return res.status(409).json({ success: false, conflictSeats: conflicts, message: `Ghế ${conflicts.join(', ')} vừa được người khác giữ hoặc mua.` })
+	if (cleanSeats.some(seat => isSeedSeatSold(cinemaId, movieId, date, time, seat))) {
+		return res.status(409).json({ success: false, message: 'Một hoặc nhiều ghế đã được bán. Vui lòng chọn ghế khác.' })
+	}
 	const expiresAt = now + 300000
 	state.seat_holds = activeHolds.filter(h => h.holdId !== holdId)
 	state.seat_holds.push({ holdId: String(holdId), cinemaId, movieId, date, time, seats: cleanSeats, expiresAt })
@@ -301,16 +376,53 @@ server.delete('/seat-holds/:holdId', (req, res) => {
 	return res.json({ success: true })
 })
 
+server.post('/admin/bookings/:id/confirm-payment', (req, res) => {
+	const admin = resolveRequestUser(req, res, true)
+	if (!admin) return
+	if (admin.role !== 'admin') return res.status(403).json({ success: false, message: 'Chỉ quản trị viên mới được xác nhận thanh toán.' })
+	const state = JSON.parse(JSON.stringify(server.db.getState()))
+	expirePendingBookings(state)
+	const booking = (state.bookings || []).find(item => String(item.id) === String(req.params.id))
+	if (!booking) return res.status(404).json({ success: false, message: 'Không tìm thấy đơn vé.' })
+	if (booking.paymentStatus === 'paid') return res.json({ success: true, booking, duplicate: true })
+	if (booking.paymentStatus !== 'pending' || Number(booking.holdExpiresAt) <= Date.now()) {
+		return res.status(409).json({ success: false, message: 'Đơn đã hết hạn hoặc không ở trạng thái chờ thanh toán.' })
+	}
+	booking.paymentStatus = 'paid'
+	booking.bookingStatus = 'confirmed'
+	booking.status = 'paid'
+	booking.paidAt = new Date().toISOString()
+	const user = booking.userId ? (state.users || []).find(item => String(item.id) === String(booking.userId)) : null
+	if (user) {
+		const earnedPoints = Math.max(0, Math.round((Number(booking.total) || 0) / 1000))
+		user.points = (Number(user.points) || 0) + earnedPoints
+		user.pointsHistory = [...(user.pointsHistory || []), { id: `PE-${booking.id}`, title: `Tích điểm đặt vé #${booking.id}`, points: earnedPoints, date: booking.paidAt, type: 'earn' }]
+		if (booking.voucherCode) {
+			const voucher = (user.vouchers || []).find(item => String(item.code).toUpperCase() === String(booking.voucherCode).toUpperCase() && item.status === 'reserved' && String(item.bookingId) === String(booking.id))
+			if (voucher) {
+				voucher.status = 'used'
+				voucher.usedAt = booking.paidAt
+				voucher.bookingId = booking.id
+				state.voucher_uses = [...(state.voucher_uses || []), { userId: user.id, voucherId: voucher.id, code: voucher.code, bookingId: booking.id, usedAt: booking.paidAt }]
+			} else if ((user.vouchers || []).some(item => String(item.code).toUpperCase() === String(booking.voucherCode).toUpperCase())) {
+				return res.status(409).json({ success: false, message: 'Voucher đặt kèm đơn không còn được giữ hợp lệ.' })
+			}
+		}
+	}
+	persistState(state)
+	return res.json({ success: true, booking, user: user ? userWithoutPassword(user) : null })
+})
+
 // Commit the ticket, consume a member voucher, and award points atomically.
 server.post('/checkout/complete', (req, res) => {
 	const user = resolveRequestUser(req, res, false)
 	if (req.headers.authorization && !user) return
 	const ticket = req.body?.ticket
 	const holdId = req.body?.holdId
-	const context = req.body?.voucherContext || {}
 	if (!ticket?.id || !holdId) return res.status(400).json({ success: false, message: 'Thiếu mã đơn hoặc mã giữ ghế.' })
 
 	const state = JSON.parse(JSON.stringify(server.db.getState()))
+	expirePendingBookings(state)
 	state.bookings = Array.isArray(state.bookings) ? state.bookings : []
 	state.voucher_uses = Array.isArray(state.voucher_uses) ? state.voucher_uses : []
 	const priorBooking = state.bookings.find(item => String(item.id) === String(ticket.id))
@@ -320,14 +432,24 @@ server.post('/checkout/complete', (req, res) => {
 	if (!hold || !requestedSeats.length || String(hold.cinemaId) !== String(ticket.cinemaId) || String(hold.movieId) !== String(ticket.movieId) || hold.date !== ticket.date || hold.time !== ticket.time || requestedSeats.some(seat => !hold.seats.includes(seat))) {
 		return res.status(409).json({ success: false, message: 'Giữ ghế đã hết hạn hoặc không khớp đơn. Vui lòng chọn ghế lại.' })
 	}
+	if (requestedSeats.length !== String(ticket.seats || '').split(',').map(s => s.trim()).filter(Boolean).length) {
+		return res.status(400).json({ success: false, message: 'Đơn có ghế bị lặp.' })
+	}
+	const totals = calculateOrderTotals(state, ticket, requestedSeats)
+	if (!totals || !Number.isFinite(totals.rawTotal) || totals.rawTotal <= 0) return res.status(400).json({ success: false, message: 'Suất chiếu, ghế hoặc combo không hợp lệ.' })
+	const context = { rawTotal: totals.rawTotal, concessionsTotal: totals.concessionsTotal, showDate: ticket.date }
 
-	let committedTicket = { ...ticket, bookingStatus: 'pending', paymentStatus: 'pending', status: 'pending', holdExpiresAt: hold.expiresAt }
+	let committedTicket = { ...ticket, userId: user?.id || null, rawTotal: totals.rawTotal, concessionsTotal: totals.concessionsTotal, total: totals.rawTotal, discountAmount: 0, bookingStatus: 'pending', paymentStatus: 'pending', status: 'pending', holdExpiresAt: hold.expiresAt }
 	if (ticket.voucherCode) {
 		const targetUser = user ? state.users.find(u => String(u.id) === String(user.id)) : null
 		const validation = calculateServerVoucher(ticket.voucherCode, targetUser, context)
 		if (!validation.success) return res.status(409).json(validation)
 		committedTicket.discountAmount = validation.discountAmount
 		committedTicket.total = Math.max(0, Number(context.rawTotal) - validation.discountAmount)
+		if (validation.ownedVoucher) {
+			validation.ownedVoucher.status = 'reserved'
+			validation.ownedVoucher.bookingId = ticket.id
+		}
 	}
 
 	state.bookings.unshift(committedTicket)
@@ -378,6 +500,12 @@ server.post('/reset-db', (req, res) => {
 // handled by a separate authenticated endpoint so clients cannot set roles/points.
 server.use((req, res, next) => {
 	const method = req.method.toUpperCase()
+	if (method === 'GET' && (req.path === '/users' || req.path.startsWith('/users/') || req.path === '/bookings' || req.path.startsWith('/bookings/'))) {
+		const reader = resolveRequestUser(req, res, true)
+		if (!reader) return
+		if (reader.role !== 'admin') return res.status(403).json({ message: 'Chỉ quản trị viên mới được xem dữ liệu này.' })
+		return next()
+	}
 	if (!['POST', 'PUT', 'PATCH', 'DELETE'].includes(method)) return next()
 	if (['/login', '/register'].includes(req.path)) return next()
 	const caller = resolveRequestUser(req, res, true)

@@ -1467,7 +1467,11 @@ document.addEventListener("DOMContentLoaded", async () => {
 			bookingsTableTbody.querySelectorAll(".btn-action-payment-confirm").forEach(btn => {
 				btn.addEventListener("click", async () => {
 					const id = btn.dataset.id
-					await confirmTicketPayment(id)
+					const result = await confirmTicketPayment(id)
+					if (!result) {
+						showToast("Không thể xác nhận thanh toán. Đơn có thể đã hết hạn hoặc dữ liệu máy chủ bị lỗi.", "error")
+						return
+					}
 					showToast(`💰 Đã xác nhận thu tiền cho đơn vé ${id}! Vé đã sẵn sàng cho khách xem phim.`, "success")
 					renderAdminBookingsTable()
 					renderOverviewDashboard()
