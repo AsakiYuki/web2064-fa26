@@ -7,6 +7,7 @@ import { formatCurrency, showToast, formatDateVN, translateDom, getSavedLang } f
 import {
 	getCinemas,
 	getCurrentCinemaId,
+	setCurrentCinemaId,
 	getMoviesData,
 	getShowtimes,
 	getTicketPricing,
@@ -104,6 +105,7 @@ export class ShowtimePicker {
 			window.addEventListener("cinemaChanged", e => {
 				if (e.detail?.id && this.cinemas.some(c => c.id === e.detail.id)) {
 					this.selectedCinemaId = e.detail.id
+					this.selectedCity = e.detail.city || "all"
 					this.validateActiveSelection()
 					this.render()
 				}
@@ -225,9 +227,12 @@ export class ShowtimePicker {
 
 		const availableCinemas = this.getAvailableCinemas(this.selectedDate, this.selectedCity)
 
-		// Nếu rạp đang chọn không có trong danh sách rạp có suất chiếu -> chọn rạp đầu tiên có suất chiếu
-		if (!availableCinemas.some(c => c.id === this.selectedCinemaId)) {
+		// Keep the globally selected cinema even when it has no showtimes that day.
+		// Only change it when the selected city filter explicitly excludes it.
+		const selectedCinema = this.cinemas.find(c => c.id === this.selectedCinemaId)
+		if (!selectedCinema || (this.selectedCity !== "all" && selectedCinema.city !== this.selectedCity)) {
 			this.selectedCinemaId = availableCinemas.length > 0 ? availableCinemas[0].id : null
+			if (this.selectedCinemaId) setCurrentCinemaId(this.selectedCinemaId)
 		}
 	}
 
@@ -567,6 +572,11 @@ export class ShowtimePicker {
 		container.querySelectorAll(".city-pill-btn").forEach(btn => {
 			btn.addEventListener("click", () => {
 				this.selectedCity = btn.dataset.city
+				const cinemas = this.getAvailableCinemas(this.selectedDate, this.selectedCity)
+				if (!cinemas.some(cinema => cinema.id === this.selectedCinemaId)) {
+					this.selectedCinemaId = cinemas[0]?.id || null
+					if (this.selectedCinemaId) setCurrentCinemaId(this.selectedCinemaId)
+				}
 				this.render()
 			})
 		})
@@ -574,10 +584,7 @@ export class ShowtimePicker {
 		// Cinema choice cards
 		container.querySelectorAll(".cinema-card-choice").forEach(card => {
 			card.addEventListener("click", () => {
-				this.selectedCinemaId = card.dataset.cinemaId
-				container.querySelectorAll(".cinema-card-choice").forEach(c => c.classList.remove("active"))
-				card.classList.add("active")
-				this.renderShowtimeResultsOnly()
+				setCurrentCinemaId(card.dataset.cinemaId)
 			})
 		})
 
