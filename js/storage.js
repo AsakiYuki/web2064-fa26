@@ -33,6 +33,7 @@ import {
 	apiUpdateBooking,
 	apiDeleteBooking,
 	apiConfirmBookingPayment,
+	apiDemoConfirmPayment,
 	apiCancelBooking,
 	apiGetCinemas,
 	apiGetGenres,
@@ -1114,6 +1115,32 @@ export async function confirmTicketPayment(id) {
 	}
 
 	return true
+}
+
+export async function demoConfirmPayment(id) {
+	const result = await apiDemoConfirmPayment(id)
+	if (!result.success) return { success: false, message: result.message }
+
+	const history = getBookingHistory()
+	const target = history.find(b => String(b.id) === String(id))
+
+	if (target) {
+		target.paymentStatus = "paid"
+		target.bookingStatus = "confirmed"
+		target.status = "paid"
+		target.paidAt = result.booking?.paidAt || new Date().toISOString()
+		storageSet(STORAGE_KEYS.BOOKING_HISTORY, history)
+	}
+
+	if (result.user) {
+		delete result.user.password
+		saveUserSession(result.user)
+		if (typeof window !== "undefined") {
+			window.dispatchEvent(new CustomEvent("beta_auth_changed", { detail: { user: result.user } }))
+		}
+	}
+
+	return { success: true, booking: result.booking }
 }
 
 export async function deleteBookingTicket(id) {

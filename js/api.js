@@ -387,6 +387,14 @@ export async function apiConfirmBookingPayment(id) {
 	return res.ok ? res.data : { success: false, message: res.error || 'Không thể xác nhận thanh toán.' }
 }
 
+export async function apiDemoConfirmPayment(id) {
+	const res = await request(`/demo/webhook/confirm-payment`, {
+		method: 'POST',
+		body: JSON.stringify({ bookingId: id }),
+	})
+	return res.ok ? res.data : { success: false, message: res.error || 'Không thể xác nhận thanh toán giả lập.' }
+}
+
 export async function apiCancelBooking(id) {
 	const res = await request(`/bookings/${encodeURIComponent(id)}/cancel`, { method: 'POST', body: '{}' })
 	return res.ok ? res.data : { success: false, message: res.error || 'Không thể hủy đơn vé.' }

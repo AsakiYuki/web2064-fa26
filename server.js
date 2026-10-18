@@ -414,6 +414,41 @@ server.delete('/seat-holds/:holdId', (req, res) => {
 	return res.json({ success: true })
 })
 
+// Demo Instant Payment Webhook (Simulation of Payment Provider IPN Callback)
+server.post('/demo/webhook/confirm-payment', (req, res) => {
+	const { bookingId } = req.body || {}
+	if (!bookingId) return res.status(400).json({ success: false, message: 'Thiếu mã đơn đặt vé.' })
+
+	const state = JSON.parse(JSON.stringify(server.db.getState()))
+	const booking = (state.bookings || []).find(item => String(item.id) === String(bookingId))
+	if (!booking) return res.status(404).json({ success: false, message: 'Không tìm thấy đơn vé.' })
+
+	if (booking.paymentStatus === 'paid') return res.json({ success: true, booking, duplicate: true })
+
+	booking.paymentStatus = 'paid'
+	booking.bookingStatus = 'confirmed'
+	booking.status = 'paid'
+	booking.paidAt = new Date().toISOString()
+
+	const user = booking.userId ? (state.users || []).find(item => String(item.id) === String(booking.userId)) : null
+	if (user) {
+		const earnedPoints = Math.max(0, Math.round((Number(booking.total) || 0) / 1000))
+		user.points = (Number(user.points) || 0) + earnedPoints
+		user.pointsHistory = [...(user.pointsHistory || []), { id: `PE-${booking.id}`, title: `Tích điểm đặt vé #${booking.id}`, points: earnedPoints, date: booking.paidAt, type: 'earn' }]
+		if (booking.voucherCode) {
+			const voucher = (user.vouchers || []).find(item => String(item.code).toUpperCase() === String(booking.voucherCode).toUpperCase() && item.status === 'reserved' && String(item.bookingId) === String(booking.id))
+			if (voucher) {
+				voucher.status = 'used'
+				voucher.usedAt = booking.paidAt
+				voucher.bookingId = booking.id
+				state.voucher_uses = [...(state.voucher_uses || []), { userId: user.id, voucherId: voucher.id, code: voucher.code, bookingId: booking.id, usedAt: booking.paidAt }]
+			}
+		}
+	}
+	persistState(state)
+	return res.status(200).json({ success: true, booking, user: user ? userWithoutPassword(user) : null, message: 'Xác nhận thanh toán tức thì thành công!' })
+})
+
 server.post('/admin/bookings/:id/confirm-payment', (req, res) => {
 	const admin = resolveRequestUser(req, res, true)
 	if (!admin) return
