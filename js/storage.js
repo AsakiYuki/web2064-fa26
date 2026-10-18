@@ -7,6 +7,7 @@ import {
 	apiRegister,
 	apiLogin,
 	apiUpdateUser,
+	apiChangePassword,
 	apiRedeemMemberReward,
 	apiValidateVoucher,
 	apiCompleteCheckout,
@@ -520,40 +521,7 @@ export async function registerNewUser(userData) {
 		return { success: true, user: res.user }
 	}
 
-	// Fallback offline nếu server không hoạt động
-	const cleanEmail = (userData.email || "").trim().toLowerCase()
-	const cleanPhone = (userData.phone || "").trim().replace(/[\s.-]/g, "")
-	const list = getUsersList()
-
-	if (
-		list.some(
-			u =>
-				(u.email && u.email.toLowerCase() === cleanEmail) || (u.phone && u.phone.replace(/[\s.-]/g, "") === cleanPhone),
-		)
-	) {
-		return { success: false, message: "Email hoặc Số điện thoại này đã được đăng ký tài khoản!" }
-	}
-
-	const fallbackUser = {
-		id: Date.now(),
-		name: userData.name.trim(),
-		email: cleanEmail,
-		phone: cleanPhone,
-		password: userData.password,
-		avatarText: userData.name.trim().charAt(0).toUpperCase(),
-		rank: "Thành viên Beta Mới",
-		points: 50,
-		gender: userData.gender || "male",
-		birthday: userData.birthday || "2000-01-01",
-		city: userData.city || "Hà Nội",
-		cinemaFavorite: userData.cinemaFavorite || "beta-thainguyen",
-		createdAt: new Date().toISOString(),
-	}
-
-	list.push(fallbackUser)
-	storageSet(STORAGE_KEYS.USERS_LIST, list)
-	saveUserSession(fallbackUser)
-	return { success: true, user: fallbackUser }
+	return { success: false, message: res.message || "Không thể kết nối máy chủ. Tài khoản chưa được tạo." }
 }
 
 /**
@@ -566,28 +534,6 @@ export async function authenticateUser(account, password) {
 		return { success: true, user: res.user }
 	}
 
-	// Fallback offline login
-	const cleanAcc = (account || "").trim().toLowerCase()
-	const cleanPhone = cleanAcc.replace(/[\s.-]/g, "")
-	const list = getUsersList()
-
-	const user = list.find(
-		u =>
-			((u.email && u.email.toLowerCase() === cleanAcc) ||
-				(u.phone && u.phone.replace(/[\s.-]/g, "") === cleanPhone) ||
-				(u.username && u.username.toLowerCase() === cleanAcc) ||
-				(cleanAcc === "admin" &&
-					(u.role === "admin" || u.username === "admin" || u.email?.toLowerCase().startsWith("admin")))) &&
-			(u.password === password ||
-				(cleanAcc === "admin" && password === "12345678") ||
-				(u.role === "admin" && password === "12345678")),
-	)
-
-	if (user) {
-		saveUserSession(user)
-		return { success: true, user }
-	}
-
 	return { success: false, message: res.message || "Tài khoản hoặc mật khẩu không chính xác!" }
 }
 
@@ -598,9 +544,7 @@ export async function authenticateUser(account, password) {
  */
 export function isUserAdmin(user) {
 	if (!user) return false
-	return (
-		user.role === "admin" || user.username === "admin" || (user.email && user.email.toLowerCase().startsWith("admin"))
-	)
+	return user.role === "admin"
 }
 
 /**
@@ -651,14 +595,9 @@ export async function updateUserInDatabase(updatedUser) {
 /** Verify the current password, then let json-server-auth hash and save the new one. */
 export async function changeUserPassword(user, currentPassword, newPassword) {
 	if (!user?.id || !user.email) return { success: false, message: "Tài khoản chưa được liên kết với máy chủ." }
-	const verified = await apiLogin(user.email, currentPassword)
-	if (!verified.success) return { success: false, message: "Mật khẩu hiện tại không chính xác." }
-	const result = await apiUpdateUser(user.id, { password: newPassword })
+	const result = await apiChangePassword({ oldPassword: currentPassword, newPassword })
 	if (!result.success) return result
-	const safeUser = { ...user }
-	delete safeUser.password
-	saveUserSession(safeUser)
-	return { success: true, user: safeUser }
+	return { success: true, user }
 }
 
 /**
@@ -666,38 +605,7 @@ export async function changeUserPassword(user, currentPassword, newPassword) {
  * Đồng bộ với API server và LocalStorage
  */
 export async function resetUserPassword(account, newPassword) {
-	const cleanAcc = (account || "").trim().toLowerCase()
-	const cleanPhone = cleanAcc.replace(/[\s.-]/g, "")
-	const list = getUsersList()
-
-	const user = list.find(
-		u =>
-			(u.email && u.email.toLowerCase() === cleanAcc) ||
-			(u.phone && u.phone.replace(/[\s.-]/g, "") === cleanPhone) ||
-			(u.username && u.username.toLowerCase() === cleanAcc),
-	)
-
-	if (!user) {
-		return { success: false, message: "Không tìm thấy tài khoản với email hoặc số điện thoại này!" }
-	}
-
-	// 1. Đồng bộ lên API Server
-	const apiRes = await apiResetPassword(account, newPassword).catch(err => ({ success: false, message: err.message }))
-	if (!apiRes.success && apiRes.message && !apiRes.message.includes("fetch") && !apiRes.message.includes("Failed")) {
-		return { success: false, message: apiRes.message }
-	}
-
-	// 2. Cập nhật LocalStorage
-	user.password = newPassword
-	storageSet(STORAGE_KEYS.USERS_LIST, list)
-
-	const currentUser = getCurrentUser()
-	if (currentUser && (currentUser.id === user.id || currentUser.email === user.email)) {
-		currentUser.password = newPassword
-		saveUserSession(currentUser)
-	}
-
-	return { success: true, message: "Đặt lại mật khẩu thành công!", user }
+	return apiResetPassword(account, newPassword).catch(err => ({ success: false, message: err.message }))
 }
 
 /* ==========================================================================
