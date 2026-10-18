@@ -18,23 +18,35 @@ const TOKEN_KEY = "beta_auth_token"
    TOKEN & HEADERS MANAGEMENT
    ========================================================================== */
 
-export function getAuthToken() {
-	if (typeof localStorage === "undefined") return ""
-	return localStorage.getItem(TOKEN_KEY) || ""
-}
+let memoryToken = ""
 
-export function setAuthToken(token) {
-	if (typeof localStorage === "undefined") return
-	if (token) {
-		localStorage.setItem(TOKEN_KEY, token)
-	} else {
-		localStorage.removeItem(TOKEN_KEY)
+export function getAuthToken() {
+	if (typeof localStorage === "undefined") return memoryToken
+	try {
+		return localStorage.getItem(TOKEN_KEY) || memoryToken || ""
+	} catch {
+		return memoryToken
 	}
 }
 
-export function removeAuthToken() {
+export function setAuthToken(token) {
+	memoryToken = token || ""
 	if (typeof localStorage === "undefined") return
-	localStorage.removeItem(TOKEN_KEY)
+	try {
+		if (token) {
+			localStorage.setItem(TOKEN_KEY, token)
+		} else {
+			localStorage.removeItem(TOKEN_KEY)
+		}
+	} catch {}
+}
+
+export function removeAuthToken() {
+	memoryToken = ""
+	if (typeof localStorage === "undefined") return
+	try {
+		localStorage.removeItem(TOKEN_KEY)
+	} catch {}
 }
 
 function getHeaders(isJson = true) {

@@ -43,6 +43,7 @@ import {
 	apiGetMemberRewards,
 	apiResetDatabase,
 	getAuthToken,
+	setAuthToken,
 	removeAuthToken,
 } from "./api.js"
 
@@ -491,6 +492,9 @@ export function getUser() {
 
 export function saveUserSession(userData) {
 	storageSet(STORAGE_KEYS.USER_SESSION, userData)
+	if (userData?.token) {
+		setAuthToken(userData.token)
+	}
 }
 
 export function logoutUser() {
