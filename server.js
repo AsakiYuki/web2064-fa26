@@ -159,7 +159,7 @@ function calculateOrderTotals(state, ticket, seatIds) {
 	const seatTotal = seatPrices.reduce((sum, price) => sum + price, 0)
 	let concessionsTotal = 0
 	const concessions = String(ticket.concessions || '').trim()
-	if (concessions && !['Không chọn', 'None'].includes(concessions)) {
+	if (concessions && !['Không chọn', 'Không kèm bắp nước', 'None'].includes(concessions)) {
 		for (const part of concessions.split(',')) {
 			const match = part.trim().match(/^(\d+)\s*x\s*(.+)$/i)
 			if (!match || Number(match[1]) < 1) return null
