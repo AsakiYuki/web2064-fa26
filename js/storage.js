@@ -10,6 +10,7 @@ import {
 	apiRedeemMemberReward,
 	apiValidateVoucher,
 	apiCompleteCheckout,
+	apiReleaseSeatHold,
 	apiResetPassword,
 	apiGetUsers,
 	apiGetMovies,
@@ -1101,7 +1102,7 @@ export async function saveBookingTicket(ticket) {
 		rawTotal: Number(ticket.rawTotal ?? ticket.total) || 0,
 		concessionsTotal: Number(ticket.concessionsTotal) || 0,
 		showDate: ticket.date,
-	})
+	}, ticket.holdId)
 	if (!committed.success) return { ...newTicket, saveError: committed.message || "Không thể lưu đơn vé lên máy chủ." }
 	const savedTicket = { ...newTicket, ...committed.ticket }
 	if (committed.user) {
@@ -1720,6 +1721,7 @@ export function releaseSeatHold(holdId) {
 	const filtered = allHolds.filter(h => h && h.holdId !== holdId)
 	if (filtered.length !== allHolds.length) {
 		storageSet(STORAGE_KEYS.SEAT_HOLDS, filtered)
+		apiReleaseSeatHold(holdId).catch(() => {})
 		return true
 	}
 	return false

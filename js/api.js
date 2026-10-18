@@ -199,10 +199,20 @@ export async function apiValidateVoucher(payload) {
 	return res.ok ? res.data : { success: false, message: res.error || "Voucher không hợp lệ." }
 }
 
-export async function apiCompleteCheckout(ticket, voucherContext) {
+export async function apiHoldSeats(hold) {
+	const res = await request('/seat-holds', { method: 'POST', body: JSON.stringify(hold) })
+	return res.ok ? res.data : { success: false, message: res.error || 'Không thể giữ ghế trên máy chủ.' }
+}
+
+export async function apiReleaseSeatHold(holdId) {
+	const res = await request(`/seat-holds/${encodeURIComponent(holdId)}`, { method: 'DELETE' })
+	return res.ok
+}
+
+export async function apiCompleteCheckout(ticket, voucherContext, holdId) {
 	const res = await request("/checkout/complete", {
 		method: "POST",
-		body: JSON.stringify({ ticket, voucherContext }),
+		body: JSON.stringify({ ticket, voucherContext, holdId }),
 	})
 	return res.ok ? res.data : { success: false, message: res.error || "Không thể hoàn tất đơn vé." }
 }

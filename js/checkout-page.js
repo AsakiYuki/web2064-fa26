@@ -8,12 +8,12 @@ import {
 	getPendingBooking,
 	clearPendingBooking,
 	saveBookingTicket,
-	updateShowtimeSeats,
 	validateVoucherForCheckout,
 	checkSeatsAvailability,
 	releaseSeatHold,
 } from "./storage.js"
 import { generateQRCodeSVG } from "./qrcode.js"
+import { apiHoldSeats } from "./api.js"
 
 document.addEventListener("DOMContentLoaded", async () => {
 	await setupHeaderAndFooter()
@@ -38,6 +38,12 @@ document.addEventListener("DOMContentLoaded", async () => {
 	// 1. Read from LocalStorage Pending Booking or fallback to URL query params
 	const pending = getPendingBooking()
 	const urlParams = new URLSearchParams(window.location.search)
+	const holdId = urlParams.get("holdId") || pending?.holdId
+	if (!pending || !holdId) {
+		showToast("Phiên giữ ghế không hợp lệ. Vui lòng chọn suất và ghế lại.", "error", 6000)
+		window.location.replace("/schedule.html")
+		return
+	}
 
 	const movieId = urlParams.get("movieId") || pending?.movieId || "utlan2"
 	const cinemaId = urlParams.get("cinemaId") || pending?.cinemaId || "beta-thainguyen"
@@ -50,6 +56,20 @@ document.addEventListener("DOMContentLoaded", async () => {
 	let initialVoucher = urlParams.get("voucher") || pending?.voucherCode || ""
 	let rawTotal = pending ? (pending.seatsTotal || 0) + (pending.concessionsTotal || 0) : (+urlParams.get("total") || 255000)
 	const concessionsTotal = Number(pending?.concessionsTotal) || 0
+	const serverHold = await apiHoldSeats({
+		holdId,
+		cinemaId,
+		movieId,
+		date: dateStr,
+		time: timeSlot,
+		seats: seatsParam.split(",").map(seat => seat.trim()).filter(Boolean),
+	})
+	if (!serverHold.success) {
+		showToast(serverHold.message || "Các ghế này không còn khả dụng. Vui lòng chọn ghế khác.", "error", 7000)
+		window.location.replace(`/booking.html?movieId=${encodeURIComponent(movieId)}&cinemaId=${encodeURIComponent(cinemaId)}&date=${encodeURIComponent(dateStr)}&time=${encodeURIComponent(timeSlot)}`)
+		return
+	}
+	pending.holdExpiresAt = serverHold.expiresAt
 
 	// If rawTotal wasn't split, deduce fallback
 	if (rawTotal <= 0) rawTotal = 255000
@@ -407,7 +427,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 		if (badgeEl) badgeEl.textContent = checkoutState.paymentMethod.toUpperCase()
 		if (titleEl) titleEl.textContent = `Quét Mã QR ${methodNameText}`
-		if (descEl) descEl.textContent = `Mở ứng dụng ${methodNameText} hoặc Mobile Banking trên điện thoại để quét mã QR chuyển khoản.`
+		if (descEl) descEl.textContent = `Đây là mã QR mô phỏng, chưa kết nối ${methodNameText} và không thể dùng để chuyển tiền. Gửi yêu cầu chỉ tạo đơn chờ thanh toán.`
 		if (amountEl) amountEl.textContent = formatCurrency(checkoutState.finalTotal)
 		if (bookingCodeEl) bookingCodeEl.textContent = bookingCode
 		if (transferMsgEl) transferMsgEl.textContent = transferContent
@@ -456,16 +476,10 @@ document.addEventListener("DOMContentLoaded", async () => {
 				qrConfirmPaidBtn.disabled = true
 				if (qrVerifyOverlay) qrVerifyOverlay.style.display = "flex"
 
-				// Simulate realistic banking reconciliation check (1.8s)
-				await new Promise(resolve => setTimeout(resolve, 1800))
-
 				if (qrTimerInterval) clearInterval(qrTimerInterval)
 				clearInterval(timerInterval)
 
-				// 8. UPDATE SEAT STATUS TO 'SOLD' IN LOCALSTORAGE & RELEASE ACTIVE HOLD
-				const seatList = seatsParam.split(",").map(s => s.trim()).filter(Boolean)
-
-				// 9. SAVE TICKET TO USER'S BOOKING HISTORY IN LOCALSTORAGE
+				// Save as pending. A customer click cannot prove that a provider received money.
 				const newTicket = {
 				id: bookingCode,
 				movieId: currentMovie.id,
@@ -488,9 +502,10 @@ document.addEventListener("DOMContentLoaded", async () => {
 				customerName: fullName,
 				customerPhone: cleanPhone,
 				customerEmail: email,
-				bookingDate: new Date().toISOString(),
+					bookingDate: new Date().toISOString(),
+					holdId,
 
-				bookingStatus: "pending",	
+				bookingStatus: "pending",
 				paymentStatus: "pending",
 }
 
@@ -501,8 +516,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 					qrConfirmPaidBtn.disabled = false
 					return
 				}
-				updateShowtimeSeats(currentCinema.id, currentMovie.id, dateStr, timeSlot, seatList, "sold")
-				if (pending?.holdId) releaseSeatHold(pending.holdId)
 				isPaymentCompleted = true
 				clearPendingBooking()
 				updateHeaderAccountUI()
@@ -519,8 +532,8 @@ document.addEventListener("DOMContentLoaded", async () => {
 				}
 
 				showToast(
-					`🎉 Thanh toán thành công qua ${methodNameText}! Mã vé của bạn là ${bookingCode}. Chúc bạn xem phim vui vẻ!`,
-					"success",
+					`Đã ghi nhận đơn ${bookingCode} ở trạng thái chờ xác nhận thanh toán. Vé chưa được xác nhận thanh toán.`,
+					"info",
 					7000
 				)
 			}
