@@ -383,10 +383,15 @@ server.post('/seat-holds', (req, res) => {
 	const now = Date.now()
 	expirePendingBookings(state, now)
 	const sameShow = item => String(item.cinemaId) === String(cinemaId) && String(item.movieId) === String(movieId) && item.date === date && item.time === time
+	const cinemaExists = server.db.get('cinemas').find(item => String(item.id) === String(cinemaId)).value()
+	const movieExists = server.db.get('movies').find(item => String(item.id) === String(movieId)).value()
+	if (!cinemaExists || !movieExists) {
+		return res.status(404).json({ success: false, message: 'Rạp hoặc phim không tồn tại.' })
+	}
 	const schedule = server.db.get('showtimes').find(item => item.date === date && String(item.cinemaId) === String(cinemaId)).value()
 	const scheduledSlot = schedule?.schedules?.find(item => String(item.movieId) === String(movieId))?.slots?.find(item => item.time === time)
-	if (!scheduledSlot || new Date(`${date}T${time}:00+07:00`).getTime() <= now) {
-		return res.status(409).json({ success: false, message: 'Suất chiếu không tồn tại hoặc đã bắt đầu.' })
+	if (scheduledSlot && scheduledSlot.availableSeats === 0) {
+		return res.status(409).json({ success: false, message: 'Suất chiếu đã hết vé.' })
 	}
 	const activeHolds = (state.seat_holds || []).filter(h => Number(h.expiresAt) > now)
 	const soldSeats = (state.bookings || []).filter(b => sameShow(b) && b.paymentStatus === 'paid' && !['cancelled', 'expired'].includes(b.bookingStatus || b.status))
