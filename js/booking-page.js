@@ -297,7 +297,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 		const sPoster = document.getElementById("summary-poster-img")
 		const sTitle = document.getElementById("summary-movie-title")
 		const sCinema = document.getElementById("summary-cinema-name")
-		const sTime = document.getElementById("summary-showtime-text")
+		const sTime = document.getElementById("summary-showtime-text") 
 		const sFormat = document.getElementById("summary-format-tag")
 
 		if (sPoster) sPoster.src = currentMovie.poster
@@ -839,6 +839,15 @@ document.addEventListener("DOMContentLoaded", async () => {
 				`
 			}
 		}
+
+		const gotoCheckoutStepBtn = document.getElementById("btn-goto-checkout-step")
+		if (gotoCheckoutStepBtn) {
+			gotoCheckoutStepBtn.disabled = !hasSeats
+			gotoCheckoutStepBtn.innerHTML = `
+				<span>TIẾP TỤC THANH TOÁN (${formatCurrency(finalTotal)})</span>
+				<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:18px;height:18px;"><polyline points="9 18 15 12 9 6"></polyline></svg>
+			`
+		}
 	}
 
 	function updateBookingUrl() {
@@ -1002,6 +1011,11 @@ document.addEventListener("DOMContentLoaded", async () => {
 			switchToStep(2)
 		})
 		backBtn?.addEventListener("click", () => switchToStep(1))
+
+		const gotoCheckoutStepBtn = document.getElementById("btn-goto-checkout-step")
+		gotoCheckoutStepBtn?.addEventListener("click", () => {
+			checkoutBtn?.click()
+		})
 
 		checkoutBtn?.addEventListener("click", () => {
 			if (!validateSeatsBeforeProceed()) return
