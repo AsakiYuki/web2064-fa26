@@ -116,12 +116,12 @@ document.addEventListener("DOMContentLoaded", async () => {
 		btn.addEventListener("click", () => {
 			filterBtns.forEach(b => {
 				b.classList.remove("active")
-				b.style.background = "#313244"
-				b.style.color = "#a6adc8"
+				b.style.background = ""
+				b.style.color = ""
 			})
 			btn.classList.add("active")
-			btn.style.background = "#89b4fa"
-			btn.style.color = "#11111b"
+			btn.style.background = ""
+			btn.style.color = ""
 
 			currentHistoryFilter = btn.dataset.status
 			renderBookingHistory()
