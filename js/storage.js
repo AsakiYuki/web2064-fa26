@@ -567,8 +567,10 @@ export async function updateUserInDatabase(updatedUser) {
 	// Keep the local profile unchanged unless the server confirms the update.
 	let serverUser = null
 	if (updatedUser.id) {
-		const serverUpdates = { ...updatedUser }
-		delete serverUpdates.password
+		const editableFields = ["name", "email", "phone", "birthday", "gender", "city", "cinemaFavorite", "avatarText", "avatar"]
+		const serverUpdates = Object.fromEntries(editableFields
+			.filter(field => updatedUser[field] !== undefined)
+			.map(field => [field, updatedUser[field]]))
 		const result = await apiUpdateUser(updatedUser.id, serverUpdates)
 		if (!result.success) return result
 		serverUser = result.user
@@ -818,7 +820,7 @@ export function getShowtimes() {
 
 export async function addShowtimeSlot(slotData) {
 	const { cinemaId, date, movieId, movieTitle, screenId, screenName, format, time, price, availableSeats } = slotData
-	const allShowtimes = getShowtimes()
+	const allShowtimes = JSON.parse(JSON.stringify(getShowtimes()))
 
 	let dayCinema = allShowtimes.find(st => st.date === date && st.cinemaId === cinemaId)
 	if (!dayCinema) {
@@ -852,17 +854,13 @@ export async function addShowtimeSlot(slotData) {
 	})
 	schedule.slots.sort((a, b) => a.time.localeCompare(b.time))
 
-	// Sync local
+	// Save to the server first so the UI cannot claim success for a local-only schedule.
+	let result = await apiUpdateShowtime(dayCinema.id, dayCinema)
+	if (!result.success) result = await apiCreateShowtime(dayCinema)
+	if (!result.success) return { success: false, message: result.error || "Không thể lưu lịch chiếu lên máy chủ." }
+
 	storageSet(STORAGE_KEYS.SHOWTIMES, allShowtimes)
-
-	// Sync backend
-	if (dayCinema.id) {
-		apiUpdateShowtime(dayCinema.id, dayCinema).catch(() => {
-			apiCreateShowtime(dayCinema).catch(() => {})
-		})
-	}
-
-	return schedule
+	return { success: true, schedule }
 }
 
 export async function updateShowtimeSlot(slotData) {
