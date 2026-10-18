@@ -1,5 +1,22 @@
-import { setupHeaderAndFooter, formatCurrency, formatDateVN, showToast, getCurrentUser, saveUserSession, translateDom, getSavedLang } from "./common.js"
-import { getBookingHistory, updateUserInDatabase, changeUserPassword, cancelBookingTicket, VOUCHER_LIST } from "./storage.js"
+import {
+	setupHeaderAndFooter,
+	formatCurrency,
+	formatDateVN,
+	showToast,
+	getCurrentUser,
+	saveUserSession,
+	translateDom,
+	getSavedLang,
+	openAuthModal,
+} from "./common.js"
+import {
+	getBookingHistory,
+	syncMyBookingsFromServer,
+	updateUserInDatabase,
+	changeUserPassword,
+	cancelBookingTicket,
+	VOUCHER_LIST,
+} from "./storage.js"
 import { generateQRCodeSVG } from "./qrcode.js"
 
 const DEFAULT_PROFILE = {
@@ -23,14 +40,16 @@ document.addEventListener("DOMContentLoaded", async () => {
 	// 1. Load User Session from LocalStorage
 	let user = getCurrentUser()
 	if (!user) {
-		user = { ...DEFAULT_PROFILE }
-		saveUserSession(user)
+		openAuthModal("login")
+		showToast("Vui lòng đăng nhập để xem hồ sơ và lịch sử vé.", "info")
+		return
 	} else {
 		// Merge any missing fields with defaults
 		user = { ...DEFAULT_PROFILE, ...user }
 	}
 
 	renderUserInfo(user)
+	renderVouchers(user)
 
 	// 2. Setup Profile Navigation Tabs
 	const urlParams = new URLSearchParams(window.location.search)
@@ -56,6 +75,12 @@ document.addEventListener("DOMContentLoaded", async () => {
 				panel.classList.remove("active")
 			}
 		})
+		if (target === "history") {
+			renderBookingHistory()
+			syncMyBookingsFromServer().then(res => {
+				if (res?.changed) renderBookingHistory()
+			})
+		}
 	}
 
 	tabBtns.forEach(btn => {
@@ -64,8 +89,26 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 	activateTab(initialTab)
 
-	// 3. Render Booking History
+	// 3. Render Booking History with auto-sync
 	renderBookingHistory()
+	syncMyBookingsFromServer().then(res => {
+		if (res?.changed) renderBookingHistory()
+	})
+
+	// Background polling to reflect admin payment approvals in real-time
+	setInterval(() => {
+		if (document.visibilityState === "visible") {
+			syncMyBookingsFromServer().then(res => {
+				if (res?.changed) renderBookingHistory()
+			})
+		}
+	}, 7000)
+
+	window.addEventListener("focus", () => {
+		syncMyBookingsFromServer().then(res => {
+			if (res?.changed) renderBookingHistory()
+		})
+	})
 
 	// Booking History Status Filter Buttons
 	const filterBtns = document.querySelectorAll("#history-status-filters .btn-filter-status")
@@ -73,12 +116,12 @@ document.addEventListener("DOMContentLoaded", async () => {
 		btn.addEventListener("click", () => {
 			filterBtns.forEach(b => {
 				b.classList.remove("active")
-				b.style.background = "#313244"
-				b.style.color = "#a6adc8"
+				b.style.background = ""
+				b.style.color = ""
 			})
 			btn.classList.add("active")
-			btn.style.background = "#89b4fa"
-			btn.style.color = "#11111b"
+			btn.style.background = ""
+			btn.style.color = ""
 
 			currentHistoryFilter = btn.dataset.status
 			renderBookingHistory()
@@ -125,9 +168,9 @@ document.addEventListener("DOMContentLoaded", async () => {
 		if (avatarPreview) avatarPreview.textContent = val || "N"
 	})
 
-	// 5. Bắt sự kiện người dùng bấm Lưu và Ghi vào LocalStorage
+	// 5. Save profile changes to the server before updating the local session.
 	const infoForm = document.getElementById("form-profile-info")
-	infoForm?.addEventListener("submit", e => {
+	infoForm?.addEventListener("submit", async e => {
 		e.preventDefault()
 		// Lấy giá trị từ người dùng gõ vào
 		const name = document.getElementById("pf-name")?.value.trim()
@@ -147,48 +190,89 @@ document.addEventListener("DOMContentLoaded", async () => {
 			return
 		}
 
-		// Cập nhật  thông tin vào OBJECT user
-		user.name = name
-		user.email = email
-		user.phone = phone
-		user.birthday = birthday
-		user.gender = gender
-		user.cinemaFavorite = favCinema
-		user.avatarText = name.charAt(0).toUpperCase()
-		user.avatar = user.avatarText
+		const updatedUser = {
+			...user,
+			name,
+			email,
+			phone,
+			birthday,
+			gender,
+			cinemaFavorite: favCinema,
+			avatarText: name.charAt(0).toUpperCase(),
+			avatar: name.charAt(0).toUpperCase(),
+		}
 
-		saveUserSession(user)
-		updateUserInDatabase(user)
-		renderUserInfo(user)
-		// Báo thành công
-		showToast("✅ Đã cập nhật và lưu thông tin cá nhân vào LocalStorage thành công!", "success")
+		const saveButton = infoForm.querySelector('[type="submit"]')
+		const originalLabel = saveButton?.textContent
+		if (saveButton) {
+			saveButton.disabled = true
+			saveButton.textContent = "Đang lưu..."
+		}
+		try {
+			const result = await updateUserInDatabase(updatedUser)
+			if (!result.success) {
+				showToast(result.message || "Không thể cập nhật hồ sơ trên máy chủ. Vui lòng thử lại.", "error")
+				return
+			}
+
+			user = updatedUser
+			saveUserSession(user)
+			renderUserInfo(user)
+			showToast(
+				result.localOnly
+					? "Đã lưu hồ sơ trên thiết bị này. Tài khoản chưa được đồng bộ với máy chủ."
+					: "Đã cập nhật hồ sơ thành công.",
+				"success",
+			)
+		} catch (error) {
+			showToast(error.message || "Không thể cập nhật hồ sơ trên máy chủ. Vui lòng thử lại.", "error")
+		} finally {
+			if (saveButton) {
+				saveButton.disabled = false
+				saveButton.textContent = originalLabel
+			}
+		}
 	})
 
 	// Reset profile button
-	document.getElementById("btn-reset-profile")?.addEventListener("click", () => {
+	document.getElementById("btn-reset-profile")?.addEventListener("click", async e => {
 		if (confirm("Bạn có chắc chắn muốn đặt lại thông tin cá nhân về mặc định?")) {
-			user = { ...DEFAULT_PROFILE }
-			saveUserSession(user)
-			renderUserInfo(user)
-			showToast("Đã khôi phục thông tin cá nhân về mặc định.", "info")
+			const button = e.currentTarget
+			const originalLabel = button.textContent
+			button.disabled = true
+			button.textContent = "Đang lưu..."
+			const resetUser = { ...DEFAULT_PROFILE, id: user.id, email: user.email }
+			try {
+				const result = await updateUserInDatabase(resetUser)
+				if (!result.success) {
+					showToast(result.message || "Không thể đặt lại hồ sơ trên máy chủ.", "error")
+					return
+				}
+				user = resetUser
+				saveUserSession(user)
+				renderUserInfo(user)
+				showToast("Đã đặt lại hồ sơ.", "success")
+			} catch (error) {
+				showToast(error.message || "Không thể đặt lại hồ sơ trên máy chủ.", "error")
+			} finally {
+				button.disabled = false
+				button.textContent = originalLabel
+			}
 		}
 	})
 
 	// 6. Voucher Copy Buttons
-	document.querySelectorAll(".btn-use-voucher").forEach(btn => {
-		btn.addEventListener("click", () => {
-			const code = btn.dataset.code
-			if (code) {
-				navigator.clipboard?.writeText(code)
-				showToast(`Đã sao chép mã ưu đãi ${code}! Dùng mã này khi đặt vé để nhận giảm giá.`, "success")
-			}
-		})
+	document.getElementById("profile-vouchers-grid")?.addEventListener("click", e => {
+		const btn = e.target.closest(".btn-use-voucher")
+		const code = btn?.dataset.code
+		if (code) {
+			navigator.clipboard?.writeText(code)
+			showToast(`Đã sao chép mã ưu đãi ${code}!`, "success")
+		}
 	})
 
 	// 7. Change Password Form with Old Password Verification & Server Sync
 	const passForm = document.getElementById("form-change-password")
-	const submitPassBtn = passForm?.querySelector("button[type='submit']")
-
 	passForm?.addEventListener("submit", async e => {
 		e.preventDefault()
 		const oldPass = document.getElementById("old-pass")?.value || ""
@@ -219,32 +303,27 @@ document.addEventListener("DOMContentLoaded", async () => {
 			return
 		}
 
-		if (submitPassBtn) {
-			submitPassBtn.disabled = true
-			submitPassBtn.dataset.origText = submitPassBtn.textContent
-			submitPassBtn.textContent = "Đang xác thực với hệ thống..."
+		const saveButton = passForm.querySelector('[type="submit"]')
+		const originalLabel = saveButton?.textContent
+		if (saveButton) {
+			saveButton.disabled = true
+			saveButton.textContent = "Đang lưu..."
 		}
-
 		try {
-			// Xác minh mật khẩu cũ và lưu lên server
-			const res = await changeUserPassword(oldPass, newPass)
-
-			if (!res.success) {
-				showToast(res.message || "Đổi mật khẩu thất bại! Vui lòng thử lại.", "error", 5000)
+			const result = await changeUserPassword(user, oldPass, newPass)
+			if (!result.success) {
+				showToast(result.message || "Không thể đổi mật khẩu. Vui lòng thử lại.", "error")
 				return
 			}
-
-			// Chỉ báo thành công và xóa form khi server cập nhật thành công
-			user.password = newPass
+			user = result.user
 			passForm.reset()
-			showToast("🎉 Đổi mật khẩu thành công! Mật khẩu mới đã được cập nhật an toàn.", "success", 5000)
-		} catch (err) {
-			console.error("[ChangePassword] Error:", err)
-			showToast("Lỗi kết nối máy chủ! Không thể đổi mật khẩu lúc này.", "error")
+			showToast("Đổi mật khẩu thành công! Hãy ghi nhớ mật khẩu mới của bạn.", "success")
+		} catch (error) {
+			showToast(error.message || "Không thể đổi mật khẩu. Vui lòng thử lại.", "error")
 		} finally {
-			if (submitPassBtn) {
-				submitPassBtn.disabled = false
-				submitPassBtn.textContent = submitPassBtn.dataset.origText || "Cập Nhật Mật Khẩu"
+			if (saveButton) {
+				saveButton.disabled = false
+				saveButton.textContent = originalLabel
 			}
 		}
 	})
@@ -307,12 +386,63 @@ document.addEventListener("DOMContentLoaded", async () => {
 		translateDom(getSavedLang())
 	}
 
+	function renderVouchers(u) {
+		const grid = document.getElementById("profile-vouchers-grid")
+		if (!grid) return
+		grid.replaceChildren()
+		const vouchers = Array.isArray(u.vouchers) ? u.vouchers : []
+		if (vouchers.length === 0) {
+			const empty = document.createElement("p")
+			empty.style.color = "#a6adc8"
+			empty.textContent = "Bạn chưa có voucher nào."
+			grid.append(empty)
+			return
+		}
+		vouchers.forEach(voucher => {
+			const card = document.createElement("div")
+			card.className = "voucher-card"
+			const icon = document.createElement("div")
+			icon.className = "v-icon"
+			icon.textContent = "🎟️"
+			const info = document.createElement("div")
+			info.className = "v-info"
+			const code = document.createElement("span")
+			code.className = "v-code"
+			code.textContent = voucher.code || "Voucher"
+			const description = document.createElement("p")
+			description.className = "v-desc"
+			description.textContent = voucher.name || voucher.discount || "Ưu đãi thành viên"
+			const expiry = document.createElement("span")
+			expiry.className = "v-exp"
+			const expiresAt = voucher.expiresAt ? new Date(voucher.expiresAt).toLocaleDateString("vi-VN") : voucher.expiry
+			const status = voucher.status === "used"
+				? "Đã sử dụng"
+				: voucher.expiresAt && new Date(voucher.expiresAt).getTime() <= Date.now()
+					? "Đã hết hạn"
+					: "Còn hiệu lực"
+			expiry.textContent = expiresAt ? `Hạn sử dụng: ${expiresAt} · ${status}` : "Voucher thành viên"
+			info.append(code, description, expiry)
+			const copy = document.createElement("button")
+			copy.type = "button"
+			copy.className = "btn-use-voucher"
+			copy.dataset.code = voucher.code || ""
+			const isExpired = voucher.expiresAt && new Date(voucher.expiresAt).getTime() <= Date.now()
+			copy.disabled = voucher.status === "used" || isExpired
+			copy.textContent = voucher.status === "used" ? "Đã dùng" : isExpired ? "Hết hạn" : "Sao chép"
+			card.append(icon, info, copy)
+			grid.append(card)
+		})
+	}
+
 	function renderBookingHistory() {
 		const container = document.getElementById("history-cards-container")
 		const badge = document.getElementById("history-count-badge")
 		if (!container) return
 
-		const history = getBookingHistory()
+		const history = getBookingHistory().filter(ticket =>
+			(ticket.userId && String(ticket.userId) === String(user.id)) ||
+			(!ticket.userId && String(ticket.customerEmail || ticket.userEmail || "").toLowerCase() === String(user.email || "").toLowerCase()),
+		)
 
 		if (badge) badge.textContent = history.length
 
@@ -322,7 +452,8 @@ document.addEventListener("DOMContentLoaded", async () => {
 				const isCancelled = t.status === "cancelled" || t.bookingStatus === "cancelled"
 				const isDone = t.status === "done"
 				const isPaid = !isCancelled && (t.paymentStatus === "paid" || t.status === "paid")
-				const isConfirmed = !isCancelled && !isPaid && !isDone && (t.bookingStatus === "confirmed" || t.status === "confirmed")
+				const isConfirmed =
+					!isCancelled && !isPaid && !isDone && (t.bookingStatus === "confirmed" || t.status === "confirmed")
 				const isPending = !isCancelled && !isPaid && !isDone && !isConfirmed
 
 				if (currentHistoryFilter === "pending") return isPending || isConfirmed
@@ -359,33 +490,40 @@ document.addEventListener("DOMContentLoaded", async () => {
 				const isCancelled = t.status === "cancelled" || t.bookingStatus === "cancelled"
 				const isDone = t.status === "done"
 				const isPaid = !isCancelled && (t.paymentStatus === "paid" || t.status === "paid")
-				const isConfirmed = !isCancelled && !isPaid && !isDone && (t.bookingStatus === "confirmed" || t.status === "confirmed")
+				const isConfirmed =
+					!isCancelled && !isPaid && !isDone && (t.bookingStatus === "confirmed" || t.status === "confirmed")
 				const isPending = !isCancelled && !isPaid && !isDone && !isConfirmed
 
 				let statusText = "Đã Thanh Toán"
 				let statusClass = "status-paid"
-				let statusBadgeStyle = "background: rgba(166, 227, 161, 0.2); color: #a6e3a1; border: 1px solid rgba(166, 227, 161, 0.4);"
+				let statusBadgeStyle =
+					"background: rgba(166, 227, 161, 0.2); color: #a6e3a1; border: 1px solid rgba(166, 227, 161, 0.4);"
 
 				if (isCancelled) {
 					statusText = "Đã Hủy"
 					statusClass = "status-cancelled"
-					statusBadgeStyle = "background: rgba(243, 139, 168, 0.2); color: #f38ba8; border: 1px solid rgba(243, 139, 168, 0.4);"
+					statusBadgeStyle =
+						"background: rgba(243, 139, 168, 0.2); color: #f38ba8; border: 1px solid rgba(243, 139, 168, 0.4);"
 				} else if (isDone) {
 					statusText = "Đã Sử Dụng"
 					statusClass = "status-done"
-					statusBadgeStyle = "background: rgba(148, 163, 184, 0.2); color: #bac2de; border: 1px solid rgba(148, 163, 184, 0.4);"
+					statusBadgeStyle =
+						"background: rgba(148, 163, 184, 0.2); color: #bac2de; border: 1px solid rgba(148, 163, 184, 0.4);"
 				} else if (isPaid) {
 					statusText = "Đã Thanh Toán"
 					statusClass = "status-paid"
-					statusBadgeStyle = "background: rgba(166, 227, 161, 0.2); color: #a6e3a1; border: 1px solid rgba(166, 227, 161, 0.4);"
+					statusBadgeStyle =
+						"background: rgba(166, 227, 161, 0.2); color: #a6e3a1; border: 1px solid rgba(166, 227, 161, 0.4);"
 				} else if (isConfirmed) {
 					statusText = "Đã Xác Nhận Đơn"
 					statusClass = "status-confirmed"
-					statusBadgeStyle = "background: rgba(137, 180, 250, 0.2); color: #89b4fa; border: 1px solid rgba(137, 180, 250, 0.4);"
+					statusBadgeStyle =
+						"background: rgba(137, 180, 250, 0.2); color: #89b4fa; border: 1px solid rgba(137, 180, 250, 0.4);"
 				} else {
 					statusText = "Chờ Xác Nhận"
 					statusClass = "status-pending"
-					statusBadgeStyle = "background: rgba(250, 179, 135, 0.2); color: #fab387; border: 1px solid rgba(250, 179, 135, 0.4);"
+					statusBadgeStyle =
+						"background: rgba(250, 179, 135, 0.2); color: #fab387; border: 1px solid rgba(250, 179, 135, 0.4);"
 				}
 
 				return `
@@ -416,7 +554,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 								🎟️ Xem Vé Điện Tử
 							</button>
 							${
-								!isCancelled && !isDone
+								!isCancelled && !isDone && isPending && Number(t.holdExpiresAt) > Date.now()
 									? `
 								<button type="button" class="btn-cancel-ticket" data-ticket-id="${t.id}" style="background: rgba(243, 139, 168, 0.15); color: #f38ba8; border: 1px solid rgba(243, 139, 168, 0.3); padding: 6px 12px; border-radius: 6px; font-weight: 600; font-size: 12px; cursor: pointer;">
 									✕ Hủy Vé
@@ -451,11 +589,15 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 		// Attach cancel ticket clicks
 		container.querySelectorAll(".btn-cancel-ticket").forEach(btn => {
-			btn.addEventListener("click", () => {
+			btn.addEventListener("click", async () => {
 				const ticketId = String(btn.dataset.ticketId || "").trim()
-				if (confirm(`Bạn có chắc chắn muốn hủy vé ${ticketId}? Tiền vé sẽ được hoàn về phương thức thanh toán ban đầu.`)) {
-					cancelBookingTicket(ticketId)
-					showToast(`Đã hủy vé ${ticketId} thành công.`, "info")
+				if (confirm(`Hủy đơn ${ticketId}? Chỉ đơn chưa thanh toán còn thời gian giữ ghế mới hủy được. Đơn đã thanh toán cần liên hệ rạp theo chính sách hoàn vé.`)) {
+					const result = await cancelBookingTicket(ticketId)
+					if (!result.success) {
+						showToast(result.message || "Không thể hủy đơn vé.", "error")
+						return
+					}
+					showToast(`Đã hủy đơn ${ticketId}.`, "info")
 					renderBookingHistory()
 				}
 			})
@@ -473,9 +615,18 @@ document.addEventListener("DOMContentLoaded", async () => {
 		const isCancelled = t.status === "cancelled" || t.bookingStatus === "cancelled"
 		const isDone = t.status === "done"
 		const isPaid = !isCancelled && (t.paymentStatus === "paid" || t.status === "paid")
-		const isConfirmed = !isCancelled && !isPaid && !isDone && (t.bookingStatus === "confirmed" || t.status === "confirmed")
+		const isConfirmed =
+			!isCancelled && !isPaid && !isDone && (t.bookingStatus === "confirmed" || t.status === "confirmed")
 		const isPending = !isCancelled && !isPaid && !isDone && !isConfirmed
-		const qrStatus = isCancelled ? "CANCELLED" : isDone ? "USED" : isPaid ? "VALID_PAID" : isConfirmed ? "CONFIRMED_UNPAID" : "PENDING"
+		const qrStatus = isCancelled
+			? "CANCELLED"
+			: isDone
+				? "USED"
+				: isPaid
+					? "VALID_PAID"
+					: isConfirmed
+						? "CONFIRMED_UNPAID"
+						: "PENDING"
 
 		const cName = t.customerName || t.userName || "Khách Hàng"
 		const cPhone = t.customerPhone || t.userPhone || "Chưa cập nhật"
@@ -505,7 +656,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 				darkColor: "#11111b",
 				lightColor: "#cdd6f4",
 				includeLogo: true,
-			}
+			},
 		)
 
 		let bannerBg = "#10b981"

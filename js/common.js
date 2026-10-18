@@ -498,7 +498,7 @@ export function openAuthModal(defaultTab = "login") {
 					<form id="form-auth-forgot" class="auth-form" style="display: none;" novalidate>
 						<div class="auth-title-intro" style="margin-bottom: 16px;">
 							<h3 style="font-size: 18px; margin-bottom: 4px;">Đặt lại mật khẩu</h3>
-							<p style="font-size: 13px; color: var(--text-secondary, #a6adc8);">Nhập email hoặc số điện thoại để nhận mã xác minh OTP</p>
+							<p style="font-size: 13px; color: var(--text-secondary, #a6adc8);">Đặt lại mật khẩu cần xác minh email hoặc số điện thoại.</p>
 						</div>
 
 						<!-- Step 1: Input Account -->
@@ -510,12 +510,12 @@ export function openAuthModal(defaultTab = "login") {
 							<span class="field-error-msg" id="err-forgot-account"></span>
 						</div>
 
-						<button type="button" class="btn-submit-auth" id="btn-forgot-send-otp">GỬI MÃ XÁC MINH OTP</button>
+						<button type="button" class="btn-submit-auth" id="btn-forgot-send-otp">KIỂM TRA HỖ TRỢ ĐẶT LẠI</button>
 
 						<!-- Step 2: Input OTP & New Password (initially hidden) -->
 						<div id="forgot-step-reset" style="display: none; flex-direction: column; gap: 14px; margin-top: 6px;">
 							<div class="otp-notice-box" style="padding: 10px 14px; background: rgba(137, 180, 250, 0.12); border: 1px solid rgba(137, 180, 250, 0.3); border-radius: 8px; font-size: 13px; color: #89b4fa; line-height: 1.4;">
-								<span>Mã xác minh OTP đã được tạo: <strong id="forgot-otp-display" style="font-size: 15px; letter-spacing: 2px; color: #f9e2af;"></strong> (có hiệu lực 5 phút)</span>
+								<span>Chưa cấu hình gửi mã xác minh. Liên hệ hỗ trợ để đặt lại mật khẩu an toàn.</span>
 							</div>
 
 							<div class="form-group">
@@ -838,52 +838,10 @@ function initAuthModalEvents(modal) {
 		setAuthTab("login")
 	})
 
-	// Gửi mã OTP xác minh đặt lại mật khẩu
+	// Do not generate or reveal reset codes in the browser. No mail/SMS delivery
+	// provider is configured, so fail clearly until a verified delivery flow exists.
 	document.getElementById("btn-forgot-send-otp")?.addEventListener("click", () => {
-		const accInput = document.getElementById("forgot-account")
-		const acc = accInput?.value.trim() || ""
-
-		if (!acc) {
-			setFieldError("forgot-account", "Vui lòng nhập Email hoặc Số điện thoại đã đăng ký.")
-			return
-		}
-
-		const cleanAcc = acc.toLowerCase()
-		const cleanPhone = cleanAcc.replace(/[\s.-]/g, "")
-		const users = getUsersList()
-		const user = users.find(
-			u =>
-				(u.email && u.email.toLowerCase() === cleanAcc) ||
-				(u.phone && u.phone.replace(/[\s.-]/g, "") === cleanPhone) ||
-				(u.username && u.username.toLowerCase() === cleanAcc)
-		)
-
-		if (!user) {
-			setFieldError("forgot-account", "Không tìm thấy tài khoản với email hoặc số điện thoại này!")
-			return
-		}
-		setFieldError("forgot-account", "")
-
-		// Tạo mã OTP 6 số ngẫu nhiên
-		const otp = String(Math.floor(100000 + Math.random() * 900000))
-		activeResetState = {
-			account: acc,
-			otp,
-			expiresAt: Date.now() + 5 * 60 * 1000,
-		}
-
-		const otpDisplay = document.getElementById("forgot-otp-display")
-		if (otpDisplay) otpDisplay.textContent = otp
-
-		const stepReset = document.getElementById("forgot-step-reset")
-		if (stepReset) stepReset.style.display = "flex"
-
-		const btnSend = document.getElementById("btn-forgot-send-otp")
-		if (btnSend) btnSend.style.display = "none"
-
-		if (accInput) accInput.readOnly = true
-
-		showToast(`Mã OTP xác minh của bạn: ${otp} (có hiệu lực 5 phút)`, "info", 8000)
+		setFieldError("forgot-account", "Tính năng đặt lại mật khẩu chưa được cấu hình xác minh email/SMS. Vui lòng liên hệ hỗ trợ.")
 	})
 
 	// Xác nhận đặt lại mật khẩu
@@ -891,7 +849,7 @@ function initAuthModalEvents(modal) {
 		e.preventDefault()
 
 		if (!activeResetState || Date.now() > activeResetState.expiresAt) {
-			setFieldError("forgot-otp", "Mã xác minh đã hết hạn hoặc chưa được tạo. Vui lòng bấm gửi lại mã.")
+			setFieldError("forgot-otp", "Chưa có mã xác minh hợp lệ. Vui lòng liên hệ hỗ trợ tài khoản.")
 			return
 		}
 
@@ -1377,6 +1335,21 @@ export async function setupHeaderAndFooter() {
 			footerContainer.innerHTML = getStandardFooterHtml()
 		}
 
+		// Do not expose placeholder anchors as working links.
+		document.querySelectorAll(".footer-links-list a[href='#'], .social-icons a[href='#']").forEach(link => {
+			if (link.closest(".social-icons")) link.remove()
+			else link.closest("li")?.remove()
+		})
+		document.querySelectorAll(".footer-links-list").forEach(list => {
+			if (!list.children.length) list.remove()
+		})
+		document.querySelectorAll(".footer-download-title").forEach(title => {
+			if (!title.nextElementSibling?.children.length) title.remove()
+		})
+		document.querySelectorAll(".social-icons").forEach(icons => {
+			if (!icons.children.length) icons.previousElementSibling?.remove()
+		})
+
 		// Cinema Dropdown
 		const currentCinemaId = getCurrentCinemaId()
 		const currentCinema = Array.isArray(cinemas) ? cinemas.find(c => c.id === currentCinemaId) : null
@@ -1450,13 +1423,9 @@ function initCinemaDropdownEvents() {
 		btn.setAttribute("aria-expanded", "false")
 	}
 
-	btn.addEventListener("click", e => {
-		e.stopPropagation()
-		dd.classList.contains("open") ? closeDD() : openDD()
-	})
-
 	dd.querySelectorAll(".cinema-dropdown-item").forEach(item => {
-		item.addEventListener("click", function () {
+		item.onclick = function (e) {
+			e.stopPropagation()
 			const cId = this.dataset.id
 			if (cId) {
 				setCurrentCinemaId(cId)
@@ -1466,7 +1435,15 @@ function initCinemaDropdownEvents() {
 			dd.querySelectorAll(".cinema-dropdown-item").forEach(el => el.classList.remove("active"))
 			this.classList.add("active")
 			closeDD()
-		})
+		}
+	})
+
+	if (btn.dataset.bound === "true") return
+	btn.dataset.bound = "true"
+
+	btn.addEventListener("click", e => {
+		e.stopPropagation()
+		dd.classList.contains("open") ? closeDD() : openDD()
 	})
 
 	document.addEventListener("click", e => {

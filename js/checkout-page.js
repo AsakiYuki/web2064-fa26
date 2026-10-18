@@ -8,12 +8,13 @@ import {
 	getPendingBooking,
 	clearPendingBooking,
 	saveBookingTicket,
-	updateShowtimeSeats,
-	calculateVoucherDiscount,
+	demoConfirmPayment,
+	validateVoucherForCheckout,
 	checkSeatsAvailability,
 	releaseSeatHold,
 } from "./storage.js"
 import { generateQRCodeSVG } from "./qrcode.js"
+import { apiHoldSeats } from "./api.js"
 
 document.addEventListener("DOMContentLoaded", async () => {
 	await setupHeaderAndFooter()
@@ -38,6 +39,12 @@ document.addEventListener("DOMContentLoaded", async () => {
 	// 1. Read from LocalStorage Pending Booking or fallback to URL query params
 	const pending = getPendingBooking()
 	const urlParams = new URLSearchParams(window.location.search)
+	const holdId = urlParams.get("holdId") || pending?.holdId
+	if (!pending || !holdId) {
+		showToast("Phiên giữ ghế không hợp lệ. Vui lòng chọn suất và ghế lại.", "error", 6000)
+		window.location.replace("/schedule.html")
+		return
+	}
 
 	const movieId = urlParams.get("movieId") || pending?.movieId || "utlan2"
 	const cinemaId = urlParams.get("cinemaId") || pending?.cinemaId || "beta-thainguyen"
@@ -49,6 +56,21 @@ document.addEventListener("DOMContentLoaded", async () => {
 	const concessionsParam = urlParams.get("concessions") || pending?.concessionsString || "1x Beta Combo Đôi"
 	let initialVoucher = urlParams.get("voucher") || pending?.voucherCode || ""
 	let rawTotal = pending ? (pending.seatsTotal || 0) + (pending.concessionsTotal || 0) : (+urlParams.get("total") || 255000)
+	const concessionsTotal = Number(pending?.concessionsTotal) || 0
+	const serverHold = await apiHoldSeats({
+		holdId,
+		cinemaId,
+		movieId,
+		date: dateStr,
+		time: timeSlot,
+		seats: seatsParam.split(",").map(seat => seat.trim()).filter(Boolean),
+	})
+	if (!serverHold.success) {
+		showToast(serverHold.message || "Các ghế này không còn khả dụng. Vui lòng chọn ghế khác.", "error", 7000)
+		window.location.replace(`/booking.html?movieId=${encodeURIComponent(movieId)}&cinemaId=${encodeURIComponent(cinemaId)}&date=${encodeURIComponent(dateStr)}&time=${encodeURIComponent(timeSlot)}`)
+		return
+	}
+	pending.holdExpiresAt = serverHold.expiresAt
 
 	// If rawTotal wasn't split, deduce fallback
 	if (rawTotal <= 0) rawTotal = 255000
@@ -80,8 +102,8 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 	// Calculate initial voucher discount if present
 	if (initialVoucher) {
-		const vRes = calculateVoucherDiscount(initialVoucher, checkoutState.rawTotal)
-		if (vRes.isValid) {
+		const vRes = await validateVoucherForCheckout(initialVoucher, checkoutState.rawTotal, concessionsTotal, dateStr)
+		if (vRes.success) {
 			checkoutState.discountAmount = vRes.discountAmount
 			checkoutState.finalTotal = Math.max(0, checkoutState.rawTotal - checkoutState.discountAmount)
 		} else {
@@ -235,7 +257,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 			}
 		}
 
-		vBtn?.addEventListener("click", () => {
+		vBtn?.addEventListener("click", async () => {
 			const code = vInput?.value.trim().toUpperCase() || ""
 			if (!code) {
 				checkoutState.voucherCode = ""
@@ -249,8 +271,10 @@ document.addEventListener("DOMContentLoaded", async () => {
 				return
 			}
 
-			const vRes = calculateVoucherDiscount(code, checkoutState.rawTotal)
-			if (vRes.isValid) {
+			vBtn.disabled = true
+			const vRes = await validateVoucherForCheckout(code, checkoutState.rawTotal, concessionsTotal, dateStr)
+			vBtn.disabled = false
+			if (vRes.success) {
 				checkoutState.voucherCode = code
 				checkoutState.discountAmount = vRes.discountAmount
 				checkoutState.finalTotal = Math.max(0, checkoutState.rawTotal - checkoutState.discountAmount)
@@ -436,7 +460,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 		if (badgeEl) badgeEl.textContent = checkoutState.paymentMethod.toUpperCase()
 		if (titleEl) titleEl.textContent = `Quét Mã QR ${methodNameText}`
-		if (descEl) descEl.textContent = `Mở ứng dụng ${methodNameText} hoặc Mobile Banking trên điện thoại để quét mã QR chuyển khoản.`
+		if (descEl) descEl.textContent = `Đây là mã QR mô phỏng, chưa kết nối ${methodNameText} và không thể dùng để chuyển tiền. Gửi yêu cầu chỉ tạo đơn chờ thanh toán.`
 		if (amountEl) amountEl.textContent = formatCurrency(checkoutState.finalTotal)
 		if (bookingCodeEl) bookingCodeEl.textContent = bookingCode
 		if (transferMsgEl) transferMsgEl.textContent = transferContent
@@ -485,20 +509,10 @@ document.addEventListener("DOMContentLoaded", async () => {
 				qrConfirmPaidBtn.disabled = true
 				if (qrVerifyOverlay) qrVerifyOverlay.style.display = "flex"
 
-				// Simulate realistic banking reconciliation check (1.8s)
-				await new Promise(resolve => setTimeout(resolve, 1800))
-
 				if (qrTimerInterval) clearInterval(qrTimerInterval)
 				clearInterval(timerInterval)
 
-				// 8. UPDATE SEAT STATUS TO 'SOLD' IN LOCALSTORAGE & RELEASE ACTIVE HOLD
-				const seatList = seatsParam.split(",").map(s => s.trim()).filter(Boolean)
-				updateShowtimeSeats(currentCinema.id, currentMovie.id, dateStr, timeSlot, seatList, "sold")
-				if (pending?.holdId) {
-					releaseSeatHold(pending.holdId)
-				}
-
-				// 9. SAVE TICKET TO USER'S BOOKING HISTORY IN LOCALSTORAGE
+				// Save as pending. A customer click cannot prove that a provider received money.
 				const newTicket = {
 					id: bookingCode,
 					userId: currentUser?.id || null,
@@ -521,12 +535,21 @@ document.addEventListener("DOMContentLoaded", async () => {
 					customerName: fullName,
 					customerPhone: cleanPhone,
 					customerEmail: email,
+					rawTotal: checkoutState.rawTotal,
+					concessionsTotal,
 					bookingDate: new Date().toISOString(),
+					holdId,
 					bookingStatus: "pending",
 					paymentStatus: "pending",
 				}
 
-				await saveBookingTicket(newTicket)
+				const savedTicket = await saveBookingTicket(newTicket)
+				if (savedTicket.saveError) {
+					showToast(savedTicket.saveError, "error", 7000)
+					if (qrVerifyOverlay) qrVerifyOverlay.style.display = "none"
+					qrConfirmPaidBtn.disabled = false
+					return
+				}
 				isPaymentCompleted = true
 				clearPendingBooking()
 				updateHeaderAccountUI()
@@ -538,15 +561,84 @@ document.addEventListener("DOMContentLoaded", async () => {
 				if (checkoutLayout) checkoutLayout.style.display = "none"
 				if (eticketSuccessView) {
 					eticketSuccessView.style.display = "block"
-					renderETicketContent(newTicket)
+					renderETicketContent(savedTicket)
 					window.scrollTo({ top: 0, behavior: "smooth" })
 				}
 
 				showToast(
-					`🎉 Thanh toán thành công qua ${methodNameText}! Mã vé của bạn là ${bookingCode}. Chúc bạn xem phim vui vẻ!`,
-					"success",
+					`Đã ghi nhận đơn ${bookingCode} ở trạng thái chờ xác nhận thanh toán. Vé chưa được xác nhận thanh toán.`,
+					"info",
 					7000
 				)
+			}
+		}
+
+		// 5. Handle Demo Instant Pay (Simulation of bank IPN callback)
+		const demoInstantBtn = document.getElementById("btn-demo-instant-pay")
+		if (demoInstantBtn) {
+			demoInstantBtn.disabled = false
+			demoInstantBtn.onclick = async () => {
+				demoInstantBtn.disabled = true
+				if (qrVerifyOverlay) qrVerifyOverlay.style.display = "flex"
+
+				if (qrTimerInterval) clearInterval(qrTimerInterval)
+				clearInterval(timerInterval)
+
+				const newTicket = {
+					id: bookingCode,
+					movieId: currentMovie.id,
+					movieTitle: currentMovie.title,
+					moviePoster: currentMovie.poster,
+					cinemaId: currentCinema.id,
+					cinemaName: currentCinema.name,
+					screenName,
+					formatName,
+					date: dateStr,
+					time: timeSlot,
+					seats: seatsParam,
+					concessions: concessionsParam,
+					rawTotal: checkoutState.rawTotal,
+					concessionsTotal,
+					total: checkoutState.finalTotal,
+					voucherCode: checkoutState.voucherCode || null,
+					discountAmount: checkoutState.discountAmount || 0,
+					paymentMethod: checkoutState.paymentMethod,
+					customerName: fullName,
+					customerPhone: cleanPhone,
+					customerEmail: email,
+					bookingDate: new Date().toISOString(),
+					holdId,
+					bookingStatus: "pending",
+					paymentStatus: "pending",
+				}
+
+				const savedTicket = await saveBookingTicket(newTicket)
+				if (savedTicket.saveError) {
+					showToast(savedTicket.saveError, "error", 7000)
+					if (qrVerifyOverlay) qrVerifyOverlay.style.display = "none"
+					demoInstantBtn.disabled = false
+					return
+				}
+
+				// Call instant webhook confirmation
+				await demoConfirmPayment(savedTicket.id)
+				savedTicket.paymentStatus = "paid"
+				savedTicket.status = "paid"
+				savedTicket.bookingStatus = "confirmed"
+
+				isPaymentCompleted = true
+				clearPendingBooking()
+				updateHeaderAccountUI()
+				closeQRModal()
+
+				if (checkoutLayout) checkoutLayout.style.display = "none"
+				if (eticketSuccessView) {
+					eticketSuccessView.style.display = "block"
+					renderETicketContent(savedTicket)
+					window.scrollTo({ top: 0, behavior: "smooth" })
+				}
+
+				showToast("🎉 Mô phỏng thanh toán thành công! Vé đã được xác nhận thanh toán và cộng điểm tích lũy.", "success", 7000)
 			}
 		}
 	}
@@ -565,6 +657,46 @@ document.addEventListener("DOMContentLoaded", async () => {
 		const combosEl = document.getElementById("et-combos-val")
 		const totalEl = document.getElementById("et-total-val")
 		const barcodeNum = document.getElementById("et-barcode-digits")
+
+		const isPaid = ticket.paymentStatus === "paid" || ticket.status === "paid"
+		const bannerBadge = document.getElementById("et-success-badge")
+		const bannerTitle = document.getElementById("et-top-title")
+		const bannerDesc = document.getElementById("et-top-desc")
+		const statusPill = document.getElementById("et-status-pill-banner")
+		const statusPillText = document.getElementById("et-status-pill-text")
+		const qrHint = document.querySelector(".qr-hint")
+
+		if (isPaid) {
+			if (bannerBadge) {
+				bannerBadge.textContent = "✓"
+				bannerBadge.style.background = "#a6e3a1"
+				bannerBadge.style.color = "#11111b"
+			}
+			if (bannerTitle) bannerTitle.textContent = "THANH TOÁN THÀNH CÔNG!"
+			if (bannerDesc) bannerDesc.textContent = "Vé điện tử đã được xác nhận thanh toán. Bạn có thể xuất trình mã vé tại rạp để vào xem phim."
+			if (statusPill) {
+				statusPill.style.background = "rgba(166, 227, 161, 0.15)"
+				statusPill.style.color = "#a6e3a1"
+				statusPill.style.borderColor = "rgba(166, 227, 161, 0.3)"
+			}
+			if (statusPillText) statusPillText.textContent = "✅ ĐÃ THANH TOÁN (VÉ HỢP LỆ VÀO RẠP)"
+			if (qrHint) qrHint.textContent = "Xuất trình mã QR này tại quầy soát vé hoặc Kiosk tự động để in vé vào rạp."
+		} else {
+			if (bannerBadge) {
+				bannerBadge.textContent = "⏳"
+				bannerBadge.style.background = "#fab387"
+				bannerBadge.style.color = "#11111b"
+			}
+			if (bannerTitle) bannerTitle.textContent = "ĐÃ TIẾP NHẬN ĐƠN ĐẶT VÉ"
+			if (bannerDesc) bannerDesc.textContent = "Đơn đang chờ xác nhận thanh toán từ ngân hàng hoặc quản trị viên rạp. Vui lòng kiểm tra trạng thái vé."
+			if (statusPill) {
+				statusPill.style.background = "rgba(250, 179, 135, 0.15)"
+				statusPill.style.color = "#fab387"
+				statusPill.style.borderColor = "rgba(250, 179, 135, 0.3)"
+			}
+			if (statusPillText) statusPillText.textContent = "⏳ ĐANG CHỜ DUYỆT THANH TOÁN"
+			if (qrHint) qrHint.textContent = "Mã tham chiếu đơn hàng. Vé sẽ có hiệu lực vào rạp ngay sau khi thanh toán được duyệt."
+		}
 
 		if (codeEl) codeEl.textContent = ticket.id
 		if (movieEl) movieEl.textContent = ticket.movieTitle

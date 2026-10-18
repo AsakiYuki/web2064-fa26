@@ -15,6 +15,14 @@ let searchQuery = ""
 document.addEventListener("DOMContentLoaded", async () => {
 	await setupHeaderAndFooter()
 	await loadCinemasData()
+	if (!allCinemas.length) {
+		const grid = document.getElementById("cinemas-grid")
+		if (grid) {
+			grid.innerHTML = `<div role="alert"><h2>Chưa tải được danh sách rạp</h2><p>Kiểm tra kết nối rồi thử lại.</p><button type="button" id="retry-cinemas">Thử tải lại</button></div>`
+			grid.querySelector("#retry-cinemas")?.addEventListener("click", () => window.location.reload())
+		}
+		return
+	}
 	setupURLParams()
 	setupSearchAndFilters()
 	setupModalEvents()
@@ -48,6 +56,7 @@ async function loadCinemasData() {
 
 		if (!allCinemas || allCinemas.length === 0) {
 			const res = await fetch("/data/cinemas.json")
+			if (!res.ok) throw new Error(`HTTP ${res.status}`)
 			allCinemas = await res.json()
 		}
 	} catch (err) {

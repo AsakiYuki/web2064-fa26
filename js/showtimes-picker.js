@@ -7,6 +7,7 @@ import { formatCurrency, showToast, formatDateVN, translateDom, getSavedLang } f
 import {
 	getCinemas,
 	getCurrentCinemaId,
+	setCurrentCinemaId,
 	getMoviesData,
 	getShowtimes,
 	getTicketPricing,
@@ -80,8 +81,9 @@ export class ShowtimePicker {
 			this.showtimes = showtimesData || []
 			this.ticketPricing = pricing
 
-			// Default date is today: 2026-09-26
-			this.selectedDate = "2026-09-26"
+			// Start from the active calendar date (today or earliest available showtime date)
+			const baseDate = this.getBaseDate()
+			this.selectedDate = this.toDateString(baseDate)
 
 			// Check URL param for cinema if available, else use preferred cinema
 			const urlParams = new URLSearchParams(window.location.search)
@@ -104,6 +106,7 @@ export class ShowtimePicker {
 			window.addEventListener("cinemaChanged", e => {
 				if (e.detail?.id && this.cinemas.some(c => c.id === e.detail.id)) {
 					this.selectedCinemaId = e.detail.id
+					this.selectedCity = e.detail.city || "all"
 					this.validateActiveSelection()
 					this.render()
 				}
@@ -114,12 +117,48 @@ export class ShowtimePicker {
 			})
 		} catch (err) {
 			console.error("Failed to initialize ShowtimePicker:", err)
+			const container = document.getElementById(this.containerId)
+			if (container) {
+				container.innerHTML = `<div role="alert" class="data-state"><h2>Chưa tải được lịch chiếu</h2><p>Kiểm tra kết nối rồi thử lại.</p><button type="button" id="retry-showtimes">Thử tải lại</button></div>`
+				container.querySelector("#retry-showtimes")?.addEventListener("click", () => window.location.reload())
+			}
 		}
 	}
 
-	/** Generate 8 days starting from 2026-09-26 */
+	toDateString(date) {
+		const yyyy = date.getFullYear()
+		const mm = String(date.getMonth() + 1).padStart(2, "0")
+		const dd = String(date.getDate()).padStart(2, "0")
+		return `${yyyy}-${mm}-${dd}`
+	}
+
+	getBaseDate() {
+		const today = new Date()
+		today.setHours(0, 0, 0, 0)
+		const todayStr = this.toDateString(today)
+
+		const hasFutureOrToday = this.showtimes.some(
+			s => s.date >= todayStr && Array.isArray(s.schedules) && s.schedules.length > 0
+		)
+		if (hasFutureOrToday) {
+			return today
+		}
+
+		const availableDates = this.showtimes
+			.filter(s => Array.isArray(s.schedules) && s.schedules.length > 0)
+			.map(s => s.date)
+			.sort()
+
+		if (availableDates.length > 0) {
+			const [y, m, d] = availableDates[0].split("-").map(Number)
+			return new Date(y, m - 1, d)
+		}
+		return today
+	}
+
+	/** Generate 8 days starting from the base date */
 	getDatesList() {
-		const baseDate = new Date("2026-09-26T00:00:00")
+		const baseDate = this.getBaseDate()
 		const dates = []
 		const dayNames = ["Chủ Nhật", "Thứ 2", "Thứ 3", "Thứ 4", "Thứ 5", "Thứ 6", "Thứ 7"]
 
@@ -127,10 +166,9 @@ export class ShowtimePicker {
 			const d = new Date(baseDate)
 			d.setDate(baseDate.getDate() + i)
 
-			const yyyy = d.getFullYear()
+			const dateStr = this.toDateString(d)
 			const mm = String(d.getMonth() + 1).padStart(2, "0")
 			const dd = String(d.getDate()).padStart(2, "0")
-			const dateStr = `${yyyy}-${mm}-${dd}`
 
 			let label = dayNames[d.getDay()]
 			let tag = ""
@@ -213,9 +251,12 @@ export class ShowtimePicker {
 
 		const availableCinemas = this.getAvailableCinemas(this.selectedDate, this.selectedCity)
 
-		// Nếu rạp đang chọn không có trong danh sách rạp có suất chiếu -> chọn rạp đầu tiên có suất chiếu
-		if (!availableCinemas.some(c => c.id === this.selectedCinemaId)) {
+		// Keep the globally selected cinema even when it has no showtimes that day.
+		// Only change it when the selected city filter explicitly excludes it.
+		const selectedCinema = this.cinemas.find(c => c.id === this.selectedCinemaId)
+		if (!selectedCinema || (this.selectedCity !== "all" && selectedCinema.city !== this.selectedCity)) {
 			this.selectedCinemaId = availableCinemas.length > 0 ? availableCinemas[0].id : null
+			if (this.selectedCinemaId) setCurrentCinemaId(this.selectedCinemaId)
 		}
 	}
 
@@ -555,6 +596,11 @@ export class ShowtimePicker {
 		container.querySelectorAll(".city-pill-btn").forEach(btn => {
 			btn.addEventListener("click", () => {
 				this.selectedCity = btn.dataset.city
+				const cinemas = this.getAvailableCinemas(this.selectedDate, this.selectedCity)
+				if (!cinemas.some(cinema => cinema.id === this.selectedCinemaId)) {
+					this.selectedCinemaId = cinemas[0]?.id || null
+					if (this.selectedCinemaId) setCurrentCinemaId(this.selectedCinemaId)
+				}
 				this.render()
 			})
 		})
@@ -562,10 +608,11 @@ export class ShowtimePicker {
 		// Cinema choice cards
 		container.querySelectorAll(".cinema-card-choice").forEach(card => {
 			card.addEventListener("click", () => {
-				this.selectedCinemaId = card.dataset.cinemaId
-				container.querySelectorAll(".cinema-card-choice").forEach(c => c.classList.remove("active"))
-				card.classList.add("active")
-				this.renderShowtimeResultsOnly()
+				const cinemaId = card.dataset.cinemaId
+				if (!cinemaId) return
+				this.selectedCinemaId = cinemaId
+				setCurrentCinemaId(cinemaId)
+				this.render()
 			})
 		})
 

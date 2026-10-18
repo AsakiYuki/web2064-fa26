@@ -13,7 +13,11 @@ document.addEventListener("DOMContentLoaded", async () => {
 	const genresList = getGenres()
 
 	if (!moviesData || !moviesData.items) {
-		console.error("Không thể tải dữ liệu phim từ LocalStorage")
+		const grid = document.getElementById("movies-grid-container")
+		if (grid) {
+			grid.innerHTML = `<div class="data-state" role="alert"><h2>Chưa tải được danh sách phim</h2><p>Kiểm tra kết nối rồi thử lại.</p><button type="button" id="retry-movies">Thử tải lại</button></div>`
+			grid.querySelector("#retry-movies")?.addEventListener("click", () => window.location.reload())
+		}
 		return
 	}
 

@@ -7,8 +7,12 @@ import {
 	apiRegister,
 	apiLogin,
 	apiUpdateUser,
-	apiResetPassword,
 	apiChangePassword,
+	apiRedeemMemberReward,
+	apiValidateVoucher,
+	apiCompleteCheckout,
+	apiReleaseSeatHold,
+	apiResetPassword,
 	apiGetUsers,
 	apiGetMovies,
 	apiGetMovieById,
@@ -25,9 +29,12 @@ import {
 	apiUpdateConcession,
 	apiDeleteConcession,
 	apiGetBookings,
-	apiCreateBooking,
+	apiGetMyBookings,
 	apiUpdateBooking,
 	apiDeleteBooking,
+	apiConfirmBookingPayment,
+	apiDemoConfirmPayment,
+	apiCancelBooking,
 	apiGetCinemas,
 	apiGetGenres,
 	apiGetBanners,
@@ -37,6 +44,7 @@ import {
 	apiGetMemberRewards,
 	apiResetDatabase,
 	getAuthToken,
+	setAuthToken,
 	removeAuthToken,
 } from "./api.js"
 
@@ -319,6 +327,7 @@ function formatMoviesData(rawMovies) {
 export async function initializeStorage(force = false) {
 	try {
 		console.info(`[Storage] Đang đồng bộ hóa dữ liệu với json-server...`)
+		const sessionUser = getCurrentUser()
 
 		// Thử lấy dữ liệu từ json-server
 		const [
@@ -338,7 +347,7 @@ export async function initializeStorage(force = false) {
 			apiGetShowtimes(),
 			apiGetConcessions(),
 			apiGetConcessionCategories(),
-			apiGetBookings(),
+			sessionUser?.role === "admin" ? apiGetBookings() : sessionUser ? apiGetMyBookings() : Promise.resolve(null),
 			apiGetGenres(),
 			apiGetBanners(),
 			apiGetTicketPricing(),
@@ -351,38 +360,49 @@ export async function initializeStorage(force = false) {
 			storageSet(STORAGE_KEYS.MOVIES, formattedMovies)
 		} else if (!storageHas(STORAGE_KEYS.MOVIES) || force) {
 			// Fallback local JSON
-			const m = await fetch("/data/movies.json").then(r => r.json()).catch(() => null)
+			const m = await fetch("/data/movies.json")
+				.then(r => r.json())
+				.catch(() => null)
 			if (m) storageSet(STORAGE_KEYS.MOVIES, m)
 		}
 
 		if (cinemasRes && cinemasRes.length > 0) {
 			storageSet(STORAGE_KEYS.CINEMAS, cinemasRes)
 		} else if (!storageHas(STORAGE_KEYS.CINEMAS) || force) {
-			const c = await fetch("/data/cinemas.json").then(r => r.json()).catch(() => null)
+			const c = await fetch("/data/cinemas.json")
+				.then(r => r.json())
+				.catch(() => null)
 			if (c) storageSet(STORAGE_KEYS.CINEMAS, c)
 		}
 
 		if (showtimesRes && showtimesRes.length > 0) {
 			storageSet(STORAGE_KEYS.SHOWTIMES, showtimesRes)
 		} else if (!storageHas(STORAGE_KEYS.SHOWTIMES) || force) {
-			const s = await fetch("/data/showtimes.json").then(r => r.json()).catch(() => null)
+			const s = await fetch("/data/showtimes.json")
+				.then(r => r.json())
+				.catch(() => null)
 			if (s) storageSet(STORAGE_KEYS.SHOWTIMES, s)
 		}
 
 		if (concessionsRes && concessionsRes.length > 0) {
-			const cats = categoriesRes && categoriesRes.length > 0 ? categoriesRes : [
-				{ id: "combos", name: "Combo Bắp Nước", active: true },
-				{ id: "popcorn", name: "Bắp Rang Bơ", active: false },
-				{ id: "beverages", name: "Nước Uống", active: false },
-				{ id: "snacks", name: "Đồ Ăn Kèm", active: false },
-			]
+			const cats =
+				categoriesRes && categoriesRes.length > 0
+					? categoriesRes
+					: [
+							{ id: "combos", name: "Combo Bắp Nước", active: true },
+							{ id: "popcorn", name: "Bắp Rang Bơ", active: false },
+							{ id: "beverages", name: "Nước Uống", active: false },
+							{ id: "snacks", name: "Đồ Ăn Kèm", active: false },
+						]
 			storageSet(STORAGE_KEYS.CONCESSIONS, { categories: cats, items: concessionsRes })
 		} else if (!storageHas(STORAGE_KEYS.CONCESSIONS) || force) {
-			const cc = await fetch("/data/concessions.json").then(r => r.json()).catch(() => null)
+			const cc = await fetch("/data/concessions.json")
+				.then(r => r.json())
+				.catch(() => null)
 			if (cc) storageSet(STORAGE_KEYS.CONCESSIONS, cc)
 		}
 
-		if (bookingsRes && bookingsRes.length > 0) {
+		if (Array.isArray(bookingsRes)) {
 			storageSet(STORAGE_KEYS.BOOKING_HISTORY, bookingsRes)
 		} else if (!storageHas(STORAGE_KEYS.BOOKING_HISTORY)) {
 			storageSet(STORAGE_KEYS.BOOKING_HISTORY, DEFAULT_BOOKING_HISTORY)
@@ -391,28 +411,36 @@ export async function initializeStorage(force = false) {
 		if (genresRes && genresRes.length > 0) {
 			storageSet(STORAGE_KEYS.GENRES, genresRes)
 		} else if (!storageHas(STORAGE_KEYS.GENRES) || force) {
-			const g = await fetch("/data/genres.json").then(r => r.json()).catch(() => null)
+			const g = await fetch("/data/genres.json")
+				.then(r => r.json())
+				.catch(() => null)
 			if (g) storageSet(STORAGE_KEYS.GENRES, g)
 		}
 
 		if (bannersRes) {
 			storageSet(STORAGE_KEYS.BANNERS, bannersRes)
 		} else if (!storageHas(STORAGE_KEYS.BANNERS) || force) {
-			const b = await fetch("/data/banners.json").then(r => r.json()).catch(() => null)
+			const b = await fetch("/data/banners.json")
+				.then(r => r.json())
+				.catch(() => null)
 			if (b) storageSet(STORAGE_KEYS.BANNERS, b)
 		}
 
 		if (pricingRes && Object.keys(pricingRes).length > 0) {
 			storageSet(STORAGE_KEYS.TICKET_PRICING, pricingRes)
 		} else if (!storageHas(STORAGE_KEYS.TICKET_PRICING) || force) {
-			const p = await fetch("/data/ticket_pricing.json").then(r => r.json()).catch(() => null)
+			const p = await fetch("/data/ticket_pricing.json")
+				.then(r => r.json())
+				.catch(() => null)
 			if (p) storageSet(STORAGE_KEYS.TICKET_PRICING, p)
 		}
 
 		if (footerRes && footerRes.length > 0) {
 			storageSet(STORAGE_KEYS.FOOTER, footerRes)
 		} else if (!storageHas(STORAGE_KEYS.FOOTER) || force) {
-			const f = await fetch("/data/footer.json").then(r => r.json()).catch(() => null)
+			const f = await fetch("/data/footer.json")
+				.then(r => r.json())
+				.catch(() => null)
 			if (f) storageSet(STORAGE_KEYS.FOOTER, f)
 		}
 
@@ -422,7 +450,9 @@ export async function initializeStorage(force = false) {
 			if (rwRes && rwRes.length > 0) {
 				storageSet(STORAGE_KEYS.MEMBER_REWARDS, rwRes)
 			} else {
-				const rw = await fetch("/data/member_rewards.json").then(r => r.json()).catch(() => null)
+				const rw = await fetch("/data/member_rewards.json")
+					.then(r => r.json())
+					.catch(() => null)
 				if (rw) storageSet(STORAGE_KEYS.MEMBER_REWARDS, rw)
 			}
 		}
@@ -463,6 +493,9 @@ export function getUser() {
 
 export function saveUserSession(userData) {
 	storageSet(STORAGE_KEYS.USER_SESSION, userData)
+	if (userData?.token) {
+		setAuthToken(userData.token)
+	}
 }
 
 export function logoutUser() {
@@ -481,7 +514,7 @@ export function isAccountRegistered(emailOrPhone) {
 	return list.some(
 		u =>
 			(u.email && u.email.toLowerCase() === clean) ||
-			(u.phone && u.phone.replace(/[\s.-]/g, "") === clean.replace(/[\s.-]/g, ""))
+			(u.phone && u.phone.replace(/[\s.-]/g, "") === clean.replace(/[\s.-]/g, "")),
 	)
 }
 
@@ -497,35 +530,7 @@ export async function registerNewUser(userData) {
 		return { success: true, user: res.user }
 	}
 
-	// Fallback offline nếu server không hoạt động
-	const cleanEmail = (userData.email || "").trim().toLowerCase()
-	const cleanPhone = (userData.phone || "").trim().replace(/[\s.-]/g, "")
-	const list = getUsersList()
-
-	if (list.some(u => (u.email && u.email.toLowerCase() === cleanEmail) || (u.phone && u.phone.replace(/[\s.-]/g, "") === cleanPhone))) {
-		return { success: false, message: "Email hoặc Số điện thoại này đã được đăng ký tài khoản!" }
-	}
-
-	const fallbackUser = {
-		id: Date.now(),
-		name: userData.name.trim(),
-		email: cleanEmail,
-		phone: cleanPhone,
-		password: userData.password,
-		avatarText: userData.name.trim().charAt(0).toUpperCase(),
-		rank: "Thành viên Beta Mới",
-		points: 50,
-		gender: userData.gender || "male",
-		birthday: userData.birthday || "2000-01-01",
-		city: userData.city || "Hà Nội",
-		cinemaFavorite: userData.cinemaFavorite || "beta-thainguyen",
-		createdAt: new Date().toISOString(),
-	}
-
-	list.push(fallbackUser)
-	storageSet(STORAGE_KEYS.USERS_LIST, list)
-	saveUserSession(fallbackUser)
-	return { success: true, user: fallbackUser }
+	return { success: false, message: res.message || "Không thể kết nối máy chủ. Tài khoản chưa được tạo." }
 }
 
 /**
@@ -538,27 +543,6 @@ export async function authenticateUser(account, password) {
 		return { success: true, user: res.user }
 	}
 
-	// Fallback offline login
-	const cleanAcc = (account || "").trim().toLowerCase()
-	const cleanPhone = cleanAcc.replace(/[\s.-]/g, "")
-	const list = getUsersList()
-
-	const user = list.find(
-		u =>
-			((u.email && u.email.toLowerCase() === cleanAcc) ||
-				(u.phone && u.phone.replace(/[\s.-]/g, "") === cleanPhone) ||
-				(u.username && u.username.toLowerCase() === cleanAcc) ||
-				(cleanAcc === "admin" && (u.role === "admin" || u.username === "admin" || u.email?.toLowerCase().startsWith("admin")))) &&
-			(u.password === password ||
-				(cleanAcc === "admin" && password === "12345678") ||
-				(u.role === "admin" && password === "12345678"))
-	)
-
-	if (user) {
-		saveUserSession(user)
-		return { success: true, user }
-	}
-
 	return { success: false, message: res.message || "Tài khoản hoặc mật khẩu không chính xác!" }
 }
 
@@ -569,7 +553,7 @@ export async function authenticateUser(account, password) {
  */
 export function isUserAdmin(user) {
 	if (!user) return false
-	return user.role === "admin" || user.username === "admin" || (user.email && user.email.toLowerCase().startsWith("admin"))
+	return user.role === "admin"
 }
 
 /**
@@ -585,27 +569,46 @@ export function isCurrentAdmin() {
  * Cập nhật thông tin người dùng trong json-server & LocalStorage
  */
 export async function updateUserInDatabase(updatedUser) {
-	// Call API PATCH /users/:id
+	// Keep the local profile unchanged unless the server confirms the update.
+	let serverUser = null
 	if (updatedUser.id) {
-		apiUpdateUser(updatedUser.id, updatedUser).catch(() => {})
+		const editableFields = ["name", "email", "phone", "birthday", "gender", "city", "cinemaFavorite", "avatarText", "avatar"]
+		const serverUpdates = Object.fromEntries(editableFields
+			.filter(field => updatedUser[field] !== undefined)
+			.map(field => [field, updatedUser[field]]))
+		const result = await apiUpdateUser(updatedUser.id, serverUpdates)
+		if (!result.success) return result
+		serverUser = result.user
 	}
+	const persistedUser = { ...(serverUser || {}), ...updatedUser }
+	delete persistedUser.password
 
 	const list = getUsersList()
 	const idx = list.findIndex(u => u.id === updatedUser.id || (u.email && u.email === updatedUser.email))
 	if (idx !== -1) {
-		list[idx] = { ...list[idx], ...updatedUser }
+		list[idx] = { ...list[idx], ...persistedUser }
+		delete list[idx].password
 		storageSet(STORAGE_KEYS.USERS_LIST, list)
 	}
 
 	const currentUser = getCurrentUser()
 	if (currentUser && (currentUser.id === updatedUser.id || currentUser.email === updatedUser.email)) {
-		const merged = { ...currentUser, ...updatedUser }
+		const merged = { ...currentUser, ...persistedUser }
+		delete merged.password
 		saveUserSession(merged)
 		if (typeof window !== "undefined") {
 			window.dispatchEvent(new CustomEvent("beta_auth_changed", { detail: { user: merged } }))
 		}
 	}
-	return { success: true, user: updatedUser }
+	return { success: true, localOnly: !updatedUser.id }
+}
+
+/** Verify the current password, then let json-server-auth hash and save the new one. */
+export async function changeUserPassword(user, currentPassword, newPassword) {
+	if (!user?.id || !user.email) return { success: false, message: "Tài khoản chưa được liên kết với máy chủ." }
+	const result = await apiChangePassword({ oldPassword: currentPassword, newPassword })
+	if (!result.success) return result
+	return { success: true, user }
 }
 
 /**
@@ -613,81 +616,7 @@ export async function updateUserInDatabase(updatedUser) {
  * Đồng bộ với API server và LocalStorage
  */
 export async function resetUserPassword(account, newPassword) {
-	const cleanAcc = (account || "").trim().toLowerCase()
-	const cleanPhone = cleanAcc.replace(/[\s.-]/g, "")
-	const list = getUsersList()
-
-	const user = list.find(
-		u =>
-			(u.email && u.email.toLowerCase() === cleanAcc) ||
-			(u.phone && u.phone.replace(/[\s.-]/g, "") === cleanPhone) ||
-			(u.username && u.username.toLowerCase() === cleanAcc)
-	)
-
-	if (!user) {
-		return { success: false, message: "Không tìm thấy tài khoản với email hoặc số điện thoại này!" }
-	}
-
-	// 1. Đồng bộ lên API Server
-	const apiRes = await apiResetPassword(account, newPassword).catch(err => ({ success: false, message: err.message }))
-	if (!apiRes.success && apiRes.message && !apiRes.message.includes("fetch") && !apiRes.message.includes("Failed")) {
-		return { success: false, message: apiRes.message }
-	}
-
-	// 2. Cập nhật LocalStorage
-	user.password = newPassword
-	storageSet(STORAGE_KEYS.USERS_LIST, list)
-
-	const currentUser = getCurrentUser()
-	if (currentUser && (currentUser.id === user.id || currentUser.email === user.email)) {
-		currentUser.password = newPassword
-		saveUserSession(currentUser)
-	}
-
-	return { success: true, message: "Đặt lại mật khẩu thành công!", user }
-}
-
-/**
- * Đổi mật khẩu tài khoản đang đăng nhập với xác thực mật khẩu cũ
- * Yêu cầu máy chủ xác nhận thành công mới lưu vào phiên
- */
-export async function changeUserPassword(oldPassword, newPassword) {
-	const currentUser = getCurrentUser()
-	if (!currentUser) {
-		return { success: false, message: "Bạn chưa đăng nhập! Vui lòng đăng nhập lại." }
-	}
-
-	// 1. Kiểm tra mật khẩu cũ trên client
-	const list = getUsersList()
-	const userInDb = list.find(u => (currentUser.id && u.id === currentUser.id) || (currentUser.email && u.email === currentUser.email))
-	const currentRealPass = currentUser.password || userInDb?.password || "BetaCinemas2026!"
-
-	if (oldPassword !== currentRealPass) {
-		return { success: false, message: "Mật khẩu hiện tại không chính xác! Vui lòng kiểm tra lại." }
-	}
-
-	// 2. Gọi API server xác thực và lưu mật khẩu
-	const apiRes = await apiChangePassword({
-		userId: currentUser.id,
-		email: currentUser.email,
-		oldPassword,
-		newPassword,
-	}).catch(err => ({ success: false, message: err.message || "Lỗi kết nối máy chủ" }))
-
-	if (!apiRes.success) {
-		return { success: false, message: apiRes.message || "Máy chủ từ chối cập nhật mật khẩu!" }
-	}
-
-	// 3. Máy chủ cập nhật thành công -> cập nhật LocalStorage và Session
-	currentUser.password = newPassword
-	saveUserSession(currentUser)
-
-	if (userInDb) {
-		userInDb.password = newPassword
-		storageSet(STORAGE_KEYS.USERS_LIST, list)
-	}
-
-	return { success: true, message: "Đổi mật khẩu thành công!" }
+	return apiResetPassword(account, newPassword).catch(err => ({ success: false, message: err.message }))
 }
 
 /* ==========================================================================
@@ -708,11 +637,7 @@ export function getMovieById(movieId) {
 	const data = getMoviesData()
 	if (!data || !data.items) return null
 
-	const allMovies = [
-		...(data.items.nowshowing || []),
-		...(data.items.upcoming || []),
-		...(data.items.special || []),
-	]
+	const allMovies = [...(data.items.nowshowing || []), ...(data.items.upcoming || []), ...(data.items.special || [])]
 
 	return allMovies.find(m => String(m.id) === String(movieId)) || null
 }
@@ -721,11 +646,7 @@ export function getMovieBySlug(slug) {
 	const data = getMoviesData()
 	if (!data || !data.items) return null
 
-	const allMovies = [
-		...(data.items.nowshowing || []),
-		...(data.items.upcoming || []),
-		...(data.items.special || []),
-	]
+	const allMovies = [...(data.items.nowshowing || []), ...(data.items.upcoming || []), ...(data.items.special || [])]
 
 	return allMovies.find(m => m.slug === slug) || null
 }
@@ -741,11 +662,7 @@ export function searchMovies(query, tab = null) {
 	if (tab && data.items[tab]) {
 		movieList = [...data.items[tab]]
 	} else {
-		movieList = [
-			...(data.items.nowshowing || []),
-			...(data.items.upcoming || []),
-			...(data.items.special || []),
-		]
+		movieList = [...(data.items.nowshowing || []), ...(data.items.upcoming || []), ...(data.items.special || [])]
 	}
 
 	return movieList.filter(m => {
@@ -775,7 +692,7 @@ export function filterMovies(filters = {}) {
 					(m.title && m.title.toLowerCase().includes(q)) ||
 					(m.originalTitle && m.originalTitle.toLowerCase().includes(q)) ||
 					(m.director && m.director.toLowerCase().includes(q)) ||
-					(Array.isArray(m.cast) && m.cast.some(c => c.toLowerCase().includes(q)))
+					(Array.isArray(m.cast) && m.cast.some(c => c.toLowerCase().includes(q))),
 			)
 		}
 	}
@@ -784,7 +701,7 @@ export function filterMovies(filters = {}) {
 		list = list.filter(
 			m =>
 				(m.genreIds && m.genreIds.includes(genre)) ||
-				(m.genre && m.genre.toLowerCase().includes(genre.replace("-", " ")))
+				(m.genre && m.genre.toLowerCase().includes(genre.replace("-", " "))),
 		)
 	}
 
@@ -908,7 +825,7 @@ export function getShowtimes() {
 
 export async function addShowtimeSlot(slotData) {
 	const { cinemaId, date, movieId, movieTitle, screenId, screenName, format, time, price, availableSeats } = slotData
-	const allShowtimes = getShowtimes()
+	const allShowtimes = JSON.parse(JSON.stringify(getShowtimes()))
 
 	let dayCinema = allShowtimes.find(st => st.date === date && st.cinemaId === cinemaId)
 	if (!dayCinema) {
@@ -942,17 +859,13 @@ export async function addShowtimeSlot(slotData) {
 	})
 	schedule.slots.sort((a, b) => a.time.localeCompare(b.time))
 
-	// Sync local
+	// Save to the server first so the UI cannot claim success for a local-only schedule.
+	let result = await apiUpdateShowtime(dayCinema.id, dayCinema)
+	if (!result.success) result = await apiCreateShowtime(dayCinema)
+	if (!result.success) return { success: false, message: result.error || "Không thể lưu lịch chiếu lên máy chủ." }
+
 	storageSet(STORAGE_KEYS.SHOWTIMES, allShowtimes)
-
-	// Sync backend
-	if (dayCinema.id) {
-		apiUpdateShowtime(dayCinema.id, dayCinema).catch(() => {
-			apiCreateShowtime(dayCinema).catch(() => {})
-		})
-	}
-
-	return schedule
+	return { success: true, schedule }
 }
 
 export async function updateShowtimeSlot(slotData) {
@@ -1077,6 +990,38 @@ export function getBookingHistory() {
 	return storageGet(STORAGE_KEYS.BOOKING_HISTORY, DEFAULT_BOOKING_HISTORY)
 }
 
+/**
+ * Đồng bộ lịch sử đặt vé cá nhân từ máy chủ json-server
+ */
+export async function syncMyBookingsFromServer() {
+	try {
+		const res = await apiGetMyBookings()
+		if (Array.isArray(res) && res.length > 0) {
+			const history = getBookingHistory()
+			let changed = false
+			res.forEach(serverTicket => {
+				const idx = history.findIndex(t => String(t.id) === String(serverTicket.id))
+				if (idx >= 0) {
+					if (history[idx].paymentStatus !== serverTicket.paymentStatus || history[idx].status !== serverTicket.status) {
+						history[idx] = { ...history[idx], ...serverTicket }
+						changed = true
+					}
+				} else {
+					history.unshift(serverTicket)
+					changed = true
+				}
+			})
+			if (changed) {
+				storageSet(STORAGE_KEYS.BOOKING_HISTORY, history)
+				return { changed: true, history }
+			}
+		}
+	} catch (err) {
+		console.warn("[Storage] Không thể đồng bộ lịch sử vé từ máy chủ:", err)
+	}
+	return { changed: false, history: getBookingHistory() }
+}
+
 export async function saveBookingTicket(ticket) {
 	const history = getBookingHistory()
 	const cName = ticket.customerName || ticket.userName || "Khách Hàng"
@@ -1100,20 +1045,26 @@ export async function saveBookingTicket(ticket) {
 		bookingDate: ticket.bookingDate || new Date().toISOString(),
 		status: ticket.status || "pending",
 	}
-
-	// 1. Lưu vào lịch sử trên trình duyệt
-	history.unshift(newTicket)
-	storageSet(STORAGE_KEYS.BOOKING_HISTORY, history)
-
-	// 2. Gửi đơn lên json-server
-	try {
-		await apiCreateBooking(newTicket)
-		console.log("[API] Đã lưu đơn vé:", newTicket.id)
-	} catch (err) {
-		console.error("[API] Không lưu được đơn vé:", err)
+	const committed = await apiCompleteCheckout(newTicket, {
+		rawTotal: Number(ticket.rawTotal ?? ticket.total) || 0,
+		concessionsTotal: Number(ticket.concessionsTotal) || 0,
+		showDate: ticket.date,
+	}, ticket.holdId)
+	if (!committed.success) return { ...newTicket, saveError: committed.message || "Không thể lưu đơn vé lên máy chủ." }
+	const savedTicket = { ...newTicket, ...committed.ticket }
+	if (committed.user) {
+		delete committed.user.password
+		saveUserSession(committed.user)
+		if (typeof window !== "undefined") {
+			window.dispatchEvent(new CustomEvent("beta_auth_changed", { detail: { user: committed.user } }))
+		}
 	}
 
-	return newTicket
+	// Sync local history only after the server commits the booking and any voucher use.
+	if (!history.some(item => String(item.id) === String(savedTicket.id))) history.unshift(savedTicket)
+	storageSet(STORAGE_KEYS.BOOKING_HISTORY, history)
+	clearPendingBooking()
+	return { ...savedTicket, pointsSave: { success: true } }
 }
 
 
@@ -1153,7 +1104,17 @@ export async function updateBookingStatus(id, newStatus) {
 }
 
 export async function cancelBookingTicket(id) {
-	return updateBookingStatus(id, "cancelled")
+	const result = await apiCancelBooking(id)
+	if (!result.success) return result
+	const history = getBookingHistory()
+	const target = history.find(item => String(item.id) === String(id))
+	if (target) {
+		target.status = "cancelled"
+		target.bookingStatus = "cancelled"
+		target.paymentStatus = "cancelled"
+		storageSet(STORAGE_KEYS.BOOKING_HISTORY, history)
+	}
+	return { success: true }
 }
 
 export async function confirmBookingOrder(id) {
@@ -1173,8 +1134,8 @@ export async function confirmBookingOrder(id) {
 }
 
 export async function confirmTicketPayment(id) {
-	const patchData = { paymentStatus: "paid", status: "paid" }
-	apiUpdateBooking(id, patchData).catch(err => console.warn("[API] Lỗi khi xác nhận thu tiền vé:", err))
+	const result = await apiConfirmBookingPayment(id)
+	if (!result.success) return false
 
 	const history = getBookingHistory()
 	const target = history.find(b => String(b.id) === String(id))
@@ -1186,6 +1147,32 @@ export async function confirmTicketPayment(id) {
 	}
 
 	return true
+}
+
+export async function demoConfirmPayment(id) {
+	const result = await apiDemoConfirmPayment(id)
+	if (!result.success) return { success: false, message: result.message }
+
+	const history = getBookingHistory()
+	const target = history.find(b => String(b.id) === String(id))
+
+	if (target) {
+		target.paymentStatus = "paid"
+		target.bookingStatus = "confirmed"
+		target.status = "paid"
+		target.paidAt = result.booking?.paidAt || new Date().toISOString()
+		storageSet(STORAGE_KEYS.BOOKING_HISTORY, history)
+	}
+
+	if (result.user) {
+		delete result.user.password
+		saveUserSession(result.user)
+		if (typeof window !== "undefined") {
+			window.dispatchEvent(new CustomEvent("beta_auth_changed", { detail: { user: result.user } }))
+		}
+	}
+
+	return { success: true, booking: result.booking }
 }
 
 export async function deleteBookingTicket(id) {
@@ -1251,7 +1238,8 @@ export const VOUCHER_LIST = [
 		value: 50000,
 		name: "Giảm trực tiếp 50.000đ",
 		description: "Giảm 50K cho đơn hàng kèm bắp nước từ 100K",
-		minOrder: 100000,
+		minOrder: 0,
+		minConcessions: 100000,
 		maxDiscount: 50000,
 	},
 	{
@@ -1260,7 +1248,8 @@ export const VOUCHER_LIST = [
 		value: 30000,
 		name: "Tặng bắp nước / Giảm 30K",
 		description: "Giảm 30.000đ quy đổi cho combo bắp nước",
-		minOrder: 50000,
+		minOrder: 0,
+		minConcessions: 50000,
 		maxDiscount: 30000,
 	},
 	{
@@ -1270,6 +1259,7 @@ export const VOUCHER_LIST = [
 		name: "Thứ Ba Vui Vẻ - Giảm 20K",
 		description: "Giảm 20K cho ngày Thứ 3 xem phim",
 		minOrder: 50000,
+		weekday: 2,
 		maxDiscount: 20000,
 	},
 	{
@@ -1283,7 +1273,7 @@ export const VOUCHER_LIST = [
 	},
 ]
 
-export function calculateVoucherDiscount(code, rawTotal) {
+export function calculateVoucherDiscount(code, rawTotal, context = {}) {
 	if (!code || typeof code !== "string") {
 		return { isValid: false, discountAmount: 0, voucher: null, message: "Vui lòng nhập mã voucher" }
 	}
@@ -1300,6 +1290,17 @@ export function calculateVoucherDiscount(code, rawTotal) {
 		}
 	}
 
+	const rewardNeedsOwnership = getMemberRewards().some(reward => String(reward.code || "").toUpperCase() === cleanCode)
+	const ownedVouchers = getCurrentUser()?.vouchers?.filter(item => String(item.code || "").toUpperCase() === cleanCode) || []
+	const ownedVoucher = ownedVouchers.find(item => item.status === "active" && new Date(item.expiresAt).getTime() > Date.now()) || ownedVouchers[0]
+	const ownedExpiry = ownedVoucher?.expiresAt ? new Date(ownedVoucher.expiresAt).getTime() : NaN
+	if (rewardNeedsOwnership && (!ownedVoucher || ownedVoucher.status !== "active" || !Number.isFinite(ownedExpiry))) {
+		return { isValid: false, discountAmount: 0, voucher, message: "Bạn cần đổi voucher bằng điểm và voucher phải còn hiệu lực." }
+	}
+	if (ownedVoucher && ownedExpiry <= Date.now()) {
+		return { isValid: false, discountAmount: 0, voucher, message: "Voucher này đã hết hạn." }
+	}
+
 	if (voucher.minOrder && rawTotal < voucher.minOrder) {
 		return {
 			isValid: false,
@@ -1307,6 +1308,12 @@ export function calculateVoucherDiscount(code, rawTotal) {
 			voucher,
 			message: `Mã ${cleanCode} chỉ áp dụng cho đơn hàng từ ${new Intl.NumberFormat("vi-VN").format(voucher.minOrder)} đ`,
 		}
+	}
+	if (voucher.minConcessions && Number(context.concessionsTotal || 0) < voucher.minConcessions) {
+		return { isValid: false, discountAmount: 0, voucher, message: `Mã ${cleanCode} cần có combo bắp nước từ ${voucher.minConcessions.toLocaleString("vi-VN")} đ` }
+	}
+	if (voucher.weekday !== undefined && new Date(`${context.showDate}T00:00:00Z`).getUTCDay() !== voucher.weekday) {
+		return { isValid: false, discountAmount: 0, voucher, message: "Mã này chỉ áp dụng cho suất chiếu vào Thứ Ba." }
 	}
 
 	let discount = 0
@@ -1545,9 +1552,7 @@ export function cleanExpiredSeatHolds() {
  */
 export function getActiveSeatHolds(cinemaId, movieId, date, time) {
 	const active = cleanExpiredSeatHolds()
-	return active.filter(
-		h => h.cinemaId === cinemaId && h.movieId === movieId && h.date === date && h.time === time,
-	)
+	return active.filter(h => h.cinemaId === cinemaId && h.movieId === movieId && h.date === date && h.time === time)
 }
 
 /**
@@ -1583,7 +1588,10 @@ export function holdSeats(cinemaId, movieId, date, time, seatIds = [], holdId = 
 	const cleanSeats = Array.isArray(seatIds)
 		? seatIds
 		: typeof seatIds === "string"
-			? seatIds.split(",").map(s => s.trim()).filter(Boolean)
+			? seatIds
+					.split(",")
+					.map(s => s.trim())
+					.filter(Boolean)
 			: []
 
 	if (cleanSeats.length === 0) {
@@ -1696,6 +1704,7 @@ export function releaseSeatHold(holdId) {
 	const filtered = allHolds.filter(h => h && h.holdId !== holdId)
 	if (filtered.length !== allHolds.length) {
 		storageSet(STORAGE_KEYS.SEAT_HOLDS, filtered)
+		apiReleaseSeatHold(holdId).catch(() => {})
 		return true
 	}
 	return false
@@ -1752,7 +1761,10 @@ export function checkSeatsAvailability(cinemaId, movieId, date, time, seatIds = 
 	const list = Array.isArray(seatIds)
 		? seatIds
 		: typeof seatIds === "string"
-			? seatIds.split(",").map(s => s.trim()).filter(Boolean)
+			? seatIds
+					.split(",")
+					.map(s => s.trim())
+					.filter(Boolean)
 			: []
 
 	const unavailableSeats = []
@@ -1929,7 +1941,8 @@ export function canDeselectSeat(currentSeats = [], seatIdToRemove) {
 			return {
 				allowed: false,
 				reason: "split",
-				message: "Không thể bỏ chọn ghế ở giữa vì các ghế còn lại sẽ bị cách xa nhau. Vui lòng bỏ chọn từ hai đầu ngoài!",
+				message:
+					"Không thể bỏ chọn ghế ở giữa vì các ghế còn lại sẽ bị cách xa nhau. Vui lòng bỏ chọn từ hai đầu ngoài!",
 			}
 		}
 	}
@@ -2030,61 +2043,25 @@ export async function redeemMemberReward(rewardId) {
 	if (!user) {
 		return { success: false, error: "NOT_LOGGED_IN", message: "Vui lòng đăng nhập để đổi quà thưởng!" }
 	}
-
-	const rewards = getMemberRewards()
-	const reward = rewards.find(r => r.id === rewardId)
-	if (!reward) {
-		return { success: false, error: "REWARD_NOT_FOUND", message: "Phần thưởng không tồn tại!" }
-	}
-
-	const userPoints = Number(user.points) || 0
-	if (userPoints < reward.points) {
-		return {
-			success: false,
-			error: "INSUFFICIENT_POINTS",
-			message: `Bạn hiện có ${userPoints} điểm, còn thiếu ${reward.points - userPoints} điểm để đổi quà này!`
+	const requestId = globalThis.crypto?.randomUUID?.() || `redeem-${Date.now()}-${Math.random().toString(36).slice(2)}`
+	const result = await apiRedeemMemberReward(rewardId, requestId)
+	if (!result.success) return result
+	if (result.user) {
+		delete result.user.password
+		saveUserSession(result.user)
+		if (typeof window !== "undefined") {
+			window.dispatchEvent(new CustomEvent("beta_auth_changed", { detail: { user: result.user } }))
 		}
 	}
-
-	// Trừ điểm của người dùng
-	user.points = userPoints - reward.points
-
-	// Tạo mã voucher vào danh sách vouchers của user
-	const voucherCode = reward.code
-	const newVoucher = {
-		code: voucherCode,
-		name: reward.title,
-		points: reward.points,
-		category: reward.category,
-		discount: reward.description,
-		expiry: "31/12/2026",
-		redeemedAt: new Date().toISOString()
-	}
-
-	if (!user.vouchers) user.vouchers = []
-	user.vouchers.push(newVoucher)
-
-	// Thêm vào lịch sử tích / tiêu điểm
-	if (!user.pointsHistory) user.pointsHistory = []
-	user.pointsHistory.unshift({
-		id: `PH-${Date.now()}`,
-		title: `Đổi quà: ${reward.title}`,
-		points: -reward.points,
-		date: new Date().toISOString(),
-		code: voucherCode,
-		type: "redeem"
-	})
-
-	// Cập nhật database và session
-	await updateUserInDatabase(user)
-
 	return {
-		success: true,
-		reward,
-		remainingPoints: user.points,
-		voucher: newVoucher,
-		message: `Đổi thành công "${reward.title}"! Đã thêm vào Kho ưu đãi của bạn.`
+		...result,
+		remainingPoints: result.user?.points ?? result.transaction?.remainingPoints,
+		message: `Đổi thành công "${result.voucher?.name || "phần thưởng"}"! Voucher có hạn đến ${new Date(result.voucher.expiresAt).toLocaleDateString("vi-VN")}.`,
 	}
+}
+
+export async function validateVoucherForCheckout(code, rawTotal, concessionsTotal, showDate) {
+	return apiValidateVoucher({ code, rawTotal, concessionsTotal, showDate })
 }
 
 export function getUserPointsHistory(user) {
@@ -2099,15 +2076,15 @@ export function getUserPointsHistory(user) {
 			title: "Tích lũy vé Đơn #BT-842915",
 			points: 45,
 			date: "2026-09-28T14:30:00.000Z",
-			type: "earn"
+			type: "earn",
 		},
 		{
 			id: "PH-100",
 			title: "Thưởng kích hoạt thành viên Beta VIP",
 			points: 50,
 			date: "2026-09-15T09:00:00.000Z",
-			type: "earn"
-		}
+			type: "earn",
+		},
 	]
 }
 

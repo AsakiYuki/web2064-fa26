@@ -59,9 +59,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 	function checkAdminAccess() {
 		const currentUser = getCurrentUser()
 		const isAdmin = isUserAdmin(currentUser)
-		const isPreview = new URLSearchParams(window.location.search).has("preview")
-
-		if (isAdmin || isPreview) {
+		if (isAdmin) {
 			if (authGate) authGate.style.display = "none"
 			if (adminLayout) adminLayout.style.display = "flex"
 
@@ -975,7 +973,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 		}
 
 		// Showtime Form Submit
-		showtimeForm?.addEventListener("submit", e => {
+		showtimeForm?.addEventListener("submit", async e => {
 			e.preventDefault()
 
 			const isEdit = document.getElementById("st-is-edit")?.value === "true"
@@ -1013,7 +1011,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 				})
 				showToast(`✅ Đã cập nhật suất chiếu ${time} cho phim "${movieTitle}"!`, "success")
 			} else {
-				addShowtimeSlot({
+				const result = await addShowtimeSlot({
 					cinemaId,
 					date,
 					movieId,
@@ -1025,6 +1023,10 @@ document.addEventListener("DOMContentLoaded", async () => {
 					price,
 					availableSeats,
 				})
+				if (!result.success) {
+					showToast(result.message || "Không thể lưu suất chiếu. Vui lòng thử lại.", "error")
+					return
+				}
 				showToast(`✅ Đã thêm suất chiếu mới ${time} cho phim "${movieTitle}"!`, "success")
 			}
 
@@ -1469,7 +1471,11 @@ document.addEventListener("DOMContentLoaded", async () => {
 			bookingsTableTbody.querySelectorAll(".btn-action-payment-confirm").forEach(btn => {
 				btn.addEventListener("click", async () => {
 					const id = btn.dataset.id
-					await confirmTicketPayment(id)
+					const result = await confirmTicketPayment(id)
+					if (!result) {
+						showToast("Không thể xác nhận thanh toán. Đơn có thể đã hết hạn hoặc dữ liệu máy chủ bị lỗi.", "error")
+						return
+					}
 					showToast(`💰 Đã xác nhận thu tiền cho đơn vé ${id}! Vé đã sẵn sàng cho khách xem phim.`, "success")
 					renderAdminBookingsTable()
 					renderOverviewDashboard()

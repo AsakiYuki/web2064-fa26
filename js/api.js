@@ -7,9 +7,10 @@
 
 // Auto-detect API base endpoint (Vite proxy /api -> localhost:3000, or fallback direct)
 const isBrowser = typeof window !== "undefined"
-const API_BASE = isBrowser && (window.location.port === "5173" || window.location.port === "4173")
+const configuredApiBase = import.meta.env?.VITE_API_BASE_URL
+const API_BASE = configuredApiBase || (isBrowser && (window.location.port === "5173" || window.location.port === "4173")
 	? "/api"
-	: (typeof process !== "undefined" && process.env?.BACKEND_URL) || "http://localhost:3000"
+	: "http://localhost:3000")
 
 const TOKEN_KEY = "beta_auth_token"
 
@@ -17,23 +18,35 @@ const TOKEN_KEY = "beta_auth_token"
    TOKEN & HEADERS MANAGEMENT
    ========================================================================== */
 
-export function getAuthToken() {
-	if (typeof localStorage === "undefined") return ""
-	return localStorage.getItem(TOKEN_KEY) || ""
-}
+let memoryToken = ""
 
-export function setAuthToken(token) {
-	if (typeof localStorage === "undefined") return
-	if (token) {
-		localStorage.setItem(TOKEN_KEY, token)
-	} else {
-		localStorage.removeItem(TOKEN_KEY)
+export function getAuthToken() {
+	if (typeof localStorage === "undefined") return memoryToken
+	try {
+		return localStorage.getItem(TOKEN_KEY) || memoryToken || ""
+	} catch {
+		return memoryToken
 	}
 }
 
-export function removeAuthToken() {
+export function setAuthToken(token) {
+	memoryToken = token || ""
 	if (typeof localStorage === "undefined") return
-	localStorage.removeItem(TOKEN_KEY)
+	try {
+		if (token) {
+			localStorage.setItem(TOKEN_KEY, token)
+		} else {
+			localStorage.removeItem(TOKEN_KEY)
+		}
+	} catch {}
+}
+
+export function removeAuthToken() {
+	memoryToken = ""
+	if (typeof localStorage === "undefined") return
+	try {
+		localStorage.removeItem(TOKEN_KEY)
+	} catch {}
 }
 
 function getHeaders(isJson = true) {
@@ -182,6 +195,40 @@ export async function apiChangePassword(payload) {
 	return res.ok ? { success: true, message: res.data?.message || "Đổi mật khẩu thành công!" } : { success: false, message: res.error || "Không thể đổi mật khẩu" }
 }
 
+export async function apiRedeemMemberReward(rewardId, requestId) {
+	const res = await request("/member/redeem", {
+		method: "POST",
+		body: JSON.stringify({ rewardId, requestId }),
+	})
+	return res.ok ? res.data : { success: false, message: res.error || "Không thể đổi quà lúc này." }
+}
+
+export async function apiValidateVoucher(payload) {
+	const res = await request("/vouchers/validate", {
+		method: "POST",
+		body: JSON.stringify(payload),
+	})
+	return res.ok ? res.data : { success: false, message: res.error || "Voucher không hợp lệ." }
+}
+
+export async function apiHoldSeats(hold) {
+	const res = await request('/seat-holds', { method: 'POST', body: JSON.stringify(hold) })
+	return res.ok ? res.data : { success: false, message: res.error || 'Không thể giữ ghế trên máy chủ.' }
+}
+
+export async function apiReleaseSeatHold(holdId) {
+	const res = await request(`/seat-holds/${encodeURIComponent(holdId)}`, { method: 'DELETE' })
+	return res.ok
+}
+
+export async function apiCompleteCheckout(ticket, voucherContext, holdId) {
+	const res = await request("/checkout/complete", {
+		method: "POST",
+		body: JSON.stringify({ ticket, voucherContext, holdId }),
+	})
+	return res.ok ? res.data : { success: false, message: res.error || "Không thể hoàn tất đơn vé." }
+}
+
 /**
  * Lấy danh sách người dùng
  */
@@ -307,6 +354,11 @@ export async function apiGetBookings() {
 	return res.ok && Array.isArray(res.data) ? res.data : []
 }
 
+export async function apiGetMyBookings() {
+	const res = await request("/my/bookings")
+	return res.ok && Array.isArray(res.data) ? res.data : []
+}
+
 export async function apiCreateBooking(booking) {
 	const res = await request("/bookings", {
 		method: "POST",
@@ -328,6 +380,24 @@ export async function apiDeleteBooking(id) {
 		method: "DELETE",
 	})
 	return res.ok ? { success: true } : { success: false, error: res.error }
+}
+
+export async function apiConfirmBookingPayment(id) {
+	const res = await request(`/admin/bookings/${encodeURIComponent(id)}/confirm-payment`, { method: 'POST', body: '{}' })
+	return res.ok ? res.data : { success: false, message: res.error || 'Không thể xác nhận thanh toán.' }
+}
+
+export async function apiDemoConfirmPayment(id) {
+	const res = await request(`/demo/webhook/confirm-payment`, {
+		method: 'POST',
+		body: JSON.stringify({ bookingId: id }),
+	})
+	return res.ok ? res.data : { success: false, message: res.error || 'Không thể xác nhận thanh toán giả lập.' }
+}
+
+export async function apiCancelBooking(id) {
+	const res = await request(`/bookings/${encodeURIComponent(id)}/cancel`, { method: 'POST', body: '{}' })
+	return res.ok ? res.data : { success: false, message: res.error || 'Không thể hủy đơn vé.' }
 }
 
 /* ==========================================================================

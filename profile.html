@@ -193,32 +193,18 @@
 				<div class="section-head" style="flex-wrap: wrap; gap: 14px;">
 					<div>
 						<h2>Lịch Sử Đặt Vé Xem Phim</h2>
-						<span style="font-size: 13px; color: #a6adc8;">Danh sách vé đã đặt và mã vé điện tử QR Code của
-							bạn</span>
+						<span class="section-sub">Danh sách vé đã đặt và mã vé điện tử QR Code của bạn</span>
 					</div>
-					<div class="history-filter-bar"
-						style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center;">
-						<div class="history-search-wrap" style="position: relative;">
-							<input type="text" id="history-search-input" placeholder="Tìm theo tên phim hoặc mã vé..."
-								style="background: #313244; border: 1px solid rgba(88, 91, 112, 0.4); border-radius: 8px; padding: 6px 12px; font-size: 13px; color: #cdd6f4; width: 230px;" />
+					<div class="history-filter-bar">
+						<div class="history-search-wrap">
+							<input type="text" id="history-search-input" placeholder="Tìm theo tên phim hoặc mã vé..." />
 						</div>
-						<div class="history-status-filters" id="history-status-filters"
-							style="display: flex; gap: 6px;">
-							<button type="button" class="btn-filter-status active" data-status="all"
-								style="background: #89b4fa; border: none; color: #11111b; padding: 6px 12px; border-radius: 6px; font-size: 12px; font-weight: 700; cursor: pointer;">Tất
-								cả</button>
-							<button type="button" class="btn-filter-status" data-status="pending"
-								style="background: #313244; border: 1px solid rgba(88, 91, 112, 0.4); color: #fab387; padding: 6px 12px; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer;">Chờ
-								xác nhận</button>
-							<button type="button" class="btn-filter-status" data-status="paid"
-								style="background: #313244; border: 1px solid rgba(88, 91, 112, 0.4); color: #a6adc8; padding: 6px 12px; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer;">Đã
-								thanh toán</button>
-							<button type="button" class="btn-filter-status" data-status="done"
-								style="background: #313244; border: 1px solid rgba(88, 91, 112, 0.4); color: #a6adc8; padding: 6px 12px; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer;">Đã
-								sử dụng</button>
-							<button type="button" class="btn-filter-status" data-status="cancelled"
-								style="background: #313244; border: 1px solid rgba(88, 91, 112, 0.4); color: #a6adc8; padding: 6px 12px; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer;">Đã
-								hủy</button>
+						<div class="history-status-filters" id="history-status-filters">
+							<button type="button" class="btn-filter-status active" data-status="all">Tất cả</button>
+							<button type="button" class="btn-filter-status" data-status="pending">Chờ xác nhận</button>
+							<button type="button" class="btn-filter-status" data-status="paid">Đã thanh toán</button>
+							<button type="button" class="btn-filter-status" data-status="done">Đã sử dụng</button>
+							<button type="button" class="btn-filter-status" data-status="cancelled">Đã hủy</button>
 						</div>
 					</div>
 				</div>
@@ -240,7 +226,7 @@
 					</div>
 					<span
 						style="font-size: 12px; background: rgba(166, 227, 161, 0.15); color: #a6e3a1; border: 1px solid rgba(166, 227, 161, 0.3); padding: 4px 10px; border-radius: 12px; font-weight: 700;">
-						● Đã đồng bộ LocalStorage
+						● Hồ sơ thành viên
 					</span>
 				</div>
 
@@ -316,7 +302,7 @@
 						</select>
 					</div>
 					<div class="pf-actions" style="display: flex; gap: 12px; align-items: center;">
-						<button type="submit" class="btn-save-profile">💾 Lưu Thay Đổi Vào LocalStorage</button>
+						<button type="submit" class="btn-save-profile">💾 Lưu Thay Đổi</button>
 						<button type="button" id="btn-reset-profile"
 							style="background: #45475a; border: 1px solid rgba(88, 91, 112, 0.4); color: #cdd6f4; padding: 12px 20px; border-radius: 8px; font-weight: 700; cursor: pointer;">
 							Đặt Lại Mặc Định
@@ -334,36 +320,8 @@
 					<span style="font-size: 13px; color: #a6adc8;">Nhập mã tại bước thanh toán để được giảm giá</span>
 				</div>
 
-				<div class="vouchers-grid">
-					<div class="voucher-card">
-						<div class="v-icon">🎟️</div>
-						<div class="v-info">
-							<span class="v-code">BETA10</span>
-							<p class="v-desc">Giảm ngay 10% tổng hóa đơn đặt vé online cho thành viên VIP</p>
-							<span class="v-exp">Hạn sử dụng: 31/12/2026 • Còn 5 lượt</span>
-						</div>
-						<button type="button" class="btn-use-voucher" data-code="BETA10">Sao chép</button>
-					</div>
-
-					<div class="voucher-card">
-						<div class="v-icon">🍿</div>
-						<div class="v-info">
-							<span class="v-code">BETA50</span>
-							<p class="v-desc">Giảm 50.000đ khi đặt vé kèm combo bắp nước từ 100K</p>
-							<span class="v-exp">Hạn sử dụng: 30/11/2026 • Còn 2 lượt</span>
-						</div>
-						<button type="button" class="btn-use-voucher" data-code="BETA50">Sao chép</button>
-					</div>
-
-					<div class="voucher-card">
-						<div class="v-icon">🥤</div>
-						<div class="v-info">
-							<span class="v-code">FREEPOP</span>
-							<p class="v-desc">Tặng 01 ly nước ngọt lớn khi mua từ 02 vé xem phim cuối tuần</p>
-							<span class="v-exp">Hạn sử dụng: 15/10/2026 • Còn 1 lượt</span>
-						</div>
-						<button type="button" class="btn-use-voucher" data-code="FREEPOP">Sao chép</button>
-					</div>
+				<div class="vouchers-grid" id="profile-vouchers-grid">
+					<p style="color:#a6adc8;">Bạn chưa có voucher nào.</p>
 				</div>
 			</div>
 		</section>
