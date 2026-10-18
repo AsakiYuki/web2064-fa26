@@ -32,6 +32,7 @@ import {
 	apiUpdateBooking,
 	apiDeleteBooking,
 	apiConfirmBookingPayment,
+	apiCancelBooking,
 	apiGetCinemas,
 	apiGetGenres,
 	apiGetBanners,
@@ -1066,7 +1067,17 @@ export async function updateBookingStatus(id, newStatus) {
 }
 
 export async function cancelBookingTicket(id) {
-	return updateBookingStatus(id, "cancelled")
+	const result = await apiCancelBooking(id)
+	if (!result.success) return result
+	const history = getBookingHistory()
+	const target = history.find(item => String(item.id) === String(id))
+	if (target) {
+		target.status = "cancelled"
+		target.bookingStatus = "cancelled"
+		target.paymentStatus = "cancelled"
+		storageSet(STORAGE_KEYS.BOOKING_HISTORY, history)
+	}
+	return { success: true }
 }
 
 export async function confirmBookingOrder(id) {

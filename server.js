@@ -413,6 +413,30 @@ server.post('/admin/bookings/:id/confirm-payment', (req, res) => {
 	return res.json({ success: true, booking, user: user ? userWithoutPassword(user) : null })
 })
 
+server.post('/bookings/:id/cancel', (req, res) => {
+	const caller = resolveRequestUser(req, res, true)
+	if (!caller) return
+	const state = JSON.parse(JSON.stringify(server.db.getState()))
+	expirePendingBookings(state)
+	const booking = (state.bookings || []).find(item => String(item.id) === String(req.params.id))
+	if (!booking || String(booking.userId) !== String(caller.id)) return res.status(404).json({ success: false, message: 'Không tìm thấy đơn vé thuộc tài khoản này.' })
+	if (booking.paymentStatus !== 'pending' || booking.bookingStatus !== 'pending' || Number(booking.holdExpiresAt) <= Date.now()) {
+		return res.status(409).json({ success: false, message: 'Chỉ có thể hủy đơn chưa thanh toán còn trong thời gian giữ ghế. Đơn đã thanh toán cần xử lý theo chính sách hoàn vé.' })
+	}
+	booking.paymentStatus = 'cancelled'
+	booking.bookingStatus = 'cancelled'
+	booking.status = 'cancelled'
+	booking.cancelledAt = new Date().toISOString()
+	const user = (state.users || []).find(item => String(item.id) === String(caller.id))
+	const voucher = user?.vouchers?.find(item => item.status === 'reserved' && String(item.bookingId) === String(booking.id))
+	if (voucher) {
+		voucher.status = 'active'
+		delete voucher.bookingId
+	}
+	persistState(state)
+	return res.json({ success: true, booking })
+})
+
 // Commit the ticket, consume a member voucher, and award points atomically.
 server.post('/checkout/complete', (req, res) => {
 	const user = resolveRequestUser(req, res, false)

@@ -7,6 +7,7 @@ import {
 	saveUserSession,
 	translateDom,
 	getSavedLang,
+	openAuthModal,
 } from "./common.js"
 import {
 	getBookingHistory,
@@ -38,8 +39,9 @@ document.addEventListener("DOMContentLoaded", async () => {
 	// 1. Load User Session from LocalStorage
 	let user = getCurrentUser()
 	if (!user) {
-		user = { ...DEFAULT_PROFILE }
-		saveUserSession(user)
+		openAuthModal("login")
+		showToast("Vui lòng đăng nhập để xem hồ sơ và lịch sử vé.", "info")
+		return
 	} else {
 		// Merge any missing fields with defaults
 		user = { ...DEFAULT_PROFILE, ...user }
@@ -412,7 +414,10 @@ document.addEventListener("DOMContentLoaded", async () => {
 		const badge = document.getElementById("history-count-badge")
 		if (!container) return
 
-		const history = getBookingHistory()
+		const history = getBookingHistory().filter(ticket =>
+			(ticket.userId && String(ticket.userId) === String(user.id)) ||
+			(!ticket.userId && String(ticket.customerEmail || ticket.userEmail || "").toLowerCase() === String(user.email || "").toLowerCase()),
+		)
 
 		if (badge) badge.textContent = history.length
 
@@ -524,7 +529,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 								🎟️ Xem Vé Điện Tử
 							</button>
 							${
-								!isCancelled && !isDone
+								!isCancelled && !isDone && isPending && Number(t.holdExpiresAt) > Date.now()
 									? `
 								<button type="button" class="btn-cancel-ticket" data-ticket-id="${t.id}" style="background: rgba(243, 139, 168, 0.15); color: #f38ba8; border: 1px solid rgba(243, 139, 168, 0.3); padding: 6px 12px; border-radius: 6px; font-weight: 600; font-size: 12px; cursor: pointer;">
 									✕ Hủy Vé
@@ -559,13 +564,15 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 		// Attach cancel ticket clicks
 		container.querySelectorAll(".btn-cancel-ticket").forEach(btn => {
-			btn.addEventListener("click", () => {
+			btn.addEventListener("click", async () => {
 				const ticketId = String(btn.dataset.ticketId || "").trim()
-				if (
-					confirm(`Bạn có chắc chắn muốn hủy vé ${ticketId}? Tiền vé sẽ được hoàn về phương thức thanh toán ban đầu.`)
-				) {
-					cancelBookingTicket(ticketId)
-					showToast(`Đã hủy vé ${ticketId} thành công.`, "info")
+				if (confirm(`Hủy đơn ${ticketId}? Chỉ đơn chưa thanh toán còn thời gian giữ ghế mới hủy được. Đơn đã thanh toán cần liên hệ rạp theo chính sách hoàn vé.`)) {
+					const result = await cancelBookingTicket(ticketId)
+					if (!result.success) {
+						showToast(result.message || "Không thể hủy đơn vé.", "error")
+						return
+					}
+					showToast(`Đã hủy đơn ${ticketId}.`, "info")
 					renderBookingHistory()
 				}
 			})

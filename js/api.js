@@ -370,6 +370,11 @@ export async function apiConfirmBookingPayment(id) {
 	return res.ok ? res.data : { success: false, message: res.error || 'Không thể xác nhận thanh toán.' }
 }
 
+export async function apiCancelBooking(id) {
+	const res = await request(`/bookings/${encodeURIComponent(id)}/cancel`, { method: 'POST', body: '{}' })
+	return res.ok ? res.data : { success: false, message: res.error || 'Không thể hủy đơn vé.' }
+}
+
 /* ==========================================================================
    STATIC & SYSTEM APIS (/cinemas, /genres, /banners, /promotions, etc.)
    ========================================================================== */
