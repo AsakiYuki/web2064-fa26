@@ -1335,6 +1335,21 @@ export async function setupHeaderAndFooter() {
 			footerContainer.innerHTML = getStandardFooterHtml()
 		}
 
+		// Do not expose placeholder anchors as working links.
+		document.querySelectorAll(".footer-links-list a[href='#'], .social-icons a[href='#']").forEach(link => {
+			if (link.closest(".social-icons")) link.remove()
+			else link.closest("li")?.remove()
+		})
+		document.querySelectorAll(".footer-links-list").forEach(list => {
+			if (!list.children.length) list.remove()
+		})
+		document.querySelectorAll(".footer-download-title").forEach(title => {
+			if (!title.nextElementSibling?.children.length) title.remove()
+		})
+		document.querySelectorAll(".social-icons").forEach(icons => {
+			if (!icons.children.length) icons.previousElementSibling?.remove()
+		})
+
 		// Cinema Dropdown
 		const currentCinemaId = getCurrentCinemaId()
 		const currentCinema = Array.isArray(cinemas) ? cinemas.find(c => c.id === currentCinemaId) : null

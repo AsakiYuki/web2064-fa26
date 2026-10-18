@@ -80,8 +80,8 @@ export class ShowtimePicker {
 			this.showtimes = showtimesData || []
 			this.ticketPricing = pricing
 
-			// Default date is today: 2026-09-26
-			this.selectedDate = "2026-09-26"
+			// Always start from the visitor's local calendar date.
+			this.selectedDate = this.toDateString(new Date())
 
 			// Check URL param for cinema if available, else use preferred cinema
 			const urlParams = new URLSearchParams(window.location.search)
@@ -114,12 +114,25 @@ export class ShowtimePicker {
 			})
 		} catch (err) {
 			console.error("Failed to initialize ShowtimePicker:", err)
+			const container = document.getElementById(this.containerId)
+			if (container) {
+				container.innerHTML = `<div role="alert" class="data-state"><h2>Chưa tải được lịch chiếu</h2><p>Kiểm tra kết nối rồi thử lại.</p><button type="button" id="retry-showtimes">Thử tải lại</button></div>`
+				container.querySelector("#retry-showtimes")?.addEventListener("click", () => window.location.reload())
+			}
 		}
 	}
 
-	/** Generate 8 days starting from 2026-09-26 */
+	toDateString(date) {
+		const yyyy = date.getFullYear()
+		const mm = String(date.getMonth() + 1).padStart(2, "0")
+		const dd = String(date.getDate()).padStart(2, "0")
+		return `${yyyy}-${mm}-${dd}`
+	}
+
+	/** Generate 8 days starting from today */
 	getDatesList() {
-		const baseDate = new Date("2026-09-26T00:00:00")
+		const baseDate = new Date()
+		baseDate.setHours(0, 0, 0, 0)
 		const dates = []
 		const dayNames = ["Chủ Nhật", "Thứ 2", "Thứ 3", "Thứ 4", "Thứ 5", "Thứ 6", "Thứ 7"]
 
@@ -127,10 +140,9 @@ export class ShowtimePicker {
 			const d = new Date(baseDate)
 			d.setDate(baseDate.getDate() + i)
 
-			const yyyy = d.getFullYear()
+			const dateStr = this.toDateString(d)
 			const mm = String(d.getMonth() + 1).padStart(2, "0")
 			const dd = String(d.getDate()).padStart(2, "0")
-			const dateStr = `${yyyy}-${mm}-${dd}`
 
 			let label = dayNames[d.getDay()]
 			let tag = ""

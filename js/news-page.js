@@ -8,17 +8,23 @@ document.addEventListener("DOMContentLoaded", async () => {
 	await setupHeaderAndFooter()
 
 	let promotionsData = getPromotions()
+	const promoContainer = document.getElementById("promotions-grid-container")
 
 	try {
 		if (!promotionsData || !promotionsData.length) {
-			promotionsData = await fetch("/data/promotions.json").then(r => r.json())
+			const response = await fetch("/data/promotions.json")
+			if (!response.ok) throw new Error(`HTTP ${response.status}`)
+			promotionsData = await response.json()
 		}
 	} catch (err) {
 		console.error("Failed to load promotions data:", err)
+		if (promoContainer) {
+			promoContainer.innerHTML = `<div role="alert" style="grid-column:1/-1;text-align:center;padding:48px 20px"><h2>Chưa tải được ưu đãi</h2><p>Kiểm tra kết nối rồi thử lại.</p><button type="button" id="retry-promotions">Thử tải lại</button></div>`
+			promoContainer.querySelector("#retry-promotions")?.addEventListener("click", () => window.location.reload())
+		}
 		return
 	}
 
-	const promoContainer = document.getElementById("promotions-grid-container")
 	const filterPills = document.querySelectorAll(".promo-pill")
 	const urlParams = new URLSearchParams(window.location.search)
 	let currentCategory = urlParams.get("category") || "all"
