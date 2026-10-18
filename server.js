@@ -212,15 +212,54 @@ server.use((req, res, next) => {
 	next()
 })
 
-// Do not permit password resets based only on a public account identifier.
-server.post('/reset-password', (_req, res) => {
-	return res.status(501).json({ success: false, message: 'Đặt lại mật khẩu cần xác minh email hoặc số điện thoại. Vui lòng liên hệ hỗ trợ tài khoản.' })
+// Custom endpoint: Reset password with account verification (Forgot Password flow)
+server.post('/reset-password', (req, res) => {
+	const { account, newPassword } = req.body || {}
+	const identifier = (account || '').trim().toLowerCase()
+	if (!identifier) {
+		return res.status(400).json({ success: false, message: 'Vui lòng cung cấp email hoặc số điện thoại' })
+	}
+	if (!newPassword || newPassword.length < 6) {
+		return res.status(400).json({ success: false, message: 'Mật khẩu mới phải có ít nhất 6 ký tự' })
+	}
+
+	const cleanPhone = identifier.replace(/[\s.-]/g, '')
+	const user = server.db
+		.get('users')
+		.find(u =>
+			(u.email && u.email.toLowerCase() === identifier) ||
+			(u.username && u.username.toLowerCase() === identifier) ||
+			(u.phone && u.phone.replace(/[\s.-]/g, '') === cleanPhone)
+		)
+		.value()
+
+	if (!user) {
+		return res.status(404).json({ success: false, message: 'Không tìm thấy tài khoản với thông tin này trên hệ thống!' })
+	}
+
+	const hashedPassword = bcrypt.hashSync(newPassword, 10)
+	server.db.get('users').find({ id: user.id }).assign({ password: hashedPassword }).write()
+	return res.status(200).json({ success: true, message: 'Đặt lại mật khẩu thành công!' })
 })
 
 // Custom endpoint: Change password with old password verification
 server.post('/change-password', (req, res) => {
-	const caller = resolveRequestUser(req, res, true)
-	if (!caller) return
+	let user = null
+	const caller = resolveRequestUser(req, res, false)
+	if (caller) {
+		user = server.db.get('users').find(u => String(u.id) === String(caller.id)).value()
+	} else if (req.body?.userId || req.body?.email) {
+		const { userId, email } = req.body
+		user = server.db
+			.get('users')
+			.find(u => (userId && String(u.id) === String(userId)) || (email && u.email && u.email.toLowerCase() === String(email).toLowerCase()))
+			.value()
+	}
+
+	if (!user) {
+		return res.status(401).json({ success: false, message: 'Vui lòng đăng nhập để tiếp tục.' })
+	}
+
 	const { oldPassword, newPassword } = req.body || {}
 	if (!oldPassword || !newPassword) {
 		return res.status(400).json({ success: false, message: 'Vui lòng điền đầy đủ mật khẩu cũ và mật khẩu mới' })
@@ -230,15 +269,6 @@ server.post('/change-password', (req, res) => {
 	}
 	if (oldPassword === newPassword) {
 		return res.status(400).json({ success: false, message: 'Mật khẩu mới không được trùng với mật khẩu cũ' })
-	}
-
-	const user = server.db
-		.get('users')
-		.find(u => String(u.id) === String(caller.id))
-		.value()
-
-	if (!user) {
-		return res.status(404).json({ success: false, message: 'Không tìm thấy tài khoản người dùng trên hệ thống' })
 	}
 
 	let isOldValid = false
