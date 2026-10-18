@@ -973,7 +973,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 		}
 
 		// Showtime Form Submit
-		showtimeForm?.addEventListener("submit", e => {
+		showtimeForm?.addEventListener("submit", async e => {
 			e.preventDefault()
 
 			const isEdit = document.getElementById("st-is-edit")?.value === "true"
@@ -1011,7 +1011,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 				})
 				showToast(`✅ Đã cập nhật suất chiếu ${time} cho phim "${movieTitle}"!`, "success")
 			} else {
-				addShowtimeSlot({
+				const result = await addShowtimeSlot({
 					cinemaId,
 					date,
 					movieId,
@@ -1023,6 +1023,10 @@ document.addEventListener("DOMContentLoaded", async () => {
 					price,
 					availableSeats,
 				})
+				if (!result.success) {
+					showToast(result.message || "Không thể lưu suất chiếu. Vui lòng thử lại.", "error")
+					return
+				}
 				showToast(`✅ Đã thêm suất chiếu mới ${time} cho phim "${movieTitle}"!`, "success")
 			}
 
