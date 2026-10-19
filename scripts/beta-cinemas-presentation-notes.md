@@ -1,28 +1,55 @@
-# Lời thuyết trình Beta Cinemas
+# Kịch bản thuyết trình Beta Cinemas
 
-**Thời lượng dự kiến:** 4–5 phút, gồm phần demo ở slide 5.  
-**Lưu ý khi trình bày:** Checkout hiện mô phỏng; đơn cần Admin xác nhận trước khi check-in.
+**Thời lượng dự kiến:** 4–5 phút, gồm demo. Nội dung checkout được mô tả đúng là mô phỏng; đơn cần Admin xác nhận.
 
-## Slide 1 — Giới thiệu dự án (30–40 giây)
+## Slide 1 — Giới thiệu dự án
 
-Xin chào thầy cô và các bạn. Nhóm em xin giới thiệu Beta Cinemas, một website hỗ trợ khách hàng tìm phim, xem lịch và đặt vé trực tuyến. Dự án hiện có 14 trang MPA, kết nối REST API và được triển khai trên Vercel. Khách hàng có thể chọn ghế, dùng voucher và theo dõi vé; phía nhân viên có thể xử lý đơn và check-in. Nhóm hiện gồm Nguyễn Văn Trọng, Vũ Tiến Lập và Phạm Anh Duy.
+Xin chào thầy cô và các bạn. Nhóm em xin giới thiệu dự án Beta Cinemas, một website đặt vé xem phim trực tuyến.
 
-## Slide 2 — Các chức năng chính (35–45 giây)
+Mục tiêu của website là giúp khán giả tìm phim, xem lịch chiếu và chọn vé thuận tiện hơn. Dự án gồm 14 trang, kết nối với REST API và được triển khai trên Vercel.
 
-Website có sáu nhóm chức năng. Khách có thể tìm phim và xem trailer, sau đó chọn lịch ở một trong mười cụm rạp. Khi đặt vé, hệ thống hiển thị sơ đồ 152 ghế và giữ chỗ trong năm phút. Người dùng có thể chọn combo và nhập voucher; phía server kiểm tra điều kiện mã. Checkout đang là mô phỏng, nên đơn sẽ ở trạng thái chờ Admin xác nhận. Sau khi được xác nhận, vé QR dùng cho bước check-in.
+Ngoài khách hàng, hệ thống còn có phần dành cho Admin để xử lý đơn và check-in vé. Nhóm hiện gồm Nguyễn Văn Trọng, Vũ Tiến Lập và Phạm Anh Duy. Sau đây, em xin giới thiệu các chức năng chính.
 
-## Slide 3 — Phạm vi MVP (40–50 giây)
+## Slide 2 — Chức năng chính
 
-MVP tập trung vào luồng cốt lõi từ chọn phim đến nhận vé. Nhóm đã hoàn thành 14 trên 14 trang, API giữ ghế và xử lý voucher, điểm; các thao tác Admin gồm xác nhận đơn và check-in. Phần chưa có là cổng thanh toán thật, gửi vé qua email hoặc SMS, và cơ sở dữ liệu production bền vững. Nhóm chủ động để các tính năng ngoài luồng đặt vé chính sang giai đoạn sau.
+Đầu tiên là phần phim. Người dùng có thể xem danh sách phim và trailer. Tiếp theo là lịch chiếu, nơi người dùng chọn rạp, ngày và suất phù hợp.
 
-## Slide 4 — Giải pháp và kiến trúc (35–45 giây)
+Khi đặt vé, website hiển thị sơ đồ 152 ghế. Người dùng đăng nhập để tiếp tục và ghế được giữ trong năm phút. Sau đó, khách có thể chọn combo bắp nước và nhập voucher. Server sẽ kiểm tra mã giảm giá.
 
-Về kỹ thuật, giao diện dùng Vite MPA, SCSS và JavaScript thuần. Bun hỗ trợ backend và công cụ dự án; json-server cung cấp REST API, còn json-server-auth xử lý JWT và phân quyền. Dữ liệu demo gồm phim, rạp, lịch chiếu, combo, vé và hội viên. Mã giao diện dùng api.js và storage.js để làm việc với API. Phần quản trị có năm tab phục vụ duyệt đơn và check-in.
+Ở bước cuối, hệ thống tạo đơn và vé QR. Thanh toán hiện đang mô phỏng, nên đơn cần Admin xác nhận trước khi khách dùng vé để check-in. Website cũng có trang thành viên để xem điểm và voucher.
 
-## Slide 5 — Demo luồng đặt vé (60–90 giây)
+## Slide 3 — Phạm vi MVP
 
-Sau đây nhóm xin demo luồng chính. Đầu tiên, em tìm một bộ phim, chọn rạp, ngày và suất chiếu. Tiếp theo, em đăng nhập rồi chọn ghế; hệ thống giữ ghế trong năm phút. Em có thể thêm combo và nhập voucher để server kiểm tra. Khi checkout, hệ thống tạo đơn chờ xác nhận vì thanh toán hiện đang mô phỏng. Admin xác nhận đơn, sau đó vé QR sẵn sàng cho check-in. Nếu còn thời gian, nhóm sẽ xem nhanh hồ sơ hội viên và các tab Admin.
+Nhóm tập trung hoàn thiện luồng đặt vé cơ bản: chọn phim, chọn suất, đăng nhập, chọn ghế, chọn combo và tạo đơn.
 
-## Slide 6 — Nhóm và hướng phát triển (35–45 giây)
+Trong phạm vi hiện tại, hệ thống đã có các trang chính, chức năng giữ ghế, kiểm tra voucher và điểm, cùng phần Admin xác nhận đơn và check-in.
 
-Trong nhóm, Nguyễn Văn Trọng phụ trách kiến trúc, API, xác thực và triển khai. Vũ Tiến Lập phụ trách các phần giao diện checkout, combo, bảng giá, tin tức và rạp. Phạm Anh Duy phụ trách đặt ghế, giữ chỗ, voucher, hội viên và công cụ Admin. Khó khăn chính là giữ trạng thái ghế và đơn nhất quán giữa giao diện với API; nhóm xử lý bằng việc để server xác nhận thao tác quan trọng và đồng bộ dữ liệu qua các module API. Tiếp theo, nhóm dự kiến tích hợp thanh toán thật, lưu dữ liệu production, gửi vé tự động và mở rộng công cụ quản trị. Cảm ơn thầy cô và các bạn đã lắng nghe.
+Một số tính năng vẫn đang để ở dạng mô phỏng. Dự án chưa kết nối cổng thanh toán thật, chưa tự gửi vé qua email hoặc SMS và chưa dùng cơ sở dữ liệu production bền vững. Vì vậy, bản hiện tại phù hợp để trình diễn luồng nghiệp vụ; trước khi đưa vào sử dụng thật cần hoàn thiện các phần này.
+
+## Slide 4 — Giải pháp kỹ thuật
+
+Về giao diện, nhóm dùng Vite MPA, SCSS và JavaScript. Backend dùng Bun; REST API được cung cấp qua json-server. Phần xác thực dùng JWT và hỗ trợ phân quyền tài khoản User với Admin.
+
+Dữ liệu demo gồm phim, rạp, lịch chiếu, combo, đơn vé và tài khoản thành viên. Các phần giao diện gọi API thông qua những module dùng chung để hiển thị dữ liệu và cập nhật trạng thái.
+
+Khu vực Admin có năm tab, tập trung vào việc quản lý đơn và check-in. Cách chia này giúp khách hàng thao tác trên các trang đặt vé, còn nhân viên xử lý nghiệp vụ ở khu vực quản trị.
+
+## Slide 5 — Demo đặt vé
+
+Sau đây nhóm em xin demo một lượt đặt vé.
+
+Trước tiên, em tìm bộ phim muốn xem, sau đó chọn rạp, ngày và suất chiếu. Ở bước chọn ghế, em đăng nhập rồi chọn ghế còn trống. Hệ thống sẽ giữ ghế trong năm phút để hoàn tất đơn.
+
+Tiếp theo, em chọn combo và nhập voucher nếu có. Website gửi thông tin lên server để kiểm tra điều kiện áp dụng. Sau khi xác nhận thông tin, em tiếp tục checkout. Vì thanh toán thật chưa được tích hợp, hệ thống tạo đơn ở trạng thái chờ Admin xác nhận.
+
+Admin mở khu vực quản trị để xác nhận đơn. Khi vé đã sẵn sàng, mã QR được dùng cho bước check-in. Như vậy, demo vừa rồi đi qua các bước chính từ chọn phim đến nhận vé.
+
+## Slide 6 — Nhóm và hướng phát triển
+
+Về phân công, Nguyễn Văn Trọng phụ trách kiến trúc hệ thống, API, xác thực và triển khai. Vũ Tiến Lập phụ trách các trang checkout, combo, bảng giá, tin tức và rạp. Phạm Anh Duy phụ trách đặt ghế, giữ chỗ, voucher, thành viên và công cụ Admin.
+
+Một khó khăn của dự án là giữ trạng thái ghế và đơn nhất quán giữa giao diện và server. Nhóm xử lý bằng cách để server xác nhận các thao tác quan trọng như giữ ghế và tạo đơn, sau đó giao diện tải lại trạng thái từ API.
+
+Trong giai đoạn tiếp theo, nhóm muốn tích hợp cổng thanh toán thật, lưu dữ liệu production ổn định, gửi vé qua email hoặc SMS và bổ sung công cụ quản lý sơ đồ phòng chiếu, ưu đãi.
+
+Phần trình bày của nhóm em đến đây là hết. Cảm ơn thầy cô và các bạn đã lắng nghe. Nhóm em xin nhận câu hỏi.
