@@ -510,7 +510,7 @@ server.post('/bookings/:id/cancel', (req, res) => {
 		return res.status(409).json({ success: false, message: 'Vé đã soát không thể hủy.' })
 	}
 	if (booking.paymentStatus !== 'pending' || booking.bookingStatus !== 'pending' || Number(booking.holdExpiresAt) <= Date.now()) {
-		return res.status(409).json({ success: false, message: 'Chỉ có thể hủy đơn chưa thanh toán còn trong thời gian giữ ghế. Đơn đã thanh toán cần xử lý theo chính sách hoàn vé.' })
+		return res.status(409).json({ success: false, message: 'Chỉ có thể hủy đơn chưa xác nhận, chưa thanh toán và còn trong thời gian giữ ghế.' })
 	}
 	booking.paymentStatus = 'cancelled'
 	booking.bookingStatus = 'cancelled'

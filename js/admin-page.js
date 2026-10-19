@@ -1443,7 +1443,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 							? `<button type="button" class="btn-action-icon btn-checkin-ticket" data-id="${b.id}" style="color: #a6e3a1;" title="Soát vé nhanh (Xác nhận khách đã vào rạp)">✓</button>`
 							: ""
 						}
-								${!isCancelled && !isDone ? `<button type="button" class="btn-action-icon btn-cancel-admin-ticket" data-id="${b.id}" style="color: #fab387;" title="Hủy vé">✕</button>` : ""}
+								${isPending && !isCancelled ? `<button type="button" class="btn-action-icon btn-cancel-admin-ticket" data-id="${b.id}" style="color: #fab387;" title="Hủy đơn đang chờ xử lý">✕</button>` : ""}
 							</div>
 						</td>
 					</tr>
@@ -1502,10 +1502,14 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 			// 4. Quick Cancel
 			bookingsTableTbody.querySelectorAll(".btn-cancel-admin-ticket").forEach(btn => {
-				btn.addEventListener("click", () => {
+				btn.addEventListener("click", async () => {
 					const id = btn.dataset.id
 					if (confirm(`Bạn có chắc chắn muốn hủy đơn vé ${id} này không?`)) {
-						cancelBookingTicket(id)
+						const result = await cancelBookingTicket(id)
+						if (!result.success) {
+							showToast(result.message || "Không thể hủy đơn vé này.", "error")
+							return
+						}
 						showToast(`Đã chuyển trạng thái đơn vé ${id} sang "Đã hủy".`, "info")
 						renderAdminBookingsTable()
 						renderOverviewDashboard()
