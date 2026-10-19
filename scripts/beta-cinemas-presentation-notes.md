@@ -13,7 +13,7 @@ Website có sáu nhóm chức năng. Khách có thể tìm phim và xem trailer,
 
 ## Slide 3 — Phạm vi MVP (40–50 giây)
 
-MVP tập trung vào luồng cốt lõi từ chọn phim đến nhận vé. Nhóm đã hoàn thành 14 trên 14 trang, API giữ ghế và xử lý voucher, điểm; các thao tác Admin gồm xác nhận đơn và check-in. Bộ use case hiện có 78 trên 78 trường hợp đạt, và Vite build thành công. Phần chưa có là cổng thanh toán thật, gửi vé qua email hoặc SMS, và cơ sở dữ liệu production bền vững. Nhóm chủ động để các tính năng ngoài luồng đặt vé chính sang giai đoạn sau.
+MVP tập trung vào luồng cốt lõi từ chọn phim đến nhận vé. Nhóm đã hoàn thành 14 trên 14 trang, API giữ ghế và xử lý voucher, điểm; các thao tác Admin gồm xác nhận đơn và check-in. Phần chưa có là cổng thanh toán thật, gửi vé qua email hoặc SMS, và cơ sở dữ liệu production bền vững. Nhóm chủ động để các tính năng ngoài luồng đặt vé chính sang giai đoạn sau.
 
 ## Slide 4 — Giải pháp và kiến trúc (35–45 giây)
 
@@ -25,4 +25,4 @@ Sau đây nhóm xin demo luồng chính. Đầu tiên, em tìm một bộ phim, 
 
 ## Slide 6 — Nhóm và hướng phát triển (35–45 giây)
 
-Trong nhóm, Nguyễn Văn Trọng phụ trách kiến trúc, API, xác thực và triển khai. Vũ Tiến Lập phụ trách các phần giao diện checkout, combo, bảng giá, tin tức, rạp và QA. Phạm Anh Duy phụ trách đặt ghế, giữ chỗ, voucher, hội viên và công cụ Admin. Khó khăn chính là giữ trạng thái ghế và đơn nhất quán giữa giao diện với API; nhóm xử lý bằng việc để server xác nhận thao tác quan trọng và đồng bộ dữ liệu qua các module API. Tiếp theo, nhóm dự kiến tích hợp thanh toán thật, lưu dữ liệu production, gửi vé tự động và mở rộng công cụ quản trị. Cảm ơn thầy cô và các bạn đã lắng nghe.
+Trong nhóm, Nguyễn Văn Trọng phụ trách kiến trúc, API, xác thực và triển khai. Vũ Tiến Lập phụ trách các phần giao diện checkout, combo, bảng giá, tin tức và rạp. Phạm Anh Duy phụ trách đặt ghế, giữ chỗ, voucher, hội viên và công cụ Admin. Khó khăn chính là giữ trạng thái ghế và đơn nhất quán giữa giao diện với API; nhóm xử lý bằng việc để server xác nhận thao tác quan trọng và đồng bộ dữ liệu qua các module API. Tiếp theo, nhóm dự kiến tích hợp thanh toán thật, lưu dữ liệu production, gửi vé tự động và mở rộng công cụ quản trị. Cảm ơn thầy cô và các bạn đã lắng nghe.
