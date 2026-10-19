@@ -737,6 +737,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 		   Thêm, Sửa, Xóa suất chiếu vào LocalStorage
 		   ========================================================================== */
 		const cinemaSelect = document.getElementById("st-cinema-select")
+		const dateFilter = document.getElementById("st-date-filter")
 		const showtimesContainer = document.getElementById("showtimes-content-container")
 
 		// Pre-fill cinemas dropdown
@@ -748,6 +749,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 		}
 
 		cinemaSelect?.addEventListener("change", renderShowtimesSection)
+		dateFilter?.addEventListener("change", renderShowtimesSection)
 
 		// Reset Showtimes Data
 		document.getElementById("btn-reset-showtimes-data")?.addEventListener("click", async () => {
@@ -763,8 +765,19 @@ document.addEventListener("DOMContentLoaded", async () => {
 			if (!showtimesContainer) return
 			const selectedCinema = cinemaSelect?.value || "beta-thainguyen"
 			const allShowtimes = getShowtimes() || []
-			const cinemaEntries = allShowtimes
+			const datesForCinema = [...new Set(allShowtimes
 				.filter(st => st.cinemaId === selectedCinema && st.schedules?.length)
+				.map(st => st.date))].sort()
+			const requestedDate = dateFilter?.value || ""
+			if (dateFilter) {
+				dateFilter.innerHTML = `<option value="">Tất cả ngày</option>${datesForCinema
+					.map(date => `<option value="${date}">${formatDateVN(date)}</option>`)
+					.join("")}`
+				dateFilter.value = datesForCinema.includes(requestedDate) ? requestedDate : ""
+			}
+			const selectedDate = dateFilter?.value || ""
+			const cinemaEntries = allShowtimes
+				.filter(st => st.cinemaId === selectedCinema && st.schedules?.length && (!selectedDate || st.date === selectedDate))
 				.sort((a, b) => a.date.localeCompare(b.date))
 
 			if (!cinemaEntries.length) {
