@@ -1,5 +1,53 @@
 [
   {
+    "date": "2026-10-19",
+    "cinemaId": "beta-thainguyen",
+    "schedules": [
+      {
+        "movieId": "utlan2",
+        "movieTitle": "Út Lan 2: Vùng Đất Mất Tích",
+        "screenId": "TN-P1",
+        "screenName": "Phòng 1",
+        "format": "2D Phụ Đề",
+        "slots": [
+          {
+            "time": "13:15",
+            "price": 75000,
+            "availableSeats": 54
+          }
+        ]
+      },
+      {
+        "movieId": "bongma",
+        "movieTitle": "Bóng Ma Nhà Hát",
+        "screenId": "TN-P2",
+        "screenName": "Phòng 2",
+        "format": "2D Phụ Đề",
+        "slots": [
+          {
+            "time": "17:00",
+            "price": 80000,
+            "availableSeats": 42
+          }
+        ]
+      },
+      {
+        "movieId": "lenhuong",
+        "movieTitle": "Lên Hương",
+        "screenId": "TN-P3",
+        "screenName": "Phòng 3",
+        "format": "2D Lồng Tiếng",
+        "slots": [
+          {
+            "time": "20:30",
+            "price": 80000,
+            "availableSeats": 36
+          }
+        ]
+      }
+    ]
+  },
+  {
     "date": "2026-10-20",
     "cinemaId": "beta-thainguyen",
     "schedules": [
