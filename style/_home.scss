@@ -604,8 +604,14 @@
 	.movie-tabs {
 		width: 100%;
 		overflow-x: auto;
+		scrollbar-width: none;
+		-ms-overflow-style: none;
 		justify-content: flex-start;
 		padding: 0;
+
+		&::-webkit-scrollbar {
+			display: none;
+		}
 
 		.movie-tab {
 			flex-shrink: 0;

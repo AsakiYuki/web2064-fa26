@@ -587,7 +587,7 @@ export const PHRASE_PAIRS = [
 	["Chương Trình Thành Viên & Đổi Quà", "Membership Program & Rewards"],
 	["Chương Trình Thành Viên Beta Cinemas", "Beta Cinemas Membership Program"],
 	["Bấm để lật thẻ xem mã vạch", "Click to flip card and view barcode"],
-	["Chủ thẻ / Card Holder", "Card Holder"],
+	["Chủ thẻ", "Cardholder"],
 	["Xuất trình mã này cho nhân viên tại quầy vé hoặc quầy bắp nước để tích điểm & áp dụng ưu đãi hội viên.", "Present this code to staff at the box office or concession counter to earn points & apply member perks."],
 	["Lật Thẻ Xem Mã Vạch Quẹt Quầy", "Flip Card for Counter Barcode"],
 	["Đặc Quyền Thành Viên Beta VIP", "Beta VIP Member Privileges"],
@@ -818,7 +818,7 @@ export const PHRASE_PAIRS = [
 	["Xem Vé Đã Mua", "View Purchased Tickets"],
 	["Lật Thẻ Xem Mã Vạch Quẹt Quầy", "Flip Card to View Barcode"],
 	["Bấm để lật thẻ xem mã vạch", "Click to flip card and view barcode"],
-	["Chủ thẻ / Card Holder", "Card Holder"],
+	["Chủ thẻ", "Cardholder"],
 	["Hạn dùng", "Valid Thru"],
 	["Xuất trình mã này cho nhân viên tại quầy vé hoặc quầy bắp nước để tích điểm & áp dụng ưu đãi hội viên.", "Present this code to staff at the box office or concession counter to earn points and apply member discounts."],
 	["Đạt hạng Beta Diamond để nhận đặc quyền x2 điểm ngày hội thành viên và vé mời Premiere phim chiếu sớm.", "Reach Beta Diamond to receive 2x points on Member Day and Premiere invitations for early screenings."],
@@ -870,12 +870,16 @@ const EXACT_MAP = new Map()
 const REVERSE_EXACT_MAP = new Map()
 const COMPILED_REGEXES = []
 const COMPILED_REGEXES_EN_TO_VI = []
+const REVERSE_REGEX_LOOKUP = new Map()
+let REVERSE_COMBINED_REGEX = null
 
 function initPhraseIndices() {
 	EXACT_MAP.clear()
 	REVERSE_EXACT_MAP.clear()
 	COMPILED_REGEXES.length = 0
 	COMPILED_REGEXES_EN_TO_VI.length = 0
+	REVERSE_REGEX_LOOKUP.clear()
+	REVERSE_COMBINED_REGEX = null
 
 	// 1. Vietnamese -> English forward mapping
 	for (const [vi, en] of PHRASE_PAIRS) {
@@ -931,6 +935,7 @@ function initPhraseIndices() {
 		"in", "to", "at", "by", "or", "on", "as", "is", "it", "no", "ok", "id", "en", "vi",
 		"the", "a", "an", "of", "and", "hot", "new", "all", "vip", "imax", "2d", "3d", "4d", "per"
 	])
+	const compiledEnglishPhrases = new Set()
 
 	for (const [vi, en] of reversePairs) {
 		const normEn = en.trim().replace(/\s+/g, " ")
@@ -944,6 +949,8 @@ function initPhraseIndices() {
 		if (!REVERSE_EXACT_MAP.has(lowerEn)) {
 			REVERSE_EXACT_MAP.set(lowerEn, normVi)
 		}
+		if (compiledEnglishPhrases.has(lowerEn)) continue
+		compiledEnglishPhrases.add(lowerEn)
 
 		// Skip short single words or common prepositions for substring regex
 		if (!normEn.includes(" ") && (normEn.length < 3 || SKIP_WORDS.has(lowerEn))) {
@@ -968,9 +975,16 @@ function initPhraseIndices() {
 				vi: normVi,
 				regex: new RegExp(pattern, "giu"),
 			})
+			REVERSE_REGEX_LOOKUP.set(lowerEn, normVi)
 		} catch (e) {
 			console.warn("Could not compile reverse regex for:", en, e)
 		}
+	}
+	if (COMPILED_REGEXES_EN_TO_VI.length) {
+		REVERSE_COMBINED_REGEX = new RegExp(
+			COMPILED_REGEXES_EN_TO_VI.map(item => item.regex.source).join("|"),
+			"giu",
+		)
 	}
 }
 
@@ -1000,6 +1014,7 @@ export function translateString(text, targetLang = getSavedLang()) {
 	if (targetLang === "vi") {
 		// Fast exit: if text has no ASCII letters, it is not English
 		if (!/[a-zA-Z]/.test(text)) return text
+		if (/^\s*Beta Cinemas?\s*$/i.test(text)) return text
 
 		const norm = trimmed.replace(/\s+/g, " ")
 
@@ -1024,20 +1039,21 @@ export function translateString(text, targetLang = getSavedLang()) {
 		}
 
 		// 3. Substring replacement for multi-phrase or mixed sentence nodes
-		let result = text
-		for (const item of COMPILED_REGEXES_EN_TO_VI) {
-			item.regex.lastIndex = 0
-			if (item.regex.test(result)) {
-				item.regex.lastIndex = 0
-				result = result.replace(item.regex, match => {
-					if (match === match.toUpperCase() && /[A-Z]/.test(match)) {
-						return item.vi.toUpperCase()
-					}
-					return item.vi
-				})
-			}
+		const brandTokens = []
+		let result = text.replace(/\bBeta Cinemas?\b/gi, brand => {
+			const token = `\uE000${brandTokens.length}\uE001`
+			brandTokens.push(brand)
+			return token
+		})
+		if (REVERSE_COMBINED_REGEX) {
+			result = result.replace(REVERSE_COMBINED_REGEX, match => {
+				const phrase = match.trim().replace(/\s+/g, " ").toLowerCase()
+				let vi = REVERSE_REGEX_LOOKUP.get(phrase) || match
+				if (match === match.toUpperCase() && /[A-Z]/.test(match)) vi = vi.toUpperCase()
+				return vi
+			})
 		}
-		return result
+		return result.replace(/\uE000(\d+)\uE001/g, (_, index) => brandTokens[Number(index)])
 	}
 
 	// Target: English (translate Vietnamese -> English)
@@ -1118,7 +1134,7 @@ export function translateDom(lang = getSavedLang()) {
 			document.title = translateString(document.__origTitle, "en")
 		} else {
 			let vi = document.__origTitle
-			if (!vi || (/[a-zA-Z]/.test(vi) && translateString(vi, "vi") !== vi)) {
+			if (vi === undefined) {
 				vi = translateString(document.title || "", "vi")
 			}
 			document.title = vi
@@ -1162,7 +1178,7 @@ export function translateDom(lang = getSavedLang()) {
 			} else {
 				// Switching to VI
 				let vi = currentNode.__origText
-				if (!vi || (/[a-zA-Z]/.test(vi) && translateString(vi, "vi") !== vi)) {
+				if (vi === undefined) {
 					vi = translateString(currentNode.nodeValue, "vi")
 				}
 				if (vi !== currentNode.nodeValue) {
@@ -1188,7 +1204,7 @@ export function translateDom(lang = getSavedLang()) {
 				}
 			} else {
 				let vi = el.__origPlaceholder
-				if (!vi || (/[a-zA-Z]/.test(vi) && translateString(vi, "vi") !== vi)) {
+				if (vi === undefined) {
 					vi = translateString(el.placeholder || "", "vi")
 				}
 				if (vi !== el.placeholder) {
@@ -1215,7 +1231,7 @@ export function translateDom(lang = getSavedLang()) {
 				}
 			} else {
 				let vi = el.__origTitle
-				if (!vi || (/[a-zA-Z]/.test(vi) && translateString(vi, "vi") !== vi)) {
+				if (vi === undefined) {
 					vi = translateString(el.title || "", "vi")
 				}
 				if (vi !== el.title) {
@@ -1243,7 +1259,7 @@ export function translateDom(lang = getSavedLang()) {
 				}
 			} else {
 				let vi = el.__origAriaLabel
-				if (!vi || (/[a-zA-Z]/.test(vi) && translateString(vi, "vi") !== vi)) {
+				if (vi === undefined) {
 					vi = translateString(current, "vi")
 				}
 				if (vi !== current) {
@@ -1268,7 +1284,7 @@ export function translateDom(lang = getSavedLang()) {
 				}
 			} else {
 				let vi = opt.__origText
-				if (!vi || (/[a-zA-Z]/.test(vi) && translateString(vi, "vi") !== vi)) {
+				if (vi === undefined) {
 					vi = translateString(opt.textContent || "", "vi")
 				}
 				if (vi !== opt.textContent) {
