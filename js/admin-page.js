@@ -23,7 +23,6 @@ import {
 	updateBookingStatus,
 	confirmBookingOrder,
 	confirmTicketPayment,
-	deleteBookingTicket,
 	resetStorageSection,
 	STORAGE_KEYS,
 	storageSet,
@@ -1444,10 +1443,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 							? `<button type="button" class="btn-action-icon btn-checkin-ticket" data-id="${b.id}" style="color: #a6e3a1;" title="Soát vé nhanh (Xác nhận khách đã vào rạp)">✓</button>`
 							: ""
 						}
-								${!isCancelled
-							? `<button type="button" class="btn-action-icon btn-cancel-admin-ticket" data-id="${b.id}" style="color: #fab387;" title="Hủy vé">✕</button>`
-							: `<button type="button" class="btn-action-icon btn-delete-admin-ticket" data-id="${b.id}" style="color: #f38ba8;" title="Xóa vĩnh viễn đơn vé này khỏi hệ thống">🗑️</button>`
-						}
+								${!isCancelled ? `<button type="button" class="btn-action-icon btn-cancel-admin-ticket" data-id="${b.id}" style="color: #fab387;" title="Hủy vé">✕</button>` : ""}
 							</div>
 						</td>
 					</tr>
@@ -1518,19 +1514,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 				})
 			})
 
-			// 5. Permanent Delete
-			bookingsTableTbody.querySelectorAll(".btn-delete-admin-ticket").forEach(btn => {
-				btn.addEventListener("click", () => {
-					const id = btn.dataset.id
-					if (confirm(`⚠️ Bạn có chắc chắn muốn XÓA VĨNH VIỄN đơn vé ${id} khỏi hệ thống không? Dữ liệu này sẽ mất hoàn toàn khỏi LocalStorage.`)) {
-						deleteBookingTicket(id)
-						showToast(`Đã xóa vĩnh viễn đơn vé ${id}.`, "info")
-						renderAdminBookingsTable()
-						renderOverviewDashboard()
-						updateAllBadges()
-					}
-				})
-			})
 		}
 
 		// Modal View Ticket for Admin
