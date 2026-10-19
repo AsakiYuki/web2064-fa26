@@ -1598,6 +1598,9 @@ export function holdSeats(cinemaId, movieId, date, time, seatIds = [], holdId = 
 		releaseSeatHold(sId)
 		return { success: true, holdId: sId, seats: [], expiresAt: 0, remainingSeconds: 0 }
 	}
+	if (getPhysicalSeatCount(cleanSeats) > 8) {
+		return { success: false, reason: "max", message: "Mỗi đơn tối đa 8 chỗ; mỗi ghế đôi Sweetbox tính là 2 chỗ." }
+	}
 
 	const active = cleanExpiredSeatHolds()
 
@@ -1836,7 +1839,7 @@ export function isSeatSold(cinemaId, movieId, date, time, seatId) {
  * Kiểm tra xem ghế targetSeat có thể được chọn dựa trên các ghế đang chọn không.
  * Quy tắc:
  * 1. Không chọn ghế đã bán (status === 'sold')
- * 2. Tối đa 8 ghế trong 1 đơn đặt
+ * 2. Tối đa 8 chỗ trong 1 đơn đặt (ghế Sweetbox đôi tính 2)
  * 3. Nếu chưa chọn ghế nào -> chọn bất kỳ ghế trống nào
  * 4. Nếu đã có ghế -> ghế mới PHẢI CÙNG HÀNG (same row)
  * 5. Ghế mới PHẢI SÁT NHAU / LIỀN KỀ (contiguous, không để trống ghế ở giữa)
@@ -1861,11 +1864,11 @@ export function canSelectSeat(currentSeats = [], targetSeat, currentHoldId = nul
 		}
 	}
 
-	if (currentSeats.length >= 8) {
+	if (getPhysicalSeatCount(currentSeats) + getPhysicalSeatCount([targetSeat]) > 8) {
 		return {
 			allowed: false,
 			reason: "max",
-			message: "Bạn chỉ có thể chọn tối đa 8 ghế trong 1 lần đặt.",
+			message: "Mỗi đơn tối đa 8 chỗ; mỗi ghế đôi Sweetbox tính là 2 chỗ.",
 		}
 	}
 
@@ -1922,6 +1925,16 @@ export function canSelectSeat(currentSeats = [], targetSeat, currentHoldId = nul
 	}
 
 	return { allowed: true }
+}
+
+/** Count actual seats; one Sweetbox selection occupies two seats. */
+export function getPhysicalSeatCount(seats = []) {
+	if (!Array.isArray(seats)) return 0
+	return seats.reduce((count, seat) => {
+		const id = String(typeof seat === "string" ? seat : seat?.id || "").trim().toUpperCase()
+		const isSweetbox = seat?.type === "sweetbox" || /^([LM])(\d{2})-\1(\d{2})$/.test(id)
+		return count + (isSweetbox ? 2 : 1)
+	}, 0)
 }
 
 /**

@@ -16,6 +16,11 @@ const middlewares = jsonServer.defaults()
 
 const PORT = process.env.PORT || 3000
 const JWT_SECRET = 'json-server-auth-123456'
+const MAX_SEATS_PER_BOOKING = 8
+
+function countPhysicalSeats(seats) {
+	return seats.reduce((count, seat) => count + (/^([LM])(\d{2})-\1(\d{2})$/.test(String(seat).toUpperCase()) ? 2 : 1), 0)
+}
 
 const VOUCHER_RULES = {
 	BETA10: { type: 'percent', value: 10, minOrder: 0, maxDiscount: 100000 },
@@ -379,6 +384,9 @@ server.post('/seat-holds', (req, res) => {
 	if (!holdId || !cinemaId || !movieId || !date || !time || !cleanSeats.length) {
 		return res.status(400).json({ success: false, message: 'Thông tin giữ ghế không hợp lệ.' })
 	}
+	if (countPhysicalSeats(cleanSeats) > MAX_SEATS_PER_BOOKING) {
+		return res.status(400).json({ success: false, message: `Mỗi đơn tối đa ${MAX_SEATS_PER_BOOKING} chỗ; mỗi ghế đôi Sweetbox tính là 2 chỗ.` })
+	}
 	const state = JSON.parse(JSON.stringify(server.db.getState()))
 	const now = Date.now()
 	expirePendingBookings(state, now)
@@ -531,6 +539,9 @@ server.post('/checkout/complete', (req, res) => {
 	if (priorBooking) return res.json({ success: true, ticket: priorBooking, user: user ? userWithoutPassword(state.users.find(u => String(u.id) === String(user.id))) : null, duplicate: true })
 	const hold = (state.seat_holds || []).find(item => item.holdId === holdId && Number(item.expiresAt) > Date.now())
 	const requestedSeats = [...new Set(String(ticket.seats || '').split(',').map(s => s.trim().toUpperCase()).filter(Boolean))]
+	if (countPhysicalSeats(requestedSeats) > MAX_SEATS_PER_BOOKING) {
+		return res.status(400).json({ success: false, message: `Mỗi đơn tối đa ${MAX_SEATS_PER_BOOKING} chỗ; mỗi ghế đôi Sweetbox tính là 2 chỗ.` })
+	}
 	if (!hold || !requestedSeats.length || String(hold.cinemaId) !== String(ticket.cinemaId) || String(hold.movieId) !== String(ticket.movieId) || hold.date !== ticket.date || hold.time !== ticket.time || requestedSeats.some(seat => !hold.seats.includes(seat))) {
 		return res.status(409).json({ success: false, message: 'Giữ ghế đã hết hạn hoặc không khớp đơn. Vui lòng chọn ghế lại.' })
 	}
