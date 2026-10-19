@@ -747,6 +747,10 @@ document.addEventListener("DOMContentLoaded", async () => {
 				.map(c => `<option value="${c.id}">${c.name}</option>`)
 				.join("")
 		}
+		if (dateFilter && !dateFilter.value) {
+			const today = new Date()
+			dateFilter.value = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`
+		}
 
 		cinemaSelect?.addEventListener("change", renderShowtimesSection)
 		dateFilter?.addEventListener("change", renderShowtimesSection)
@@ -765,27 +769,17 @@ document.addEventListener("DOMContentLoaded", async () => {
 			if (!showtimesContainer) return
 			const selectedCinema = cinemaSelect?.value || "beta-thainguyen"
 			const allShowtimes = getShowtimes() || []
-			const datesForCinema = [...new Set(allShowtimes
-				.filter(st => st.cinemaId === selectedCinema && st.schedules?.length)
-				.map(st => st.date))].sort()
-			const requestedDate = dateFilter?.value || ""
-			if (dateFilter) {
-				dateFilter.innerHTML = `<option value="">Tất cả ngày</option>${datesForCinema
-					.map(date => `<option value="${date}">${formatDateVN(date)}</option>`)
-					.join("")}`
-				dateFilter.value = datesForCinema.includes(requestedDate) ? requestedDate : ""
-			}
-			const selectedDate = dateFilter?.value || ""
+			const startDate = dateFilter?.value || ""
 			const cinemaEntries = allShowtimes
-				.filter(st => st.cinemaId === selectedCinema && st.schedules?.length && (!selectedDate || st.date === selectedDate))
+				.filter(st => st.cinemaId === selectedCinema && st.schedules?.length && (!startDate || st.date >= startDate))
 				.sort((a, b) => a.date.localeCompare(b.date))
 
 			if (!cinemaEntries.length) {
 				showtimesContainer.innerHTML = `
 				<div style="text-align: center; padding: 48px 20px; background: #181825; border-radius: 12px; border: 1px dashed rgba(88, 91, 112, 0.4);">
 					<div style="font-size: 40px; margin-bottom: 12px;">📅</div>
-					<h3 style="color: #cdd6f4; font-size: 17px; margin-bottom: 6px;">Rạp này chưa có lịch chiếu</h3>
-					<p style="color: #a6adc8; font-size: 13px; margin-bottom: 20px;">Hãy tạo suất chiếu đầu tiên để khán giả có thể đặt vé.</p>
+					<h3 style="color: #cdd6f4; font-size: 17px; margin-bottom: 6px;">Không có lịch chiếu từ ngày ${startDate ? formatDateVN(startDate) : "đã chọn"}</h3>
+					<p style="color: #a6adc8; font-size: 13px; margin-bottom: 20px;">Chọn ngày trong quá khứ để tra lịch cũ, hoặc thêm suất chiếu mới.</p>
 					<button type="button" class="btn-admin-primary" id="btn-empty-add-showtime">
 						➕ Thêm Suất Chiếu Ngay
 					</button>
@@ -1047,6 +1041,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 			closeShowtimeModal()
 			// Sync select values with current inputs
 			if (cinemaSelect) cinemaSelect.value = cinemaId
+			if (dateFilter && date < dateFilter.value) dateFilter.value = date
 			renderShowtimesSection()
 			updateAllBadges()
 		})
