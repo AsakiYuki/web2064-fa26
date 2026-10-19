@@ -1,7 +1,7 @@
 /**
  * Beta Cinemas - Seat Selection & Concessions Booking Logic
  */
-import { setupHeaderAndFooter, formatCurrency, formatDateVN, showToast, translateDom, getSavedLang } from "./common.js"
+import { setupHeaderAndFooter, formatCurrency, formatDateVN, showToast, translateDom, getSavedLang, getCurrentUser, openAuthModal } from "./common.js"
 import {
 	getMoviesData,
 	getCinemas,
@@ -20,6 +20,7 @@ import {
 	canSelectSeat,
 	canDeselectSeat,
 	areSeatsContiguous,
+	getPhysicalSeatCount,
 	isSeatAvailable,
 	checkSeatsAvailability,
 	getOrCreateHoldSessionId,
@@ -186,7 +187,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 							}
 						}
 					})
-					restoredSeatsCount = bookingState.selectedSeats.length
+					restoredSeatsCount = getPhysicalSeatCount(bookingState.selectedSeats)
 				}
 			}
 
@@ -258,13 +259,13 @@ document.addEventListener("DOMContentLoaded", async () => {
 				bookingState.selectedSeats.map(s => s.id),
 				holdSessionId,
 			)
-			restoredSeatsCount = bookingState.selectedSeats.length
+			restoredSeatsCount = getPhysicalSeatCount(bookingState.selectedSeats)
 		}
 	}
 
 	if (restoredSeatsCount > 0 || restoredConcessionsCount > 0) {
 		const parts = []
-		if (restoredSeatsCount > 0) parts.push(`${restoredSeatsCount} ghế (${bookingState.selectedSeats.map(s => s.id).join(", ")})`)
+		if (restoredSeatsCount > 0) parts.push(`${restoredSeatsCount} chỗ (${bookingState.selectedSeats.map(s => s.id).join(", ")})`)
 		if (restoredConcessionsCount > 0) parts.push(`${restoredConcessionsCount} phần bắp nước`)
 		showToast(`✨ Đã tự động khôi phục ${parts.join(" & ")} bạn đã chọn!`, "info", 3500)
 	}
@@ -297,7 +298,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 		const sPoster = document.getElementById("summary-poster-img")
 		const sTitle = document.getElementById("summary-movie-title")
 		const sCinema = document.getElementById("summary-cinema-name")
-		const sTime = document.getElementById("summary-showtime-text")
+		const sTime = document.getElementById("summary-showtime-text") 
 		const sFormat = document.getElementById("summary-format-tag")
 
 		if (sPoster) sPoster.src = currentMovie.poster
@@ -508,8 +509,8 @@ document.addEventListener("DOMContentLoaded", async () => {
 				showToast(`Đã chọn ghế ${id}.`, "info", 1200)
 			}
 
-			if (bookingState.selectedSeats.length === 8) {
-				showToast(`Bạn đã chọn đủ tối đa 8 ghế.`, "info", 2000)
+			if (getPhysicalSeatCount(bookingState.selectedSeats) === 8) {
+				showToast(`Bạn đã chọn đủ tối đa 8 chỗ.`, "info", 2000)
 			}
 		}
 
@@ -667,7 +668,8 @@ document.addEventListener("DOMContentLoaded", async () => {
 		const sweetboxTotal = sweetboxSeats.reduce((sum, s) => sum + s.price, 0)
 		const seatsTotal = standardTotal + vipTotal + sweetboxTotal
 
-		if (seatBadge) seatBadge.textContent = bookingState.selectedSeats.length
+		const physicalSeatCount = getPhysicalSeatCount(bookingState.selectedSeats)
+		if (seatBadge) seatBadge.textContent = physicalSeatCount
 
 		if (seatsListWrap) {
 			if (bookingState.selectedSeats.length === 0) {
@@ -717,7 +719,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 				// Dòng tổng cộng tiền ghế
 				seatRowsHTML += `
 					<div class="breakdown-subtotal-row">
-						<span>Tổng tiền ghế (${bookingState.selectedSeats.length} ghế):</span>
+						<span>Tổng tiền ghế (${physicalSeatCount} chỗ):</span>
 						<strong>${formatCurrency(seatsTotal)}</strong>
 					</div>
 				`
@@ -838,6 +840,15 @@ document.addEventListener("DOMContentLoaded", async () => {
 					<span>THANH TOÁN ${formatCurrency(finalTotal)}</span>
 				`
 			}
+		}
+
+		const gotoCheckoutStepBtn = document.getElementById("btn-goto-checkout-step")
+		if (gotoCheckoutStepBtn) {
+			gotoCheckoutStepBtn.disabled = !hasSeats
+			gotoCheckoutStepBtn.innerHTML = `
+				<span>TIẾP TỤC THANH TOÁN (${formatCurrency(finalTotal)})</span>
+				<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:18px;height:18px;"><polyline points="9 18 15 12 9 6"></polyline></svg>
+			`
 		}
 	}
 
@@ -991,20 +1002,62 @@ document.addEventListener("DOMContentLoaded", async () => {
 			return true
 		}
 
+		function checkAuthNotice() {
+			const authNotice = document.getElementById("booking-auth-notice")
+			const user = getCurrentUser()
+			if (authNotice) {
+				authNotice.style.display = user ? "none" : "flex"
+			}
+		}
+
+		document.getElementById("btn-booking-login-prompt")?.addEventListener("click", () => {
+			openAuthModal("login")
+		})
+
+		window.addEventListener("beta_auth_changed", () => {
+			checkAuthNotice()
+			updateSummarySidebar()
+		})
+
+		checkAuthNotice()
+
 		tabSeats?.addEventListener("click", () => switchToStep(1))
 		tabCombos?.addEventListener("click", () => {
 			if (!validateSeatsBeforeProceed()) return
+			const user = getCurrentUser()
+			if (!user) {
+				showToast("Vui lòng đăng nhập tài khoản để tiếp tục đặt vé!", "warning", 5000)
+				openAuthModal("login")
+				return
+			}
 			switchToStep(2)
 		})
 
 		step2Btn?.addEventListener("click", () => {
 			if (!validateSeatsBeforeProceed()) return
+			const user = getCurrentUser()
+			if (!user) {
+				showToast("Vui lòng đăng nhập tài khoản để tiếp tục đặt vé!", "warning", 5000)
+				openAuthModal("login")
+				return
+			}
 			switchToStep(2)
 		})
 		backBtn?.addEventListener("click", () => switchToStep(1))
 
+		const gotoCheckoutStepBtn = document.getElementById("btn-goto-checkout-step")
+		gotoCheckoutStepBtn?.addEventListener("click", () => {
+			checkoutBtn?.click()
+		})
+
 		checkoutBtn?.addEventListener("click", () => {
 			if (!validateSeatsBeforeProceed()) return
+			const user = getCurrentUser()
+			if (!user) {
+				showToast("Vui lòng đăng nhập tài khoản để tiếp tục đặt vé!", "warning", 5000)
+				openAuthModal("login")
+				return
+			}
 			if (bookingState.currentStep === 1) {
 				switchToStep(2)
 			} else {

@@ -251,7 +251,7 @@
 								<div class="sample-box sample-selected"></div>
 								<div class="legend-text">
 									<span class="legend-name">Đang Chọn</span>
-									<span class="legend-price">Tối đa 8 ghế</span>
+									<span class="legend-price">Tối đa 8 chỗ (ghế đôi tính 2)</span>
 								</div>
 							</div>
 						</div>
@@ -288,13 +288,21 @@
 						</div>
 
 						<!-- Concessions Navigation -->
-						<div class="concession-nav-buttons">
+						<div class="concession-nav-buttons" style="display: flex; gap: 14px; justify-content: space-between; align-items: center; margin-top: 24px; flex-wrap: wrap;">
 							<button type="button" class="btn-back-to-seats" id="btn-back-to-seats">
 								<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
 									style="width:16px;height:16px;">
 									<polyline points="15 18 9 12 15 6"></polyline>
 								</svg>
 								<span>Quay lại chọn Ghế</span>
+							</button>
+							<button type="button" class="btn-goto-checkout-step" id="btn-goto-checkout-step"
+								style="background: #89b4fa; color: #11111b; border: none; padding: 12px 24px; border-radius: 8px; font-weight: 700; font-size: 14px; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: all 0.2s ease;">
+								<span>TIẾP TỤC THANH TOÁN</span>
+								<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+									style="width:18px;height:18px;">
+									<polyline points="9 18 15 12 9 6"></polyline>
+								</svg>
 							</button>
 						</div>
 					</section>
@@ -366,6 +374,15 @@
 					<div class="summary-total-bar">
 						<span class="total-title">Tổng Thanh Toán:</span>
 						<span class="total-amount" id="summary-grand-total">0 đ</span>
+					</div>
+
+					<!-- Auth Notice if unauthenticated -->
+					<div class="booking-auth-notice" id="booking-auth-notice" style="display: none; margin-bottom: 12px; padding: 10px 12px; border-radius: 8px; background: rgba(245, 166, 35, 0.12); border: 1px dashed rgba(245, 166, 35, 0.45); font-size: 13px; color: #f5a623; display: flex; align-items: center; justify-content: space-between; gap: 8px;">
+						<div style="display: flex; align-items: center; gap: 6px;">
+							<span>🔒</span>
+							<span>Cần đăng nhập để đặt vé</span>
+						</div>
+						<button type="button" id="btn-booking-login-prompt" style="background: #f5a623; color: #11111b; border: none; padding: 4px 10px; border-radius: 4px; font-weight: 700; font-size: 12px; cursor: pointer;">Đăng nhập</button>
 					</div>
 
 					<!-- Main Checkout Action -->

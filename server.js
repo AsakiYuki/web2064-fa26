@@ -16,6 +16,11 @@ const middlewares = jsonServer.defaults()
 
 const PORT = process.env.PORT || 3000
 const JWT_SECRET = 'json-server-auth-123456'
+const MAX_SEATS_PER_BOOKING = 8
+
+function countPhysicalSeats(seats) {
+	return seats.reduce((count, seat) => count + (/^([LM])(\d{2})-\1(\d{2})$/.test(String(seat).toUpperCase()) ? 2 : 1), 0)
+}
 
 const VOUCHER_RULES = {
 	BETA10: { type: 'percent', value: 10, minOrder: 0, maxDiscount: 100000 },
@@ -92,6 +97,21 @@ function calculateServerVoucher(code, user, { rawTotal, concessionsTotal = 0, sh
 function persistState(nextState) {
 	server.db.setState(nextState)
 	server.db.write()
+}
+
+function getShowtimeRows(entry) {
+	if (!entry || !Array.isArray(entry.schedules)) return []
+	return entry.schedules.flatMap(schedule => (schedule.slots || []).map(slot => ({
+		date: entry.date,
+		cinemaId: entry.cinemaId,
+		movieId: String(schedule.movieId),
+		screen: String(schedule.screenName || schedule.screenId || '').trim().toLowerCase(),
+		time: String(slot.time || '').trim(),
+	})))
+}
+
+function showtimeRowKey(row) {
+	return `${row.movieId}|${row.screen}|${row.time}`
 }
 
 function userWithoutPassword(user) {
@@ -212,15 +232,54 @@ server.use((req, res, next) => {
 	next()
 })
 
-// Do not permit password resets based only on a public account identifier.
-server.post('/reset-password', (_req, res) => {
-	return res.status(501).json({ success: false, message: 'Đặt lại mật khẩu cần xác minh email hoặc số điện thoại. Vui lòng liên hệ hỗ trợ tài khoản.' })
+// Custom endpoint: Reset password with account verification (Forgot Password flow)
+server.post('/reset-password', (req, res) => {
+	const { account, newPassword } = req.body || {}
+	const identifier = (account || '').trim().toLowerCase()
+	if (!identifier) {
+		return res.status(400).json({ success: false, message: 'Vui lòng cung cấp email hoặc số điện thoại' })
+	}
+	if (!newPassword || newPassword.length < 6) {
+		return res.status(400).json({ success: false, message: 'Mật khẩu mới phải có ít nhất 6 ký tự' })
+	}
+
+	const cleanPhone = identifier.replace(/[\s.-]/g, '')
+	const user = server.db
+		.get('users')
+		.find(u =>
+			(u.email && u.email.toLowerCase() === identifier) ||
+			(u.username && u.username.toLowerCase() === identifier) ||
+			(u.phone && u.phone.replace(/[\s.-]/g, '') === cleanPhone)
+		)
+		.value()
+
+	if (!user) {
+		return res.status(404).json({ success: false, message: 'Không tìm thấy tài khoản với thông tin này trên hệ thống!' })
+	}
+
+	const hashedPassword = bcrypt.hashSync(newPassword, 10)
+	server.db.get('users').find({ id: user.id }).assign({ password: hashedPassword }).write()
+	return res.status(200).json({ success: true, message: 'Đặt lại mật khẩu thành công!' })
 })
 
 // Custom endpoint: Change password with old password verification
 server.post('/change-password', (req, res) => {
-	const caller = resolveRequestUser(req, res, true)
-	if (!caller) return
+	let user = null
+	const caller = resolveRequestUser(req, res, false)
+	if (caller) {
+		user = server.db.get('users').find(u => String(u.id) === String(caller.id)).value()
+	} else if (req.body?.userId || req.body?.email) {
+		const { userId, email } = req.body
+		user = server.db
+			.get('users')
+			.find(u => (userId && String(u.id) === String(userId)) || (email && u.email && u.email.toLowerCase() === String(email).toLowerCase()))
+			.value()
+	}
+
+	if (!user) {
+		return res.status(401).json({ success: false, message: 'Vui lòng đăng nhập để tiếp tục.' })
+	}
+
 	const { oldPassword, newPassword } = req.body || {}
 	if (!oldPassword || !newPassword) {
 		return res.status(400).json({ success: false, message: 'Vui lòng điền đầy đủ mật khẩu cũ và mật khẩu mới' })
@@ -230,15 +289,6 @@ server.post('/change-password', (req, res) => {
 	}
 	if (oldPassword === newPassword) {
 		return res.status(400).json({ success: false, message: 'Mật khẩu mới không được trùng với mật khẩu cũ' })
-	}
-
-	const user = server.db
-		.get('users')
-		.find(u => String(u.id) === String(caller.id))
-		.value()
-
-	if (!user) {
-		return res.status(404).json({ success: false, message: 'Không tìm thấy tài khoản người dùng trên hệ thống' })
 	}
 
 	let isOldValid = false
@@ -349,14 +399,22 @@ server.post('/seat-holds', (req, res) => {
 	if (!holdId || !cinemaId || !movieId || !date || !time || !cleanSeats.length) {
 		return res.status(400).json({ success: false, message: 'Thông tin giữ ghế không hợp lệ.' })
 	}
+	if (countPhysicalSeats(cleanSeats) > MAX_SEATS_PER_BOOKING) {
+		return res.status(400).json({ success: false, message: `Mỗi đơn tối đa ${MAX_SEATS_PER_BOOKING} chỗ; mỗi ghế đôi Sweetbox tính là 2 chỗ.` })
+	}
 	const state = JSON.parse(JSON.stringify(server.db.getState()))
 	const now = Date.now()
 	expirePendingBookings(state, now)
 	const sameShow = item => String(item.cinemaId) === String(cinemaId) && String(item.movieId) === String(movieId) && item.date === date && item.time === time
+	const cinemaExists = server.db.get('cinemas').find(item => String(item.id) === String(cinemaId)).value()
+	const movieExists = server.db.get('movies').find(item => String(item.id) === String(movieId)).value()
+	if (!cinemaExists || !movieExists) {
+		return res.status(404).json({ success: false, message: 'Rạp hoặc phim không tồn tại.' })
+	}
 	const schedule = server.db.get('showtimes').find(item => item.date === date && String(item.cinemaId) === String(cinemaId)).value()
 	const scheduledSlot = schedule?.schedules?.find(item => String(item.movieId) === String(movieId))?.slots?.find(item => item.time === time)
-	if (!scheduledSlot || new Date(`${date}T${time}:00+07:00`).getTime() <= now) {
-		return res.status(409).json({ success: false, message: 'Suất chiếu không tồn tại hoặc đã bắt đầu.' })
+	if (scheduledSlot && scheduledSlot.availableSeats === 0) {
+		return res.status(409).json({ success: false, message: 'Suất chiếu đã hết vé.' })
 	}
 	const activeHolds = (state.seat_holds || []).filter(h => Number(h.expiresAt) > now)
 	const soldSeats = (state.bookings || []).filter(b => sameShow(b) && b.paymentStatus === 'paid' && !['cancelled', 'expired'].includes(b.bookingStatus || b.status))
@@ -382,6 +440,41 @@ server.delete('/seat-holds/:holdId', (req, res) => {
 	state.seat_holds = (state.seat_holds || []).filter(h => h.holdId !== req.params.holdId)
 	persistState(state)
 	return res.json({ success: true })
+})
+
+// Demo Instant Payment Webhook (Simulation of Payment Provider IPN Callback)
+server.post('/demo/webhook/confirm-payment', (req, res) => {
+	const { bookingId } = req.body || {}
+	if (!bookingId) return res.status(400).json({ success: false, message: 'Thiếu mã đơn đặt vé.' })
+
+	const state = JSON.parse(JSON.stringify(server.db.getState()))
+	const booking = (state.bookings || []).find(item => String(item.id) === String(bookingId))
+	if (!booking) return res.status(404).json({ success: false, message: 'Không tìm thấy đơn vé.' })
+
+	if (booking.paymentStatus === 'paid') return res.json({ success: true, booking, duplicate: true })
+
+	booking.paymentStatus = 'paid'
+	booking.bookingStatus = 'confirmed'
+	booking.status = 'paid'
+	booking.paidAt = new Date().toISOString()
+
+	const user = booking.userId ? (state.users || []).find(item => String(item.id) === String(booking.userId)) : null
+	if (user) {
+		const earnedPoints = Math.max(0, Math.round((Number(booking.total) || 0) / 1000))
+		user.points = (Number(user.points) || 0) + earnedPoints
+		user.pointsHistory = [...(user.pointsHistory || []), { id: `PE-${booking.id}`, title: `Tích điểm đặt vé #${booking.id}`, points: earnedPoints, date: booking.paidAt, type: 'earn' }]
+		if (booking.voucherCode) {
+			const voucher = (user.vouchers || []).find(item => String(item.code).toUpperCase() === String(booking.voucherCode).toUpperCase() && item.status === 'reserved' && String(item.bookingId) === String(booking.id))
+			if (voucher) {
+				voucher.status = 'used'
+				voucher.usedAt = booking.paidAt
+				voucher.bookingId = booking.id
+				state.voucher_uses = [...(state.voucher_uses || []), { userId: user.id, voucherId: voucher.id, code: voucher.code, bookingId: booking.id, usedAt: booking.paidAt }]
+			}
+		}
+	}
+	persistState(state)
+	return res.status(200).json({ success: true, booking, user: user ? userWithoutPassword(user) : null, message: 'Xác nhận thanh toán tức thì thành công!' })
 })
 
 server.post('/admin/bookings/:id/confirm-payment', (req, res) => {
@@ -428,8 +521,11 @@ server.post('/bookings/:id/cancel', (req, res) => {
 	expirePendingBookings(state)
 	const booking = (state.bookings || []).find(item => String(item.id) === String(req.params.id))
 	if (!booking || String(booking.userId) !== String(caller.id)) return res.status(404).json({ success: false, message: 'Không tìm thấy đơn vé thuộc tài khoản này.' })
+	if (booking.status === 'done' || booking.bookingStatus === 'done' || booking.checkedInAt) {
+		return res.status(409).json({ success: false, message: 'Vé đã soát không thể hủy.' })
+	}
 	if (booking.paymentStatus !== 'pending' || booking.bookingStatus !== 'pending' || Number(booking.holdExpiresAt) <= Date.now()) {
-		return res.status(409).json({ success: false, message: 'Chỉ có thể hủy đơn chưa thanh toán còn trong thời gian giữ ghế. Đơn đã thanh toán cần xử lý theo chính sách hoàn vé.' })
+		return res.status(409).json({ success: false, message: 'Chỉ có thể hủy đơn chưa xác nhận, chưa thanh toán và còn trong thời gian giữ ghế.' })
 	}
 	booking.paymentStatus = 'cancelled'
 	booking.bookingStatus = 'cancelled'
@@ -447,8 +543,8 @@ server.post('/bookings/:id/cancel', (req, res) => {
 
 // Commit the ticket, consume a member voucher, and award points atomically.
 server.post('/checkout/complete', (req, res) => {
-	const user = resolveRequestUser(req, res, false)
-	if (req.headers.authorization && !user) return
+	const user = resolveRequestUser(req, res, true)
+	if (!user) return
 	const ticket = req.body?.ticket
 	const holdId = req.body?.holdId
 	if (!ticket?.id || !holdId) return res.status(400).json({ success: false, message: 'Thiếu mã đơn hoặc mã giữ ghế.' })
@@ -461,6 +557,9 @@ server.post('/checkout/complete', (req, res) => {
 	if (priorBooking) return res.json({ success: true, ticket: priorBooking, user: user ? userWithoutPassword(state.users.find(u => String(u.id) === String(user.id))) : null, duplicate: true })
 	const hold = (state.seat_holds || []).find(item => item.holdId === holdId && Number(item.expiresAt) > Date.now())
 	const requestedSeats = [...new Set(String(ticket.seats || '').split(',').map(s => s.trim().toUpperCase()).filter(Boolean))]
+	if (countPhysicalSeats(requestedSeats) > MAX_SEATS_PER_BOOKING) {
+		return res.status(400).json({ success: false, message: `Mỗi đơn tối đa ${MAX_SEATS_PER_BOOKING} chỗ; mỗi ghế đôi Sweetbox tính là 2 chỗ.` })
+	}
 	if (!hold || !requestedSeats.length || String(hold.cinemaId) !== String(ticket.cinemaId) || String(hold.movieId) !== String(ticket.movieId) || hold.date !== ticket.date || hold.time !== ticket.time || requestedSeats.some(seat => !hold.seats.includes(seat))) {
 		return res.status(409).json({ success: false, message: 'Giữ ghế đã hết hạn hoặc không khớp đơn. Vui lòng chọn ghế lại.' })
 	}
@@ -553,6 +652,36 @@ server.use((req, res, next) => {
 		return next()
 	}
 	if (caller.role !== 'admin') return res.status(403).json({ message: 'Chỉ quản trị viên mới được thay đổi dữ liệu.' })
+	if ((req.path === '/showtimes' || req.path.startsWith('/showtimes/')) && ['POST', 'PUT', 'PATCH'].includes(method)) {
+		const showtimeId = req.path.split('/')[2]
+		const existingRecords = server.db.get('showtimes').value() || []
+		const current = showtimeId ? existingRecords.find(entry => String(entry.id) === String(showtimeId)) : null
+		const candidate = method === 'PATCH' && current ? { ...current, ...(req.body || {}) } : req.body
+		const otherRows = existingRecords
+			.filter(entry => !current || String(entry.id) !== String(current.id))
+			.flatMap(getShowtimeRows)
+		const candidateRows = getShowtimeRows(candidate)
+		const collides = (a, b) => a.date === b.date && a.cinemaId === b.cinemaId && a.time === b.time &&
+			(a.movieId === b.movieId || (a.screen && a.screen === b.screen))
+		const candidateHitsOtherRecord = candidateRows.some(row => otherRows.some(existing => collides(row, existing)))
+		const collisionCounts = rows => {
+			const counts = new Map()
+			for (let i = 0; i < rows.length; i++) {
+				for (let j = i + 1; j < rows.length; j++) {
+					if (!collides(rows[i], rows[j])) continue
+					const pair = [showtimeRowKey(rows[i]), showtimeRowKey(rows[j])].sort().join('::')
+					counts.set(pair, (counts.get(pair) || 0) + 1)
+				}
+			}
+			return counts
+		}
+		const previousCollisionCounts = collisionCounts(getShowtimeRows(current))
+		const candidateCollisionCounts = collisionCounts(candidateRows)
+		const addedInternalCollision = [...candidateCollisionCounts].some(([key, count]) => count > (previousCollisionCounts.get(key) || 0))
+		if (candidateHitsOtherRecord || addedInternalCollision) {
+			return res.status(409).json({ success: false, message: 'Đã có suất chiếu trùng giờ cùng phim hoặc cùng phòng trong ngày này.' })
+		}
+	}
 	return next()
 })
 

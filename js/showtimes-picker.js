@@ -81,8 +81,9 @@ export class ShowtimePicker {
 			this.showtimes = showtimesData || []
 			this.ticketPricing = pricing
 
-			// Always start from the visitor's local calendar date.
-			this.selectedDate = this.toDateString(new Date())
+			// Start from the active calendar date (today or earliest available showtime date)
+			const baseDate = this.getBaseDate()
+			this.selectedDate = this.toDateString(baseDate)
 
 			// Check URL param for cinema if available, else use preferred cinema
 			const urlParams = new URLSearchParams(window.location.search)
@@ -131,38 +132,62 @@ export class ShowtimePicker {
 		return `${yyyy}-${mm}-${dd}`
 	}
 
-	/** Generate 8 days starting from today */
+	getBaseDate() {
+		const today = new Date()
+		today.setHours(0, 0, 0, 0)
+		const firstAvailableDate = this.getAvailableDateStrings()[0]
+		if (firstAvailableDate) {
+			const [y, m, d] = firstAvailableDate.split("-").map(Number)
+			return new Date(y, m - 1, d)
+		}
+		return today
+	}
+
+	getAvailableDateStrings() {
+		const today = new Date()
+		today.setHours(0, 0, 0, 0)
+		const todayStr = this.toDateString(today)
+		return [...new Set(this.showtimes
+			.filter(entry => entry.date >= todayStr && Array.isArray(entry.schedules) && entry.schedules.some(schedule =>
+				Array.isArray(schedule.slots) && schedule.slots.length > 0 && (!this.movieId || schedule.movieId === this.movieId)
+			))
+			.map(entry => entry.date))].sort()
+	}
+
+	/** Show up to eight upcoming dates that actually have showtimes. */
 	getDatesList() {
-		const baseDate = new Date()
-		baseDate.setHours(0, 0, 0, 0)
-		const dates = []
+		const availableDates = this.getAvailableDateStrings().slice(0, 8)
+		if (!availableDates.length) availableDates.push(this.toDateString(this.getBaseDate()))
 		const dayNames = ["Chủ Nhật", "Thứ 2", "Thứ 3", "Thứ 4", "Thứ 5", "Thứ 6", "Thứ 7"]
+		const today = new Date()
+		today.setHours(0, 0, 0, 0)
+		const todayStr = this.toDateString(today)
+		const tomorrow = new Date(today)
+		tomorrow.setDate(tomorrow.getDate() + 1)
+		const tomorrowStr = this.toDateString(tomorrow)
 
-		for (let i = 0; i < 8; i++) {
-			const d = new Date(baseDate)
-			d.setDate(baseDate.getDate() + i)
-
-			const dateStr = this.toDateString(d)
+		return availableDates.map(dateStr => {
+			const [year, month, day] = dateStr.split("-").map(Number)
+			const d = new Date(year, month - 1, day)
 			const mm = String(d.getMonth() + 1).padStart(2, "0")
 			const dd = String(d.getDate()).padStart(2, "0")
 
 			let label = dayNames[d.getDay()]
 			let tag = ""
-			if (i === 0) {
+			if (dateStr === todayStr) {
 				label = "Hôm nay"
 				tag = "Hot"
-			} else if (i === 1) {
+			} else if (dateStr === tomorrowStr) {
 				label = "Ngày mai"
 			}
 
-			dates.push({
+			return {
 				dateStr,
 				dayLabel: label,
 				dateFormatted: `${dd}/${mm}`,
 				tag,
-			})
-		}
-		return dates
+			}
+		})
 	}
 
 	/**
@@ -584,7 +609,11 @@ export class ShowtimePicker {
 		// Cinema choice cards
 		container.querySelectorAll(".cinema-card-choice").forEach(card => {
 			card.addEventListener("click", () => {
-				setCurrentCinemaId(card.dataset.cinemaId)
+				const cinemaId = card.dataset.cinemaId
+				if (!cinemaId) return
+				this.selectedCinemaId = cinemaId
+				setCurrentCinemaId(cinemaId)
+				this.render()
 			})
 		})
 

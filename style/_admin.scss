@@ -828,6 +828,21 @@
 	}
 }
 
+.showtime-day-group {
+	margin-bottom: 28px;
+
+	.showtime-day-heading {
+		margin: 0 0 12px;
+		padding: 10px 14px;
+	color: $ctp-yellow;
+	background: rgba($ctp-yellow, 0.1);
+	border-left: 3px solid $ctp-yellow;
+	border-radius: 6px;
+	font-size: 15px;
+	font-weight: 800;
+	}
+}
+
 .movie-showtime-block {
 	background: $ctp-surface0;
 	border-radius: 12px;
@@ -862,6 +877,7 @@
 			border-radius: 4px;
 			font-weight: 700;
 		}
+
 	}
 
 	.slots-chips-grid {

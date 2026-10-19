@@ -496,7 +496,7 @@ export const PHRASE_PAIRS = [
 	["Đã Bán", "Sold Out"],
 	["Không thể chọn", "Unavailable"],
 	["Đang Chọn", "Selected"],
-	["Tối đa 8 ghế", "Max 8 seats"],
+	["Tối đa 8 chỗ (ghế đôi tính 2)", "Max 8 seats (double seats count as 2)"],
 	["TIẾP TỤC CHỌN BẮP NƯỚC", "CONTINUE TO CONCESSIONS"],
 	["🍿 QUẦY BẮP NƯỚC & COMBO ƯU ĐÃI", "🍿 CONCESSIONS & COMBO DEALS"],
 	["Thưởng thức bắp rang bơ nóng hổi thơm giòn cùng nước giải khát mát lạnh xem phim trọn vẹn hơn!", "Enjoy hot crispy popcorn and refreshing cold drinks for the ultimate movie experience!"],
