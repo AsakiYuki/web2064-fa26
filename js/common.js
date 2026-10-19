@@ -313,6 +313,18 @@ if (typeof window !== "undefined") {
 			console.warn("[Auth Listener] Error updating UI:", err)
 		}
 	})
+
+	window.addEventListener("beta_auth_expired", () => {
+		const hadSession = Boolean(getCurrentUser())
+		logoutUser()
+		window.dispatchEvent(new CustomEvent("beta_auth_changed", { detail: { user: null } }))
+		showToast(
+			hadSession ? "Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại để tiếp tục." : "Vui lòng đăng nhập để tiếp tục.",
+			"warning",
+			6000,
+		)
+		openAuthModal("login")
+	})
 }
 
 /** Update Account Bar in Header (Logged in vs Logged out) */
@@ -421,18 +433,18 @@ export function openAuthModal(defaultTab = "login") {
 				</div>
 				<div class="auth-body">
 					<!-- LOGIN FORM -->
-					<form id="form-auth-login" class="auth-form" novalidate>
+					<form id="form-auth-login" class="auth-form" autocomplete="on" novalidate>
 						<div class="form-group">
 							<label for="login-account">Email hoặc Số điện thoại <span class="req">*</span></label>
 							<div class="input-icon-wrap">
-								<input type="text" id="login-account" placeholder="username@example.com"  />
+								<input type="text" id="login-account" name="username" autocomplete="username" autocapitalize="none" spellcheck="false" placeholder="username@example.com" />
 							</div>
 							<span class="field-error-msg" id="err-login-account"></span>
 						</div>
 						<div class="form-group">
 							<label for="login-password">Mật khẩu <span class="req">*</span></label>
 							<div class="input-icon-wrap">
-								<input type="password" id="login-password" placeholder="********"  />
+								<input type="password" id="login-password" name="password" autocomplete="current-password" placeholder="********" />
 								<button type="button" class="toggle-pwd-btn" data-target="login-password" aria-label="Hiện mật khẩu">👁</button>
 							</div>
 							<span class="field-error-msg" id="err-login-password"></span>
@@ -451,32 +463,32 @@ export function openAuthModal(defaultTab = "login") {
 					</form>
 
 					<!-- REGISTER FORM -->
-					<form id="form-auth-register" class="auth-form" style="display: none;" novalidate>
+					<form id="form-auth-register" class="auth-form" style="display: none;" autocomplete="on" novalidate>
 						<div class="form-group">
 							<label for="reg-fullname">Họ và tên <span class="req">*</span></label>
 							<div class="input-icon-wrap">
-								<input type="text" id="reg-fullname" placeholder="Nguyễn Văn A" />
+								<input type="text" id="reg-fullname" name="name" autocomplete="name" placeholder="Nguyễn Văn A" />
 							</div>
 							<span class="field-error-msg" id="err-reg-fullname"></span>
 						</div>
 						<div class="form-group">
 							<label for="reg-phone">Số điện thoại <span class="req">*</span></label>
 							<div class="input-icon-wrap">
-								<input type="tel" id="reg-phone" placeholder="0123456789" />
+								<input type="tel" id="reg-phone" name="tel" autocomplete="tel" inputmode="tel" placeholder="0123456789" />
 							</div>
 							<span class="field-error-msg" id="err-reg-phone"></span>
 						</div>
 						<div class="form-group">
 							<label for="reg-email">Email <span class="req">*</span></label>
 							<div class="input-icon-wrap">
-								<input type="email" id="reg-email" placeholder="username@example.com" />
+								<input type="email" id="reg-email" name="email" autocomplete="email" autocapitalize="none" placeholder="username@example.com" />
 							</div>
 							<span class="field-error-msg" id="err-reg-email"></span>
 						</div>
 						<div class="form-group">
 							<label for="reg-password">Mật khẩu <span class="req">*</span></label>
 							<div class="input-icon-wrap">
-								<input type="password" id="reg-password" placeholder="Tối thiểu 6 ký tự" />
+								<input type="password" id="reg-password" name="new-password" autocomplete="new-password" placeholder="Tối thiểu 6 ký tự" />
 								<button type="button" class="toggle-pwd-btn" data-target="reg-password" aria-label="Hiện mật khẩu">👁</button>
 							</div>
 							<span class="field-error-msg" id="err-reg-password"></span>

@@ -365,6 +365,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 	qrModalClose?.addEventListener("click", closeQRModal)
 	qrCancelBtn?.addEventListener("click", closeQRModal)
+	window.addEventListener("beta_auth_expired", closeQRModal)
 	qrModal?.addEventListener("click", e => {
 		if (e.target === qrModal && (!qrVerifyOverlay || qrVerifyOverlay.style.display === "none")) {
 			closeQRModal()

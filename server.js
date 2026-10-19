@@ -16,6 +16,11 @@ const middlewares = jsonServer.defaults()
 
 const PORT = process.env.PORT || 3000
 const JWT_SECRET = 'json-server-auth-123456'
+const MAX_SEATS_PER_BOOKING = 8
+
+function countPhysicalSeats(seats) {
+	return seats.reduce((count, seat) => count + (/^([LM])(\d{2})-\1(\d{2})$/.test(String(seat).toUpperCase()) ? 2 : 1), 0)
+}
 
 const VOUCHER_RULES = {
 	BETA10: { type: 'percent', value: 10, minOrder: 0, maxDiscount: 100000 },
@@ -92,6 +97,21 @@ function calculateServerVoucher(code, user, { rawTotal, concessionsTotal = 0, sh
 function persistState(nextState) {
 	server.db.setState(nextState)
 	server.db.write()
+}
+
+function getShowtimeRows(entry) {
+	if (!entry || !Array.isArray(entry.schedules)) return []
+	return entry.schedules.flatMap(schedule => (schedule.slots || []).map(slot => ({
+		date: entry.date,
+		cinemaId: entry.cinemaId,
+		movieId: String(schedule.movieId),
+		screen: String(schedule.screenName || schedule.screenId || '').trim().toLowerCase(),
+		time: String(slot.time || '').trim(),
+	})))
+}
+
+function showtimeRowKey(row) {
+	return `${row.movieId}|${row.screen}|${row.time}`
 }
 
 function userWithoutPassword(user) {
@@ -379,6 +399,9 @@ server.post('/seat-holds', (req, res) => {
 	if (!holdId || !cinemaId || !movieId || !date || !time || !cleanSeats.length) {
 		return res.status(400).json({ success: false, message: 'Thông tin giữ ghế không hợp lệ.' })
 	}
+	if (countPhysicalSeats(cleanSeats) > MAX_SEATS_PER_BOOKING) {
+		return res.status(400).json({ success: false, message: `Mỗi đơn tối đa ${MAX_SEATS_PER_BOOKING} chỗ; mỗi ghế đôi Sweetbox tính là 2 chỗ.` })
+	}
 	const state = JSON.parse(JSON.stringify(server.db.getState()))
 	const now = Date.now()
 	expirePendingBookings(state, now)
@@ -498,8 +521,11 @@ server.post('/bookings/:id/cancel', (req, res) => {
 	expirePendingBookings(state)
 	const booking = (state.bookings || []).find(item => String(item.id) === String(req.params.id))
 	if (!booking || String(booking.userId) !== String(caller.id)) return res.status(404).json({ success: false, message: 'Không tìm thấy đơn vé thuộc tài khoản này.' })
+	if (booking.status === 'done' || booking.bookingStatus === 'done' || booking.checkedInAt) {
+		return res.status(409).json({ success: false, message: 'Vé đã soát không thể hủy.' })
+	}
 	if (booking.paymentStatus !== 'pending' || booking.bookingStatus !== 'pending' || Number(booking.holdExpiresAt) <= Date.now()) {
-		return res.status(409).json({ success: false, message: 'Chỉ có thể hủy đơn chưa thanh toán còn trong thời gian giữ ghế. Đơn đã thanh toán cần xử lý theo chính sách hoàn vé.' })
+		return res.status(409).json({ success: false, message: 'Chỉ có thể hủy đơn chưa xác nhận, chưa thanh toán và còn trong thời gian giữ ghế.' })
 	}
 	booking.paymentStatus = 'cancelled'
 	booking.bookingStatus = 'cancelled'
@@ -531,6 +557,9 @@ server.post('/checkout/complete', (req, res) => {
 	if (priorBooking) return res.json({ success: true, ticket: priorBooking, user: user ? userWithoutPassword(state.users.find(u => String(u.id) === String(user.id))) : null, duplicate: true })
 	const hold = (state.seat_holds || []).find(item => item.holdId === holdId && Number(item.expiresAt) > Date.now())
 	const requestedSeats = [...new Set(String(ticket.seats || '').split(',').map(s => s.trim().toUpperCase()).filter(Boolean))]
+	if (countPhysicalSeats(requestedSeats) > MAX_SEATS_PER_BOOKING) {
+		return res.status(400).json({ success: false, message: `Mỗi đơn tối đa ${MAX_SEATS_PER_BOOKING} chỗ; mỗi ghế đôi Sweetbox tính là 2 chỗ.` })
+	}
 	if (!hold || !requestedSeats.length || String(hold.cinemaId) !== String(ticket.cinemaId) || String(hold.movieId) !== String(ticket.movieId) || hold.date !== ticket.date || hold.time !== ticket.time || requestedSeats.some(seat => !hold.seats.includes(seat))) {
 		return res.status(409).json({ success: false, message: 'Giữ ghế đã hết hạn hoặc không khớp đơn. Vui lòng chọn ghế lại.' })
 	}
@@ -623,6 +652,36 @@ server.use((req, res, next) => {
 		return next()
 	}
 	if (caller.role !== 'admin') return res.status(403).json({ message: 'Chỉ quản trị viên mới được thay đổi dữ liệu.' })
+	if ((req.path === '/showtimes' || req.path.startsWith('/showtimes/')) && ['POST', 'PUT', 'PATCH'].includes(method)) {
+		const showtimeId = req.path.split('/')[2]
+		const existingRecords = server.db.get('showtimes').value() || []
+		const current = showtimeId ? existingRecords.find(entry => String(entry.id) === String(showtimeId)) : null
+		const candidate = method === 'PATCH' && current ? { ...current, ...(req.body || {}) } : req.body
+		const otherRows = existingRecords
+			.filter(entry => !current || String(entry.id) !== String(current.id))
+			.flatMap(getShowtimeRows)
+		const candidateRows = getShowtimeRows(candidate)
+		const collides = (a, b) => a.date === b.date && a.cinemaId === b.cinemaId && a.time === b.time &&
+			(a.movieId === b.movieId || (a.screen && a.screen === b.screen))
+		const candidateHitsOtherRecord = candidateRows.some(row => otherRows.some(existing => collides(row, existing)))
+		const collisionCounts = rows => {
+			const counts = new Map()
+			for (let i = 0; i < rows.length; i++) {
+				for (let j = i + 1; j < rows.length; j++) {
+					if (!collides(rows[i], rows[j])) continue
+					const pair = [showtimeRowKey(rows[i]), showtimeRowKey(rows[j])].sort().join('::')
+					counts.set(pair, (counts.get(pair) || 0) + 1)
+				}
+			}
+			return counts
+		}
+		const previousCollisionCounts = collisionCounts(getShowtimeRows(current))
+		const candidateCollisionCounts = collisionCounts(candidateRows)
+		const addedInternalCollision = [...candidateCollisionCounts].some(([key, count]) => count > (previousCollisionCounts.get(key) || 0))
+		if (candidateHitsOtherRecord || addedInternalCollision) {
+			return res.status(409).json({ success: false, message: 'Đã có suất chiếu trùng giờ cùng phim hoặc cùng phòng trong ngày này.' })
+		}
+	}
 	return next()
 })
 

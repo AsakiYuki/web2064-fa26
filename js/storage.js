@@ -823,9 +823,27 @@ export function getShowtimes() {
 	return storageGet(STORAGE_KEYS.SHOWTIMES, [])
 }
 
+function showtimeConflict(entries, { cinemaId, date, movieId, time, screenName, excludeMovieId, excludeTime }) {
+	const targetScreen = String(screenName || "").trim().toLowerCase()
+	return entries.some(entry => entry.cinemaId === cinemaId && entry.date === date &&
+		(entry.schedules || []).some(schedule => {
+			const sameMovie = String(schedule.movieId) === String(movieId)
+			const scheduleScreen = String(schedule.screenName || schedule.screenId || "").trim().toLowerCase()
+			if (!sameMovie && (!targetScreen || scheduleScreen !== targetScreen)) return false
+			return (schedule.slots || []).some(slot => {
+				if (sameMovie && String(schedule.movieId) === String(excludeMovieId) && slot.time === excludeTime) return false
+				return slot.time === time
+			})
+		})
+	)
+}
+
 export async function addShowtimeSlot(slotData) {
 	const { cinemaId, date, movieId, movieTitle, screenId, screenName, format, time, price, availableSeats } = slotData
 	const allShowtimes = JSON.parse(JSON.stringify(getShowtimes()))
+	if (showtimeConflict(allShowtimes, { cinemaId, date, movieId, time, screenName })) {
+		return { success: false, message: `Đã có suất chiếu lúc ${time} cùng phim hoặc cùng phòng trong ngày này.` }
+	}
 
 	let dayCinema = allShowtimes.find(st => st.date === date && st.cinemaId === cinemaId)
 	if (!dayCinema) {
@@ -870,64 +888,84 @@ export async function addShowtimeSlot(slotData) {
 
 export async function updateShowtimeSlot(slotData) {
 	const { cinemaId, date, movieId, oldTime, time, price, availableSeats, screenName, format } = slotData
-	const allShowtimes = getShowtimes()
+	const allShowtimes = JSON.parse(JSON.stringify(getShowtimes()))
 
 	const dayCinema = allShowtimes.find(st => st.date === date && st.cinemaId === cinemaId)
-	if (!dayCinema) return false
+	if (!dayCinema) return { success: false, message: "Không tìm thấy lịch chiếu cần sửa." }
 
 	const schedule = dayCinema.schedules.find(sc => sc.movieId === movieId)
-	if (!schedule) return false
+	if (!schedule) return { success: false, message: "Không tìm thấy phim trong lịch chiếu." }
+	if (showtimeConflict(allShowtimes, {
+		cinemaId,
+		date,
+		movieId,
+		time,
+		screenName: screenName || schedule.screenName || schedule.screenId,
+		excludeMovieId: movieId,
+		excludeTime: oldTime,
+	})) {
+		return { success: false, message: `Đã có suất chiếu lúc ${time} cùng phim hoặc cùng phòng trong ngày này.` }
+	}
 
 	if (screenName) schedule.screenName = screenName
 	if (format) schedule.format = format
 
 	const slot = schedule.slots.find(s => s.time === oldTime)
-	if (slot) {
-		slot.time = time
-		slot.price = Number(price) || slot.price
-		slot.availableSeats = Number(availableSeats) !== undefined ? Number(availableSeats) : slot.availableSeats
-	}
+	if (!slot) return { success: false, message: "Không tìm thấy suất chiếu cần sửa." }
+	slot.time = time
+	slot.price = Number(price) || slot.price
+	if (availableSeats !== undefined && Number.isFinite(Number(availableSeats))) slot.availableSeats = Number(availableSeats)
 	schedule.slots.sort((a, b) => a.time.localeCompare(b.time))
 
-	storageSet(STORAGE_KEYS.SHOWTIMES, allShowtimes)
 	if (dayCinema.id) {
-		apiUpdateShowtime(dayCinema.id, dayCinema).catch(() => {})
+		const result = await apiUpdateShowtime(dayCinema.id, dayCinema)
+		if (!result.success) return { success: false, message: result.error || "Không thể lưu thay đổi lên máy chủ." }
+	} else {
+		return { success: false, message: "Lịch chiếu không có mã để cập nhật lên máy chủ." }
 	}
 
-	return true
+	storageSet(STORAGE_KEYS.SHOWTIMES, allShowtimes)
+	return { success: true }
+}
+
+async function saveShowtimeDayChange(allShowtimes, dayCinema) {
+	if (!dayCinema.id) return { success: false, message: "Lịch chiếu không có mã để cập nhật lên máy chủ." }
+	let result
+	if (!dayCinema.schedules.length) {
+		result = await apiDeleteShowtime(dayCinema.id)
+		if (result.success) {
+			const index = allShowtimes.findIndex(entry => entry.id === dayCinema.id)
+			if (index >= 0) allShowtimes.splice(index, 1)
+		}
+	} else {
+		result = await apiUpdateShowtime(dayCinema.id, dayCinema)
+	}
+	if (!result.success) return { success: false, message: result.error || "Không thể xóa lịch chiếu trên máy chủ." }
+	storageSet(STORAGE_KEYS.SHOWTIMES, allShowtimes)
+	return { success: true }
 }
 
 export async function deleteShowtimeSlot(cinemaId, date, movieId, time) {
-	const allShowtimes = getShowtimes()
+	const allShowtimes = JSON.parse(JSON.stringify(getShowtimes()))
 	const dayCinema = allShowtimes.find(st => st.date === date && st.cinemaId === cinemaId)
-	if (!dayCinema) return false
+	if (!dayCinema) return { success: false, message: "Không tìm thấy lịch chiếu." }
 
 	const schedule = dayCinema.schedules.find(sc => sc.movieId === movieId)
-	if (!schedule) return false
+	if (!schedule) return { success: false, message: "Không tìm thấy phim trong lịch chiếu." }
 
 	schedule.slots = schedule.slots.filter(s => s.time !== time)
-	storageSet(STORAGE_KEYS.SHOWTIMES, allShowtimes)
-
-	if (dayCinema.id) {
-		apiUpdateShowtime(dayCinema.id, dayCinema).catch(() => {})
-	}
-
-	return true
+	dayCinema.schedules = dayCinema.schedules.filter(sc => sc.slots?.length > 0)
+	return saveShowtimeDayChange(allShowtimes, dayCinema)
 }
 
 export async function deleteMovieSchedule(cinemaId, date, movieId) {
-	const allShowtimes = getShowtimes()
+	const allShowtimes = JSON.parse(JSON.stringify(getShowtimes()))
 	const dayCinema = allShowtimes.find(st => st.date === date && st.cinemaId === cinemaId)
-	if (!dayCinema) return false
+	if (!dayCinema) return { success: false, message: "Không tìm thấy lịch chiếu." }
 
 	dayCinema.schedules = dayCinema.schedules.filter(sc => sc.movieId !== movieId)
-	storageSet(STORAGE_KEYS.SHOWTIMES, allShowtimes)
-
-	if (dayCinema.id) {
-		apiUpdateShowtime(dayCinema.id, dayCinema).catch(() => {})
-	}
-
-	return true
+	dayCinema.schedules = dayCinema.schedules.filter(sc => sc.slots?.length > 0)
+	return saveShowtimeDayChange(allShowtimes, dayCinema)
 }
 
 /* ==========================================================================
@@ -1598,6 +1636,9 @@ export function holdSeats(cinemaId, movieId, date, time, seatIds = [], holdId = 
 		releaseSeatHold(sId)
 		return { success: true, holdId: sId, seats: [], expiresAt: 0, remainingSeconds: 0 }
 	}
+	if (getPhysicalSeatCount(cleanSeats) > 8) {
+		return { success: false, reason: "max", message: "Mỗi đơn tối đa 8 chỗ; mỗi ghế đôi Sweetbox tính là 2 chỗ." }
+	}
 
 	const active = cleanExpiredSeatHolds()
 
@@ -1836,7 +1877,7 @@ export function isSeatSold(cinemaId, movieId, date, time, seatId) {
  * Kiểm tra xem ghế targetSeat có thể được chọn dựa trên các ghế đang chọn không.
  * Quy tắc:
  * 1. Không chọn ghế đã bán (status === 'sold')
- * 2. Tối đa 8 ghế trong 1 đơn đặt
+ * 2. Tối đa 8 chỗ trong 1 đơn đặt (ghế Sweetbox đôi tính 2)
  * 3. Nếu chưa chọn ghế nào -> chọn bất kỳ ghế trống nào
  * 4. Nếu đã có ghế -> ghế mới PHẢI CÙNG HÀNG (same row)
  * 5. Ghế mới PHẢI SÁT NHAU / LIỀN KỀ (contiguous, không để trống ghế ở giữa)
@@ -1861,11 +1902,11 @@ export function canSelectSeat(currentSeats = [], targetSeat, currentHoldId = nul
 		}
 	}
 
-	if (currentSeats.length >= 8) {
+	if (getPhysicalSeatCount(currentSeats) + getPhysicalSeatCount([targetSeat]) > 8) {
 		return {
 			allowed: false,
 			reason: "max",
-			message: "Bạn chỉ có thể chọn tối đa 8 ghế trong 1 lần đặt.",
+			message: "Mỗi đơn tối đa 8 chỗ; mỗi ghế đôi Sweetbox tính là 2 chỗ.",
 		}
 	}
 
@@ -1922,6 +1963,16 @@ export function canSelectSeat(currentSeats = [], targetSeat, currentHoldId = nul
 	}
 
 	return { allowed: true }
+}
+
+/** Count actual seats; one Sweetbox selection occupies two seats. */
+export function getPhysicalSeatCount(seats = []) {
+	if (!Array.isArray(seats)) return 0
+	return seats.reduce((count, seat) => {
+		const id = String(typeof seat === "string" ? seat : seat?.id || "").trim().toUpperCase()
+		const isSweetbox = seat?.type === "sweetbox" || /^([LM])(\d{2})-\1(\d{2})$/.test(id)
+		return count + (isSweetbox ? 2 : 1)
+	}, 0)
 }
 
 /**
