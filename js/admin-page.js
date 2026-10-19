@@ -762,17 +762,19 @@ document.addEventListener("DOMContentLoaded", async () => {
 		function renderShowtimesSection() {
 			if (!showtimesContainer) return
 			const selectedCinema = cinemaSelect?.value || "beta-thainguyen"
+			const now = new Date()
+			const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`
 			const allShowtimes = getShowtimes() || []
 			const cinemaEntries = allShowtimes
-				.filter(st => st.cinemaId === selectedCinema && st.schedules?.length)
+				.filter(st => st.cinemaId === selectedCinema && st.date >= today && st.schedules?.length)
 				.sort((a, b) => a.date.localeCompare(b.date))
 
 			if (!cinemaEntries.length) {
 				showtimesContainer.innerHTML = `
 				<div style="text-align: center; padding: 48px 20px; background: #181825; border-radius: 12px; border: 1px dashed rgba(88, 91, 112, 0.4);">
 					<div style="font-size: 40px; margin-bottom: 12px;">📅</div>
-					<h3 style="color: #cdd6f4; font-size: 17px; margin-bottom: 6px;">Rạp này chưa có lịch chiếu</h3>
-					<p style="color: #a6adc8; font-size: 13px; margin-bottom: 20px;">Hãy tạo suất chiếu đầu tiên để khán giả có thể đặt vé.</p>
+					<h3 style="color: #cdd6f4; font-size: 17px; margin-bottom: 6px;">Rạp này chưa có lịch chiếu từ hôm nay</h3>
+					<p style="color: #a6adc8; font-size: 13px; margin-bottom: 20px;">Các ngày đã chiếu được ẩn. Hãy thêm lịch mới để khán giả có thể đặt vé.</p>
 					<button type="button" class="btn-admin-primary" id="btn-empty-add-showtime">
 						➕ Thêm Suất Chiếu Ngay
 					</button>
