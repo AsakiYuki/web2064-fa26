@@ -928,37 +928,44 @@ export async function updateShowtimeSlot(slotData) {
 	return { success: true }
 }
 
+async function saveShowtimeDayChange(allShowtimes, dayCinema) {
+	if (!dayCinema.id) return { success: false, message: "Lịch chiếu không có mã để cập nhật lên máy chủ." }
+	let result
+	if (!dayCinema.schedules.length) {
+		result = await apiDeleteShowtime(dayCinema.id)
+		if (result.success) {
+			const index = allShowtimes.findIndex(entry => entry.id === dayCinema.id)
+			if (index >= 0) allShowtimes.splice(index, 1)
+		}
+	} else {
+		result = await apiUpdateShowtime(dayCinema.id, dayCinema)
+	}
+	if (!result.success) return { success: false, message: result.error || "Không thể xóa lịch chiếu trên máy chủ." }
+	storageSet(STORAGE_KEYS.SHOWTIMES, allShowtimes)
+	return { success: true }
+}
+
 export async function deleteShowtimeSlot(cinemaId, date, movieId, time) {
-	const allShowtimes = getShowtimes()
+	const allShowtimes = JSON.parse(JSON.stringify(getShowtimes()))
 	const dayCinema = allShowtimes.find(st => st.date === date && st.cinemaId === cinemaId)
-	if (!dayCinema) return false
+	if (!dayCinema) return { success: false, message: "Không tìm thấy lịch chiếu." }
 
 	const schedule = dayCinema.schedules.find(sc => sc.movieId === movieId)
-	if (!schedule) return false
+	if (!schedule) return { success: false, message: "Không tìm thấy phim trong lịch chiếu." }
 
 	schedule.slots = schedule.slots.filter(s => s.time !== time)
-	storageSet(STORAGE_KEYS.SHOWTIMES, allShowtimes)
-
-	if (dayCinema.id) {
-		apiUpdateShowtime(dayCinema.id, dayCinema).catch(() => {})
-	}
-
-	return true
+	dayCinema.schedules = dayCinema.schedules.filter(sc => sc.slots?.length > 0)
+	return saveShowtimeDayChange(allShowtimes, dayCinema)
 }
 
 export async function deleteMovieSchedule(cinemaId, date, movieId) {
-	const allShowtimes = getShowtimes()
+	const allShowtimes = JSON.parse(JSON.stringify(getShowtimes()))
 	const dayCinema = allShowtimes.find(st => st.date === date && st.cinemaId === cinemaId)
-	if (!dayCinema) return false
+	if (!dayCinema) return { success: false, message: "Không tìm thấy lịch chiếu." }
 
 	dayCinema.schedules = dayCinema.schedules.filter(sc => sc.movieId !== movieId)
-	storageSet(STORAGE_KEYS.SHOWTIMES, allShowtimes)
-
-	if (dayCinema.id) {
-		apiUpdateShowtime(dayCinema.id, dayCinema).catch(() => {})
-	}
-
-	return true
+	dayCinema.schedules = dayCinema.schedules.filter(sc => sc.slots?.length > 0)
+	return saveShowtimeDayChange(allShowtimes, dayCinema)
 }
 
 /* ==========================================================================

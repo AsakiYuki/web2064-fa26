@@ -851,12 +851,16 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 			// Attach Delete entire Movie schedule
 			showtimesContainer.querySelectorAll(".btn-del-movie-schedule").forEach(btn => {
-				btn.addEventListener("click", () => {
+				btn.addEventListener("click", async () => {
 					const mId = btn.dataset.movieId
 					const mTitle = btn.dataset.movieTitle
 					const date = btn.dataset.date
 					if (confirm(`Bạn có chắc muốn xóa tất cả suất chiếu của phim "${mTitle}" trong ngày này không?`)) {
-						deleteMovieSchedule(selectedCinema, date, mId)
+						const result = await deleteMovieSchedule(selectedCinema, date, mId)
+						if (!result.success) {
+							showToast(result.message || "Không thể xóa lịch chiếu.", "error")
+							return
+						}
 						showToast(`Đã xóa toàn bộ lịch chiếu phim "${mTitle}" trong ngày.`, "info")
 						renderShowtimesSection()
 						updateAllBadges()
@@ -887,12 +891,16 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 			// Attach Delete Slot clicks
 			showtimesContainer.querySelectorAll(".btn-del-slot").forEach(btn => {
-				btn.addEventListener("click", () => {
+				btn.addEventListener("click", async () => {
 					const mId = btn.dataset.movieId
 					const time = btn.dataset.time
 					const date = btn.dataset.date
 					if (confirm(`Xóa suất chiếu lúc ${time}?`)) {
-						deleteShowtimeSlot(selectedCinema, date, mId, time)
+						const result = await deleteShowtimeSlot(selectedCinema, date, mId, time)
+						if (!result.success) {
+							showToast(result.message || "Không thể xóa suất chiếu.", "error")
+							return
+						}
 						showToast(`Đã xóa suất chiếu lúc ${time}.`, "info")
 						renderShowtimesSection()
 						updateAllBadges()
