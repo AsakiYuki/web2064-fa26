@@ -313,6 +313,18 @@ if (typeof window !== "undefined") {
 			console.warn("[Auth Listener] Error updating UI:", err)
 		}
 	})
+
+	window.addEventListener("beta_auth_expired", () => {
+		const hadSession = Boolean(getCurrentUser())
+		logoutUser()
+		window.dispatchEvent(new CustomEvent("beta_auth_changed", { detail: { user: null } }))
+		showToast(
+			hadSession ? "Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại để tiếp tục." : "Vui lòng đăng nhập để tiếp tục.",
+			"warning",
+			6000,
+		)
+		openAuthModal("login")
+	})
 }
 
 /** Update Account Bar in Header (Logged in vs Logged out) */

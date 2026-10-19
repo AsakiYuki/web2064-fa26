@@ -19,6 +19,7 @@ const TOKEN_KEY = "beta_auth_token"
    ========================================================================== */
 
 let memoryToken = ""
+let authExpiryHandled = false
 
 export function getAuthToken() {
 	if (typeof localStorage === "undefined") return memoryToken
@@ -31,6 +32,7 @@ export function getAuthToken() {
 
 export function setAuthToken(token) {
 	memoryToken = token || ""
+	if (token) authExpiryHandled = false
 	if (typeof localStorage === "undefined") return
 	try {
 		if (token) {
@@ -71,6 +73,11 @@ async function request(endpoint, options = {}) {
 
 	try {
 		const res = await fetch(url, config)
+		if (res.status === 401 && typeof window !== "undefined" && !authExpiryHandled) {
+			authExpiryHandled = true
+			removeAuthToken()
+			window.dispatchEvent(new CustomEvent("beta_auth_expired"))
+		}
 		const text = await res.text()
 		let data = null
 		try {
