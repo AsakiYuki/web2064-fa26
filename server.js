@@ -517,8 +517,8 @@ server.post('/bookings/:id/cancel', (req, res) => {
 
 // Commit the ticket, consume a member voucher, and award points atomically.
 server.post('/checkout/complete', (req, res) => {
-	const user = resolveRequestUser(req, res, false)
-	if (req.headers.authorization && !user) return
+	const user = resolveRequestUser(req, res, true)
+	if (!user) return
 	const ticket = req.body?.ticket
 	const holdId = req.body?.holdId
 	if (!ticket?.id || !holdId) return res.status(400).json({ success: false, message: 'Thiếu mã đơn hoặc mã giữ ghế.' })

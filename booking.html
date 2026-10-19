@@ -376,6 +376,15 @@
 						<span class="total-amount" id="summary-grand-total">0 đ</span>
 					</div>
 
+					<!-- Auth Notice if unauthenticated -->
+					<div class="booking-auth-notice" id="booking-auth-notice" style="display: none; margin-bottom: 12px; padding: 10px 12px; border-radius: 8px; background: rgba(245, 166, 35, 0.12); border: 1px dashed rgba(245, 166, 35, 0.45); font-size: 13px; color: #f5a623; display: flex; align-items: center; justify-content: space-between; gap: 8px;">
+						<div style="display: flex; align-items: center; gap: 6px;">
+							<span>🔒</span>
+							<span>Cần đăng nhập để đặt vé</span>
+						</div>
+						<button type="button" id="btn-booking-login-prompt" style="background: #f5a623; color: #11111b; border: none; padding: 4px 10px; border-radius: 4px; font-weight: 700; font-size: 12px; cursor: pointer;">Đăng nhập</button>
+					</div>
+
 					<!-- Main Checkout Action -->
 					<button type="button" class="btn-checkout-now" id="btn-checkout-now" disabled>
 						<span>TIẾP TỤC CHỌN BẮP NƯỚC</span>

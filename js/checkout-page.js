@@ -1,7 +1,7 @@
 /**
  * Beta Cinemas - Checkout & E-Ticket QR Code Logic
  */
-import { setupHeaderAndFooter, formatCurrency, formatDateVN, showToast, getCurrentUser, updateHeaderAccountUI, translateDom, getSavedLang } from "./common.js"
+import { setupHeaderAndFooter, formatCurrency, formatDateVN, showToast, getCurrentUser, openAuthModal, updateHeaderAccountUI, translateDom, getSavedLang } from "./common.js"
 import {
 	getMoviesData,
 	getCinemas,
@@ -111,16 +111,38 @@ document.addEventListener("DOMContentLoaded", async () => {
 		}
 	}
 
-	// 2. Fill User contact data if logged in
-	const user = getCurrentUser()
-	if (user) {
+	// 2. Auth verification & prefill contact data
+	function checkUserAuth() {
+		const currentUser = getCurrentUser()
 		const nameInput = document.getElementById("cust-fullname")
 		const phoneInput = document.getElementById("cust-phone")
 		const emailInput = document.getElementById("cust-email")
-		if (nameInput && !nameInput.value) nameInput.value = user.name || ""
-		if (phoneInput && !phoneInput.value) phoneInput.value = user.phone || ""
-		if (emailInput && !emailInput.value) emailInput.value = user.email || ""
+		const authNotice = document.getElementById("checkout-auth-notice")
+
+		if (currentUser) {
+			if (nameInput) nameInput.value = currentUser.name || nameInput.value || ""
+			if (phoneInput) phoneInput.value = currentUser.phone || phoneInput.value || ""
+			if (emailInput) emailInput.value = currentUser.email || emailInput.value || ""
+			if (authNotice) authNotice.style.display = "none"
+		} else {
+			if (authNotice) authNotice.style.display = "flex"
+		}
+		return currentUser
 	}
+
+	const initialUser = checkUserAuth()
+	if (!initialUser) {
+		showToast("Vui lòng đăng nhập tài khoản để tiếp tục đặt vé!", "warning", 5000)
+		openAuthModal("login")
+	}
+
+	document.getElementById("btn-checkout-login-prompt")?.addEventListener("click", () => {
+		openAuthModal("login")
+	})
+
+	window.addEventListener("beta_auth_changed", () => {
+		checkUserAuth()
+	})
 
 	// 2.1 Stepper Navigation (Allow returning to Seat selection or Concessions)
 	let isPaymentCompleted = false
@@ -364,6 +386,16 @@ document.addEventListener("DOMContentLoaded", async () => {
 			e.preventDefault()
 		}
 
+		// Validate user authentication - must be logged in to book ticket
+		const currentUser = getCurrentUser()
+		if (!currentUser) {
+			showToast("Vui lòng đăng nhập tài khoản để hoàn tất đặt vé!", "warning", 5000)
+			openAuthModal("login")
+			const submitBtn = document.getElementById("btn-submit-payment")
+			if (submitBtn) submitBtn.disabled = false
+			return
+		}
+
 		// Validate terms agreement
 		const termsCheck = document.getElementById("agree-terms-check")
 		if (!termsCheck?.checked) {
@@ -373,9 +405,9 @@ document.addEventListener("DOMContentLoaded", async () => {
 		}
 
 		// Validate customer contact form
-		const fullName = document.getElementById("cust-fullname")?.value.trim() || "Nguyễn Văn A"
-		const phone = document.getElementById("cust-phone")?.value.trim() || "0912345678"
-		const email = document.getElementById("cust-email")?.value.trim() || "customer@betacinemas.vn"
+		const fullName = document.getElementById("cust-fullname")?.value.trim() || currentUser.name || "Khách Hàng"
+		const phone = document.getElementById("cust-phone")?.value.trim() || currentUser.phone || ""
+		const email = document.getElementById("cust-email")?.value.trim() || currentUser.email || ""
 
 		if (!fullName || fullName.length < 2) {
 			showToast("Vui lòng nhập họ và tên người nhận vé hợp lệ.", "warning")
@@ -482,33 +514,34 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 				// Save as pending. A customer click cannot prove that a provider received money.
 				const newTicket = {
-				id: bookingCode,
-				movieId: currentMovie.id,
-				movieTitle: currentMovie.title,
-				moviePoster: currentMovie.poster,
-				cinemaId: currentCinema.id,
-				cinemaName: currentCinema.name,
-				screenName,
-				formatName,
-				date: dateStr,
-				time: timeSlot,
-				seats: seatsParam,
-				concessions: concessionsParam,
-				rawTotal: checkoutState.rawTotal,
-				concessionsTotal,
-				total: checkoutState.finalTotal,
-				voucherCode: checkoutState.voucherCode || null,
-				discountAmount: checkoutState.discountAmount || 0,
-				paymentMethod: checkoutState.paymentMethod,
-				customerName: fullName,
-				customerPhone: cleanPhone,
-				customerEmail: email,
+					id: bookingCode,
+					userId: currentUser?.id || null,
+					userEmail: currentUser?.email || email,
+					movieId: currentMovie.id,
+					movieTitle: currentMovie.title,
+					moviePoster: currentMovie.poster,
+					cinemaId: currentCinema.id,
+					cinemaName: currentCinema.name,
+					screenName,
+					formatName,
+					date: dateStr,
+					time: timeSlot,
+					seats: seatsParam,
+					concessions: concessionsParam,
+					total: checkoutState.finalTotal,
+					voucherCode: checkoutState.voucherCode || null,
+					discountAmount: checkoutState.discountAmount || 0,
+					paymentMethod: checkoutState.paymentMethod,
+					customerName: fullName,
+					customerPhone: cleanPhone,
+					customerEmail: email,
+					rawTotal: checkoutState.rawTotal,
+					concessionsTotal,
 					bookingDate: new Date().toISOString(),
 					holdId,
-
-				bookingStatus: "pending",
-				paymentStatus: "pending",
-}
+					bookingStatus: "pending",
+					paymentStatus: "pending",
+				}
 
 				const savedTicket = await saveBookingTicket(newTicket)
 				if (savedTicket.saveError) {
