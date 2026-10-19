@@ -1006,7 +1006,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 			const movieTitle = targetMovie ? targetMovie.title : "Phim Mới"
 
 			if (isEdit && oldTime) {
-				updateShowtimeSlot({
+				const result = await updateShowtimeSlot({
 					cinemaId,
 					date,
 					movieId,
@@ -1017,6 +1017,10 @@ document.addEventListener("DOMContentLoaded", async () => {
 					screenName,
 					format,
 				})
+				if (!result.success) {
+					showToast(result.message || "Không thể cập nhật suất chiếu.", "error")
+					return
+				}
 				showToast(`✅ Đã cập nhật suất chiếu ${time} cho phim "${movieTitle}"!`, "success")
 			} else {
 				const result = await addShowtimeSlot({

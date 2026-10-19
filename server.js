@@ -99,6 +99,21 @@ function persistState(nextState) {
 	server.db.write()
 }
 
+function getShowtimeRows(entry) {
+	if (!entry || !Array.isArray(entry.schedules)) return []
+	return entry.schedules.flatMap(schedule => (schedule.slots || []).map(slot => ({
+		date: entry.date,
+		cinemaId: entry.cinemaId,
+		movieId: String(schedule.movieId),
+		screen: String(schedule.screenName || schedule.screenId || '').trim().toLowerCase(),
+		time: String(slot.time || '').trim(),
+	})))
+}
+
+function showtimeRowKey(row) {
+	return `${row.movieId}|${row.screen}|${row.time}`
+}
+
 function userWithoutPassword(user) {
 	if (!user) return null
 	const { password, ...safeUser } = user
@@ -637,6 +652,36 @@ server.use((req, res, next) => {
 		return next()
 	}
 	if (caller.role !== 'admin') return res.status(403).json({ message: 'Chỉ quản trị viên mới được thay đổi dữ liệu.' })
+	if ((req.path === '/showtimes' || req.path.startsWith('/showtimes/')) && ['POST', 'PUT', 'PATCH'].includes(method)) {
+		const showtimeId = req.path.split('/')[2]
+		const existingRecords = server.db.get('showtimes').value() || []
+		const current = showtimeId ? existingRecords.find(entry => String(entry.id) === String(showtimeId)) : null
+		const candidate = method === 'PATCH' && current ? { ...current, ...(req.body || {}) } : req.body
+		const otherRows = existingRecords
+			.filter(entry => !current || String(entry.id) !== String(current.id))
+			.flatMap(getShowtimeRows)
+		const candidateRows = getShowtimeRows(candidate)
+		const collides = (a, b) => a.date === b.date && a.cinemaId === b.cinemaId && a.time === b.time &&
+			(a.movieId === b.movieId || (a.screen && a.screen === b.screen))
+		const candidateHitsOtherRecord = candidateRows.some(row => otherRows.some(existing => collides(row, existing)))
+		const collisionCounts = rows => {
+			const counts = new Map()
+			for (let i = 0; i < rows.length; i++) {
+				for (let j = i + 1; j < rows.length; j++) {
+					if (!collides(rows[i], rows[j])) continue
+					const pair = [showtimeRowKey(rows[i]), showtimeRowKey(rows[j])].sort().join('::')
+					counts.set(pair, (counts.get(pair) || 0) + 1)
+				}
+			}
+			return counts
+		}
+		const previousCollisionCounts = collisionCounts(getShowtimeRows(current))
+		const candidateCollisionCounts = collisionCounts(candidateRows)
+		const addedInternalCollision = [...candidateCollisionCounts].some(([key, count]) => count > (previousCollisionCounts.get(key) || 0))
+		if (candidateHitsOtherRecord || addedInternalCollision) {
+			return res.status(409).json({ success: false, message: 'Đã có suất chiếu trùng giờ cùng phim hoặc cùng phòng trong ngày này.' })
+		}
+	}
 	return next()
 })
 
