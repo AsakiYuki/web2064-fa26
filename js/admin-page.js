@@ -737,7 +737,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 		   Thêm, Sửa, Xóa suất chiếu vào LocalStorage
 		   ========================================================================== */
 		const cinemaSelect = document.getElementById("st-cinema-select")
-		const dateInput = document.getElementById("st-date-input")
 		const showtimesContainer = document.getElementById("showtimes-content-container")
 
 		// Pre-fill cinemas dropdown
@@ -748,13 +747,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 				.join("")
 		}
 
-		// Pre-fill date input (default 2026-09-26 or today)
-		if (dateInput) {
-			dateInput.value = "2026-09-26"
-		}
-
 		cinemaSelect?.addEventListener("change", renderShowtimesSection)
-		dateInput?.addEventListener("change", renderShowtimesSection)
 
 		// Reset Showtimes Data
 		document.getElementById("btn-reset-showtimes-data")?.addEventListener("click", async () => {
@@ -769,17 +762,17 @@ document.addEventListener("DOMContentLoaded", async () => {
 		function renderShowtimesSection() {
 			if (!showtimesContainer) return
 			const selectedCinema = cinemaSelect?.value || "beta-thainguyen"
-			const selectedDate = dateInput?.value || "2026-09-26"
-
 			const allShowtimes = getShowtimes() || []
-			const dayCinemaEntry = allShowtimes.find(st => st.date === selectedDate && st.cinemaId === selectedCinema)
+			const cinemaEntries = allShowtimes
+				.filter(st => st.cinemaId === selectedCinema && st.schedules?.length)
+				.sort((a, b) => a.date.localeCompare(b.date))
 
-			if (!dayCinemaEntry || !dayCinemaEntry.schedules || dayCinemaEntry.schedules.length === 0) {
+			if (!cinemaEntries.length) {
 				showtimesContainer.innerHTML = `
 				<div style="text-align: center; padding: 48px 20px; background: #181825; border-radius: 12px; border: 1px dashed rgba(88, 91, 112, 0.4);">
 					<div style="font-size: 40px; margin-bottom: 12px;">📅</div>
-					<h3 style="color: #cdd6f4; font-size: 17px; margin-bottom: 6px;">Chưa có lịch chiếu nào cho ngày ${formatDateVN(selectedDate)}</h3>
-					<p style="color: #a6adc8; font-size: 13px; margin-bottom: 20px;">Hãy tạo suất chiếu đầu tiên cho rạp này để khán giả có thể đặt vé.</p>
+					<h3 style="color: #cdd6f4; font-size: 17px; margin-bottom: 6px;">Rạp này chưa có lịch chiếu</h3>
+					<p style="color: #a6adc8; font-size: 13px; margin-bottom: 20px;">Hãy tạo suất chiếu đầu tiên để khán giả có thể đặt vé.</p>
 					<button type="button" class="btn-admin-primary" id="btn-empty-add-showtime">
 						➕ Thêm Suất Chiếu Ngay
 					</button>
@@ -789,22 +782,23 @@ document.addEventListener("DOMContentLoaded", async () => {
 				return
 			}
 
-			showtimesContainer.innerHTML = dayCinemaEntry.schedules
-				.map(sc => {
+			showtimesContainer.innerHTML = cinemaEntries.map(dayCinemaEntry => `
+				<div class="showtime-day-group">
+					<h3 class="showtime-day-heading">📅 ${formatDateVN(dayCinemaEntry.date)}</h3>
+					${dayCinemaEntry.schedules.map(sc => {
 					return `
-					<div class="movie-showtime-block" id="schedule-block-${sc.movieId}">
+					<div class="movie-showtime-block" id="schedule-block-${sc.movieId}-${dayCinemaEntry.date}">
 						<div class="ms-head">
 							<div class="ms-movie-title">
 								<span>🎬</span>
 								<span>${sc.movieTitle}</span>
-								<span class="ms-date-tag">📅 ${formatDateVN(selectedDate)}</span>
 								<span class="ms-format-tag">${sc.screenName || "Phòng 1"} • ${sc.format || "2D"}</span>
 							</div>
 							<div style="display: flex; gap: 8px;">
-								<button type="button" class="btn-admin-secondary btn-add-slot-for-movie" data-movie-id="${sc.movieId}" data-movie-title="${sc.movieTitle}" data-screen="${sc.screenName}" data-format="${sc.format}" style="font-size: 12px; padding: 5px 10px;">
+								<button type="button" class="btn-admin-secondary btn-add-slot-for-movie" data-date="${dayCinemaEntry.date}" data-movie-id="${sc.movieId}" data-movie-title="${sc.movieTitle}" data-screen="${sc.screenName}" data-format="${sc.format}" style="font-size: 12px; padding: 5px 10px;">
 									➕ Thêm Giờ Chiếu
 								</button>
-								<button type="button" class="btn-admin-danger btn-del-movie-schedule" data-movie-id="${sc.movieId}" data-movie-title="${sc.movieTitle}" style="font-size: 12px; padding: 5px 10px; background: rgba(243, 139, 168, 0.15); color: #f38ba8; border: 1px solid rgba(243, 139, 168, 0.3); border-radius: 6px; cursor: pointer;" title="Xóa toàn bộ lịch chiếu phim này trong ngày">
+								<button type="button" class="btn-admin-danger btn-del-movie-schedule" data-date="${dayCinemaEntry.date}" data-movie-id="${sc.movieId}" data-movie-title="${sc.movieTitle}" style="font-size: 12px; padding: 5px 10px; background: rgba(243, 139, 168, 0.15); color: #f38ba8; border: 1px solid rgba(243, 139, 168, 0.3); border-radius: 6px; cursor: pointer;" title="Xóa toàn bộ lịch chiếu phim này trong ngày">
 									🗑️ Xóa Lịch Phim
 								</button>
 							</div>
@@ -820,8 +814,8 @@ document.addEventListener("DOMContentLoaded", async () => {
 										<span>Còn ${s.availableSeats} ghế</span>
 									</div>
 									<div class="slot-chip-actions">
-										<button type="button" class="btn-edit-slot" data-movie-id="${sc.movieId}" data-time="${s.time}" data-price="${s.price}" data-seats="${s.availableSeats}" title="Sửa giờ hoặc giá vé">✏️</button>
-										<button type="button" class="btn-del-slot" data-movie-id="${sc.movieId}" data-time="${s.time}" title="Xóa suất chiếu này">✕</button>
+										<button type="button" class="btn-edit-slot" data-date="${dayCinemaEntry.date}" data-movie-id="${sc.movieId}" data-time="${s.time}" data-price="${s.price}" data-seats="${s.availableSeats}" title="Sửa giờ hoặc giá vé">✏️</button>
+										<button type="button" class="btn-del-slot" data-date="${dayCinemaEntry.date}" data-movie-id="${sc.movieId}" data-time="${s.time}" title="Xóa suất chiếu này">✕</button>
 									</div>
 								</div>
 							`
@@ -830,7 +824,9 @@ document.addEventListener("DOMContentLoaded", async () => {
 						</div>
 					</div>
 				`
-				})
+				}).join("")}
+				</div>
+			`)
 				.join("")
 
 			// Attach Add Slot for Movie buttons
@@ -838,7 +834,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 				btn.addEventListener("click", () => {
 					openShowtimeModal({
 						cinemaId: selectedCinema,
-						date: selectedDate,
+						date: btn.dataset.date,
 						movieId: btn.dataset.movieId,
 						screenName: btn.dataset.screen,
 						format: btn.dataset.format,
@@ -851,8 +847,9 @@ document.addEventListener("DOMContentLoaded", async () => {
 				btn.addEventListener("click", () => {
 					const mId = btn.dataset.movieId
 					const mTitle = btn.dataset.movieTitle
+					const date = btn.dataset.date
 					if (confirm(`Bạn có chắc muốn xóa tất cả suất chiếu của phim "${mTitle}" trong ngày này không?`)) {
-						deleteMovieSchedule(selectedCinema, selectedDate, mId)
+						deleteMovieSchedule(selectedCinema, date, mId)
 						showToast(`Đã xóa toàn bộ lịch chiếu phim "${mTitle}" trong ngày.`, "info")
 						renderShowtimesSection()
 						updateAllBadges()
@@ -864,13 +861,14 @@ document.addEventListener("DOMContentLoaded", async () => {
 			showtimesContainer.querySelectorAll(".btn-edit-slot").forEach(btn => {
 				btn.addEventListener("click", () => {
 					const mId = btn.dataset.movieId
+					const date = btn.dataset.date
 					const time = btn.dataset.time
 					const price = btn.dataset.price
 					const seats = btn.dataset.seats
 					openShowtimeModal({
 						isEdit: true,
 						cinemaId: selectedCinema,
-						date: selectedDate,
+						date,
 						movieId: mId,
 						oldTime: time,
 						time,
@@ -885,8 +883,9 @@ document.addEventListener("DOMContentLoaded", async () => {
 				btn.addEventListener("click", () => {
 					const mId = btn.dataset.movieId
 					const time = btn.dataset.time
+					const date = btn.dataset.date
 					if (confirm(`Xóa suất chiếu lúc ${time}?`)) {
-						deleteShowtimeSlot(selectedCinema, selectedDate, mId, time)
+						deleteShowtimeSlot(selectedCinema, date, mId, time)
 						showToast(`Đã xóa suất chiếu lúc ${time}.`, "info")
 						renderShowtimesSection()
 						updateAllBadges()
@@ -907,6 +906,8 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 		function openShowtimeModal(options = {}) {
 			if (!showtimeModal) return
+			const now = new Date()
+			const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`
 
 			const titleEl = document.getElementById("modal-showtime-title")
 			const cinemaSelectEl = document.getElementById("st-form-cinema")
@@ -943,7 +944,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 				if (options.movieId) movieSelectEl.value = options.movieId
 			}
 
-			if (dateInputEl) dateInputEl.value = options.date || dateInput?.value || "2026-09-26"
+			if (dateInputEl) dateInputEl.value = options.date || today
 			if (screenSelectEl && options.screenName) screenSelectEl.value = options.screenName
 			if (formatSelectEl && options.format) formatSelectEl.value = options.format
 
@@ -1033,7 +1034,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 			closeShowtimeModal()
 			// Sync select values with current inputs
 			if (cinemaSelect) cinemaSelect.value = cinemaId
-			if (dateInput) dateInput.value = date
 			renderShowtimesSection()
 			updateAllBadges()
 		})
