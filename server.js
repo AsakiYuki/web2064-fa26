@@ -506,6 +506,9 @@ server.post('/bookings/:id/cancel', (req, res) => {
 	expirePendingBookings(state)
 	const booking = (state.bookings || []).find(item => String(item.id) === String(req.params.id))
 	if (!booking || String(booking.userId) !== String(caller.id)) return res.status(404).json({ success: false, message: 'Không tìm thấy đơn vé thuộc tài khoản này.' })
+	if (booking.status === 'done' || booking.bookingStatus === 'done' || booking.checkedInAt) {
+		return res.status(409).json({ success: false, message: 'Vé đã soát không thể hủy.' })
+	}
 	if (booking.paymentStatus !== 'pending' || booking.bookingStatus !== 'pending' || Number(booking.holdExpiresAt) <= Date.now()) {
 		return res.status(409).json({ success: false, message: 'Chỉ có thể hủy đơn chưa thanh toán còn trong thời gian giữ ghế. Đơn đã thanh toán cần xử lý theo chính sách hoàn vé.' })
 	}

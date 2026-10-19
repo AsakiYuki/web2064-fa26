@@ -1443,7 +1443,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 							? `<button type="button" class="btn-action-icon btn-checkin-ticket" data-id="${b.id}" style="color: #a6e3a1;" title="Soát vé nhanh (Xác nhận khách đã vào rạp)">✓</button>`
 							: ""
 						}
-								${!isCancelled ? `<button type="button" class="btn-action-icon btn-cancel-admin-ticket" data-id="${b.id}" style="color: #fab387;" title="Hủy vé">✕</button>` : ""}
+								${!isCancelled && !isDone ? `<button type="button" class="btn-action-icon btn-cancel-admin-ticket" data-id="${b.id}" style="color: #fab387;" title="Hủy vé">✕</button>` : ""}
 							</div>
 						</td>
 					</tr>
