@@ -862,6 +862,15 @@
 			border-radius: 4px;
 			font-weight: 700;
 		}
+
+		.ms-date-tag {
+			font-size: 12px;
+			color: $ctp-yellow;
+			background: rgba($ctp-yellow, 0.12);
+			padding: 3px 8px;
+			border-radius: 4px;
+			font-weight: 700;
+		}
 	}
 
 	.slots-chips-grid {

@@ -797,6 +797,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 							<div class="ms-movie-title">
 								<span>🎬</span>
 								<span>${sc.movieTitle}</span>
+								<span class="ms-date-tag">📅 ${formatDateVN(selectedDate)}</span>
 								<span class="ms-format-tag">${sc.screenName || "Phòng 1"} • ${sc.format || "2D"}</span>
 							</div>
 							<div style="display: flex; gap: 8px;">
