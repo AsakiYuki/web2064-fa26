@@ -519,24 +519,26 @@ document.addEventListener("DOMContentLoaded", async () => {
 			})
 		}
 
-		// 2. Start QR Payment Countdown Timer (5 mins)
-		let qrSeconds = 300
+		// 2. Start QR Payment Countdown Timer (Đồng bộ tuyệt đối theo holdExpiresAt)
 		const qrTimerDisplay = document.getElementById("qr-modal-timer")
 		if (qrTimerInterval) clearInterval(qrTimerInterval)
-		if (qrTimerDisplay) qrTimerDisplay.textContent = "05:00"
 
-		qrTimerInterval = setInterval(() => {
-			qrSeconds--
-			if (qrSeconds <= 0) {
-				clearInterval(qrTimerInterval)
-				showToast("Mã QR thanh toán đã hết hạn! Vui lòng thực hiện lại.", "warning", 6000)
-				closeQRModal()
-				return
-			}
-			const m = String(Math.floor(qrSeconds / 60)).padStart(2, "0")
-			const s = String(qrSeconds % 60).padStart(2, "0")
+		const updateQrTimer = () => {
+			const now = Date.now()
+			const remaining = Math.max(0, Math.ceil((holdExpiresAt - now) / 1000))
+			const m = String(Math.floor(remaining / 60)).padStart(2, "0")
+			const s = String(remaining % 60).padStart(2, "0")
 			if (qrTimerDisplay) qrTimerDisplay.textContent = `${m}:${s}`
-		}, 1000)
+
+			if (remaining <= 0) {
+				if (qrTimerInterval) clearInterval(qrTimerInterval)
+				showToast("Thời gian giữ vé và thanh toán đã hết hạn!", "warning", 6000)
+				closeQRModal()
+			}
+		}
+
+		updateQrTimer()
+		qrTimerInterval = setInterval(updateQrTimer, 1000)
 
 		// 3. Open QR Modal
 		if (qrModal) {
