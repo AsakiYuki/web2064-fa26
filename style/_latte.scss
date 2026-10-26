@@ -3672,3 +3672,40 @@
 		}
 	}
 }
+
+[data-theme="latte"] {
+	.admin-seat-unit {
+		border-color: rgba($latte-surface2, 0.5);
+
+		&.seat-standard {
+			background: $latte-surface0;
+			color: $latte-text;
+			border-color: $latte-surface1;
+
+			&:hover {
+				background: $latte-surface1;
+			}
+		}
+
+		&.seat-maintenance {
+			background: rgba($latte-red, 0.1) !important;
+			color: $latte-red !important;
+			border-color: $latte-red !important;
+
+			&::after {
+				background: $latte-base;
+			}
+		}
+	}
+
+	.seat-row-toggle-btn {
+		background: $latte-surface0;
+		color: $latte-text;
+		border-color: $latte-surface1;
+
+		&:hover {
+			background: $latte-surface1;
+			color: $latte-blue;
+		}
+	}
+}
