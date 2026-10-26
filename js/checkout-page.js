@@ -57,6 +57,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 	let initialVoucher = urlParams.get("voucher") || pending?.voucherCode || ""
 	let rawTotal = pending ? (pending.seatsTotal || 0) + (pending.concessionsTotal || 0) : (+urlParams.get("total") || 255000)
 	const concessionsTotal = Number(pending?.concessionsTotal) || 0
+	const knownExpiresAt = pending?.holdExpiresAt || Number(urlParams.get("expiresAt")) || null
 	const serverHold = await apiHoldSeats({
 		holdId,
 		cinemaId,
@@ -64,13 +65,26 @@ document.addEventListener("DOMContentLoaded", async () => {
 		date: dateStr,
 		time: timeSlot,
 		seats: seatsParam.split(",").map(seat => seat.trim()).filter(Boolean),
+		expiresAt: knownExpiresAt,
 	})
 	if (!serverHold.success) {
 		showToast(serverHold.message || "Các ghế này không còn khả dụng. Vui lòng chọn ghế khác.", "error", 7000)
 		window.location.replace(`/booking.html?movieId=${encodeURIComponent(movieId)}&cinemaId=${encodeURIComponent(cinemaId)}&date=${encodeURIComponent(dateStr)}&time=${encodeURIComponent(timeSlot)}`)
 		return
 	}
-	pending.holdExpiresAt = serverHold.expiresAt
+	pending.holdExpiresAt = serverHold.expiresAt || knownExpiresAt || (Date.now() + 300000)
+	savePendingBooking(pending)
+
+	if (pending.holdExpiresAt && Date.now() >= pending.holdExpiresAt) {
+		clearPendingBooking()
+		if (holdId) {
+			releaseSeatHold(holdId)
+			apiReleaseSeatHold(holdId).catch(() => {})
+		}
+		showToast("⏰ Phiên giữ ghế và thanh toán đã hết hạn (5 phút). Vui lòng chọn lại ghế.", "warning", 7000)
+		window.location.replace(`/booking.html?movieId=${encodeURIComponent(movieId)}&cinemaId=${encodeURIComponent(cinemaId)}&date=${encodeURIComponent(dateStr)}&time=${encodeURIComponent(timeSlot)}`)
+		return
+	}
 
 	// If rawTotal wasn't split, deduce fallback
 	if (rawTotal <= 0) rawTotal = 255000
@@ -308,31 +322,66 @@ document.addEventListener("DOMContentLoaded", async () => {
 		})
 	})
 
-	// 6. Hold Countdown Timer (10:00 minutes)
+	// 6. Synchronized Hold & Payment Countdown Timer (Đồng bộ thời gian giữ ghế và thanh toán)
 	let remainingSeconds = pending?.holdExpiresAt
-		? Math.max(10, Math.floor((pending.holdExpiresAt - Date.now()) / 1000))
-		: 600
+		? Math.max(0, Math.floor((pending.holdExpiresAt - Date.now()) / 1000))
+		: 300
+	let hasNotifiedOneMinute = false
 
 	const timerDisplay = document.getElementById("hold-timer-digits")
+	const qrTimerDisplay = document.getElementById("qr-modal-timer")
+
+	function formatTimeDigits(totalSecs) {
+		const m = Math.floor(Math.max(0, totalSecs) / 60)
+		const s = Math.max(0, totalSecs) % 60
+		return `${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`
+	}
+
+	function updateAllTimerDisplays(secs) {
+		const formatted = formatTimeDigits(secs)
+		if (timerDisplay) timerDisplay.textContent = formatted
+		if (qrTimerDisplay) qrTimerDisplay.textContent = formatted
+	}
+
+	// Cập nhật ngay khi tải trang
+	updateAllTimerDisplays(remainingSeconds)
+
 	const timerInterval = setInterval(() => {
-		remainingSeconds--
-		if (remainingSeconds <= 0) {
+		if (isPaymentCompleted) {
 			clearInterval(timerInterval)
-			if (timerDisplay) timerDisplay.textContent = "00:00"
-			if (pending?.holdId) {
-				releaseSeatHold(pending.holdId)
-			}
-			showToast("Thời gian giữ vé đã hết! Vui lòng thực hiện đặt vé lại.", "warning", 8000)
-			document.getElementById("btn-submit-payment")?.setAttribute("disabled", "true")
-			clearPendingBooking()
 			return
 		}
-		const m = String(Math.floor(remainingSeconds / 60)).padStart(2, "0")
-		const s = String(remainingSeconds % 60).padStart(2, "0")
-		if (timerDisplay) timerDisplay.textContent = `${m}:${s}`
+
+		if (pending?.holdExpiresAt) {
+			remainingSeconds = Math.max(0, Math.floor((pending.holdExpiresAt - Date.now()) / 1000))
+		} else {
+			remainingSeconds = Math.max(0, remainingSeconds - 1)
+		}
+
+		updateAllTimerDisplays(remainingSeconds)
+
+		if (remainingSeconds === 60 && !hasNotifiedOneMinute) {
+			hasNotifiedOneMinute = true
+			showToast("⚠️ Thời gian giữ ghế & thanh toán chỉ còn 1 phút! Vui lòng sớm hoàn tất thanh toán.", "warning", 6000)
+		}
+
+		if (remainingSeconds <= 0) {
+			clearInterval(timerInterval)
+			closeQRModal()
+			if (pending?.holdId) {
+				releaseSeatHold(pending.holdId)
+				apiReleaseSeatHold(pending.holdId).catch(() => {})
+			}
+			clearPendingBooking()
+			document.getElementById("btn-submit-payment")?.setAttribute("disabled", "true")
+			showToast("⏰ Đã hết thời gian giữ ghế và thanh toán (5 phút)! Hệ thống đã tự động giải phóng ghế của bạn. Vui lòng chọn lại ghế.", "warning", 8000)
+			setTimeout(() => {
+				window.location.replace(`/booking.html?movieId=${encodeURIComponent(movieId)}&cinemaId=${encodeURIComponent(cinemaId)}&date=${encodeURIComponent(dateStr)}&time=${encodeURIComponent(timeSlot)}`)
+			}, 2500)
+		}
 	}, 1000)
 
-	// 7. Interactive QR Code Payment Confirmation Process
+		// 7. Interactive QR Code Payment Confirmation Process
 	const payForm = document.getElementById("form-checkout-payment")
 	const checkoutLayout = document.getElementById("checkout-main-grid")
 	const eticketSuccessView = document.getElementById("eticket-success-view")
@@ -478,24 +527,13 @@ document.addEventListener("DOMContentLoaded", async () => {
 			})
 		}
 
-		// 2. Start QR Payment Countdown Timer (5 mins)
-		let qrSeconds = 300
-		const qrTimerDisplay = document.getElementById("qr-modal-timer")
-		if (qrTimerInterval) clearInterval(qrTimerInterval)
-		if (qrTimerDisplay) qrTimerDisplay.textContent = "05:00"
-
-		qrTimerInterval = setInterval(() => {
-			qrSeconds--
-			if (qrSeconds <= 0) {
-				clearInterval(qrTimerInterval)
-				showToast("Mã QR thanh toán đã hết hạn! Vui lòng thực hiện lại.", "warning", 6000)
-				closeQRModal()
-				return
-			}
-			const m = String(Math.floor(qrSeconds / 60)).padStart(2, "0")
-			const s = String(qrSeconds % 60).padStart(2, "0")
-			if (qrTimerDisplay) qrTimerDisplay.textContent = `${m}:${s}`
-		}, 1000)
+		// 2. Synchronized QR Payment Timer Check
+		if (remainingSeconds <= 0 || (pending?.holdExpiresAt && Date.now() >= pending.holdExpiresAt)) {
+			showToast("⚠️ Thời gian giữ ghế và thanh toán đã hết hạn! Vui lòng chọn lại ghế.", "warning", 5000)
+			return
+		}
+		// Đồng bộ tức thì hiển thị thời gian còn lại vào modal QR
+		updateAllTimerDisplays(remainingSeconds)
 
 		// 3. Open QR Modal
 		if (qrModal) {
@@ -540,6 +578,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 					concessionsTotal,
 					bookingDate: new Date().toISOString(),
 					holdId,
+					holdExpiresAt: pending?.holdExpiresAt || null,
 					bookingStatus: "pending",
 					paymentStatus: "pending",
 				}
@@ -609,6 +648,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 					customerEmail: email,
 					bookingDate: new Date().toISOString(),
 					holdId,
+					holdExpiresAt: pending?.holdExpiresAt || null,
 					bookingStatus: "pending",
 					paymentStatus: "pending",
 				}
