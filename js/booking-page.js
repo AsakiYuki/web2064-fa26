@@ -105,6 +105,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 	// Hold timer variables (defined early to prevent TDZ access)
 	let holdTimerInterval = null
+	let currentHoldExpiresAt = null
 	let holdSecondsRemaining = 300 // 5 phút = 300 giây
 	let hasNotifiedOneMinute = false
 	let isProceedingToCheckout = false
@@ -114,9 +115,14 @@ document.addEventListener("DOMContentLoaded", async () => {
 		initialStep = 2
 	}
 
-	// Restore hold timer from pending booking if not expired
-	if (isMatchingShowtime && pending?.holdExpiresAt && pending.holdExpiresAt > Date.now()) {
-		holdSecondsRemaining = Math.max(10, Math.floor((pending.holdExpiresAt - Date.now()) / 1000))
+	// Restore hold timer from existing hold or pending booking if not expired
+	const existingHoldBeforeInit = getSeatHold(holdSessionId)
+	if (existingHoldBeforeInit && existingHoldBeforeInit.expiresAt > Date.now()) {
+		currentHoldExpiresAt = existingHoldBeforeInit.expiresAt
+		holdSecondsRemaining = Math.max(0, Math.ceil((currentHoldExpiresAt - Date.now()) / 1000))
+	} else if (isMatchingShowtime && pending?.holdExpiresAt && pending.holdExpiresAt > Date.now()) {
+		currentHoldExpiresAt = pending.holdExpiresAt
+		holdSecondsRemaining = Math.max(0, Math.ceil((currentHoldExpiresAt - Date.now()) / 1000))
 	}
 
 	// Booking State
@@ -140,7 +146,9 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 	if (isMatchingShowtime) {
 		const now = Date.now()
-		const isExpired = pending.holdExpiresAt ? now >= pending.holdExpiresAt : false
+		const isExpired = currentHoldExpiresAt
+			? now >= currentHoldExpiresAt
+			: (pending.holdExpiresAt ? now >= pending.holdExpiresAt : false)
 
 		if (isExpired) {
 			// Phiên giữ ghế đã quá 5 phút trong lúc người dùng rời trang / reload muộn
@@ -148,11 +156,12 @@ document.addEventListener("DOMContentLoaded", async () => {
 			if (pending.holdId) {
 				releaseSeatHold(pending.holdId)
 			}
+			currentHoldExpiresAt = null
 			showToast("⏰ Phiên giữ ghế trước đó của bạn đã hết thời gian (5 phút). Vui lòng chọn lại ghế.", "warning", 6000)
 		} else {
 			// Phiên giữ ghế vẫn còn hiệu lực -> Khôi phục chính xác thời gian còn lại
-			if (pending.holdExpiresAt) {
-				holdSecondsRemaining = Math.max(5, Math.ceil((pending.holdExpiresAt - now) / 1000))
+			if (currentHoldExpiresAt) {
+				holdSecondsRemaining = Math.max(0, Math.ceil((currentHoldExpiresAt - now) / 1000))
 			}
 
 			// Khôi phục danh sách ghế đã chọn
@@ -164,8 +173,8 @@ document.addEventListener("DOMContentLoaded", async () => {
 				const validSeatIds = seatIds.filter(id => !avail.unavailableSeats.includes(id))
 
 				if (validSeatIds.length > 0) {
-					// Gia hạn / xác nhận lại phiên giữ ghế với các ghế hợp lệ
-					holdSeats(currentCinema.id, currentMovie.id, dateStr, timeSlot, validSeatIds, holdSessionId)
+					// Gia hạn / xác nhận lại phiên giữ ghế với các ghế hợp lệ và giữ nguyên mốc expiresAt
+					holdSeats(currentCinema.id, currentMovie.id, dateStr, timeSlot, validSeatIds, holdSessionId, 300000, currentHoldExpiresAt)
 
 					const seatLayout = getShowtimeSeats(currentCinema.id, currentMovie.id, dateStr, timeSlot, {
 						isIMAX,
@@ -468,7 +477,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 				showToast(`Đã bỏ chọn ghế ${id}. Đã hủy giữ ghế.`, "info", 1500)
 			} else {
 				const seatIds = bookingState.selectedSeats.map(s => s.id)
-				holdSeats(currentCinema.id, currentMovie.id, dateStr, timeSlot, seatIds, holdSessionId)
+				holdSeats(currentCinema.id, currentMovie.id, dateStr, timeSlot, seatIds, holdSessionId, 300000, currentHoldExpiresAt)
 				showToast(`Đã bỏ chọn ghế ${id}`, "info", 1200)
 			}
 		} else {
@@ -490,7 +499,10 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 			// Ghi nhận giữ ghế vào hệ thống
 			const seatIds = bookingState.selectedSeats.map(s => s.id)
-			const holdRes = holdSeats(currentCinema.id, currentMovie.id, dateStr, timeSlot, seatIds, holdSessionId)
+			if (!currentHoldExpiresAt || currentHoldExpiresAt <= Date.now()) {
+				currentHoldExpiresAt = Date.now() + 300000
+			}
+			const holdRes = holdSeats(currentCinema.id, currentMovie.id, dateStr, timeSlot, seatIds, holdSessionId, 300000, currentHoldExpiresAt)
 			if (!holdRes.success) {
 				bookingState.selectedSeats.pop()
 				seatEl.classList.remove("seat-selected")
@@ -501,10 +513,13 @@ document.addEventListener("DOMContentLoaded", async () => {
 				renderSeatMap()
 				return
 			}
+			if (holdRes.expiresAt) {
+				currentHoldExpiresAt = holdRes.expiresAt
+			}
 
-			// Nếu đây là ghế đầu tiên, bắt đầu đếm ngược 5 phút
-			if (bookingState.selectedSeats.length === 1) {
-				startHoldCountdown(holdRes.remainingSeconds || 300)
+			// Nếu đây là ghế đầu tiên hoặc timer chưa chạy, bắt đầu đếm ngược
+			if (bookingState.selectedSeats.length === 1 || !holdTimerInterval) {
+				startHoldCountdown(currentHoldExpiresAt)
 				showToast(`Đã chọn ghế ${id}. Hệ thống bắt đầu giữ ghế trong 5 phút!`, "info", 2000)
 			} else {
 				showToast(`Đã chọn ghế ${id}.`, "info", 1200)
@@ -894,7 +909,11 @@ document.addEventListener("DOMContentLoaded", async () => {
 		})
 
 		const currentHold = getSeatHold(holdSessionId)
-		const holdExpiresAt = currentHold?.expiresAt || Date.now() + holdSecondsRemaining * 1000
+		const holdExpiresAt = (currentHoldExpiresAt && currentHoldExpiresAt > Date.now())
+			? currentHoldExpiresAt
+			: (currentHold?.expiresAt && currentHold.expiresAt > Date.now())
+				? currentHold.expiresAt
+				: (Date.now() + holdSecondsRemaining * 1000)
 
 		const pendingPayload = {
 			movieId: currentMovie.id,
@@ -998,8 +1017,8 @@ document.addEventListener("DOMContentLoaded", async () => {
 				updateSummarySidebar()
 				return false
 			}
-			// Gia hạn / làm mới hold cho các ghế này
-			holdSeats(currentCinema.id, currentMovie.id, dateStr, timeSlot, seatIds, holdSessionId)
+			// Gia hạn / làm mới hold cho các ghế này và giữ nguyên mốc thời gian
+			holdSeats(currentCinema.id, currentMovie.id, dateStr, timeSlot, seatIds, holdSessionId, 300000, currentHoldExpiresAt)
 			return true
 		}
 
@@ -1078,11 +1097,15 @@ document.addEventListener("DOMContentLoaded", async () => {
 				const finalTotal = Math.max(0, seatsTotal + concessionsTotal - bookingState.discountAmount)
 
 				const currentHold = getSeatHold(holdSessionId)
-				const holdExpiresAt = currentHold?.expiresAt || (Date.now() + holdSecondsRemaining * 1000)
+				const holdExpiresAt = (currentHoldExpiresAt && currentHoldExpiresAt > Date.now())
+					? currentHoldExpiresAt
+					: (currentHold?.expiresAt && currentHold.expiresAt > Date.now())
+						? currentHold.expiresAt
+						: (Date.now() + holdSecondsRemaining * 1000)
 
 				syncPendingBookingToStorage(seatsTotal, concessionsTotal, finalTotal)
 
-				const checkoutUrl = `/checkout.html?movieId=${encodeURIComponent(currentMovie.id)}&cinemaId=${encodeURIComponent(currentCinema.id)}&date=${encodeURIComponent(dateStr)}&time=${encodeURIComponent(timeSlot)}&screen=${encodeURIComponent(screenName)}&format=${encodeURIComponent(formatName)}&seats=${encodeURIComponent(seatNames)}&concessions=${encodeURIComponent(concessionsStr)}&voucher=${encodeURIComponent(bookingState.appliedCoupon || "")}&discount=${bookingState.discountAmount}&total=${finalTotal}&holdId=${encodeURIComponent(holdSessionId)}&expiresAt=${encodeURIComponent(holdExpiresAt)}`
+				const checkoutUrl = `/checkout.html?movieId=${encodeURIComponent(currentMovie.id)}&cinemaId=${encodeURIComponent(currentCinema.id)}&date=${encodeURIComponent(dateStr)}&time=${encodeURIComponent(timeSlot)}&screen=${encodeURIComponent(screenName)}&format=${encodeURIComponent(formatName)}&seats=${encodeURIComponent(seatNames)}&concessions=${encodeURIComponent(concessionsStr)}&voucher=${encodeURIComponent(bookingState.appliedCoupon || "")}&discount=${bookingState.discountAmount}&total=${finalTotal}&holdId=${encodeURIComponent(holdSessionId)}&holdExpiresAt=${encodeURIComponent(holdExpiresAt)}&expiresAt=${encodeURIComponent(holdExpiresAt)}`
 
 				isProceedingToCheckout = true
 				window.location.href = checkoutUrl
@@ -1335,12 +1358,15 @@ document.addEventListener("DOMContentLoaded", async () => {
 		const formatted = formatTimeDigits(secs)
 		const sidebarTimerEl = document.getElementById("booking-timer-countdown")
 		const hallTimerEl = document.getElementById("hall-timer-digits")
+		const concessionsTimerEl = document.getElementById("concessions-timer-digits")
 		const sidebarBadge = document.getElementById("booking-timer-badge")
 		const hallTag = document.getElementById("hall-countdown-tag")
+		const concessionsTag = document.getElementById("concessions-countdown-tag")
 		const timerSubtext = sidebarBadge?.querySelector(".timer-subtext")
 
 		if (sidebarTimerEl) sidebarTimerEl.textContent = formatted
 		if (hallTimerEl) hallTimerEl.textContent = formatted
+		if (concessionsTimerEl) concessionsTimerEl.textContent = formatted
 
 		// Trạng thái nghỉ (chưa chọn ghế nào)
 		if (!isActive || bookingState.selectedSeats.length === 0) {
@@ -1349,6 +1375,9 @@ document.addEventListener("DOMContentLoaded", async () => {
 			}
 			if (hallTag) {
 				hallTag.classList.remove("timer-danger", "timer-active")
+			}
+			if (concessionsTag) {
+				concessionsTag.classList.remove("timer-danger", "timer-active")
 			}
 			if (timerSubtext) timerSubtext.textContent = "Chưa chọn ghế"
 			return
@@ -1365,6 +1394,10 @@ document.addEventListener("DOMContentLoaded", async () => {
 		if (hallTag) {
 			hallTag.classList.add("timer-active")
 			hallTag.classList.toggle("timer-danger", isDanger)
+		}
+		if (concessionsTag) {
+			concessionsTag.classList.add("timer-active")
+			concessionsTag.classList.toggle("timer-danger", isDanger)
 		}
 
 		if (secs === 60 && !hasNotifiedOneMinute) {
@@ -1408,18 +1441,38 @@ document.addEventListener("DOMContentLoaded", async () => {
 		}
 	}
 
-	function startHoldCountdown(resetToMax = false) {
-		if (holdTimerInterval) clearInterval(holdTimerInterval)
-		if (resetToMax || !holdSecondsRemaining || holdSecondsRemaining <= 0) {
-			holdSecondsRemaining = 300
+	function startHoldCountdown(targetExpiresAt = null) {
+		if (holdTimerInterval) {
+			clearInterval(holdTimerInterval)
+			holdTimerInterval = null
 		}
-		hasNotifiedOneMinute = false
-		updateHoldTimerUI(holdSecondsRemaining, true)
 
-		holdTimerInterval = setInterval(() => {
-			holdSecondsRemaining--
-			updateHoldTimerUI(holdSecondsRemaining, true)
-		}, 1000)
+		const now = Date.now()
+		if (typeof targetExpiresAt === "number" && targetExpiresAt > now) {
+			currentHoldExpiresAt = targetExpiresAt
+		} else if (!currentHoldExpiresAt || currentHoldExpiresAt <= now) {
+			currentHoldExpiresAt = now + 300000
+		}
+
+		hasNotifiedOneMinute = false
+
+		const tick = () => {
+			const currentTime = Date.now()
+			const remaining = Math.max(0, Math.ceil((currentHoldExpiresAt - currentTime) / 1000))
+			holdSecondsRemaining = remaining
+			updateHoldTimerUI(remaining, true)
+
+			if (remaining <= 0) {
+				if (holdTimerInterval) {
+					clearInterval(holdTimerInterval)
+					holdTimerInterval = null
+				}
+				currentHoldExpiresAt = null
+			}
+		}
+
+		tick()
+		holdTimerInterval = setInterval(tick, 1000)
 	}
 
 	function stopHoldCountdown() {
@@ -1427,6 +1480,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 			clearInterval(holdTimerInterval)
 			holdTimerInterval = null
 		}
+		currentHoldExpiresAt = null
 		holdSecondsRemaining = 300
 		hasNotifiedOneMinute = false
 		updateHoldTimerUI(300, false)
@@ -1435,10 +1489,15 @@ document.addEventListener("DOMContentLoaded", async () => {
 	function initHoldTimer() {
 		if (bookingState.selectedSeats.length > 0) {
 			const existingHold = getSeatHold(holdSessionId)
-			const secs = existingHold
-				? Math.max(0, Math.ceil((existingHold.expiresAt - Date.now()) / 1000))
-				: holdSecondsRemaining
-			startHoldCountdown(secs || holdSecondsRemaining || 300)
+			const targetExp = (currentHoldExpiresAt && currentHoldExpiresAt > Date.now())
+				? currentHoldExpiresAt
+				: (existingHold?.expiresAt && existingHold.expiresAt > Date.now())
+					? existingHold.expiresAt
+					: (pending?.holdExpiresAt && pending.holdExpiresAt > Date.now())
+						? pending.holdExpiresAt
+						: null
+
+			startHoldCountdown(targetExp)
 		} else {
 			stopHoldCountdown()
 		}

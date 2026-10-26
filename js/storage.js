@@ -1670,7 +1670,7 @@ export function getSeatHold(holdId) {
  * Đăng ký giữ ghế cho người dùng trong thời gian quy định (mặc định 5 phút = 300.000ms)
  * Trả về { success: boolean, holdId: string, expiresAt: number, remainingSeconds: number, message?: string }
  */
-export function holdSeats(cinemaId, movieId, date, time, seatIds = [], holdId = null, durationMs = 300000) {
+export function holdSeats(cinemaId, movieId, date, time, seatIds = [], holdId = null, durationMs = 300000, explicitExpiresAt = null) {
 	const sId = holdId || getOrCreateHoldSessionId()
 	const cleanSeats = Array.isArray(seatIds)
 		? seatIds
@@ -1741,12 +1741,12 @@ export function holdSeats(cinemaId, movieId, date, time, seatIds = [], holdId = 
 	// 3. Cập nhật hoặc tạo mới phiên giữ ghế
 	const now = Date.now()
 	const existingIdx = active.findIndex(h => h.holdId === sId)
-	let expiresAt = now + durationMs
+	let expiresAt = explicitExpiresAt && explicitExpiresAt > now ? explicitExpiresAt : now + durationMs
 
 	if (existingIdx > -1) {
 		const existing = active[existingIdx]
 		// Giữ nguyên mốc thời gian còn lại nếu chưa hết hạn
-		if (existing.expiresAt > now + 15000) {
+		if (existing.expiresAt > now) {
 			expiresAt = existing.expiresAt
 		}
 		active[existingIdx] = {
