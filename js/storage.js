@@ -36,6 +36,9 @@ import {
 	apiDemoConfirmPayment,
 	apiCancelBooking,
 	apiGetCinemas,
+	apiCreateCinema,
+	apiUpdateCinema,
+	apiDeleteCinema,
 	apiGetGenres,
 	apiGetBanners,
 	apiGetPromotions,
@@ -1419,11 +1422,52 @@ function syncSoldSeatsFromBookings(seatLayout, cinemaId, movieId, date, time) {
 	return seatLayout
 }
 
+function syncMaintenanceSeatsFromScreen(seatLayout, cinemaId, movieId, date, time, options = {}) {
+	try {
+		const showtimes = storageGet(STORAGE_KEYS.SHOWTIMES, [])
+		let matchedScreenId = options.screenId || null
+		if (!matchedScreenId && Array.isArray(showtimes)) {
+			for (const entry of showtimes) {
+				if (entry.cinemaId === cinemaId && entry.date === date) {
+					const sc = entry.schedules?.find(s => s.movieId === movieId && s.slots?.some(sl => sl.time === time))
+					if (sc?.screenId) {
+						matchedScreenId = sc.screenId
+						break
+					}
+				}
+			}
+		}
+		if (matchedScreenId) {
+			const screenKey = `beta_screen_layout_${cinemaId}_${matchedScreenId}`
+			const screenLayout = storageGet(screenKey)
+			if (Array.isArray(screenLayout)) {
+				screenLayout.forEach(rowBlock => {
+					rowBlock.seats?.forEach(s => {
+						if (s.status === "maintenance") {
+							for (const r of seatLayout) {
+								const target = r.seats?.find(st => st.id === s.id)
+								if (target) {
+									target.status = "maintenance"
+									break
+								}
+							}
+						}
+					})
+				})
+			}
+		}
+	} catch (e) {
+		console.warn("[Storage] Error syncing maintenance seats:", e)
+	}
+	return seatLayout
+}
+
 export function getShowtimeSeats(cinemaId, movieId, date, time, options = {}) {
 	const key = getShowtimeStorageKey(cinemaId, movieId, date, time)
 	const cached = storageGet(key)
 	if (cached && Array.isArray(cached) && cached.length >= 12) {
 		syncSoldSeatsFromBookings(cached, cinemaId, movieId, date, time)
+		syncMaintenanceSeatsFromScreen(cached, cinemaId, movieId, date, time, options)
 		storageSet(key, cached)
 		return cached
 	}
@@ -1499,6 +1543,7 @@ export function getShowtimeSeats(cinemaId, movieId, date, time, options = {}) {
 	})
 
 	syncSoldSeatsFromBookings(seatLayout, cinemaId, movieId, date, time)
+	syncMaintenanceSeatsFromScreen(seatLayout, cinemaId, movieId, date, time, options)
 	storageSet(key, seatLayout)
 	return seatLayout
 }
@@ -2063,6 +2108,216 @@ export function setCurrentCinemaId(cinemaId) {
 		)
 	}
 	return cinemaId
+}
+
+/* ==========================================================================
+   CINEMA SCREENS & SEAT MANAGEMENT
+   ========================================================================== */
+
+export function getCinemaById(cinemaId) {
+	const cinemas = getCinemas()
+	return cinemas.find(c => c.id === cinemaId) || null
+}
+
+export function saveCinemas(cinemas) {
+	storageSet(STORAGE_KEYS.CINEMAS, cinemas)
+}
+
+export async function addCinemaScreen(cinemaId, screenData) {
+	const cinemas = getCinemas()
+	const cinema = cinemas.find(c => c.id === cinemaId)
+	if (!cinema) return { success: false, error: "Cinema not found" }
+	if (!Array.isArray(cinema.screens)) cinema.screens = []
+
+	const prefix = (cinema.id || "CINEMA").replace(/^beta-/, "").toUpperCase()
+	const nextIdx = cinema.screens.length + 1
+	const screenId = screenData.screenId?.trim() || `${prefix}-P${nextIdx}`
+	const totalSeats = Number(screenData.totalSeats) || 120
+
+	const newScreen = {
+		screenId,
+		name: screenData.name?.trim() || `Phòng chiếu ${nextIdx}`,
+		type: screenData.type || "2D",
+		totalSeats,
+		soundSystem: screenData.soundSystem || "Dolby 7.1",
+		status: screenData.status || "active",
+	}
+
+	cinema.screens.push(newScreen)
+	saveCinemas(cinemas)
+	apiUpdateCinema(cinemaId, { screens: cinema.screens }).catch(err => {
+		console.warn("[API] Lỗi khi cập nhật danh sách phòng chiếu lên server:", err)
+	})
+
+	return { success: true, screen: newScreen }
+}
+
+export async function updateCinemaScreen(cinemaId, screenId, updates) {
+	const cinemas = getCinemas()
+	const cinema = cinemas.find(c => c.id === cinemaId)
+	if (!cinema || !Array.isArray(cinema.screens)) return { success: false, error: "Screen not found" }
+
+	const idx = cinema.screens.findIndex(s => s.screenId === screenId)
+	if (idx === -1) return { success: false, error: "Screen not found" }
+
+	cinema.screens[idx] = {
+		...cinema.screens[idx],
+		...updates,
+		totalSeats: updates.totalSeats !== undefined ? Number(updates.totalSeats) : cinema.screens[idx].totalSeats,
+	}
+
+	saveCinemas(cinemas)
+	apiUpdateCinema(cinemaId, { screens: cinema.screens }).catch(err => {
+		console.warn("[API] Lỗi khi cập nhật phòng chiếu lên server:", err)
+	})
+
+	return { success: true, screen: cinema.screens[idx] }
+}
+
+export async function deleteCinemaScreen(cinemaId, screenId) {
+	const cinemas = getCinemas()
+	const cinema = cinemas.find(c => c.id === cinemaId)
+	if (!cinema || !Array.isArray(cinema.screens)) return { success: false, error: "Screen not found" }
+
+	cinema.screens = cinema.screens.filter(s => s.screenId !== screenId)
+	saveCinemas(cinemas)
+	apiUpdateCinema(cinemaId, { screens: cinema.screens }).catch(err => {
+		console.warn("[API] Lỗi khi xóa phòng chiếu trên server:", err)
+	})
+
+	return { success: true }
+}
+
+const SCREEN_SEATS_KEY_PREFIX = "beta_screen_layout_"
+
+export function getScreenSeatLayoutKey(cinemaId, screenId) {
+	return `${SCREEN_SEATS_KEY_PREFIX}${cinemaId}_${screenId}`
+}
+
+export function getScreenSeatLayout(cinemaId, screenId, options = {}) {
+	const key = getScreenSeatLayoutKey(cinemaId, screenId)
+	const cached = storageGet(key)
+	if (cached && Array.isArray(cached) && cached.length > 0) {
+		return cached
+	}
+
+	const cinemas = getCinemas()
+	const cinema = cinemas.find(c => c.id === cinemaId)
+	const screen = cinema?.screens?.find(s => s.screenId === screenId)
+	const isIMAX = Boolean(screen?.type?.toLowerCase().includes("imax") || options.isIMAX)
+
+	const basePrice = isIMAX ? 120000 : 70000
+	const vipPrice = basePrice + 10000
+	const sweetboxPrice = basePrice * 2 + 15000
+
+	const rowDefs = [
+		{ row: "A", type: "standard", price: basePrice, count: 14 },
+		{ row: "B", type: "standard", price: basePrice, count: 14 },
+		{ row: "C", type: "standard", price: basePrice, count: 14 },
+		{ row: "D", type: "standard", price: basePrice, count: 14 },
+		{ row: "E", type: "vip", price: vipPrice, count: 14 },
+		{ row: "F", type: "vip", price: vipPrice, count: 14 },
+		{ row: "G", type: "vip", price: vipPrice, count: 14 },
+		{ row: "H", type: "vip", price: vipPrice, count: 14 },
+		{ row: "J", type: "vip", price: vipPrice, count: 14 },
+		{ row: "K", type: "vip", price: vipPrice, count: 14 },
+		{ row: "L", type: "sweetbox", price: sweetboxPrice, count: 6 },
+		{ row: "M", type: "sweetbox", price: sweetboxPrice, count: 6 },
+	]
+
+	const layout = rowDefs.map(rd => {
+		const isSweetbox = rd.type === "sweetbox"
+		const seats = []
+		if (isSweetbox) {
+			for (let c = 1; c <= rd.count; c++) {
+				const c1 = String(c * 2 - 1).padStart(2, "0")
+				const c2 = String(c * 2).padStart(2, "0")
+				seats.push({
+					id: `${rd.row}${c1}-${rd.row}${c2}`,
+					row: rd.row,
+					col: c,
+					type: rd.type,
+					price: rd.price,
+					status: "available",
+				})
+			}
+		} else {
+			for (let c = 1; c <= rd.count; c++) {
+				seats.push({
+					id: `${rd.row}${String(c).padStart(2, "0")}`,
+					row: rd.row,
+					col: c,
+					type: rd.type,
+					price: rd.price,
+					status: "available",
+				})
+			}
+		}
+		return {
+			row: rd.row,
+			type: rd.type,
+			price: rd.price,
+			seats,
+		}
+	})
+
+	storageSet(key, layout)
+	return layout
+}
+
+export function saveScreenSeatLayout(cinemaId, screenId, layout) {
+	const key = getScreenSeatLayoutKey(cinemaId, screenId)
+	storageSet(key, layout)
+	return { success: true }
+}
+
+export function updateScreenSeatStatus(cinemaId, screenId, seatId, newStatus) {
+	const layout = getScreenSeatLayout(cinemaId, screenId)
+	let found = false
+	for (const rowBlock of layout) {
+		const seat = rowBlock.seats.find(s => s.id === seatId)
+		if (seat) {
+			seat.status = newStatus
+			found = true
+			break
+		}
+	}
+	if (found) {
+		saveScreenSeatLayout(cinemaId, screenId, layout)
+		return { success: true }
+	}
+	return { success: false, error: "Seat not found" }
+}
+
+export function toggleRowSeatStatus(cinemaId, screenId, rowLetter, newStatus) {
+	const layout = getScreenSeatLayout(cinemaId, screenId)
+	const rowBlock = layout.find(r => r.row === rowLetter)
+	if (rowBlock) {
+		rowBlock.seats.forEach(s => {
+			s.status = newStatus
+		})
+		saveScreenSeatLayout(cinemaId, screenId, layout)
+		return { success: true }
+	}
+	return { success: false, error: "Row not found" }
+}
+
+export function updateSeatAttributes(cinemaId, screenId, seatId, updates = {}) {
+	const layout = getScreenSeatLayout(cinemaId, screenId)
+	let found = false
+	for (const rowBlock of layout) {
+		const seat = rowBlock.seats.find(s => s.id === seatId)
+		if (seat) {
+			Object.assign(seat, updates)
+			found = true
+			break
+		}
+	}
+	if (found) {
+		saveScreenSeatLayout(cinemaId, screenId, layout)
+		return { success: true }
+	}
+	return { success: false, error: "Seat not found" }
 }
 
 export function getTicketPricing() {
