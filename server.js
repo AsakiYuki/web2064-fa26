@@ -428,11 +428,20 @@ server.post('/seat-holds', (req, res) => {
 	if (cleanSeats.some(seat => isSeedSeatSold(cinemaId, movieId, date, time, seat))) {
 		return res.status(409).json({ success: false, message: 'Một hoặc nhiều ghế đã được bán. Vui lòng chọn ghế khác.' })
 	}
-	const expiresAt = now + 300000
+	const existingHold = activeHolds.find(h => h.holdId === holdId)
+	const requestedExpiresAt = Number(req.body?.expiresAt)
+	let expiresAt = now + 300000
+
+	if (existingHold && Number(existingHold.expiresAt) > now) {
+		expiresAt = Number(existingHold.expiresAt)
+	} else if (requestedExpiresAt && requestedExpiresAt > now && requestedExpiresAt <= now + 305000) {
+		expiresAt = requestedExpiresAt
+	}
+
 	state.seat_holds = activeHolds.filter(h => h.holdId !== holdId)
 	state.seat_holds.push({ holdId: String(holdId), cinemaId, movieId, date, time, seats: cleanSeats, expiresAt })
 	persistState(state)
-	return res.json({ success: true, holdId, expiresAt, remainingSeconds: 300 })
+	return res.json({ success: true, holdId, expiresAt, remainingSeconds: Math.max(0, Math.ceil((expiresAt - now) / 1000)) })
 })
 
 server.delete('/seat-holds/:holdId', (req, res) => {
