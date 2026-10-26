@@ -163,6 +163,27 @@
 					<span>Lịch Sử Đơn Vé</span>
 					<span class="nav-count-badge" id="badge-bookings-count">0</span>
 				</button>
+
+				<button type="button" class="admin-nav-item" data-tab="screens" id="nav-btn-screens">
+					<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+						<rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
+						<line x1="8" y1="21" x2="16" y2="21"></line>
+						<line x1="12" y1="17" x2="12" y2="21"></line>
+					</svg>
+					<span>Phòng Chiếu Rạp</span>
+					<span class="nav-count-badge" id="badge-screens-count">0</span>
+				</button>
+
+				<button type="button" class="admin-nav-item" data-tab="seats" id="nav-btn-seats">
+					<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+						<path d="M19 9V6a2 2 0 0 0-2-2H7a2 2 0 0 0-2 2v3"></path>
+						<path d="M3 11v5a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2z"></path>
+						<path d="M5 18v3"></path>
+						<path d="M19 18v3"></path>
+					</svg>
+					<span>Quản Lý Sơ Đồ Ghế</span>
+					<span class="nav-count-badge" id="badge-seats-count">0</span>
+				</button>
 			</nav>
 
 			<div class="sidebar-footer">
@@ -313,6 +334,17 @@
 							<div class="kpi-subtext">
 								<span class="badge-trend trend-up">4 danh mục</span>
 								<span>combo & ăn vặt</span>
+							</div>
+						</div>
+
+						<div class="kpi-card" style="border-left: 4px solid #89dceb;">
+							<div class="kpi-icon-wrap" style="background: rgba(137, 220, 235, 0.15); color: #89dceb;">🎦
+							</div>
+							<span class="kpi-label">Phòng Chiếu Hệ Thống</span>
+							<span class="kpi-value" id="kpi-screens-total">0</span>
+							<div class="kpi-subtext">
+								<span class="badge-trend trend-up" id="kpi-cinemas-count">10 cụm rạp</span>
+								<span>2D, 3D, IMAX</span>
 							</div>
 						</div>
 					</div>
@@ -569,6 +601,175 @@
 						</div>
 					</div>
 				</section>
+
+				<!-- ==================== TAB 6: QUẢN LÝ PHÒNG CHIẾU RẠP ==================== -->
+				<section class="admin-tab-panel" id="tab-panel-screens">
+					<div class="admin-actions-bar">
+						<div class="actions-group">
+							<button type="button" class="btn-admin-primary" id="btn-open-add-screen-modal"
+								style="background: #89dceb; color: #11111b;">
+								➕ Thêm Phòng Chiếu Mới
+							</button>
+							<select class="admin-filter-select" id="filter-screens-cinema">
+								<option value="all">Tất cả cụm rạp</option>
+								<!-- Populated dynamically -->
+							</select>
+							<select class="admin-filter-select" id="filter-screens-type">
+								<option value="all">Tất cả định dạng</option>
+								<option value="2D">2D Tiêu Chuẩn</option>
+								<option value="3D">3D Kỹ Thuật Số</option>
+								<option value="IMAX 3D">IMAX 3D</option>
+								<option value="4DX">4DX Trải Nghiệm</option>
+								<option value="ScreenX">ScreenX 270°</option>
+							</select>
+						</div>
+						<div class="actions-group">
+							<input type="text" class="admin-search-input" id="search-screens-input"
+								placeholder="Tìm tên phòng, mã phòng, rạp..." />
+						</div>
+					</div>
+
+					<div class="admin-kpi-grid" style="grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); margin-bottom: 20px;">
+						<div class="kpi-card" style="border-left: 4px solid #89dceb;">
+							<span class="kpi-label">Tổng Phòng Chiếu</span>
+							<span class="kpi-value" id="kpi-screen-total-count" style="font-size: 22px;">0</span>
+							<div class="kpi-subtext"><span>Toàn bộ cụm rạp</span></div>
+						</div>
+						<div class="kpi-card" style="border-left: 4px solid #a6e3a1;">
+							<span class="kpi-label">Phòng Hoạt Động</span>
+							<span class="kpi-value" id="kpi-screen-active-count" style="font-size: 22px; color: #a6e3a1;">0</span>
+							<div class="kpi-subtext"><span>Sẵn sàng chiếu phim</span></div>
+						</div>
+						<div class="kpi-card" style="border-left: 4px solid #cba6f7;">
+							<span class="kpi-label">Phòng IMAX / 3D / 4DX</span>
+							<span class="kpi-value" id="kpi-screen-premium-count" style="font-size: 22px; color: #cba6f7;">0</span>
+							<div class="kpi-subtext"><span>Định dạng cao cấp</span></div>
+						</div>
+						<div class="kpi-card" style="border-left: 4px solid #fab387;">
+							<span class="kpi-label">Tổng Sức Chứa Ghế</span>
+							<span class="kpi-value" id="kpi-screen-seats-sum" style="font-size: 22px; color: #fab387;">0</span>
+							<div class="kpi-subtext"><span>Ghế ngồi phục vụ</span></div>
+						</div>
+					</div>
+
+					<div class="admin-card">
+						<div class="card-head">
+							<h2>Hệ Thống Phòng Chiếu Của Các Cụm Rạp</h2>
+							<span class="card-subtitle" id="screens-count-text">Hiển thị 0 phòng</span>
+						</div>
+						<div class="admin-table-wrap">
+							<table class="admin-data-table">
+								<thead>
+									<tr>
+										<th>Mã Phòng</th>
+										<th>Tên Phòng</th>
+										<th>Cụm Rạp</th>
+										<th>Loại Phòng</th>
+										<th>Sức Chứa Ghế</th>
+										<th>Âm Thanh</th>
+										<th>Trạng Thái</th>
+										<th style="text-align: center; min-width: 170px;">Thao Tác</th>
+									</tr>
+								</thead>
+								<tbody id="admin-screens-table-tbody">
+									<!-- Populated dynamically -->
+								</tbody>
+							</table>
+						</div>
+					</div>
+				</section>
+
+				<!-- ==================== TAB 7: QUẢN LÝ GHẾ & SƠ ĐỒ PHÒNG CHIẾU ==================== -->
+				<section class="admin-tab-panel" id="tab-panel-seats">
+					<div class="admin-actions-bar" style="flex-wrap: wrap; gap: 12px;">
+						<div class="actions-group">
+							<label style="font-size: 13px; font-weight: 600; color: #cdd6f4; display: flex; align-items: center; gap: 6px;">
+								<span>Cụm Rạp:</span>
+								<select class="admin-filter-select" id="seat-filter-cinema" style="min-width: 200px;">
+									<!-- Populated dynamically -->
+								</select>
+							</label>
+							<label style="font-size: 13px; font-weight: 600; color: #cdd6f4; display: flex; align-items: center; gap: 6px;">
+								<span>Phòng Chiếu:</span>
+								<select class="admin-filter-select" id="seat-filter-screen" style="min-width: 180px;">
+									<!-- Populated dynamically -->
+								</select>
+							</label>
+						</div>
+
+						<div class="actions-group">
+							<button type="button" class="btn-admin-secondary" id="btn-seat-toggle-mode"
+								style="font-size: 13px; font-weight: 600;">
+								🔧 Chế độ: <span id="seat-mode-label" style="color: #89b4fa;">Nhấp Đổi Trạng Thái</span>
+							</button>
+							<button type="button" class="btn-admin-secondary" id="btn-seat-reset-layout"
+								title="Khôi phục lại layout tiêu chuẩn">
+								🔄 Khôi Phục Mặc Định
+							</button>
+							<button type="button" class="btn-admin-primary" id="btn-seat-save-layout"
+								style="background: #a6e3a1; color: #11111b;">
+								💾 Lưu Cấu Hình Ghế
+							</button>
+						</div>
+					</div>
+
+					<!-- SCREEN & SEAT INFO CARD -->
+					<div class="admin-card" style="margin-bottom: 20px;">
+						<div class="card-head" style="flex-wrap: wrap; gap: 12px;">
+							<div>
+								<h2 id="seat-screen-title">Sơ Đồ Ghế Phòng Chiếu</h2>
+								<span class="card-subtitle" id="seat-screen-meta">Đang tải thông tin phòng...</span>
+							</div>
+
+							<!-- SEAT LEGEND & COUNTERS -->
+							<div class="seat-admin-legend" style="display: flex; gap: 14px; flex-wrap: wrap; align-items: center;">
+								<div class="legend-chip" style="display: flex; align-items: center; gap: 6px; font-size: 13px;">
+									<span style="display: inline-block; width: 18px; height: 18px; border-radius: 4px; background: #313244; border: 1px solid #45475a;"></span>
+									<span>Standard (<b id="seat-cnt-standard" style="color:#cdd6f4;">0</b>)</span>
+								</div>
+								<div class="legend-chip" style="display: flex; align-items: center; gap: 6px; font-size: 13px;">
+									<span style="display: inline-block; width: 18px; height: 18px; border-radius: 4px; background: #fab387;"></span>
+									<span>VIP (<b id="seat-cnt-vip" style="color:#fab387;">0</b>)</span>
+								</div>
+								<div class="legend-chip" style="display: flex; align-items: center; gap: 6px; font-size: 13px;">
+									<span style="display: inline-block; width: 26px; height: 18px; border-radius: 4px; background: #f38ba8;"></span>
+									<span>Sweetbox (<b id="seat-cnt-sweetbox" style="color:#f38ba8;">0</b>)</span>
+								</div>
+								<div class="legend-chip" style="display: flex; align-items: center; gap: 6px; font-size: 13px;">
+									<span style="display: inline-block; width: 18px; height: 18px; border-radius: 4px; background: #585b70; border: 1px dashed #f38ba8; position: relative;">
+										<span style="position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 10px; color: #f38ba8;">✕</span>
+									</span>
+									<span>Bảo Trì / Khóa (<b id="seat-cnt-maintenance" style="color:#f38ba8;">0</b>)</span>
+								</div>
+							</div>
+						</div>
+
+						<div class="card-body">
+							<!-- SCREEN BANNER -->
+							<div class="admin-screen-visual-wrap" style="text-align: center; margin: 15px 0 25px;">
+								<div class="admin-screen-visual-bar" style="margin: 0 auto; max-width: 680px; height: 8px; background: linear-gradient(90deg, transparent, #89dceb, transparent); border-radius: 4px; box-shadow: 0 4px 14px rgba(137, 220, 235, 0.4);"></div>
+								<span style="font-size: 11px; font-weight: 700; letter-spacing: 3px; color: #a6adc8; text-transform: uppercase; margin-top: 6px; display: inline-block;">🎬 MÀN HÌNH CHIẾU / SCREEN</span>
+							</div>
+
+							<!-- QUICK INSTRUCTION NOTE -->
+							<div class="admin-seat-instruction" style="background: rgba(137, 180, 250, 0.08); border: 1px dashed rgba(137, 180, 250, 0.3); border-radius: 8px; padding: 10px 16px; margin-bottom: 20px; font-size: 13px; color: #bac2de; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+								<div>
+									💡 <b>Hướng dẫn quản lý:</b> Nhấp trực tiếp vào ghế để đổi trạng thái (<b>Hoạt động ⟷ Bảo trì/Khóa</b>). Nhấp đúp vào ghế hoặc nhấp nút chữ cái đầu hàng để chỉnh sửa nhanh cả hàng ghế.
+								</div>
+								<div style="font-size: 12px; color: #fab387;">
+									⚙️ Ghế khóa/bảo trì sẽ tự động không cho khách đặt trên trang mua vé
+								</div>
+							</div>
+
+							<!-- SEAT MAP MATRIX CONTAINER -->
+							<div class="admin-seat-map-wrapper" style="overflow-x: auto; padding: 15px 5px; text-align: center;">
+								<div class="admin-seat-grid" id="admin-seat-grid">
+									<!-- Dynamically populated rows and seats -->
+								</div>
+							</div>
+						</div>
+					</div>
+				</section>
 			</main>
 		</div>
 	</div>
@@ -805,6 +1006,107 @@
 			<button class="btn-close-modal" id="modal-admin-ticket-close"
 				style="position: absolute; top: 14px; right: 14px; z-index: 10; color: #cdd6f4; font-size: 24px;">&times;</button>
 			<div id="modal-admin-ticket-body"></div>
+		</div>
+	</div>
+
+	<!-- MODAL: ADD / EDIT SCREEN -->
+	<div class="admin-modal-backdrop" id="modal-screen">
+		<div class="admin-modal-card" style="max-width: 580px;">
+			<div class="modal-card-header">
+				<h3 id="modal-screen-title">Thêm Phòng Chiếu Mới</h3>
+				<button type="button" class="btn-close-modal" id="modal-screen-close">&times;</button>
+			</div>
+			<form id="form-admin-screen" class="modal-card-body">
+				<input type="hidden" id="sc-is-edit" value="false" />
+				<div class="admin-form-grid">
+					<div class="form-field form-col-full">
+						<label for="sc-cinema-id">Cụm Rạp Chiếu <span style="color:#f38ba8;">*</span></label>
+						<select id="sc-cinema-id" required>
+							<!-- Populated dynamically -->
+						</select>
+					</div>
+					<div class="form-field">
+						<label for="sc-id">Mã Phòng Chiếu <span style="color:#f38ba8;">*</span></label>
+						<input type="text" id="sc-id" placeholder="Ví dụ: TN-P1, IMAX-01" required />
+					</div>
+					<div class="form-field">
+						<label for="sc-name">Tên Hiển Thị Phòng <span style="color:#f38ba8;">*</span></label>
+						<input type="text" id="sc-name" placeholder="Ví dụ: Phòng chiếu 1, Phòng IMAX" required />
+					</div>
+					<div class="form-field">
+						<label for="sc-type">Loại / Định Dạng Chiếu <span style="color:#f38ba8;">*</span></label>
+						<select id="sc-type" required>
+							<option value="2D">2D Tiêu Chuẩn</option>
+							<option value="3D">3D Kỹ Thuật Số</option>
+							<option value="IMAX 3D">IMAX 3D Laser</option>
+							<option value="4DX">4DX Trải Nghiệm</option>
+							<option value="ScreenX">ScreenX Đa Chiều 270°</option>
+						</select>
+					</div>
+					<div class="form-field">
+						<label for="sc-total-seats">Sức Chứa / Tổng Số Ghế <span style="color:#f38ba8;">*</span></label>
+						<input type="number" id="sc-total-seats" min="20" max="500" value="120" required />
+					</div>
+					<div class="form-field">
+						<label for="sc-sound">Hệ Thống Âm Thanh</label>
+						<select id="sc-sound">
+							<option value="Dolby 7.1">Dolby Surround 7.1</option>
+							<option value="Dolby Atmos">Dolby Atmos Đa Chiều</option>
+							<option value="Dolby 5.1">Dolby Digital 5.1</option>
+							<option value="DTS:X">DTS:X Studio Cinema</option>
+						</select>
+					</div>
+					<div class="form-field">
+						<label for="sc-status">Trạng Thái Vận Hành</label>
+						<select id="sc-status">
+							<option value="active">🟢 Đang Hoạt Động</option>
+							<option value="maintenance">🟡 Đang Bảo Trì</option>
+							<option value="closed">🔴 Tạm Dừng Phục Vụ</option>
+						</select>
+					</div>
+				</div>
+				<div class="modal-card-footer" style="padding: 16px 0 0; background: none; border-top: none;">
+					<button type="button" class="btn-admin-secondary" id="btn-cancel-screen">Hủy Bỏ</button>
+					<button type="submit" class="btn-admin-primary">💾 Lưu Phòng Chiếu</button>
+				</div>
+			</form>
+		</div>
+	</div>
+
+	<!-- MODAL: QUICK EDIT SEAT -->
+	<div class="admin-modal-backdrop" id="modal-seat-edit">
+		<div class="admin-modal-card" style="max-width: 480px;">
+			<div class="modal-card-header">
+				<h3 id="modal-seat-edit-title">Chỉnh Sửa Ghế</h3>
+				<button type="button" class="btn-close-modal" id="modal-seat-edit-close">&times;</button>
+			</div>
+			<form id="form-admin-seat-edit" class="modal-card-body">
+				<input type="hidden" id="se-seat-id" />
+				<div class="admin-form-grid">
+					<div class="form-field form-col-full">
+						<label>Mã Ghế Được Chọn: <b id="se-seat-label" style="color: #89b4fa; font-size: 16px;">--</b></label>
+					</div>
+					<div class="form-field form-col-full">
+						<label for="se-seat-type">Hạng / Loại Ghế</label>
+						<select id="se-seat-type">
+							<option value="standard">Standard (Ghế Tiêu Chuẩn)</option>
+							<option value="vip">VIP (Ghế Trung Tâm)</option>
+							<option value="sweetbox">Sweetbox (Ghế Đôi Cặp)</option>
+						</select>
+					</div>
+					<div class="form-field form-col-full">
+						<label for="se-seat-status">Trạng Thái Ghế</label>
+						<select id="se-seat-status">
+							<option value="available">🟢 Sẵn Sàng Bán (Hoạt Động Bình Thường)</option>
+							<option value="maintenance">🔴 Bảo Trì / Tạm Khóa (Không Cho Đặt Chỗ)</option>
+						</select>
+					</div>
+				</div>
+				<div class="modal-card-footer" style="padding: 16px 0 0; background: none; border-top: none;">
+					<button type="button" class="btn-admin-secondary" id="btn-cancel-seat-edit">Đóng</button>
+					<button type="submit" class="btn-admin-primary">💾 Áp Dụng Thay Đổi</button>
+				</div>
+			</form>
 		</div>
 	</div>
 

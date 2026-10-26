@@ -416,6 +416,29 @@ export async function apiGetCinemas() {
 	return res.ok && Array.isArray(res.data) ? res.data : []
 }
 
+export async function apiCreateCinema(cinema) {
+	const res = await request("/cinemas", {
+		method: "POST",
+		body: JSON.stringify(cinema),
+	})
+	return res.ok ? { success: true, cinema: res.data } : { success: false, error: res.error }
+}
+
+export async function apiUpdateCinema(id, updates) {
+	const res = await request(`/cinemas/${id}`, {
+		method: "PATCH",
+		body: JSON.stringify(updates),
+	})
+	return res.ok ? { success: true, cinema: res.data } : { success: false, error: res.error }
+}
+
+export async function apiDeleteCinema(id) {
+	const res = await request(`/cinemas/${id}`, {
+		method: "DELETE",
+	})
+	return res.ok ? { success: true } : { success: false, error: res.error }
+}
+
 export async function apiGetGenres() {
 	const res = await request("/genres")
 	return res.ok && Array.isArray(res.data) ? res.data : []
