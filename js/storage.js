@@ -380,11 +380,15 @@ export async function initializeStorage(force = false) {
 
 		if (showtimesRes && showtimesRes.length > 0) {
 			storageSet(STORAGE_KEYS.SHOWTIMES, showtimesRes)
-		} else if (!storageHas(STORAGE_KEYS.SHOWTIMES) || force) {
-			const s = await fetch("/data/showtimes.json")
-				.then(r => r.json())
-				.catch(() => null)
-			if (s) storageSet(STORAGE_KEYS.SHOWTIMES, s)
+		} else {
+			const existing = storageGet(STORAGE_KEYS.SHOWTIMES, [])
+			const hasUpcoming = Array.isArray(existing) && existing.some(s => s.date >= "2026-10-29")
+			if (!hasUpcoming || force || !storageHas(STORAGE_KEYS.SHOWTIMES)) {
+				const s = await fetch("/data/showtimes.json")
+					.then(r => r.json())
+					.catch(() => null)
+				if (s) storageSet(STORAGE_KEYS.SHOWTIMES, s)
+			}
 		}
 
 		if (concessionsRes && concessionsRes.length > 0) {

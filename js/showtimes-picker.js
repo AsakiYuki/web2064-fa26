@@ -5,6 +5,8 @@
  */
 import { formatCurrency, showToast, formatDateVN, translateDom, getSavedLang } from "./common.js"
 import {
+	storageSet,
+	STORAGE_KEYS,
 	getCinemas,
 	getCurrentCinemaId,
 	setCurrentCinemaId,
@@ -58,18 +60,23 @@ export class ShowtimePicker {
 			let showtimesData = getShowtimes()
 			let pricing = getTicketPricing()
 
-			// Fallback nếu LocalStorage chưa có
-			if (!cinemas.length || !moviesData) {
+			const todayStr = this.toDateString(new Date())
+			const hasUpcoming = Array.isArray(showtimesData) && showtimesData.some(s => s.date >= todayStr)
+			// Fallback nếu LocalStorage chưa có hoặc thiếu lịch chiếu sắp tới
+			if (!cinemas.length || !moviesData || !hasUpcoming) {
 				const [c, m, s, p] = await Promise.all([
-					fetch("/data/cinemas.json").then(r => r.json()),
-					fetch("/data/movies.json").then(r => r.json()),
-					fetch("/data/showtimes.json").then(r => r.json()),
+					fetch("/data/cinemas.json").then(r => r.json()).catch(() => null),
+					fetch("/data/movies.json").then(r => r.json()).catch(() => null),
+					fetch("/data/showtimes.json").then(r => r.json()).catch(() => null),
 					fetch("/data/ticket_pricing.json").then(r => r.json()).catch(() => null),
 				])
-				cinemas = c
-				moviesData = m
-				showtimesData = s
-				pricing = p
+				if (!cinemas.length && c) cinemas = c
+				if (!moviesData && m) moviesData = m
+				if (!hasUpcoming && s && s.length) {
+					showtimesData = s
+					storageSet(STORAGE_KEYS.SHOWTIMES, s)
+				}
+				if (!pricing && p) pricing = p
 			}
 
 			this.cinemas = cinemas || []
