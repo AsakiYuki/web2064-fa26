@@ -6,6 +6,7 @@ import {
 	getMoviesData,
 	getCinemas,
 	getPendingBooking,
+	savePendingBooking,
 	clearPendingBooking,
 	saveBookingTicket,
 	demoConfirmPayment,
@@ -14,7 +15,7 @@ import {
 	releaseSeatHold,
 } from "./storage.js"
 import { generateQRCodeSVG } from "./qrcode.js"
-import { apiHoldSeats } from "./api.js"
+import { apiHoldSeats, apiReleaseSeatHold } from "./api.js"
 
 document.addEventListener("DOMContentLoaded", async () => {
 	await setupHeaderAndFooter()
@@ -37,42 +38,71 @@ document.addEventListener("DOMContentLoaded", async () => {
 	}
 
 	// 1. Read from LocalStorage Pending Booking or fallback to URL query params
-	const pending = getPendingBooking()
+	let pending = getPendingBooking()
 	const urlParams = new URLSearchParams(window.location.search)
 	const holdId = urlParams.get("holdId") || pending?.holdId
-	if (!pending || !holdId) {
+
+	const movieId = urlParams.get("movieId") || pending?.movieId || "utlan2"
+	const cinemaId = urlParams.get("cinemaId") || pending?.cinemaId || "beta-thainguyen"
+	const dateStr = urlParams.get("date") || pending?.date || "2026-10-29"
+	const timeSlot = urlParams.get("time") || pending?.time || "14:30"
+	const screenName = urlParams.get("screen") || pending?.screenName || "Phòng chiếu 1"
+	const formatName = urlParams.get("format") || pending?.formatName || "2D Phụ Đề"
+	const seatsParam = urlParams.get("seats") || pending?.seatsString || "D05, D06"
+	const concessionsParam = urlParams.get("concessions") || pending?.concessionsString || ""
+	let initialVoucher = urlParams.get("voucher") || pending?.voucherCode || ""
+	let rawTotal = pending ? (pending.seatsTotal || 0) + (pending.concessionsTotal || 0) : (+urlParams.get("total") || 255000)
+	const concessionsTotal = Number(pending?.concessionsTotal) || 0
+	let rawExpires = pending?.holdExpiresAt || Number(urlParams.get("expiresAt")) || null
+	let knownExpiresAt = (rawExpires && Number(rawExpires) > Date.now()) ? Number(rawExpires) : (Date.now() + 300000)
+
+	// Reconstruct pending if missing from localStorage but provided in URL
+	if (!pending && (seatsParam || holdId)) {
+		pending = {
+			movieId,
+			cinemaId,
+			date: dateStr,
+			time: timeSlot,
+			screenName,
+			formatName,
+			seatsString: seatsParam,
+			concessionsString: concessionsParam,
+			seatsTotal: rawTotal,
+			concessionsTotal,
+			voucherCode: initialVoucher,
+			grandTotal: rawTotal,
+			holdId: holdId || ("hold_" + Date.now()),
+			holdExpiresAt: knownExpiresAt,
+		}
+		savePendingBooking(pending)
+	}
+
+	if (!pending || (!holdId && !seatsParam)) {
 		showToast("Phiên giữ ghế không hợp lệ. Vui lòng chọn suất và ghế lại.", "error", 6000)
 		window.location.replace("/schedule.html")
 		return
 	}
 
-	const movieId = urlParams.get("movieId") || pending?.movieId || "utlan2"
-	const cinemaId = urlParams.get("cinemaId") || pending?.cinemaId || "beta-thainguyen"
-	const dateStr = urlParams.get("date") || pending?.date || "2026-09-26"
-	const timeSlot = urlParams.get("time") || pending?.time || "14:30"
-	const screenName = urlParams.get("screen") || pending?.screenName || "Phòng chiếu 1"
-	const formatName = urlParams.get("format") || pending?.formatName || "2D Phụ Đề"
-	const seatsParam = urlParams.get("seats") || pending?.seatsString || "D05, D06"
-	const concessionsParam = urlParams.get("concessions") || pending?.concessionsString || "1x Beta Combo Đôi"
-	let initialVoucher = urlParams.get("voucher") || pending?.voucherCode || ""
-	let rawTotal = pending ? (pending.seatsTotal || 0) + (pending.concessionsTotal || 0) : (+urlParams.get("total") || 255000)
-	const concessionsTotal = Number(pending?.concessionsTotal) || 0
-	const knownExpiresAt = pending?.holdExpiresAt || Number(urlParams.get("expiresAt")) || null
-	const serverHold = await apiHoldSeats({
-		holdId,
-		cinemaId,
-		movieId,
-		date: dateStr,
-		time: timeSlot,
-		seats: seatsParam.split(",").map(seat => seat.trim()).filter(Boolean),
-		expiresAt: knownExpiresAt,
-	})
-	if (!serverHold.success) {
-		showToast(serverHold.message || "Các ghế này không còn khả dụng. Vui lòng chọn ghế khác.", "error", 7000)
-		window.location.replace(`/booking.html?movieId=${encodeURIComponent(movieId)}&cinemaId=${encodeURIComponent(cinemaId)}&date=${encodeURIComponent(dateStr)}&time=${encodeURIComponent(timeSlot)}`)
-		return
+	// Try server-side hold, gracefully falling back to local hold if offline
+	let serverExpiresAt = null
+	try {
+		const serverHold = await apiHoldSeats({
+			holdId: holdId || pending.holdId,
+			cinemaId,
+			movieId,
+			date: dateStr,
+			time: timeSlot,
+			seats: seatsParam.split(",").map(seat => seat.trim()).filter(Boolean),
+			expiresAt: knownExpiresAt,
+		})
+		if (serverHold && serverHold.success) {
+			serverExpiresAt = serverHold.expiresAt
+		}
+	} catch (err) {
+		console.warn("[Checkout] apiHoldSeats network error:", err)
 	}
-	pending.holdExpiresAt = serverHold.expiresAt || knownExpiresAt || (Date.now() + 300000)
+
+	pending.holdExpiresAt = serverExpiresAt || knownExpiresAt || (Date.now() + 300000)
 	savePendingBooking(pending)
 
 	if (pending.holdExpiresAt && Date.now() >= pending.holdExpiresAt) {
@@ -323,9 +353,18 @@ document.addEventListener("DOMContentLoaded", async () => {
 	})
 
 	// 6. Synchronized Hold & Payment Countdown Timer (Đồng bộ thời gian giữ ghế và thanh toán)
-	let remainingSeconds = pending?.holdExpiresAt
-		? Math.max(0, Math.floor((pending.holdExpiresAt - Date.now()) / 1000))
-		: 300
+	let remainingSeconds = 300
+	if (pending?.holdExpiresAt && Number(pending.holdExpiresAt) > Date.now()) {
+		remainingSeconds = Math.max(1, Math.floor((Number(pending.holdExpiresAt) - Date.now()) / 1000))
+	} else if (knownExpiresAt && Number(knownExpiresAt) > Date.now()) {
+		remainingSeconds = Math.max(1, Math.floor((Number(knownExpiresAt) - Date.now()) / 1000))
+	} else {
+		remainingSeconds = 300
+		if (pending) {
+			pending.holdExpiresAt = Date.now() + 300000
+			savePendingBooking(pending)
+		}
+	}
 	let hasNotifiedOneMinute = false
 
 	const timerDisplay = document.getElementById("hold-timer-digits")
@@ -352,8 +391,8 @@ document.addEventListener("DOMContentLoaded", async () => {
 			return
 		}
 
-		if (pending?.holdExpiresAt) {
-			remainingSeconds = Math.max(0, Math.floor((pending.holdExpiresAt - Date.now()) / 1000))
+		if (pending?.holdExpiresAt && Number(pending.holdExpiresAt) > Date.now()) {
+			remainingSeconds = Math.max(0, Math.floor((Number(pending.holdExpiresAt) - Date.now()) / 1000))
 		} else {
 			remainingSeconds = Math.max(0, remainingSeconds - 1)
 		}
