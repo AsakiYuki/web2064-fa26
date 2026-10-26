@@ -9,6 +9,15 @@ import {
 	getShowtimes,
 	getConcessions,
 	getBookingHistory,
+	getCinemaById,
+	addCinemaScreen,
+	updateCinemaScreen,
+	deleteCinemaScreen,
+	getScreenSeatLayout,
+	saveScreenSeatLayout,
+	updateScreenSeatStatus,
+	toggleRowSeatStatus,
+	updateSeatAttributes,
 	addMovie,
 	updateMovie,
 	deleteMovie,
@@ -161,6 +170,8 @@ document.addEventListener("DOMContentLoaded", async () => {
 			showtimes: document.getElementById("tab-panel-showtimes"),
 			concessions: document.getElementById("tab-panel-concessions"),
 			bookings: document.getElementById("tab-panel-bookings"),
+			screens: document.getElementById("tab-panel-screens"),
+			seats: document.getElementById("tab-panel-seats"),
 		}
 
 		const topbarTitle = document.getElementById("topbar-title")
@@ -172,6 +183,8 @@ document.addEventListener("DOMContentLoaded", async () => {
 			showtimes: { title: "Quản Lý Lịch & Suất Chiếu", sub: "Cấu hình phòng chiếu, khung giờ và giá vé theo từng cụm rạp" },
 			concessions: { title: "Quản Lý Combo Bắp Nước", sub: "Cập nhật menu bắp nước, định giá bán và khuyến mãi" },
 			bookings: { title: "Quản Lý Đơn Đặt Vé", sub: "Danh sách vé điện tử đã đặt của khách hàng trên hệ thống" },
+			screens: { title: "Quản Lý Phòng Chiếu Rạp", sub: "Quản lý hệ thống phòng chiếu, định dạng phim và sức chứa các rạp" },
+			seats: { title: "Quản Lý Sơ Đồ Ghế Phòng Chiếu", sub: "Cấu hình trực quan sơ đồ chỗ ngồi, hạng ghế và bảo trì tạm khóa ghế" },
 		}
 
 		function switchTab(tabId) {
@@ -206,6 +219,8 @@ document.addEventListener("DOMContentLoaded", async () => {
 			if (tabId === "showtimes") renderShowtimesSection()
 			if (tabId === "concessions") renderConcessionsSection()
 			if (tabId === "bookings") renderAdminBookingsTable()
+			if (tabId === "screens") renderScreensSection()
+			if (tabId === "seats") renderSeatsSection()
 
 			translateDom(getSavedLang())
 		}
@@ -333,11 +348,21 @@ document.addEventListener("DOMContentLoaded", async () => {
 			const kpiPaid = document.getElementById("kpi-paid-count")
 			const kpiTickets = document.getElementById("kpi-tickets-count")
 			const kpiTotalOrders = document.getElementById("kpi-total-orders")
+			const kpiScreens = document.getElementById("kpi-screens-total")
+			const kpiCinemas = document.getElementById("kpi-cinemas-count")
 
 			if (kpiRev) kpiRev.textContent = formatCurrency(totalRevenue)
 			if (kpiPaid) kpiPaid.textContent = `${paidOrdersCount} đơn hợp lệ`
 			if (kpiTickets) kpiTickets.textContent = `${totalSeatsSold} vé`
 			if (kpiTotalOrders) kpiTotalOrders.textContent = `${paidOrdersCount} đơn hàng`
+
+			const cinemasList = getCinemas()
+			let totalScreensCount = 0
+			cinemasList.forEach(c => {
+				totalScreensCount += c.screens?.length || 0
+			})
+			if (kpiScreens) kpiScreens.textContent = totalScreensCount
+			if (kpiCinemas) kpiCinemas.textContent = `${cinemasList.length} cụm rạp`
 
 			// Render Progress bars phân bổ doanh thu theo phim
 			const revenueBarsContainer = document.getElementById("stats-movies-revenue-bars")
@@ -470,11 +495,21 @@ document.addEventListener("DOMContentLoaded", async () => {
 			const badgeSt = document.getElementById("badge-showtimes-count")
 			const badgeCc = document.getElementById("badge-concessions-count")
 			const badgeBk = document.getElementById("badge-bookings-count")
+			const badgeSc = document.getElementById("badge-screens-count")
+			const badgeSe = document.getElementById("badge-seats-count")
+
+			const cinemas = getCinemas()
+			let screensCount = 0
+			cinemas.forEach(c => {
+				screensCount += c.screens?.length || 0
+			})
 
 			if (badgeMv) badgeMv.textContent = totalMovies
 			if (badgeSt) badgeSt.textContent = totalSlots
 			if (badgeCc) badgeCc.textContent = concessionsData?.items?.length || 0
 			if (badgeBk) badgeBk.textContent = bookings.length
+			if (badgeSc) badgeSc.textContent = screensCount
+			if (badgeSe) badgeSe.textContent = screensCount
 		}
 
 		/* ==========================================================================
@@ -1692,6 +1727,641 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 			adminTicketModal.classList.add("active")
 			document.body.style.overflow = "hidden"
+		}
+
+		/* ==========================================================================
+		   7. TAB 6: QUẢN LÝ PHÒNG CHIẾU RẠP (SCREENS MANAGEMENT)
+		   ========================================================================== */
+		let currentScreenCinemaFilter = "all"
+		let currentScreenTypeFilter = "all"
+		let currentScreenSearch = ""
+
+		const screensTableTbody = document.getElementById("admin-screens-table-tbody")
+		const screensCountText = document.getElementById("screens-count-text")
+		const filterScreensCinema = document.getElementById("filter-screens-cinema")
+		const filterScreensType = document.getElementById("filter-screens-type")
+		const searchScreensInput = document.getElementById("search-screens-input")
+		const btnOpenAddScreen = document.getElementById("btn-open-add-screen-modal")
+
+		const screenModal = document.getElementById("modal-screen")
+		const screenModalClose = document.getElementById("modal-screen-close")
+		const screenModalCancel = document.getElementById("btn-cancel-screen")
+		const screenForm = document.getElementById("form-admin-screen")
+
+		function populateScreensCinemaDropdowns() {
+			const cinemas = getCinemas()
+			if (filterScreensCinema) {
+				const currentVal = filterScreensCinema.value || "all"
+				filterScreensCinema.innerHTML = `
+					<option value="all">Tất cả cụm rạp</option>
+					${cinemas.map(c => `<option value="${c.id}">${c.name}</option>`).join("")}
+				`
+				filterScreensCinema.value = currentVal
+			}
+
+			const scCinemaSelect = document.getElementById("sc-cinema-id")
+			if (scCinemaSelect) {
+				scCinemaSelect.innerHTML = cinemas
+					.map(c => `<option value="${c.id}">${c.name} (${c.city})</option>`)
+					.join("")
+			}
+		}
+
+		filterScreensCinema?.addEventListener("change", e => {
+			currentScreenCinemaFilter = e.target.value
+			renderScreensSection()
+		})
+
+		filterScreensType?.addEventListener("change", e => {
+			currentScreenTypeFilter = e.target.value
+			renderScreensSection()
+		})
+
+		searchScreensInput?.addEventListener("input", e => {
+			currentScreenSearch = e.target.value.trim().toLowerCase()
+			renderScreensSection()
+		})
+
+		function openScreenModal(isEdit = false, screenData = null, cinemaId = null) {
+			populateScreensCinemaDropdowns()
+			const titleEl = document.getElementById("modal-screen-title")
+			const isEditInput = document.getElementById("sc-is-edit")
+			const cinemaSelect = document.getElementById("sc-cinema-id")
+			const idInput = document.getElementById("sc-id")
+			const nameInput = document.getElementById("sc-name")
+			const typeSelect = document.getElementById("sc-type")
+			const seatsInput = document.getElementById("sc-total-seats")
+			const soundSelect = document.getElementById("sc-sound")
+			const statusSelect = document.getElementById("sc-status")
+
+			if (isEdit && screenData) {
+				if (titleEl) titleEl.textContent = `Chỉnh Sửa Phòng Chiếu: ${screenData.name}`
+				if (isEditInput) isEditInput.value = "true"
+				if (cinemaSelect) {
+					cinemaSelect.value = cinemaId || ""
+					cinemaSelect.disabled = true
+				}
+				if (idInput) {
+					idInput.value = screenData.screenId || ""
+					idInput.readOnly = true
+				}
+				if (nameInput) nameInput.value = screenData.name || ""
+				if (typeSelect) typeSelect.value = screenData.type || "2D"
+				if (seatsInput) seatsInput.value = screenData.totalSeats || 120
+				if (soundSelect) soundSelect.value = screenData.soundSystem || "Dolby 7.1"
+				if (statusSelect) statusSelect.value = screenData.status || "active"
+			} else {
+				if (titleEl) titleEl.textContent = "Thêm Phòng Chiếu Mới"
+				if (isEditInput) isEditInput.value = "false"
+				if (cinemaSelect) cinemaSelect.disabled = false
+				screenForm?.reset()
+				if (idInput) idInput.readOnly = false
+				if (seatsInput) seatsInput.value = 120
+			}
+
+			screenModal?.classList.add("active")
+			document.body.style.overflow = "hidden"
+		}
+
+		function closeScreenModal() {
+			screenModal?.classList.remove("active")
+			document.body.style.overflow = ""
+		}
+
+		btnOpenAddScreen?.addEventListener("click", () => openScreenModal(false))
+		screenModalClose?.addEventListener("click", closeScreenModal)
+		screenModalCancel?.addEventListener("click", closeScreenModal)
+
+		screenForm?.addEventListener("submit", async e => {
+			e.preventDefault()
+			const isEdit = document.getElementById("sc-is-edit")?.value === "true"
+			const cinemaId = document.getElementById("sc-cinema-id")?.value
+			const screenId = document.getElementById("sc-id")?.value.trim()
+			const name = document.getElementById("sc-name")?.value.trim()
+			const type = document.getElementById("sc-type")?.value
+			const totalSeats = Number(document.getElementById("sc-total-seats")?.value) || 120
+			const soundSystem = document.getElementById("sc-sound")?.value
+			const status = document.getElementById("sc-status")?.value
+
+			if (!cinemaId || !screenId || !name) {
+				showToast("Vui lòng điền đầy đủ thông tin phòng chiếu!", "warning")
+				return
+			}
+
+			if (isEdit) {
+				await updateCinemaScreen(cinemaId, screenId, {
+					name,
+					type,
+					totalSeats,
+					soundSystem,
+					status,
+				})
+				showToast(`✅ Đã cập nhật phòng chiếu "${name}" thành công!`, "success")
+			} else {
+				const result = await addCinemaScreen(cinemaId, {
+					screenId,
+					name,
+					type,
+					totalSeats,
+					soundSystem,
+					status,
+				})
+				if (!result.success) {
+					showToast(result.error || "Không thể thêm phòng chiếu!", "error")
+					return
+				}
+				showToast(`✅ Đã thêm phòng chiếu "${name}" vào cụm rạp thành công!`, "success")
+			}
+
+			closeScreenModal()
+			renderScreensSection()
+			updateAllBadges()
+			renderOverviewDashboard()
+		})
+
+		function renderScreensSection() {
+			populateScreensCinemaDropdowns()
+			const cinemas = getCinemas()
+			if (!screensTableTbody) return
+
+			let allScreens = []
+			cinemas.forEach(cinema => {
+				if (Array.isArray(cinema.screens)) {
+					cinema.screens.forEach(s => {
+						allScreens.push({
+							...s,
+							cinemaId: cinema.id,
+							cinemaName: cinema.name,
+							cinemaCity: cinema.city,
+						})
+					})
+				}
+			})
+
+			// Filter
+			let filtered = allScreens
+			if (currentScreenCinemaFilter !== "all") {
+				filtered = filtered.filter(s => s.cinemaId === currentScreenCinemaFilter)
+			}
+			if (currentScreenTypeFilter !== "all") {
+				filtered = filtered.filter(s => s.type?.toLowerCase().includes(currentScreenTypeFilter.toLowerCase()))
+			}
+			if (currentScreenSearch) {
+				filtered = filtered.filter(
+					s =>
+						s.name?.toLowerCase().includes(currentScreenSearch) ||
+						s.screenId?.toLowerCase().includes(currentScreenSearch) ||
+						s.cinemaName?.toLowerCase().includes(currentScreenSearch),
+				)
+			}
+
+			// KPI Updates
+			const kpiTotal = document.getElementById("kpi-screen-total-count")
+			const kpiActive = document.getElementById("kpi-screen-active-count")
+			const kpiPremium = document.getElementById("kpi-screen-premium-count")
+			const kpiSeats = document.getElementById("kpi-screen-seats-sum")
+
+			if (kpiTotal) kpiTotal.textContent = allScreens.length
+			if (kpiActive) kpiActive.textContent = allScreens.filter(s => s.status !== "closed").length
+			if (kpiPremium) {
+				kpiPremium.textContent = allScreens.filter(s =>
+					["imax", "3d", "4dx", "screenx"].some(k => s.type?.toLowerCase().includes(k)),
+				).length
+			}
+			if (kpiSeats) {
+				const sumSeats = allScreens.reduce((acc, s) => acc + (Number(s.totalSeats) || 0), 0)
+				kpiSeats.textContent = sumSeats.toLocaleString("vi-VN")
+			}
+			if (screensCountText) {
+				screensCountText.textContent = `Hiển thị ${filtered.length} / ${allScreens.length} phòng chiếu`
+			}
+
+			if (filtered.length === 0) {
+				screensTableTbody.innerHTML = `
+					<tr>
+						<td colspan="8" style="text-align: center; padding: 40px; color: #a6adc8;">
+							<div style="font-size: 32px; margin-bottom: 8px;">🎦</div>
+							Không tìm thấy phòng chiếu nào phù hợp với bộ lọc hiện tại.
+						</td>
+					</tr>
+				`
+				return
+			}
+
+			screensTableTbody.innerHTML = filtered
+				.map(s => {
+					let typeClass = "type-2d"
+					const lowerType = (s.type || "").toLowerCase()
+					if (lowerType.includes("imax")) typeClass = "type-imax"
+					else if (lowerType.includes("4dx")) typeClass = "type-4dx"
+					else if (lowerType.includes("screenx")) typeClass = "type-screenx"
+					else if (lowerType.includes("3d")) typeClass = "type-3d"
+
+					let statusHtml = '<span class="badge-screen-status status-active">🟢 Hoạt Động</span>'
+					if (s.status === "maintenance") {
+						statusHtml = '<span class="badge-screen-status status-maintenance">🟡 Bảo Trì</span>'
+					} else if (s.status === "closed") {
+						statusHtml = '<span class="badge-screen-status status-closed">🔴 Tạm Đóng</span>'
+					}
+
+					return `
+						<tr>
+							<td><code style="color: #89b4fa; font-weight: 700; background: rgba(137, 180, 250, 0.12); padding: 3px 8px; border-radius: 4px;">${s.screenId}</code></td>
+							<td>
+								<div class="cell-title">${s.name}</div>
+								<div class="cell-sub">${s.cinemaCity}</div>
+							</td>
+							<td>
+								<div style="font-weight: 600; color: #cdd6f4; font-size: 13px;">${s.cinemaName}</div>
+							</td>
+							<td>
+								<span class="badge-screen-type ${typeClass}">${s.type || "2D"}</span>
+							</td>
+							<td>
+								<b style="color: #fab387; font-size: 14px;">${s.totalSeats || 120}</b> ghế
+							</td>
+							<td>
+								<span style="font-size: 12px; color: #a6adc8;">${s.soundSystem || "Dolby 7.1"}</span>
+							</td>
+							<td>${statusHtml}</td>
+							<td style="text-align: center;">
+								<div class="row-actions" style="justify-content: center; gap: 6px;">
+									<button type="button" class="btn-action-edit btn-edit-screen"
+										data-cinema-id="${s.cinemaId}" data-screen-id="${s.screenId}"
+										title="Chỉnh sửa thông tin phòng">✏️ Sửa</button>
+									<button type="button" class="btn-action-edit btn-view-screen-seats"
+										data-cinema-id="${s.cinemaId}" data-screen-id="${s.screenId}"
+										style="background: rgba(137, 220, 235, 0.15); color: #89dceb; border-color: rgba(137, 220, 235, 0.3);"
+										title="Cấu hình sơ đồ ghế phòng chiếu này">📐 Sơ Đồ Ghế</button>
+									<button type="button" class="btn-action-delete btn-delete-screen"
+										data-cinema-id="${s.cinemaId}" data-screen-id="${s.screenId}" data-screen-name="${s.name}"
+										title="Xóa phòng chiếu">🗑️</button>
+								</div>
+							</td>
+						</tr>
+					`
+				})
+				.join("")
+
+			// Edit screen button click
+			screensTableTbody.querySelectorAll(".btn-edit-screen").forEach(btn => {
+				btn.addEventListener("click", () => {
+					const cId = btn.dataset.cinemaId
+					const sId = btn.dataset.screenId
+					const cinema = getCinemaById(cId)
+					const scr = cinema?.screens?.find(x => x.screenId === sId)
+					if (scr) openScreenModal(true, scr, cId)
+				})
+			})
+
+			// View seats button click -> Switch to Seats Tab
+			screensTableTbody.querySelectorAll(".btn-view-screen-seats").forEach(btn => {
+				btn.addEventListener("click", () => {
+					const cId = btn.dataset.cinemaId
+					const sId = btn.dataset.screenId
+					switchTab("seats")
+					initSeatSectionTarget(cId, sId)
+				})
+			})
+
+			// Delete screen button click
+			screensTableTbody.querySelectorAll(".btn-delete-screen").forEach(btn => {
+				btn.addEventListener("click", async () => {
+					const cId = btn.dataset.cinemaId
+					const sId = btn.dataset.screenId
+					const sName = btn.dataset.screenName
+					if (confirm(`Bạn có chắc chắn muốn xóa phòng chiếu "${sName}" (${sId}) khỏi hệ thống không?`)) {
+						await deleteCinemaScreen(cId, sId)
+						showToast(`Đã xóa phòng chiếu "${sName}" thành công!`, "info")
+						renderScreensSection()
+						updateAllBadges()
+						renderOverviewDashboard()
+					}
+				})
+			})
+		}
+
+		/* ==========================================================================
+		   8. TAB 7: QUẢN LÝ GHẾ & SƠ ĐỒ PHÒNG CHIẾU (SEAT MANAGEMENT)
+		   ========================================================================== */
+		let selectedSeatCinemaId = "beta-thainguyen"
+		let selectedSeatScreenId = ""
+		let currentSeatLayout = []
+		let seatClickMode = "toggle" // 'toggle' | 'edit'
+
+		const seatFilterCinema = document.getElementById("seat-filter-cinema")
+		const seatFilterScreen = document.getElementById("seat-filter-screen")
+		const btnSeatToggleMode = document.getElementById("btn-seat-toggle-mode")
+		const seatModeLabel = document.getElementById("seat-mode-label")
+		const btnSeatSaveLayout = document.getElementById("btn-seat-save-layout")
+		const btnSeatResetLayout = document.getElementById("btn-seat-reset-layout")
+		const adminSeatGrid = document.getElementById("admin-seat-grid")
+
+		const modalSeatEdit = document.getElementById("modal-seat-edit")
+		const modalSeatEditClose = document.getElementById("modal-seat-edit-close")
+		const btnCancelSeatEdit = document.getElementById("btn-cancel-seat-edit")
+		const formAdminSeatEdit = document.getElementById("form-admin-seat-edit")
+
+		function populateSeatCinemaAndScreenSelectors() {
+			const cinemas = getCinemas()
+			if (cinemas.length === 0) return
+
+			if (!cinemas.some(c => c.id === selectedSeatCinemaId)) {
+				selectedSeatCinemaId = cinemas[0].id
+			}
+
+			if (seatFilterCinema) {
+				seatFilterCinema.innerHTML = cinemas
+					.map(c => `<option value="${c.id}" ${c.id === selectedSeatCinemaId ? "selected" : ""}>${c.name}</option>`)
+					.join("")
+			}
+
+			populateSeatScreensForCinema(selectedSeatCinemaId)
+		}
+
+		function populateSeatScreensForCinema(cinemaId) {
+			const cinema = getCinemaById(cinemaId)
+			const screens = cinema?.screens || []
+
+			if (!screens.some(s => s.screenId === selectedSeatScreenId)) {
+				selectedSeatScreenId = screens[0]?.screenId || ""
+			}
+
+			if (seatFilterScreen) {
+				if (screens.length === 0) {
+					seatFilterScreen.innerHTML = `<option value="">Chưa có phòng chiếu</option>`
+					selectedSeatScreenId = ""
+				} else {
+					seatFilterScreen.innerHTML = screens
+						.map(
+							s =>
+								`<option value="${s.screenId}" ${s.screenId === selectedSeatScreenId ? "selected" : ""}>${s.name} (${s.type})</option>`,
+						)
+						.join("")
+				}
+			}
+		}
+
+		function initSeatSectionTarget(cinemaId, screenId) {
+			selectedSeatCinemaId = cinemaId
+			selectedSeatScreenId = screenId
+			populateSeatCinemaAndScreenSelectors()
+			renderSeatsSection()
+		}
+
+		seatFilterCinema?.addEventListener("change", e => {
+			selectedSeatCinemaId = e.target.value
+			populateSeatScreensForCinema(selectedSeatCinemaId)
+			renderSeatsSection()
+		})
+
+		seatFilterScreen?.addEventListener("change", e => {
+			selectedSeatScreenId = e.target.value
+			renderSeatsSection()
+		})
+
+		btnSeatToggleMode?.addEventListener("click", () => {
+			if (seatClickMode === "toggle") {
+				seatClickMode = "edit"
+				if (seatModeLabel) {
+					seatModeLabel.textContent = "Nhấp Sửa Chi Tiết (Modal)"
+					seatModeLabel.style.color = "#a6e3a1"
+				}
+				showToast("Đã chuyển chế độ: Nhấp vào ghế để mở cửa sổ chỉnh sửa loại ghế & trạng thái.", "info")
+			} else {
+				seatClickMode = "toggle"
+				if (seatModeLabel) {
+					seatModeLabel.textContent = "Nhấp Đổi Trạng Thái"
+					seatModeLabel.style.color = "#89b4fa"
+				}
+				showToast("Đã chuyển chế độ: Nhấp vào ghế để nhanh chóng Bật/Tắt khóa bảo trì.", "info")
+			}
+		})
+
+		btnSeatSaveLayout?.addEventListener("click", () => {
+			if (!selectedSeatCinemaId || !selectedSeatScreenId) return
+			saveScreenSeatLayout(selectedSeatCinemaId, selectedSeatScreenId, currentSeatLayout)
+			showToast("✅ Đã lưu cấu hình sơ đồ ghế phòng chiếu thành công!", "success")
+		})
+
+		btnSeatResetLayout?.addEventListener("click", () => {
+			if (!selectedSeatCinemaId || !selectedSeatScreenId) return
+			if (confirm("Bạn có chắc chắn muốn khôi phục sơ đồ ghế của phòng này về mặc định ban đầu không?")) {
+				localStorage.removeItem(`beta_screen_layout_${selectedSeatCinemaId}_${selectedSeatScreenId}`)
+				currentSeatLayout = getScreenSeatLayout(selectedSeatCinemaId, selectedSeatScreenId)
+				renderSeatGrid()
+				showToast("🔄 Đã khôi phục sơ đồ ghế về mặc định!", "info")
+			}
+		})
+
+		function openSeatEditModal(seat) {
+			const labelEl = document.getElementById("se-seat-label")
+			const idInput = document.getElementById("se-seat-id")
+			const typeSelect = document.getElementById("se-seat-type")
+			const statusSelect = document.getElementById("se-seat-status")
+
+			if (labelEl) labelEl.textContent = `${seat.id} (${seat.row}-${seat.col})`
+			if (idInput) idInput.value = seat.id
+			if (typeSelect) typeSelect.value = seat.type || "standard"
+			if (statusSelect) statusSelect.value = seat.status || "available"
+
+			modalSeatEdit?.classList.add("active")
+			document.body.style.overflow = "hidden"
+		}
+
+		function closeSeatEditModal() {
+			modalSeatEdit?.classList.remove("active")
+			document.body.style.overflow = ""
+		}
+
+		modalSeatEditClose?.addEventListener("click", closeSeatEditModal)
+		btnCancelSeatEdit?.addEventListener("click", closeSeatEditModal)
+
+		formAdminSeatEdit?.addEventListener("submit", e => {
+			e.preventDefault()
+			const seatId = document.getElementById("se-seat-id")?.value
+			const newType = document.getElementById("se-seat-type")?.value
+			const newStatus = document.getElementById("se-seat-status")?.value
+
+			if (!seatId) return
+
+			for (const rowBlock of currentSeatLayout) {
+				const seat = rowBlock.seats.find(s => s.id === seatId)
+				if (seat) {
+					seat.type = newType
+					seat.status = newStatus
+					break
+				}
+			}
+
+			saveScreenSeatLayout(selectedSeatCinemaId, selectedSeatScreenId, currentSeatLayout)
+			closeSeatEditModal()
+			renderSeatGrid()
+			showToast(`✅ Đã cập nhật ghế ${seatId} thành công!`, "success")
+		})
+
+		function renderSeatsSection() {
+			populateSeatCinemaAndScreenSelectors()
+			if (!selectedSeatCinemaId || !selectedSeatScreenId) {
+				if (adminSeatGrid) {
+					adminSeatGrid.innerHTML = `
+						<div style="padding: 40px; color: #a6adc8; text-align: center;">
+							Vui lòng chọn cụm rạp và phòng chiếu hợp lệ để xem sơ đồ ghế.
+						</div>
+					`
+				}
+				return
+			}
+
+			const cinema = getCinemaById(selectedSeatCinemaId)
+			const screen = cinema?.screens?.find(s => s.screenId === selectedSeatScreenId)
+
+			const titleEl = document.getElementById("seat-screen-title")
+			const metaEl = document.getElementById("seat-screen-meta")
+
+			if (titleEl && screen) {
+				titleEl.textContent = `Sơ Đồ Ghế: ${screen.name} (${screen.screenId})`
+			}
+			if (metaEl && screen && cinema) {
+				metaEl.textContent = `Cụm rạp: ${cinema.name} | Định dạng: ${screen.type} | Âm thanh: ${screen.soundSystem || "Dolby 7.1"} | Tổng số ghế: ${screen.totalSeats || 120}`
+			}
+
+			currentSeatLayout = getScreenSeatLayout(selectedSeatCinemaId, selectedSeatScreenId)
+			renderSeatGrid()
+		}
+
+		function renderSeatGrid() {
+			if (!adminSeatGrid) return
+
+			let countStandard = 0
+			let countVip = 0
+			let countSweetbox = 0
+			let countMaintenance = 0
+
+			currentSeatLayout.forEach(rowBlock => {
+				rowBlock.seats.forEach(s => {
+					if (s.status === "maintenance") {
+						countMaintenance++
+					} else if (s.type === "vip") {
+						countVip++
+					} else if (s.type === "sweetbox") {
+						countSweetbox++
+					} else {
+						countStandard++
+					}
+				})
+			})
+
+			const elStd = document.getElementById("seat-cnt-standard")
+			const elVip = document.getElementById("seat-cnt-vip")
+			const elSwb = document.getElementById("seat-cnt-sweetbox")
+			const elMnt = document.getElementById("seat-cnt-maintenance")
+
+			if (elStd) elStd.textContent = countStandard
+			if (elVip) elVip.textContent = countVip
+			if (elSwb) elSwb.textContent = countSweetbox
+			if (elMnt) elMnt.textContent = countMaintenance
+
+			adminSeatGrid.innerHTML = currentSeatLayout
+				.map(rowBlock => {
+					const seatsHtml = rowBlock.seats
+						.map(seat => {
+							const isMaint = seat.status === "maintenance"
+							const maintClass = isMaint ? "seat-maintenance" : ""
+							const typeClass = `seat-${seat.type}`
+							const displayLabel = seat.type === "sweetbox" ? seat.id.replace(seat.row, "") : seat.id
+
+							return `
+								<div class="admin-seat-unit ${typeClass} ${maintClass}"
+									data-seat-id="${seat.id}"
+									data-row="${seat.row}"
+									data-type="${seat.type}"
+									data-status="${seat.status}"
+									title="${seat.id} (${seat.type.toUpperCase()}) - ${isMaint ? "Đang Bảo Trì / Khóa" : "Hoạt Động"}">
+									${displayLabel}
+								</div>
+							`
+						})
+						.join("")
+
+					return `
+						<div class="admin-seat-row">
+							<button type="button" class="seat-row-toggle-btn"
+								data-row="${rowBlock.row}"
+								title="Nhấp để Bật / Tắt bảo trì toàn bộ hàng ghế ${rowBlock.row}">
+								${rowBlock.row}
+							</button>
+							<div style="display: flex; gap: 6px; align-items: center;">
+								${seatsHtml}
+							</div>
+							<button type="button" class="seat-row-toggle-btn"
+								data-row="${rowBlock.row}"
+								title="Nhấp để Bật / Tắt bảo trì toàn bộ hàng ghế ${rowBlock.row}">
+								${rowBlock.row}
+							</button>
+						</div>
+					`
+				})
+				.join("")
+
+			// Attach row toggle handlers
+			adminSeatGrid.querySelectorAll(".seat-row-toggle-btn").forEach(btn => {
+				btn.addEventListener("click", () => {
+					const rowLetter = btn.dataset.row
+					const rowBlock = currentSeatLayout.find(r => r.row === rowLetter)
+					if (!rowBlock) return
+
+					const allCurrentlyMaintenance = rowBlock.seats.every(s => s.status === "maintenance")
+					const nextStatus = allCurrentlyMaintenance ? "available" : "maintenance"
+
+					rowBlock.seats.forEach(s => {
+						s.status = nextStatus
+					})
+
+					saveScreenSeatLayout(selectedSeatCinemaId, selectedSeatScreenId, currentSeatLayout)
+					renderSeatGrid()
+					showToast(
+						`Hàng ${rowLetter}: Đã chuyển toàn bộ ghế sang ${nextStatus === "maintenance" ? "BẢO TRÌ / KHÓA" : "HOẠT ĐỘNG"}!`,
+						"info",
+					)
+				})
+			})
+
+			// Attach seat unit click and dblclick handlers
+			adminSeatGrid.querySelectorAll(".admin-seat-unit").forEach(unit => {
+				unit.addEventListener("click", () => {
+					const seatId = unit.dataset.seatId
+					let targetSeat = null
+					for (const rowBlock of currentSeatLayout) {
+						targetSeat = rowBlock.seats.find(s => s.id === seatId)
+						if (targetSeat) break
+					}
+					if (!targetSeat) return
+
+					if (seatClickMode === "edit") {
+						openSeatEditModal(targetSeat)
+					} else {
+						// Toggle maintenance status
+						targetSeat.status = targetSeat.status === "maintenance" ? "available" : "maintenance"
+						saveScreenSeatLayout(selectedSeatCinemaId, selectedSeatScreenId, currentSeatLayout)
+						renderSeatGrid()
+						showToast(
+							`Ghế ${seatId}: ${targetSeat.status === "maintenance" ? "🔴 Đã chuyển sang Bảo trì / Khóa" : "🟢 Đã mở bán hoạt động"}`,
+							"info",
+						)
+					}
+				})
+
+				unit.addEventListener("dblclick", () => {
+					const seatId = unit.dataset.seatId
+					let targetSeat = null
+					for (const rowBlock of currentSeatLayout) {
+						targetSeat = rowBlock.seats.find(s => s.id === seatId)
+						if (targetSeat) break
+					}
+					if (targetSeat) openSeatEditModal(targetSeat)
+				})
+			})
 		}
 	} // Kết thúc initDashboard
 
