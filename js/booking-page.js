@@ -344,10 +344,11 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 			rowBlock.seats.forEach(seat => {
 				const isSold = seat.status === "sold"
-				const isHeld = !isSold && heldByOthers.includes(seat.id)
+				const isMaintenance = seat.status === "maintenance"
+				const isHeld = !isSold && !isMaintenance && heldByOthers.includes(seat.id)
 				const isSelected = bookingState.selectedSeats.some(s => s.id === seat.id)
-				const statusClass = isSold ? "seat-sold" : isHeld ? "seat-holding" : isSelected ? "seat-selected" : ""
-				const statusData = isSold ? "sold" : isHeld ? "holding" : isSelected ? "selected" : "available"
+				const statusClass = isSold || isMaintenance ? "seat-sold" : isHeld ? "seat-holding" : isSelected ? "seat-selected" : ""
+				const statusData = isSold || isMaintenance ? "sold" : isHeld ? "holding" : isSelected ? "selected" : "available"
 
 				if (isSweetbox) {
 					rowSeatsHTML += `
@@ -358,10 +359,10 @@ document.addEventListener("DOMContentLoaded", async () => {
 							data-type="${seat.type}"
 							data-price="${seat.price}"
 							data-status="${statusData}"
-							title="${seat.id} (${isSold ? "Đã bán" : isHeld ? "Khách khác đang giữ tạm 5 phút" : `Ghế đôi Sweetbox: ${formatCurrency(seat.price)}`})"
+							title="${seat.id} (${isSold ? "Đã bán" : isMaintenance ? "Tạm khóa bảo trì" : isHeld ? "Khách khác đang giữ tạm 5 phút" : `Ghế đôi Sweetbox: ${formatCurrency(seat.price)}`})"
 							role="checkbox"
 							aria-checked="${isSelected ? "true" : "false"}"
-							tabindex="${isSold || isHeld ? "-1" : "0"}">
+							tabindex="${isSold || isMaintenance || isHeld ? "-1" : "0"}">
 							<span class="swb-icon">👫</span> ${seat.id}
 						</div>
 					`
@@ -379,10 +380,10 @@ document.addEventListener("DOMContentLoaded", async () => {
 							data-type="${seat.type}"
 							data-price="${seat.price}"
 							data-status="${statusData}"
-							title="${seat.id} (${isSold ? "Đã bán" : isHeld ? "Khách khác đang giữ tạm 5 phút" : `${seat.type === "vip" ? "VIP" : "Thường"}: ${formatCurrency(seat.price)}`})"
+							title="${seat.id} (${isSold ? "Đã bán" : isMaintenance ? "Tạm khóa bảo trì" : isHeld ? "Khách khác đang giữ tạm 5 phút" : `${seat.type === "vip" ? "VIP" : "Thường"}: ${formatCurrency(seat.price)}`})"
 							role="checkbox"
 							aria-checked="${isSelected ? "true" : "false"}"
-							tabindex="${isSold || isHeld ? "-1" : "0"}">
+							tabindex="${isSold || isMaintenance || isHeld ? "-1" : "0"}">
 							${seat.col}
 						</div>
 					`

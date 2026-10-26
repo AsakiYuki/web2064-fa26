@@ -1422,11 +1422,52 @@ function syncSoldSeatsFromBookings(seatLayout, cinemaId, movieId, date, time) {
 	return seatLayout
 }
 
+function syncMaintenanceSeatsFromScreen(seatLayout, cinemaId, movieId, date, time, options = {}) {
+	try {
+		const showtimes = storageGet(STORAGE_KEYS.SHOWTIMES, [])
+		let matchedScreenId = options.screenId || null
+		if (!matchedScreenId && Array.isArray(showtimes)) {
+			for (const entry of showtimes) {
+				if (entry.cinemaId === cinemaId && entry.date === date) {
+					const sc = entry.schedules?.find(s => s.movieId === movieId && s.slots?.some(sl => sl.time === time))
+					if (sc?.screenId) {
+						matchedScreenId = sc.screenId
+						break
+					}
+				}
+			}
+		}
+		if (matchedScreenId) {
+			const screenKey = `beta_screen_layout_${cinemaId}_${matchedScreenId}`
+			const screenLayout = storageGet(screenKey)
+			if (Array.isArray(screenLayout)) {
+				screenLayout.forEach(rowBlock => {
+					rowBlock.seats?.forEach(s => {
+						if (s.status === "maintenance") {
+							for (const r of seatLayout) {
+								const target = r.seats?.find(st => st.id === s.id)
+								if (target) {
+									target.status = "maintenance"
+									break
+								}
+							}
+						}
+					})
+				})
+			}
+		}
+	} catch (e) {
+		console.warn("[Storage] Error syncing maintenance seats:", e)
+	}
+	return seatLayout
+}
+
 export function getShowtimeSeats(cinemaId, movieId, date, time, options = {}) {
 	const key = getShowtimeStorageKey(cinemaId, movieId, date, time)
 	const cached = storageGet(key)
 	if (cached && Array.isArray(cached) && cached.length >= 12) {
 		syncSoldSeatsFromBookings(cached, cinemaId, movieId, date, time)
+		syncMaintenanceSeatsFromScreen(cached, cinemaId, movieId, date, time, options)
 		storageSet(key, cached)
 		return cached
 	}
@@ -1502,6 +1543,7 @@ export function getShowtimeSeats(cinemaId, movieId, date, time, options = {}) {
 	})
 
 	syncSoldSeatsFromBookings(seatLayout, cinemaId, movieId, date, time)
+	syncMaintenanceSeatsFromScreen(seatLayout, cinemaId, movieId, date, time, options)
 	storageSet(key, seatLayout)
 	return seatLayout
 }
