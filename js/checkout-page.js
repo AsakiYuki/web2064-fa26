@@ -17,7 +17,7 @@ import {
 	holdSeats,
 } from "./storage.js"
 import { generateQRCodeSVG } from "./qrcode.js"
-import { apiHoldSeats } from "./api.js"
+import { apiHoldSeats, apiReleaseSeatHold } from "./api.js"
 
 document.addEventListener("DOMContentLoaded", async () => {
 	await setupHeaderAndFooter()
@@ -40,66 +40,109 @@ document.addEventListener("DOMContentLoaded", async () => {
 	}
 
 	// 1. Read from LocalStorage Pending Booking or fallback to URL query params
-	const pending = getPendingBooking()
+	let pending = getPendingBooking()
 	const urlParams = new URLSearchParams(window.location.search)
 	const holdId = urlParams.get("holdId") || pending?.holdId
-	if (!pending || !holdId) {
+
+	const movieId = urlParams.get("movieId") || pending?.movieId || "utlan2"
+	const cinemaId = urlParams.get("cinemaId") || pending?.cinemaId || "beta-thainguyen"
+	const dateStr = urlParams.get("date") || pending?.date || "2026-10-29"
+	const timeSlot = urlParams.get("time") || pending?.time || "14:30"
+	const screenName = urlParams.get("screen") || pending?.screenName || "Phòng chiếu 1"
+	const formatName = urlParams.get("format") || pending?.formatName || "2D Phụ Đề"
+	const seatsParam = urlParams.get("seats") || pending?.seatsString || "D05, D06"
+	const concessionsParam = urlParams.get("concessions") || pending?.concessionsString || ""
+	let initialVoucher = urlParams.get("voucher") || pending?.voucherCode || ""
+	let rawTotal = pending ? (pending.seatsTotal || 0) + (pending.concessionsTotal || 0) : (+urlParams.get("total") || 255000)
+	const concessionsTotal = Number(pending?.concessionsTotal) || 0
+	let rawExpires = pending?.holdExpiresAt || Number(urlParams.get("expiresAt")) || null
+	let knownExpiresAt = (rawExpires && Number(rawExpires) > Date.now()) ? Number(rawExpires) : (Date.now() + 300000)
+
+	// Reconstruct pending if missing from localStorage but provided in URL
+	if (!pending && (seatsParam || holdId)) {
+		pending = {
+			movieId,
+			cinemaId,
+			date: dateStr,
+			time: timeSlot,
+			screenName,
+			formatName,
+			seatsString: seatsParam,
+			concessionsString: concessionsParam,
+			seatsTotal: rawTotal,
+			concessionsTotal,
+			voucherCode: initialVoucher,
+			grandTotal: rawTotal,
+			holdId: holdId || ("hold_" + Date.now()),
+			holdExpiresAt: knownExpiresAt,
+		}
+		savePendingBooking(pending)
+	}
+
+	if (!pending || (!holdId && !seatsParam)) {
 		showToast("Phiên giữ ghế không hợp lệ. Vui lòng chọn suất và ghế lại.", "error", 6000)
 		window.location.replace("/schedule.html")
 		return
 	}
 
-	const movieId = urlParams.get("movieId") || pending?.movieId || "utlan2"
-	const cinemaId = urlParams.get("cinemaId") || pending?.cinemaId || "beta-thainguyen"
-	const dateStr = urlParams.get("date") || pending?.date || "2026-09-26"
-	const timeSlot = urlParams.get("time") || pending?.time || "14:30"
-	const screenName = urlParams.get("screen") || pending?.screenName || "Phòng chiếu 1"
-	const formatName = urlParams.get("format") || pending?.formatName || "2D Phụ Đề"
-	const seatsParam = urlParams.get("seats") || pending?.seatsString || "D05, D06"
-	const concessionsParam = urlParams.get("concessions") || pending?.concessionsString || "1x Beta Combo Đôi"
-	let initialVoucher = urlParams.get("voucher") || pending?.voucherCode || ""
-	let rawTotal = pending ? (pending.seatsTotal || 0) + (pending.concessionsTotal || 0) : (+urlParams.get("total") || 255000)
-	const concessionsTotal = Number(pending?.concessionsTotal) || 0
 	const seatList = seatsParam.split(",").map(seat => seat.trim()).filter(Boolean)
-	const localHold = getSeatHold(holdId)
-	const urlHoldExpiresAt = Number(urlParams.get("holdExpiresAt"))
+	const localHold = holdId ? getSeatHold(holdId) : null
+	const urlHoldExpiresAt = Number(urlParams.get("holdExpiresAt") || urlParams.get("expiresAt"))
 	let holdExpiresAt = (urlHoldExpiresAt && urlHoldExpiresAt > Date.now())
 		? urlHoldExpiresAt
 		: (pending?.holdExpiresAt && pending.holdExpiresAt > Date.now())
 			? pending.holdExpiresAt
 			: (localHold?.expiresAt && localHold.expiresAt > Date.now())
 				? localHold.expiresAt
-				: (Date.now() + 300000)
+				: (knownExpiresAt && knownExpiresAt > Date.now())
+					? knownExpiresAt
+					: (Date.now() + 300000)
 
 	// Kiểm tra nếu phiên giữ ghế đã quá hạn
 	if (holdExpiresAt <= Date.now()) {
 		clearPendingBooking()
-		releaseSeatHold(holdId)
-		showToast("⏰ Thời gian giữ vé đã hết! Vui lòng thực hiện chọn lại ghế.", "warning", 8000)
+		if (holdId) {
+			releaseSeatHold(holdId)
+			apiReleaseSeatHold(holdId).catch(() => {})
+		}
+		showToast("⏰ Phiên giữ ghế và thanh toán đã hết hạn (5 phút). Vui lòng chọn lại ghế.", "warning", 7000)
 		window.location.replace(`/booking.html?movieId=${encodeURIComponent(movieId)}&cinemaId=${encodeURIComponent(cinemaId)}&date=${encodeURIComponent(dateStr)}&time=${encodeURIComponent(timeSlot)}`)
 		return
 	}
 
 	// Đảm bảo pending booking luôn đồng bộ holdExpiresAt và holdId
 	if (pending) {
-		pending.holdId = holdId
+		pending.holdId = holdId || pending.holdId
 		pending.holdExpiresAt = holdExpiresAt
 		savePendingBooking(pending)
 	}
 
 	// Đảm bảo local hold duy trì đúng mốc thời gian giữ ghế
-	holdSeats(cinemaId, movieId, dateStr, timeSlot, seatList, holdId, 300000, holdExpiresAt)
+	if (holdId) {
+		holdSeats(cinemaId, movieId, dateStr, timeSlot, seatList, holdId, 300000, holdExpiresAt)
+	}
 
 	// Thử đồng bộ giữ ghế lên máy chủ nếu có kết nối backend
-	apiHoldSeats({
-		holdId,
-		cinemaId,
-		movieId,
-		date: dateStr,
-		time: timeSlot,
-		seats: seatList,
-		expiresAt: holdExpiresAt,
-	}).catch(() => {})
+	try {
+		const serverHold = await apiHoldSeats({
+			holdId: holdId || pending?.holdId,
+			cinemaId,
+			movieId,
+			date: dateStr,
+			time: timeSlot,
+			seats: seatList,
+			expiresAt: holdExpiresAt,
+		})
+		if (serverHold && serverHold.success && serverHold.expiresAt) {
+			holdExpiresAt = serverHold.expiresAt
+			if (pending) {
+				pending.holdExpiresAt = holdExpiresAt
+				savePendingBooking(pending)
+			}
+		}
+	} catch (err) {
+		console.warn("[Checkout] apiHoldSeats network error:", err)
+	}
 
 	// If rawTotal wasn't split, deduce fallback
 	if (rawTotal <= 0) rawTotal = 255000
@@ -337,43 +380,85 @@ document.addEventListener("DOMContentLoaded", async () => {
 		})
 	})
 
-	// 6. Hold Countdown Timer (Đồng bộ tuyệt đối từ booking)
-	const timerDisplay = document.getElementById("hold-timer-digits")
-	let hasNotifiedCheckoutOneMin = false
+	// 6. Synchronized Hold & Payment Countdown Timer (Đồng bộ thời gian giữ ghế và thanh toán)
+	let remainingSeconds = 300
+	if (holdExpiresAt && holdExpiresAt > Date.now()) {
+		remainingSeconds = Math.max(1, Math.floor((holdExpiresAt - Date.now()) / 1000))
+	} else if (pending?.holdExpiresAt && Number(pending.holdExpiresAt) > Date.now()) {
+		remainingSeconds = Math.max(1, Math.floor((Number(pending.holdExpiresAt) - Date.now()) / 1000))
+	} else if (knownExpiresAt && Number(knownExpiresAt) > Date.now()) {
+		remainingSeconds = Math.max(1, Math.floor((Number(knownExpiresAt) - Date.now()) / 1000))
+	} else {
+		remainingSeconds = 300
+		if (pending) {
+			pending.holdExpiresAt = Date.now() + 300000
+			savePendingBooking(pending)
+		}
+	}
+	let hasNotifiedOneMinute = false
 
-	function updateCheckoutTimer() {
-		const now = Date.now()
-		const remaining = Math.max(0, Math.ceil((holdExpiresAt - now) / 1000))
-		const m = String(Math.floor(remaining / 60)).padStart(2, "0")
-		const s = String(remaining % 60).padStart(2, "0")
-		if (timerDisplay) timerDisplay.textContent = `${m}:${s}`
+	const timerDisplay = document.getElementById("hold-timer-digits")
+	const qrTimerDisplay = document.getElementById("qr-modal-timer")
+
+	function formatTimeDigits(totalSecs) {
+		const m = Math.floor(Math.max(0, totalSecs) / 60)
+		const s = Math.max(0, totalSecs) % 60
+		return `${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`
+	}
+
+	function updateAllTimerDisplays(secs) {
+		const formatted = formatTimeDigits(secs)
+		if (timerDisplay) timerDisplay.textContent = formatted
+		if (qrTimerDisplay) qrTimerDisplay.textContent = formatted
 
 		const timerAlert = document.querySelector(".hold-timer-alert")
 		if (timerAlert) {
-			timerAlert.classList.toggle("timer-danger", remaining <= 60)
-		}
-
-		if (remaining === 60 && !hasNotifiedCheckoutOneMin) {
-			hasNotifiedCheckoutOneMin = true
-			showToast("⚠️ Thời gian giữ vé chỉ còn 1 phút! Vui lòng sớm xác nhận thanh toán.", "warning", 6000)
-		}
-
-		if (remaining <= 0) {
-			if (timerInterval) clearInterval(timerInterval)
-			if (holdId) {
-				releaseSeatHold(holdId)
-			}
-			clearPendingBooking()
-			showToast("⏰ Thời gian giữ vé đã hết! Vui lòng thực hiện đặt vé lại.", "warning", 8000)
-			document.getElementById("btn-submit-payment")?.setAttribute("disabled", "true")
-			return
+			timerAlert.classList.toggle("timer-danger", secs <= 60)
 		}
 	}
 
-	updateCheckoutTimer()
-	const timerInterval = setInterval(updateCheckoutTimer, 1000)
+	// Cập nhật ngay khi tải trang
+	updateAllTimerDisplays(remainingSeconds)
 
-	// 7. Interactive QR Code Payment Confirmation Process
+	const timerInterval = setInterval(() => {
+		if (isPaymentCompleted) {
+			clearInterval(timerInterval)
+			return
+		}
+
+		const targetExpiresAt = holdExpiresAt || pending?.holdExpiresAt
+		if (targetExpiresAt && Number(targetExpiresAt) > Date.now()) {
+			remainingSeconds = Math.max(0, Math.floor((Number(targetExpiresAt) - Date.now()) / 1000))
+		} else {
+			remainingSeconds = Math.max(0, remainingSeconds - 1)
+		}
+
+		updateAllTimerDisplays(remainingSeconds)
+
+		if (remainingSeconds === 60 && !hasNotifiedOneMinute) {
+			hasNotifiedOneMinute = true
+			showToast("⚠️ Thời gian giữ ghế & thanh toán chỉ còn 1 phút! Vui lòng sớm hoàn tất thanh toán.", "warning", 6000)
+		}
+
+		if (remainingSeconds <= 0) {
+			clearInterval(timerInterval)
+			if (qrTimerInterval) clearInterval(qrTimerInterval)
+			closeQRModal()
+			const activeHoldId = holdId || pending?.holdId
+			if (activeHoldId) {
+				releaseSeatHold(activeHoldId)
+				apiReleaseSeatHold(activeHoldId).catch(() => {})
+			}
+			clearPendingBooking()
+			document.getElementById("btn-submit-payment")?.setAttribute("disabled", "true")
+			showToast("⏰ Đã hết thời gian giữ ghế và thanh toán (5 phút)! Hệ thống đã tự động giải phóng ghế của bạn. Vui lòng chọn lại ghế.", "warning", 8000)
+			setTimeout(() => {
+				window.location.replace(`/booking.html?movieId=${encodeURIComponent(movieId)}&cinemaId=${encodeURIComponent(cinemaId)}&date=${encodeURIComponent(dateStr)}&time=${encodeURIComponent(timeSlot)}`)
+			}, 2500)
+		}
+	}, 1000)
+
+		// 7. Interactive QR Code Payment Confirmation Process
 	const payForm = document.getElementById("form-checkout-payment")
 	const checkoutLayout = document.getElementById("checkout-main-grid")
 	const eticketSuccessView = document.getElementById("eticket-success-view")
@@ -519,26 +604,14 @@ document.addEventListener("DOMContentLoaded", async () => {
 			})
 		}
 
-		// 2. Start QR Payment Countdown Timer (Đồng bộ tuyệt đối theo holdExpiresAt)
-		const qrTimerDisplay = document.getElementById("qr-modal-timer")
-		if (qrTimerInterval) clearInterval(qrTimerInterval)
-
-		const updateQrTimer = () => {
-			const now = Date.now()
-			const remaining = Math.max(0, Math.ceil((holdExpiresAt - now) / 1000))
-			const m = String(Math.floor(remaining / 60)).padStart(2, "0")
-			const s = String(remaining % 60).padStart(2, "0")
-			if (qrTimerDisplay) qrTimerDisplay.textContent = `${m}:${s}`
-
-			if (remaining <= 0) {
-				if (qrTimerInterval) clearInterval(qrTimerInterval)
-				showToast("Thời gian giữ vé và thanh toán đã hết hạn!", "warning", 6000)
-				closeQRModal()
-			}
+		// 2. Synchronized QR Payment Timer Check
+		const currentExpiresAt = holdExpiresAt || pending?.holdExpiresAt
+		if (remainingSeconds <= 0 || (currentExpiresAt && Date.now() >= currentExpiresAt)) {
+			showToast("⚠️ Thời gian giữ ghế và thanh toán đã hết hạn! Vui lòng chọn lại ghế.", "warning", 5000)
+			return
 		}
-
-		updateQrTimer()
-		qrTimerInterval = setInterval(updateQrTimer, 1000)
+		// Đồng bộ tức thì hiển thị thời gian còn lại vào modal QR
+		updateAllTimerDisplays(remainingSeconds)
 
 		// 3. Open QR Modal
 		if (qrModal) {
@@ -583,6 +656,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 					concessionsTotal,
 					bookingDate: new Date().toISOString(),
 					holdId,
+					holdExpiresAt: holdExpiresAt || pending?.holdExpiresAt || null,
 					bookingStatus: "pending",
 					paymentStatus: "pending",
 				}
@@ -652,6 +726,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 					customerEmail: email,
 					bookingDate: new Date().toISOString(),
 					holdId,
+					holdExpiresAt: holdExpiresAt || pending?.holdExpiresAt || null,
 					bookingStatus: "pending",
 					paymentStatus: "pending",
 				}

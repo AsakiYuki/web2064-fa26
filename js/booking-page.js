@@ -1096,9 +1096,16 @@ document.addEventListener("DOMContentLoaded", async () => {
 				})
 				const finalTotal = Math.max(0, seatsTotal + concessionsTotal - bookingState.discountAmount)
 
+				const currentHold = getSeatHold(holdSessionId)
+				const holdExpiresAt = (currentHoldExpiresAt && currentHoldExpiresAt > Date.now())
+					? currentHoldExpiresAt
+					: (currentHold?.expiresAt && currentHold.expiresAt > Date.now())
+						? currentHold.expiresAt
+						: (Date.now() + holdSecondsRemaining * 1000)
+
 				syncPendingBookingToStorage(seatsTotal, concessionsTotal, finalTotal)
 
-				const checkoutUrl = `/checkout.html?movieId=${encodeURIComponent(currentMovie.id)}&cinemaId=${encodeURIComponent(currentCinema.id)}&date=${encodeURIComponent(dateStr)}&time=${encodeURIComponent(timeSlot)}&screen=${encodeURIComponent(screenName)}&format=${encodeURIComponent(formatName)}&seats=${encodeURIComponent(seatNames)}&concessions=${encodeURIComponent(concessionsStr)}&voucher=${encodeURIComponent(bookingState.appliedCoupon || "")}&discount=${bookingState.discountAmount}&total=${finalTotal}&holdId=${encodeURIComponent(holdSessionId)}&holdExpiresAt=${encodeURIComponent(currentHoldExpiresAt || "")}`
+				const checkoutUrl = `/checkout.html?movieId=${encodeURIComponent(currentMovie.id)}&cinemaId=${encodeURIComponent(currentCinema.id)}&date=${encodeURIComponent(dateStr)}&time=${encodeURIComponent(timeSlot)}&screen=${encodeURIComponent(screenName)}&format=${encodeURIComponent(formatName)}&seats=${encodeURIComponent(seatNames)}&concessions=${encodeURIComponent(concessionsStr)}&voucher=${encodeURIComponent(bookingState.appliedCoupon || "")}&discount=${bookingState.discountAmount}&total=${finalTotal}&holdId=${encodeURIComponent(holdSessionId)}&holdExpiresAt=${encodeURIComponent(holdExpiresAt)}&expiresAt=${encodeURIComponent(holdExpiresAt)}`
 
 				isProceedingToCheckout = true
 				window.location.href = checkoutUrl
