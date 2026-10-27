@@ -172,7 +172,7 @@ function calculateOrderTotals(state, ticket, seatIds) {
 	const day = (state.showtimes || []).find(item => item.date === ticket.date && String(item.cinemaId) === String(ticket.cinemaId))
 	const schedule = day?.schedules?.find(item => String(item.movieId) === String(ticket.movieId))
 	const slot = schedule?.slots?.find(item => item.time === ticket.time)
-	if (!slot || (ticket.screenName && schedule.screenName !== ticket.screenName) || (ticket.formatName && schedule.format !== ticket.formatName)) return null
+	if (!slot || schedule.hidden || slot.hidden || (ticket.screenName && schedule.screenName !== ticket.screenName) || (ticket.formatName && schedule.format !== ticket.formatName)) return null
 	const basePrice = String(ticket.formatName || schedule.format || '').toLowerCase().includes('imax') ? 120000 : 70000
 	const seatPrices = seatIds.map(seat => getSeatPrice(seat, basePrice))
 	if (seatPrices.some(price => price === null)) return null
@@ -184,7 +184,7 @@ function calculateOrderTotals(state, ticket, seatIds) {
 			const match = part.trim().match(/^(\d+)\s*x\s*(.+)$/i)
 			if (!match || Number(match[1]) < 1) return null
 			const item = (state.concessions || []).find(product => product.name === match[2].trim())
-			if (!item) return null
+			if (!item || item.hidden) return null
 			concessionsTotal += Number(item.price) * Number(match[1])
 		}
 	}
@@ -412,7 +412,11 @@ server.post('/seat-holds', (req, res) => {
 		return res.status(404).json({ success: false, message: 'Rạp hoặc phim không tồn tại.' })
 	}
 	const schedule = server.db.get('showtimes').find(item => item.date === date && String(item.cinemaId) === String(cinemaId)).value()
-	const scheduledSlot = schedule?.schedules?.find(item => String(item.movieId) === String(movieId))?.slots?.find(item => item.time === time)
+	const scheduledMovie = schedule?.schedules?.find(item => String(item.movieId) === String(movieId))
+	const scheduledSlot = scheduledMovie?.slots?.find(item => item.time === time)
+	if (scheduledMovie?.hidden || scheduledSlot?.hidden) {
+		return res.status(409).json({ success: false, message: 'Suất chiếu này hiện không nhận đặt vé.' })
+	}
 	if (scheduledSlot && scheduledSlot.availableSeats === 0) {
 		return res.status(409).json({ success: false, message: 'Suất chiếu đã hết vé.' })
 	}
@@ -667,6 +671,23 @@ server.use((req, res, next) => {
 		const existingRecords = server.db.get('showtimes').value() || []
 		const current = showtimeId ? existingRecords.find(entry => String(entry.id) === String(showtimeId)) : null
 		const candidate = method === 'PATCH' && current ? { ...current, ...(req.body || {}) } : req.body
+		if (current && ['PUT', 'PATCH'].includes(method)) {
+			const currentRows = getShowtimeRows(current)
+			const candidateRows = getShowtimeRows(candidate)
+			const removedRows = currentRows.filter(row => !candidateRows.some(next =>
+				next.date === row.date && next.cinemaId === row.cinemaId && next.movieId === row.movieId && next.time === row.time,
+			))
+			const bookings = server.db.get('bookings').value() || []
+			const activeHolds = (server.db.get('seat_holds').value() || []).filter(hold => Number(hold.expiresAt) > Date.now())
+			const hasReservation = row => bookings.some(ticket =>
+				String(ticket.cinemaId) === row.cinemaId && String(ticket.movieId) === row.movieId && ticket.date === row.date && ticket.time === row.time,
+			) || activeHolds.some(hold =>
+				String(hold.cinemaId) === row.cinemaId && String(hold.movieId) === row.movieId && hold.date === row.date && hold.time === row.time,
+			)
+			if (removedRows.some(hasReservation)) {
+				return res.status(409).json({ success: false, message: 'Không thể xóa suất chiếu đã có vé đặt hoặc đang giữ ghế. Hãy ẩn suất chiếu để bảo toàn dữ liệu.' })
+			}
+		}
 		const otherRows = existingRecords
 			.filter(entry => !current || String(entry.id) !== String(current.id))
 			.flatMap(getShowtimeRows)
@@ -714,6 +735,20 @@ server.get('/member_rewards', (req, res) => {
 
 // Register json-server-auth middleware (handles /register, /login, JWT tokens)
 server.use(auth)
+
+// Movie records are retained for showtimes, ticket history, and reporting. Hide movies with PATCH instead.
+server.use((req, res, next) => {
+	if (req.method === 'DELETE' && /^\/movies(?:\/[^/]+)?\/?$/.test(req.path)) {
+		return res.status(405).json({ success: false, message: 'Movies cannot be deleted. Set hidden=true to hide a movie.' })
+	}
+	if (req.method === 'DELETE' && /^\/showtimes(?:\/[^/]+)?\/?$/.test(req.path)) {
+		return res.status(405).json({ success: false, message: 'Showtimes cannot be deleted. Set hidden=true to hide a showtime.' })
+	}
+	if (req.method === 'DELETE' && /^\/concessions(?:\/[^/]+)?\/?$/.test(req.path)) {
+		return res.status(405).json({ success: false, message: 'Menu items cannot be deleted. Set hidden=true to hide an item.' })
+	}
+	return next()
+})
 
 // Use json-server router for all resource CRUD (/movies, /showtimes, /concessions, /bookings, /cinemas, etc.)
 server.use(router)

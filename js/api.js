@@ -276,13 +276,6 @@ export async function apiUpdateMovie(id, updates) {
 	return res.ok ? { success: true, movie: res.data } : { success: false, error: res.error }
 }
 
-export async function apiDeleteMovie(id) {
-	const res = await request(`/movies/${id}`, {
-		method: "DELETE",
-	})
-	return res.ok ? { success: true } : { success: false, error: res.error }
-}
-
 /* ==========================================================================
    SHOWTIMES CRUD APIS (json-server: /showtimes)
    ========================================================================== */
@@ -306,13 +299,6 @@ export async function apiUpdateShowtime(id, showtime) {
 		body: JSON.stringify(showtime),
 	})
 	return res.ok ? { success: true, showtime: res.data } : { success: false, error: res.error }
-}
-
-export async function apiDeleteShowtime(id) {
-	const res = await request(`/showtimes/${id}`, {
-		method: "DELETE",
-	})
-	return res.ok ? { success: true } : { success: false, error: res.error }
 }
 
 /* ==========================================================================
@@ -343,13 +329,6 @@ export async function apiUpdateConcession(id, updates) {
 		body: JSON.stringify(updates),
 	})
 	return res.ok ? { success: true, concession: res.data } : { success: false, error: res.error }
-}
-
-export async function apiDeleteConcession(id) {
-	const res = await request(`/concessions/${id}`, {
-		method: "DELETE",
-	})
-	return res.ok ? { success: true } : { success: false, error: res.error }
 }
 
 /* ==========================================================================

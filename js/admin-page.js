@@ -12,7 +12,6 @@ import {
 	getCinemaById,
 	addCinemaScreen,
 	updateCinemaScreen,
-	deleteCinemaScreen,
 	getScreenSeatLayout,
 	saveScreenSeatLayout,
 	updateScreenSeatStatus,
@@ -20,14 +19,14 @@ import {
 	updateSeatAttributes,
 	addMovie,
 	updateMovie,
-	deleteMovie,
+	setMovieHidden,
 	addShowtimeSlot,
 	updateShowtimeSlot,
-	deleteShowtimeSlot,
-	deleteMovieSchedule,
+	setShowtimeSlotHidden,
+	setMovieScheduleHidden,
 	addConcessionItem,
 	updateConcessionItem,
-	deleteConcessionItem,
+	setConcessionHidden,
 	cancelBookingTicket,
 	updateBookingStatus,
 	confirmBookingOrder,
@@ -274,9 +273,9 @@ document.addEventListener("DOMContentLoaded", async () => {
 		function renderOverviewDashboard() {
 			updateAllBadges()
 
-			const moviesData = getMoviesData()
+			const moviesData = getMoviesData({ includeHidden: true })
 			const showtimesData = getShowtimes()
-			const concessionsData = getConcessions()
+			const concessionsData = getConcessions({ includeHidden: true })
 			const bookings = getBookingHistory()
 
 			// 1. KPI Movies
@@ -470,9 +469,9 @@ document.addEventListener("DOMContentLoaded", async () => {
 		}
 
 		function updateAllBadges() {
-			const moviesData = getMoviesData()
+			const moviesData = getMoviesData({ includeHidden: true })
 			const showtimesData = getShowtimes()
-			const concessionsData = getConcessions()
+			const concessionsData = getConcessions({ includeHidden: true })
 			const bookings = getBookingHistory()
 
 			let totalMovies = 0
@@ -545,7 +544,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 		})
 
 		function renderMoviesTable() {
-			const data = getMoviesData()
+			const data = getMoviesData({ includeHidden: true })
 			if (!data || !data.items || !movieTableTbody) return
 
 			let allMovies = []
@@ -592,13 +591,13 @@ document.addEventListener("DOMContentLoaded", async () => {
 					const tabInfo = tabBadgeMap[m._tab] || { label: m._tab, class: "badge-nowshowing" }
 
 					return `
-					<tr id="movie-row-${m.id}">
+					<tr id="movie-row-${m.id}"${m.hidden ? ' style="opacity: 0.58"' : ""}>
 						<td>
 							<img src="${m.poster}" alt="${m.title}" class="table-thumb" onerror="this.src='/poster/poster_utlan2.jpg'" />
 						</td>
 						<td>
 							<div class="cell-title">${m.title}</div>
-							<div class="cell-sub">${m.originalTitle || "N/A"}</div>
+							<div class="cell-sub">${m.hidden ? "Đang ẩn · " : ""}${m.originalTitle || "N/A"}</div>
 						</td>
 						<td><span class="admin-badge ${tabInfo.class}">${tabInfo.label}</span></td>
 						<td>${m.genre || "N/A"}</td>
@@ -609,7 +608,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 						<td style="text-align: center;">
 							<div class="row-actions" style="justify-content: center; gap: 6px;">
 								<button type="button" class="btn-action-icon btn-edit-movie" data-id="${m.id}" title="Chỉnh sửa phim">✏️</button>
-								<button type="button" class="btn-action-icon btn-delete-movie" data-id="${m.id}" data-title="${m.title}" title="Xóa phim khỏi hệ thống" style="color: #f38ba8;">🗑️</button>
+								<button type="button" class="btn-action-icon btn-toggle-movie-visibility" data-id="${m.id}" data-title="${m.title}" data-hidden="${Boolean(m.hidden)}" title="${m.hidden ? "Hiện phim" : "Ẩn phim"}" style="color: ${m.hidden ? "#a6e3a1" : "#f38ba8"};">${m.hidden ? "👁️" : "🙈"}</button>
 							</div>
 						</td>
 					</tr>
@@ -626,17 +625,17 @@ document.addEventListener("DOMContentLoaded", async () => {
 				})
 			})
 
-			// Attach Delete clicks
-			movieTableTbody.querySelectorAll(".btn-delete-movie").forEach(btn => {
-				btn.addEventListener("click", () => {
+			// Toggle movie visibility without deleting its data or booking history.
+			movieTableTbody.querySelectorAll(".btn-toggle-movie-visibility").forEach(btn => {
+				btn.addEventListener("click", async () => {
 					const id = btn.dataset.id
 					const title = btn.dataset.title
-					if (confirm(`Bạn có chắc chắn muốn xóa phim "${title}" khỏi hệ thống không?`)) {
-						deleteMovie(id)
-						showToast(`Đã xóa phim "${title}" khỏi LocalStorage thành công!`, "info")
-						renderMoviesTable()
-						updateAllBadges()
-					}
+					const willHide = btn.dataset.hidden !== "true"
+					await setMovieHidden(id, willHide)
+					showToast(willHide ? `Đã ẩn phim "${title}" khỏi trang khách.` : `Đã hiện lại phim "${title}".`, "info")
+					renderMoviesTable()
+					updateAllBadges()
+					renderOverviewDashboard()
 				})
 			})
 		}
@@ -829,19 +828,20 @@ document.addEventListener("DOMContentLoaded", async () => {
 					<h3 class="showtime-day-heading">📅 ${formatDateVN(dayCinemaEntry.date)}</h3>
 					${dayCinemaEntry.schedules.map(sc => {
 					return `
-					<div class="movie-showtime-block" id="schedule-block-${sc.movieId}-${dayCinemaEntry.date}">
+					<div class="movie-showtime-block" id="schedule-block-${sc.movieId}-${dayCinemaEntry.date}"${sc.hidden ? ' style="opacity: 0.58"' : ""}>
 						<div class="ms-head">
 							<div class="ms-movie-title">
 								<span>🎬</span>
 								<span>${sc.movieTitle}</span>
 								<span class="ms-format-tag">${sc.screenName || "Phòng 1"} • ${sc.format || "2D"}</span>
+								${sc.hidden ? '<span class="ms-format-tag">ĐANG ẨN</span>' : ""}
 							</div>
 							<div style="display: flex; gap: 8px;">
-								<button type="button" class="btn-admin-secondary btn-add-slot-for-movie" data-date="${dayCinemaEntry.date}" data-movie-id="${sc.movieId}" data-movie-title="${sc.movieTitle}" data-screen="${sc.screenName}" data-format="${sc.format}" style="font-size: 12px; padding: 5px 10px;">
+								<button type="button" class="btn-admin-secondary btn-add-slot-for-movie" data-date="${dayCinemaEntry.date}" data-movie-id="${sc.movieId}" data-movie-title="${sc.movieTitle}" data-screen="${sc.screenName}" data-format="${sc.format}" ${sc.hidden ? "disabled" : ""} style="font-size: 12px; padding: 5px 10px;">
 									➕ Thêm Giờ Chiếu
 								</button>
-								<button type="button" class="btn-admin-danger btn-del-movie-schedule" data-date="${dayCinemaEntry.date}" data-movie-id="${sc.movieId}" data-movie-title="${sc.movieTitle}" style="font-size: 12px; padding: 5px 10px; background: rgba(243, 139, 168, 0.15); color: #f38ba8; border: 1px solid rgba(243, 139, 168, 0.3); border-radius: 6px; cursor: pointer;" title="Xóa toàn bộ lịch chiếu phim này trong ngày">
-									🗑️ Xóa Lịch Phim
+								<button type="button" class="btn-admin-secondary btn-toggle-movie-schedule" data-date="${dayCinemaEntry.date}" data-movie-id="${sc.movieId}" data-movie-title="${sc.movieTitle}" data-hidden="${Boolean(sc.hidden)}" style="font-size: 12px; padding: 5px 10px;">
+									${sc.hidden ? "👁️ Hiện Lịch" : "🙈 Ẩn Lịch"}
 								</button>
 							</div>
 						</div>
@@ -849,15 +849,15 @@ document.addEventListener("DOMContentLoaded", async () => {
 							${(sc.slots || [])
 							.map(
 								s => `
-								<div class="slot-chip">
+								<div class="slot-chip"${s.hidden ? ' style="opacity: 0.55"' : ""}>
 									<div class="slot-time">${s.time}</div>
 									<div class="slot-meta">
 										<span class="slot-price">${formatCurrency(s.price)}</span>
-										<span>Còn ${s.availableSeats} ghế</span>
+										<span>${s.hidden ? "Đang ẩn" : `Còn ${s.availableSeats} ghế`}</span>
 									</div>
 									<div class="slot-chip-actions">
 										<button type="button" class="btn-edit-slot" data-date="${dayCinemaEntry.date}" data-movie-id="${sc.movieId}" data-time="${s.time}" data-price="${s.price}" data-seats="${s.availableSeats}" title="Sửa giờ hoặc giá vé">✏️</button>
-										<button type="button" class="btn-del-slot" data-date="${dayCinemaEntry.date}" data-movie-id="${sc.movieId}" data-time="${s.time}" title="Xóa suất chiếu này">✕</button>
+										<button type="button" class="btn-toggle-slot" data-date="${dayCinemaEntry.date}" data-movie-id="${sc.movieId}" data-time="${s.time}" data-hidden="${Boolean(s.hidden)}" title="${s.hidden ? "Hiện suất chiếu" : "Ẩn suất chiếu"}">${s.hidden ? "👁️" : "🙈"}</button>
 									</div>
 								</div>
 							`
@@ -884,22 +884,21 @@ document.addEventListener("DOMContentLoaded", async () => {
 				})
 			})
 
-			// Attach Delete entire Movie schedule
-			showtimesContainer.querySelectorAll(".btn-del-movie-schedule").forEach(btn => {
+			// Hide or restore an entire movie schedule without deleting its data.
+			showtimesContainer.querySelectorAll(".btn-toggle-movie-schedule").forEach(btn => {
 				btn.addEventListener("click", async () => {
 					const mId = btn.dataset.movieId
 					const mTitle = btn.dataset.movieTitle
 					const date = btn.dataset.date
-					if (confirm(`Bạn có chắc muốn xóa tất cả suất chiếu của phim "${mTitle}" trong ngày này không?`)) {
-						const result = await deleteMovieSchedule(selectedCinema, date, mId)
-						if (!result.success) {
-							showToast(result.message || "Không thể xóa lịch chiếu.", "error")
-							return
-						}
-						showToast(`Đã xóa toàn bộ lịch chiếu phim "${mTitle}" trong ngày.`, "info")
-						renderShowtimesSection()
-						updateAllBadges()
+					const willHide = btn.dataset.hidden !== "true"
+					const result = await setMovieScheduleHidden(selectedCinema, date, mId, willHide)
+					if (!result.success) {
+						showToast(result.message || "Không thể cập nhật lịch chiếu.", "error")
+						return
 					}
+					showToast(willHide ? `Đã ẩn lịch chiếu phim "${mTitle}".` : `Đã hiện lịch chiếu phim "${mTitle}".`, "info")
+					renderShowtimesSection()
+					updateAllBadges()
 				})
 			})
 
@@ -924,22 +923,21 @@ document.addEventListener("DOMContentLoaded", async () => {
 				})
 			})
 
-			// Attach Delete Slot clicks
-			showtimesContainer.querySelectorAll(".btn-del-slot").forEach(btn => {
+			// Hide or restore one slot without deleting its data.
+			showtimesContainer.querySelectorAll(".btn-toggle-slot").forEach(btn => {
 				btn.addEventListener("click", async () => {
 					const mId = btn.dataset.movieId
 					const time = btn.dataset.time
 					const date = btn.dataset.date
-					if (confirm(`Xóa suất chiếu lúc ${time}?`)) {
-						const result = await deleteShowtimeSlot(selectedCinema, date, mId, time)
-						if (!result.success) {
-							showToast(result.message || "Không thể xóa suất chiếu.", "error")
-							return
-						}
-						showToast(`Đã xóa suất chiếu lúc ${time}.`, "info")
-						renderShowtimesSection()
-						updateAllBadges()
+					const willHide = btn.dataset.hidden !== "true"
+					const result = await setShowtimeSlotHidden(selectedCinema, date, mId, time, willHide)
+					if (!result.success) {
+						showToast(result.message || "Không thể cập nhật suất chiếu.", "error")
+						return
 					}
+					showToast(willHide ? `Đã ẩn suất chiếu lúc ${time}.` : `Đã hiện suất chiếu lúc ${time}.`, "info")
+					renderShowtimesSection()
+					updateAllBadges()
 				})
 			})
 		}
@@ -980,7 +978,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 			}
 
 			// Populate movies from LocalStorage
-			const moviesData = getMoviesData()
+			const moviesData = getMoviesData({ includeHidden: true })
 			const activeMovies = [
 				...(moviesData?.items?.nowshowing || []),
 				...(moviesData?.items?.special || []),
@@ -1039,7 +1037,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 			const availableSeats = Number(document.getElementById("st-form-seats")?.value) || 60
 
 			// Find movie title
-			const moviesData = getMoviesData()
+			const moviesData = getMoviesData({ includeHidden: true })
 			const allMovies = [
 				...(moviesData?.items?.nowshowing || []),
 				...(moviesData?.items?.special || []),
@@ -1127,7 +1125,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 		function renderConcessionsSection() {
 			if (!concessionGrid) return
-			const concessionsData = getConcessions()
+			const concessionsData = getConcessions({ includeHidden: true })
 			const items = concessionsData?.items || []
 
 			let filtered = items
@@ -1165,7 +1163,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 				.map(it => {
 					const catLabel = categoryNames[it.categoryId] || it.categoryId
 					return `
-					<div class="admin-concession-card" id="concession-card-${it.id}">
+					<div class="admin-concession-card" id="concession-card-${it.id}"${it.hidden ? ' style="opacity: 0.58"' : ""}>
 						<div class="cc-img-wrap">
 							<img src="${it.image || "/promo/promo_deal.jpg"}" alt="${it.name}" onerror="this.src='/promo/promo_deal.jpg'" />
 						</div>
@@ -1175,7 +1173,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 								${it.badge ? `<span style="font-size: 10px; background: rgba(243, 139, 168, 0.2); color: #f38ba8; padding: 1px 6px; border-radius: 4px; font-weight: 800;">${it.badge}</span>` : ""}
 							</div>
 							<h4 class="cc-name">${it.name}</h4>
-							<p class="cc-desc">${it.description || "Món ăn ngon miệng tại rạp Beta"}</p>
+							<p class="cc-desc">${it.hidden ? "ĐANG ẨN · " : ""}${it.description || "Món ăn ngon miệng tại rạp Beta"}</p>
 							<div class="cc-price-row">
 								<span class="cc-price">${formatCurrency(it.price)}</span>
 								${it.originalPrice ? `<span class="cc-orig-price">${formatCurrency(it.originalPrice)}</span>` : ""}
@@ -1183,7 +1181,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 						</div>
 						<div class="cc-card-actions" style="display: flex; gap: 6px;">
 							<button type="button" class="btn-action-icon btn-edit-concession" data-id="${it.id}" title="Sửa thông tin và giá bán">✏️</button>
-							<button type="button" class="btn-action-icon btn-del-concession" data-id="${it.id}" data-name="${it.name}" title="Xóa món này khỏi menu" style="color: #f38ba8;">🗑️</button>
+							<button type="button" class="btn-action-icon btn-toggle-concession-visibility" data-id="${it.id}" data-name="${it.name}" data-hidden="${Boolean(it.hidden)}" title="${it.hidden ? "Hiện món" : "Ẩn món"}" style="color: ${it.hidden ? "#a6e3a1" : "#f38ba8"};">${it.hidden ? "👁️" : "🙈"}</button>
 						</div>
 					</div>
 				`
@@ -1199,17 +1197,20 @@ document.addEventListener("DOMContentLoaded", async () => {
 				})
 			})
 
-			// Attach Delete clicks
-			concessionGrid.querySelectorAll(".btn-del-concession").forEach(btn => {
-				btn.addEventListener("click", () => {
+			// Toggle menu visibility without deleting products referenced by past orders.
+			concessionGrid.querySelectorAll(".btn-toggle-concession-visibility").forEach(btn => {
+				btn.addEventListener("click", async () => {
 					const id = btn.dataset.id
 					const name = btn.dataset.name
-					if (confirm(`Bạn có chắc chắn muốn xóa "${name}" khỏi menu bắp nước không?`)) {
-						deleteConcessionItem(id)
-						showToast(`Đã xóa "${name}" khỏi LocalStorage.`, "info")
-						renderConcessionsSection()
-						updateAllBadges()
+					const willHide = btn.dataset.hidden !== "true"
+					const result = await setConcessionHidden(id, willHide)
+					if (!result.success) {
+						showToast(result.error || "Không thể cập nhật món.", "error")
+						return
 					}
+					showToast(willHide ? `Đã ẩn "${name}" khỏi menu khách.` : `Đã hiện lại "${name}".`, "info")
+					renderConcessionsSection()
+					updateAllBadges()
 				})
 			})
 		}
@@ -1993,9 +1994,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 										data-cinema-id="${s.cinemaId}" data-screen-id="${s.screenId}"
 										style="background: rgba(137, 220, 235, 0.15); color: #89dceb; border-color: rgba(137, 220, 235, 0.3);"
 										title="Cấu hình sơ đồ ghế phòng chiếu này">📐 Sơ Đồ Ghế</button>
-									<button type="button" class="btn-action-delete btn-delete-screen"
-										data-cinema-id="${s.cinemaId}" data-screen-id="${s.screenId}" data-screen-name="${s.name}"
-										title="Xóa phòng chiếu">🗑️</button>
 								</div>
 							</td>
 						</tr>
@@ -2024,21 +2022,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 				})
 			})
 
-			// Delete screen button click
-			screensTableTbody.querySelectorAll(".btn-delete-screen").forEach(btn => {
-				btn.addEventListener("click", async () => {
-					const cId = btn.dataset.cinemaId
-					const sId = btn.dataset.screenId
-					const sName = btn.dataset.screenName
-					if (confirm(`Bạn có chắc chắn muốn xóa phòng chiếu "${sName}" (${sId}) khỏi hệ thống không?`)) {
-						await deleteCinemaScreen(cId, sId)
-						showToast(`Đã xóa phòng chiếu "${sName}" thành công!`, "info")
-						renderScreensSection()
-						updateAllBadges()
-						renderOverviewDashboard()
-					}
-				})
-			})
 		}
 
 		/* ==========================================================================

@@ -85,7 +85,19 @@ export class ShowtimePicker {
 				...(moviesData?.items?.special || []),
 				...(moviesData?.items?.upcoming || []),
 			]
-			this.showtimes = showtimesData || []
+			const visibleMovieIds = new Set(this.movies.map(movie => String(movie.id)))
+			this.showtimes = (showtimesData || [])
+				.map(entry => ({
+					...entry,
+					schedules: (entry.schedules || [])
+						.filter(schedule => !schedule.hidden && visibleMovieIds.has(String(schedule.movieId)))
+						.map(schedule => ({
+							...schedule,
+							slots: (schedule.slots || []).filter(slot => !slot.hidden),
+						}))
+						.filter(schedule => schedule.slots.length > 0),
+				}))
+				.filter(entry => entry.schedules.length > 0)
 			this.ticketPricing = pricing
 
 			// Start from the active calendar date (today or earliest available showtime date)

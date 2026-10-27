@@ -18,16 +18,13 @@ import {
 	apiGetMovieById,
 	apiCreateMovie,
 	apiUpdateMovie,
-	apiDeleteMovie,
 	apiGetShowtimes,
 	apiCreateShowtime,
 	apiUpdateShowtime,
-	apiDeleteShowtime,
 	apiGetConcessions,
 	apiGetConcessionCategories,
 	apiCreateConcession,
 	apiUpdateConcession,
-	apiDeleteConcession,
 	apiGetBookings,
 	apiGetMyBookings,
 	apiUpdateBooking,
@@ -630,8 +627,15 @@ export async function resetUserPassword(account, newPassword) {
    MOVIES DATA ACCESS & CRUD (json-server /movies)
    ========================================================================== */
 
-export function getMoviesData() {
-	return storageGet(STORAGE_KEYS.MOVIES, { tabs: [], items: { nowshowing: [], upcoming: [], special: [] } })
+export function getMoviesData({ includeHidden = false } = {}) {
+	const data = storageGet(STORAGE_KEYS.MOVIES, { tabs: [], items: { nowshowing: [], upcoming: [], special: [] } })
+	if (includeHidden || !data?.items) return data
+	return {
+		...data,
+		items: Object.fromEntries(
+			Object.entries(data.items).map(([tab, movies]) => [tab, (movies || []).filter(movie => !movie.hidden)]),
+		),
+	}
 }
 
 export function getMoviesByTab(tab) {
@@ -771,7 +775,7 @@ export async function addMovie(moviePayload, tab = "nowshowing") {
 	apiCreateMovie(fullPayload).catch(err => console.warn("[API] Lỗi khi tạo phim trên json-server:", err))
 
 	// 2. Update local storage cache
-	const data = getMoviesData()
+	const data = getMoviesData({ includeHidden: true })
 	if (!data.items[tab]) data.items[tab] = []
 	data.items[tab].unshift(fullPayload)
 	storageSet(STORAGE_KEYS.MOVIES, data)
@@ -792,34 +796,34 @@ export async function updateMovie(id, moviePayload, tab = "nowshowing") {
 	apiUpdateMovie(id, fullPayload).catch(err => console.warn("[API] Lỗi khi cập nhật phim trên json-server:", err))
 
 	// 2. Update local storage cache
-	const data = getMoviesData()
+	const data = getMoviesData({ includeHidden: true })
+	const existingMovie = Object.values(data.items || {}).flat().find(movie => String(movie.id) === String(id))
 	const allTabs = Object.keys(data.items || {})
 	allTabs.forEach(t => {
 		data.items[t] = data.items[t].filter(m => String(m.id) !== String(id))
 	})
 	if (!data.items[tab]) data.items[tab] = []
-	data.items[tab].unshift({ id, ...fullPayload })
+	data.items[tab].unshift({ id, ...fullPayload, ...(existingMovie?.hidden ? { hidden: true } : {}) })
 	storageSet(STORAGE_KEYS.MOVIES, data)
 
 	return { id, ...fullPayload }
 }
 
-/**
- * Xóa phim (Admin) -> DELETE /movies/:id
- */
-export async function deleteMovie(id) {
-	// 1. Sync backend json-server
-	apiDeleteMovie(id).catch(err => console.warn("[API] Lỗi khi xóa phim trên json-server:", err))
+/** Hide or restore a movie without deleting its record or related booking history. */
+export async function setMovieHidden(id, hidden = true) {
+	const data = getMoviesData({ includeHidden: true })
+	let target = null
+	for (const movies of Object.values(data.items || {})) {
+		target = movies.find(movie => String(movie.id) === String(id)) || target
+	}
+	if (!target) return { success: false, error: "Movie not found" }
 
-	// 2. Update local storage cache
-	const data = getMoviesData()
-	const allTabs = Object.keys(data.items || {})
-	allTabs.forEach(t => {
-		data.items[t] = data.items[t].filter(m => String(m.id) !== String(id))
-	})
+	target.hidden = Boolean(hidden)
 	storageSet(STORAGE_KEYS.MOVIES, data)
-
-	return true
+	apiUpdateMovie(id, { hidden: target.hidden }).catch(err => {
+		console.warn("[API] Could not sync movie visibility:", err)
+	})
+	return { success: true, hidden: target.hidden }
 }
 
 /* ==========================================================================
@@ -935,52 +939,46 @@ export async function updateShowtimeSlot(slotData) {
 	return { success: true }
 }
 
-async function saveShowtimeDayChange(allShowtimes, dayCinema) {
+async function saveShowtimeVisibilityChange(allShowtimes, dayCinema) {
 	if (!dayCinema.id) return { success: false, message: "Lịch chiếu không có mã để cập nhật lên máy chủ." }
-	let result
-	if (!dayCinema.schedules.length) {
-		result = await apiDeleteShowtime(dayCinema.id)
-		if (result.success) {
-			const index = allShowtimes.findIndex(entry => entry.id === dayCinema.id)
-			if (index >= 0) allShowtimes.splice(index, 1)
-		}
-	} else {
-		result = await apiUpdateShowtime(dayCinema.id, dayCinema)
-	}
-	if (!result.success) return { success: false, message: result.error || "Không thể xóa lịch chiếu trên máy chủ." }
+	const result = await apiUpdateShowtime(dayCinema.id, dayCinema)
+	if (!result.success) return { success: false, message: result.error || "Không thể cập nhật trạng thái ẩn/hiện lên máy chủ." }
 	storageSet(STORAGE_KEYS.SHOWTIMES, allShowtimes)
 	return { success: true }
 }
 
-export async function deleteShowtimeSlot(cinemaId, date, movieId, time) {
+export async function setShowtimeSlotHidden(cinemaId, date, movieId, time, hidden = true) {
 	const allShowtimes = JSON.parse(JSON.stringify(getShowtimes()))
 	const dayCinema = allShowtimes.find(st => st.date === date && st.cinemaId === cinemaId)
 	if (!dayCinema) return { success: false, message: "Không tìm thấy lịch chiếu." }
 
 	const schedule = dayCinema.schedules.find(sc => sc.movieId === movieId)
 	if (!schedule) return { success: false, message: "Không tìm thấy phim trong lịch chiếu." }
-
-	schedule.slots = schedule.slots.filter(s => s.time !== time)
-	dayCinema.schedules = dayCinema.schedules.filter(sc => sc.slots?.length > 0)
-	return saveShowtimeDayChange(allShowtimes, dayCinema)
+	const slot = schedule.slots.find(s => s.time === time)
+	if (!slot) return { success: false, message: "Không tìm thấy suất chiếu." }
+	slot.hidden = Boolean(hidden)
+	return saveShowtimeVisibilityChange(allShowtimes, dayCinema)
 }
 
-export async function deleteMovieSchedule(cinemaId, date, movieId) {
+export async function setMovieScheduleHidden(cinemaId, date, movieId, hidden = true) {
 	const allShowtimes = JSON.parse(JSON.stringify(getShowtimes()))
 	const dayCinema = allShowtimes.find(st => st.date === date && st.cinemaId === cinemaId)
 	if (!dayCinema) return { success: false, message: "Không tìm thấy lịch chiếu." }
 
-	dayCinema.schedules = dayCinema.schedules.filter(sc => sc.movieId !== movieId)
-	dayCinema.schedules = dayCinema.schedules.filter(sc => sc.slots?.length > 0)
-	return saveShowtimeDayChange(allShowtimes, dayCinema)
+	const schedule = dayCinema.schedules.find(sc => String(sc.movieId) === String(movieId))
+	if (!schedule) return { success: false, message: "Không tìm thấy phim trong lịch chiếu." }
+	schedule.hidden = Boolean(hidden)
+	return saveShowtimeVisibilityChange(allShowtimes, dayCinema)
 }
 
 /* ==========================================================================
    CONCESSIONS DATA ACCESS & CRUD (json-server /concessions)
    ========================================================================== */
 
-export function getConcessions() {
-	return storageGet(STORAGE_KEYS.CONCESSIONS, { categories: [], items: [] })
+export function getConcessions({ includeHidden = false } = {}) {
+	const data = storageGet(STORAGE_KEYS.CONCESSIONS, { categories: [], items: [] })
+	if (includeHidden || !Array.isArray(data?.items)) return data
+	return { ...data, items: data.items.filter(item => !item.hidden) }
 }
 
 export async function addConcessionItem(payload) {
@@ -993,7 +991,7 @@ export async function addConcessionItem(payload) {
 	apiCreateConcession(fullItem).catch(err => console.warn("[API] Lỗi khi tạo combo trên json-server:", err))
 
 	// Sync local
-	const data = getConcessions()
+	const data = getConcessions({ includeHidden: true })
 	data.items.unshift(fullItem)
 	storageSet(STORAGE_KEYS.CONCESSIONS, data)
 
@@ -1005,7 +1003,7 @@ export async function updateConcessionItem(id, updates) {
 	apiUpdateConcession(id, updates).catch(err => console.warn("[API] Lỗi khi cập nhật combo trên json-server:", err))
 
 	// Sync local
-	const data = getConcessions()
+	const data = getConcessions({ includeHidden: true })
 	const idx = data.items.findIndex(it => String(it.id) === String(id))
 	if (idx !== -1) {
 		data.items[idx] = { ...data.items[idx], ...updates }
@@ -1015,16 +1013,18 @@ export async function updateConcessionItem(id, updates) {
 	return { id, ...updates }
 }
 
-export async function deleteConcessionItem(id) {
-	// Sync API
-	apiDeleteConcession(id).catch(err => console.warn("[API] Lỗi khi xóa combo trên json-server:", err))
+/** Hide or restore a menu item while preserving references from old orders. */
+export async function setConcessionHidden(id, hidden = true) {
+	const data = getConcessions({ includeHidden: true })
+	const item = data.items.find(entry => String(entry.id) === String(id))
+	if (!item) return { success: false, error: "Menu item not found" }
 
-	// Sync local
-	const data = getConcessions()
-	data.items = data.items.filter(it => String(it.id) !== String(id))
+	item.hidden = Boolean(hidden)
 	storageSet(STORAGE_KEYS.CONCESSIONS, data)
-
-	return true
+	apiUpdateConcession(id, { hidden: item.hidden }).catch(err => {
+		console.warn("[API] Could not sync menu item visibility:", err)
+	})
+	return { success: true, hidden: item.hidden }
 }
 
 /* ==========================================================================
@@ -2176,20 +2176,6 @@ export async function updateCinemaScreen(cinemaId, screenId, updates) {
 	})
 
 	return { success: true, screen: cinema.screens[idx] }
-}
-
-export async function deleteCinemaScreen(cinemaId, screenId) {
-	const cinemas = getCinemas()
-	const cinema = cinemas.find(c => c.id === cinemaId)
-	if (!cinema || !Array.isArray(cinema.screens)) return { success: false, error: "Screen not found" }
-
-	cinema.screens = cinema.screens.filter(s => s.screenId !== screenId)
-	saveCinemas(cinemas)
-	apiUpdateCinema(cinemaId, { screens: cinema.screens }).catch(err => {
-		console.warn("[API] Lỗi khi xóa phòng chiếu trên server:", err)
-	})
-
-	return { success: true }
 }
 
 const SCREEN_SEATS_KEY_PREFIX = "beta_screen_layout_"

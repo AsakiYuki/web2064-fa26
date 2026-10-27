@@ -40,17 +40,17 @@ document.addEventListener("DOMContentLoaded", async () => {
 	let pricingData = getTicketPricing()
 
 	try {
-		if (!moviesData || !cinemasData.length || !concessionsData.length) {
+		if (!moviesData || !cinemasData.length || !Array.isArray(concessionsData?.items)) {
 			const [mRes, cRes, fRes, pRes] = await Promise.all([
 				fetch("/data/movies.json").then(r => r.json()),
 				fetch("/data/cinemas.json").then(r => r.json()),
 				fetch("/data/concessions.json").then(r => r.json()),
 				fetch("/data/ticket_pricing.json").then(r => r.json()).catch(() => null),
 			])
-			moviesData = mRes
-			cinemasData = cRes
-			concessionsData = fRes
-			pricingData = pRes
+			moviesData = moviesData || mRes
+			cinemasData = cinemasData.length ? cinemasData : cRes
+			concessionsData = Array.isArray(concessionsData?.items) ? concessionsData : fRes
+			pricingData = pricingData || pRes
 		}
 	} catch (err) {
 		console.error("Failed to load booking data:", err)
