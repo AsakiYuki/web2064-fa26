@@ -2100,7 +2100,7 @@ export function setCurrentCinemaId(cinemaId) {
 	const user = getCurrentUser()
 	if (user) {
 		user.cinemaFavorite = cinemaId
-		updateCurrentUser(user)
+		saveUserSession(user)
 	}
 	const cinemas = getCinemas()
 	const cinema = cinemas.find(c => c.id === cinemaId)

@@ -125,7 +125,6 @@ export class ShowtimePicker {
 			window.addEventListener("cinemaChanged", e => {
 				if (e.detail?.id && this.cinemas.some(c => c.id === e.detail.id)) {
 					this.selectedCinemaId = e.detail.id
-					this.selectedCity = e.detail.city || "all"
 					this.validateActiveSelection()
 					this.render()
 				}
@@ -370,7 +369,7 @@ export class ShowtimePicker {
 				<div class="city-pills-row">
 					<span class="city-label">2. KHU VỰC CÓ SUẤT CHIẾU:</span>
 					<button type="button" class="city-pill-btn ${this.selectedCity === "all" ? "active" : ""}" data-city="all">
-						Tất cả (${availableCinemas.length} rạp)
+						Tất cả (${this.getAvailableCinemas(this.selectedDate, "all").length} rạp)
 					</button>
 					${availableCities
 						.map(city => {
@@ -388,16 +387,16 @@ export class ShowtimePicker {
 					${availableCinemas
 						.map(
 							c => `
-						<div class="cinema-card-choice ${this.selectedCinemaId === c.id ? "active" : ""}" data-cinema-id="${c.id}">
-							<div class="cinema-name">
-								${c.name}
-								<span class="check-mark">✓</span>
-							</div>
-							<div class="cinema-addr">${c.address || ""}</div>
-							<div class="cinema-facs">
+						<button type="button" class="cinema-card-choice ${this.selectedCinemaId === c.id ? "active" : ""}" data-cinema-id="${c.id}" aria-pressed="${this.selectedCinemaId === c.id}">
+							<span class="cinema-name">
+								<span>${c.name}</span>
+								<span class="check-mark" aria-hidden="true">✓</span>
+							</span>
+							<span class="cinema-addr">${c.address || ""}</span>
+							<span class="cinema-facs">
 								${(c.facilities || []).slice(0, 2).map(f => `<span class="fac-tag">${f}</span>`).join("")}
-							</div>
-						</div>
+							</span>
+						</button>
 					`,
 						)
 						.join("")}

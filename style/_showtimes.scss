@@ -238,6 +238,12 @@
 		gap: 12px;
 
 		.cinema-card-choice {
+			appearance: none;
+			-webkit-appearance: none;
+			width: 100%;
+			color: inherit;
+			font: inherit;
+			text-align: left;
 			background: $ctp-surface0;
 			border: 1.5px solid $border-color;
 			border-radius: $radius-md;
@@ -292,6 +298,11 @@
 			&:hover {
 				border-color: $primary-color;
 				box-shadow: $shadow-sm;
+			}
+
+			&:focus-visible {
+				outline: 2px solid $primary-color;
+				outline-offset: 2px;
 			}
 
 			&.active {
